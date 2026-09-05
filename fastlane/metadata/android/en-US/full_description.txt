@@ -1,0 +1,11 @@
+Victoria Launcher is a minimal, list-based Android home screen, and an open
+source alternative to Niagara Launcher.
+
+The home screen keeps a short list of favourites under a clock and weather
+widget. Everything else lives in an alphabetical app list you reach by swiping
+the edge of the screen, with an A-Z scrubber for jumping straight to a letter.
+
+Layout, icon pack, icon and text size, spacing, font and colours are all
+adjustable, and an optional Now Playing widget shows current media.
+
+No ads, no tracking, no network access.
