@@ -172,7 +172,6 @@ fun VictoriaNavHost(
         showFavoriteLabels = showFavoriteLabels,
         doubleTapToLock = doubleTapToLock,
         contentColor = contentColor,
-        textColorMode = textColorMode,
     )
 
     var pendingIconTarget by remember { mutableStateOf<String?>(null) }

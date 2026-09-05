@@ -23,7 +23,8 @@ import dev.victorialauncher.VictoriaApp
 import dev.victorialauncher.data.AppInfo
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 /** Per-app icon overrides are stored either as a gallery `content://` URI or as `pack:<pkg>:<drawable>`. */
 const val ICON_PACK_OVERRIDE_PREFIX = "pack:"
@@ -100,7 +101,9 @@ suspend fun warmIconCache(
     }
 
     val (first, rest) = apps.partition { it.key in priorityKeys }
-    coroutineScope {
+    // Explicitly off the caller's dispatcher: this is invoked from a LaunchedEffect, which
+    // runs on Main, and coroutineScope/async would inherit it.
+    withContext(Dispatchers.Default) {
         for (group in listOf(first, rest)) {
             if (group.isEmpty()) continue
             group.chunked(CHUNK_SIZE)

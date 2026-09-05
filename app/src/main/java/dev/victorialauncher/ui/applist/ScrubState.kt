@@ -49,6 +49,15 @@ class ScrubState {
 
     fun currentPull(): Float = if (releasing) releasePull.value else pull
 
+    /**
+     * Parks the strip on the edge the settings name, so it renders on the right side before
+     * the first scrub of a session ever happens. Ignored mid-gesture: the side in play then
+     * is whichever edge the finger is actually on.
+     */
+    fun syncRestingSide(edgeSide: EdgeSide) {
+        if (!active) side = if (edgeSide == EdgeSide.LEFT) EdgeSide.LEFT else EdgeSide.RIGHT
+    }
+
     fun begin(side: EdgeSide) {
         this.side = side
         active = true

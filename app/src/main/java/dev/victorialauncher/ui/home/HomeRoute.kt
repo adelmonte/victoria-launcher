@@ -42,7 +42,6 @@ import dev.victorialauncher.data.EdgeSide
 import dev.victorialauncher.data.Folder
 import dev.victorialauncher.data.HomePaddings
 import dev.victorialauncher.data.PaddingSlot
-import dev.victorialauncher.data.TextColorMode
 import dev.victorialauncher.data.folderToken
 import dev.victorialauncher.media.NowPlayingBus
 import dev.victorialauncher.media.isListenerEnabled
@@ -137,6 +136,8 @@ fun HomeRoute(
         appListVisible = false
         scrub.cancel()
     }
+
+    LaunchedEffect(settings.edgeSide) { scrub.syncRestingSide(settings.edgeSide) }
 
     BackHandler(enabled = appListVisible) { closeAppList() }
 
@@ -447,5 +448,4 @@ data class HomeSettings(
     val showFavoriteLabels: Boolean,
     val doubleTapToLock: Boolean,
     val contentColor: Color,
-    val textColorMode: TextColorMode,
 )
