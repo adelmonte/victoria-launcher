@@ -7,8 +7,8 @@ minimal, list-based Android home screen.
 
 ## Install
 
-Coming to [F-Droid](https://f-droid.org). Until then, build it yourself with the
-steps below.
+Grab the APK from [Releases](../../releases), or wait for it to land on
+[F-Droid](https://f-droid.org).
 
 Once it is installed, pick Victoria Launcher under
 **Settings → Apps → Default apps → Home app**.
