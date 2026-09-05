@@ -1,0 +1,22 @@
+# Gradle / Android build output
+build/
+.gradle/
+.kotlin/
+*.apk
+*.aab
+dist/
+
+# Local machine configuration — never commit
+local.properties
+keystore.properties
+*.keystore
+*.jks
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db

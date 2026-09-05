@@ -1,0 +1,150 @@
+<resources>
+    <string name="app_name">Victoria Launcher</string>
+    <string name="accessibility_description">Lets the swipe-down gesture open the notification shade. Victoria Launcher does not read or act on screen content.</string>
+
+    <!-- Shared actions -->
+    <string name="action_back">Back</string>
+    <string name="action_save">Save</string>
+    <string name="action_cancel">Cancel</string>
+    <string name="action_reset">Reset</string>
+    <string name="action_create">Create</string>
+    <string name="action_done">Done</string>
+    <string name="action_remove">Remove</string>
+    <string name="action_app_info">App info</string>
+    <string name="action_edit_layout">Edit layout</string>
+    <string name="action_edit_icon_and_name">Edit icon &amp; name</string>
+    <string name="action_move_to_folder">Move to folder…</string>
+    <string name="action_change_icon">Change icon…</string>
+    <string name="action_open_settings">Victoria Launcher settings</string>
+
+    <!-- Home screen -->
+    <string name="home_reorder_hint">Hold and drag to reorder</string>
+    <string name="home_no_favorites_title">No favorites yet</string>
+    <string name="home_no_favorites_body">Touch the screen edge to open the app list, or pick your favorites from the list below.</string>
+    <string name="home_choose_favorites">Choose favorites</string>
+    <string name="home_folder_choose_apps">Choose apps…</string>
+    <string name="home_folder_delete">Delete folder</string>
+    <string name="home_folder_empty">Empty — long-press the folder to choose apps</string>
+    <string name="home_folder_name_label">Folder name</string>
+    <string name="home_folder_use_previews">Use app previews</string>
+    <string name="home_display_name_label">Display name</string>
+
+    <!-- Edit-mode drag handles -->
+    <string name="handle_side_padding">↔ Side padding · %1$ddp</string>
+    <string name="handle_vertical">↕ %1$s · %2$ddp</string>
+    <string name="handle_widget_top">Widget top</string>
+    <string name="handle_widget_bottom">Widget bottom</string>
+    <string name="handle_widget_height">Widget height</string>
+    <string name="handle_favorites_top">Favorites top</string>
+    <string name="handle_favorites_bottom">Favorites bottom</string>
+    <string name="handle_now_playing_top">Now Playing top</string>
+    <string name="handle_now_playing_bottom">Now Playing bottom</string>
+    <string name="handle_now_playing_height">Now Playing height</string>
+
+    <!-- App list -->
+    <string name="applist_add_favorite">Add to favorites</string>
+    <string name="applist_remove_favorite">Remove from favorites</string>
+    <string name="applist_hide">Hide from list</string>
+
+    <!-- Toasts -->
+    <string name="toast_enable_accessibility_shade">Enable Victoria Launcher in Settings → Accessibility to open notifications</string>
+    <string name="toast_enable_accessibility_lock">Enable Victoria Launcher in Settings → Accessibility to lock the screen</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Victoria Launcher settings</string>
+    <string name="settings_section_appearance">Appearance</string>
+    <string name="settings_section_behavior">Behavior</string>
+    <string name="settings_section_now_playing">Now Playing</string>
+    <string name="settings_section_apps">Apps</string>
+    <string name="settings_section_about">About</string>
+    <string name="settings_preview">Preview</string>
+    <string name="settings_preview_sample">Sample app</string>
+    <string name="settings_icon_pack">Icon pack</string>
+    <string name="settings_icon_pack_default">Default</string>
+    <string name="settings_icon_pack_none">No icon pack apps found on this device.</string>
+    <string name="settings_icon_size">Icon size</string>
+    <string name="settings_text_size">Text size</string>
+    <string name="settings_favorite_spacing">Spacing between favorites</string>
+    <string name="settings_font">Font</string>
+    <string name="settings_text_colour">Text colour</string>
+    <string name="settings_text_colour_detail">Auto reads the wallpaper and picks whichever is legible</string>
+    <string name="settings_right_handed">Right-handed layout</string>
+    <string name="settings_right_handed_detail">Lines icons and names up against the right edge</string>
+    <string name="settings_show_names">Show names under favorites</string>
+    <string name="settings_hide_status_bar">Hide status bar</string>
+    <string name="settings_dim_home">Dim wallpaper on home screen</string>
+    <string name="settings_dim_applist">Dim wallpaper behind app list</string>
+    <string name="settings_haptics">Haptic feedback</string>
+    <string name="settings_haptics_detail">Follows your system\'s touch feedback setting</string>
+    <string name="settings_edge_side">Which edge opens the app list</string>
+    <string name="settings_double_tap_lock">Double-tap to lock screen</string>
+    <string name="settings_double_tap_lock_detail">Tap twice on empty space in the app list</string>
+    <string name="settings_always_show_az">Always show A-Z</string>
+    <string name="settings_shade_gesture">Swipe down for notifications</string>
+    <string name="settings_shade_ready">Ready — pull down on the home screen</string>
+    <string name="settings_shade_not_ready">Android has no public way to open the shade; enable Victoria Launcher under Accessibility to allow it</string>
+    <string name="settings_enable">Enable</string>
+    <string name="settings_now_playing_show">Show Now Playing widget</string>
+    <string name="settings_notification_access_granted">Notification access granted</string>
+    <string name="settings_notification_access_missing">Notification access not granted</string>
+    <string name="settings_notification_access_detail">Needed to show the currently playing track</string>
+    <string name="settings_open_settings">Open settings</string>
+    <string name="settings_favorites">Favorites</string>
+    <string name="settings_favorites_detail">Choose which apps sit on the home screen</string>
+    <string name="settings_hidden_apps">Hidden apps</string>
+    <string name="settings_hidden_none">None hidden</string>
+    <string name="settings_hidden_count">%1$d hidden</string>
+    <string name="settings_version">Version %1$s</string>
+    <string name="settings_less">Less</string>
+    <string name="settings_more">More</string>
+
+    <!-- Font choices -->
+    <string name="font_system">System</string>
+    <string name="font_sans_serif">Sans serif</string>
+    <string name="font_serif">Serif</string>
+    <string name="font_monospace">Monospace</string>
+
+    <!-- Text colour choices -->
+    <string name="text_colour_auto">Auto</string>
+    <string name="text_colour_light">Light</string>
+    <string name="text_colour_dark">Dark</string>
+
+    <!-- Edge choices -->
+    <string name="edge_left">Left</string>
+    <string name="edge_right">Right</string>
+    <string name="edge_both">Both</string>
+
+    <!-- Favorites / hidden / folder pickers -->
+    <string name="favorites_title">Favorites</string>
+    <string name="favorites_count">%1$d on your home screen</string>
+    <string name="folder_title_fallback">Folder</string>
+    <string name="folder_gone">This folder no longer exists.</string>
+    <string name="folder_member_count">%1$d in this folder</string>
+    <string name="folder_picker_title">Move %1$s to…</string>
+    <string name="folder_picker_app_count">%1$d apps</string>
+    <string name="folder_picker_new">New folder</string>
+    <string name="folder_picker_new_detail">The app moves into the new folder on your home screen.</string>
+
+    <!-- Icon picker -->
+    <string name="icon_picker_title">Icon for %1$s</string>
+    <string name="icon_picker_gallery">Gallery…</string>
+    <string name="icon_picker_reset">Reset to default</string>
+    <string name="icon_picker_no_packs">No icon packs installed. Install an icon pack from the Play Store, or pick an image from your gallery.</string>
+    <string name="icon_picker_search">Search icons</string>
+    <string name="icon_picker_clear_search">Clear search</string>
+    <string name="icon_picker_not_browsable">This pack didn\'t expose a browsable icon list.</string>
+    <string name="icon_picker_no_matches">No icons match “%1$s”.</string>
+
+    <!-- Widgets -->
+    <string name="widget_add">Add widget</string>
+    <string name="widget_add_custom">Add custom widget</string>
+    <string name="widget_change_settings">Change widget settings</string>
+    <string name="widget_none_found">No widgets found on this device.</string>
+
+    <!-- Now Playing -->
+    <string name="now_playing_enable_access">Enable Now Playing access</string>
+    <string name="now_playing_unknown_title">Unknown title</string>
+    <string name="now_playing_previous">Previous</string>
+    <string name="now_playing_play_pause">Play/pause</string>
+    <string name="now_playing_next">Next</string>
+</resources>
