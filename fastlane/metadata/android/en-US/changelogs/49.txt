@@ -1,0 +1,1 @@
+First release signed with the project key, published for F-Droid reproducible builds.
