@@ -60,7 +60,7 @@
     <string name="toast_enable_accessibility_lock">Включите Victoria Launcher в Настройках → Специальные возможности для блокировки экрана</string>
 
     <!-- Настройки -->
-    <string name="settings_title">Настнойки Victoria Launcher</string>
+    <string name="settings_title">Настройки Victoria Launcher</string>
     <string name="settings_section_appearance">Внешний вид</string>
     <string name="settings_section_behavior">Поведение</string>
     <string name="settings_section_now_playing">Виджет проигрывателя</string>
