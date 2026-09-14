@@ -1,0 +1,199 @@
+<resources>
+    <string name="app_name">Victoria Launcher</string>
+    <string name="accessibility_description">Позволяет открывать панель уведомлений жестом смахивания вниз. Victoria Launcher не умеет читать содержимое экрана.</string>
+
+    <!-- Общие действия -->
+    <string name="action_back">Назад</string>
+    <string name="action_save">Сохранить</string>
+    <string name="action_cancel">Отменить</string>
+    <string name="action_reset">Сбросить</string>
+    <string name="action_create">Создать</string>
+    <string name="action_done">Готово</string>
+    <string name="action_remove">Убрать</string>
+    <string name="action_app_info">Информация о приложении</string>
+    <string name="action_edit_layout">Редактировать главный экран</string>
+    <string name="action_edit_icon_and_name">Персонализировать</string>
+    <string name="action_move_to_folder">Переместить в папку…</string>
+    <string name="action_change_icon">Изменить иконку…</string>
+    <string name="action_open_settings">Настройки Victoria Launcher</string>
+
+    <!-- Главный экран -->
+    <string name="home_drag_handle">Сортировать</string>
+    <string name="home_no_favorites_title">Нет избранных</string>
+    <string name="home_no_favorites_body">Коснитесь края экрана, чтобы открыть список приложений или выберите избранные из списка ниже.</string>
+    <string name="home_choose_favorites">Выбрать избранные</string>
+    <string name="home_folder_choose_apps">Управление папкой</string>
+    <string name="home_folder_delete">Удалить папку</string>
+    <string name="home_folder_remove_app">Убрать из папки</string>
+    <string name="home_folder_empty">Пусто — зажмите для выбора приложений</string>
+    <string name="home_folder_name_label">Название папки</string>
+    <string name="home_folder_use_previews">Использовать предпросмотр приложений</string>
+    <string name="home_display_name_label">Отображаемое имя</string>
+
+    <!-- Режим редактирования -->
+    <string name="handle_side_padding">Боковой отступ</string>
+    <string name="handle_widget_top">Виджет: верхний отступ</string>
+    <string name="handle_widget_bottom">Виджет: нижний отступ</string>
+    <string name="handle_widget_height">Виджет: ширина</string>
+    <string name="handle_widget_side_padding">Виджет: боковой отступ</string>
+    <string name="handle_az_range">Настройка алфавитной волны</string>
+    <string name="edit_value_range">от %1$d до %2$d dp</string>
+    <string name="handle_favorites_top">Избранное: верхний отступ</string>
+    <string name="handle_favorites_bottom">Избранное: нижний отступ</string>
+    <string name="handle_now_playing_top">Сейчас играет: верхний отступ</string>
+    <string name="handle_now_playing_bottom">Сейчас играет: нижний отступ</string>
+    <string name="handle_now_playing_height">Сейчас играет: ширина</string>
+
+    <!-- Меню приложений -->
+    <string name="applist_add_favorite">Добавить в избранное</string>
+    <string name="applist_remove_favorite">Убрать из избранного</string>
+    <string name="applist_hide">Скрыть из списка</string>
+
+    <string name="applist_band_hint">Удерживайте и ведите для перемещения, или потяните за любой край, чтобы изменить её размер</string>
+    <string name="applist_band_top">Верх алфавитной волны</string>
+    <string name="applist_band_bottom">Низ алфавитной волны</string>
+
+    <string name="applist_search">Поиск</string>
+
+    <!-- Toasts -->
+    <string name="toast_enable_accessibility_shade">Включите Victoria Launcher в Настройках → Специальные возможности для открытия уведомлений</string>
+    <string name="toast_enable_accessibility_lock">Включите Victoria Launcher в Настройках → Специальные возможности для блокировки экрана</string>
+
+    <!-- Настройки -->
+    <string name="settings_title">Настнойки Victoria Launcher</string>
+    <string name="settings_section_appearance">Внешний вид</string>
+    <string name="settings_section_behavior">Поведение</string>
+    <string name="settings_section_now_playing">Виджет проигрывателя</string>
+    <string name="settings_section_apps">Приложения</string>
+    <string name="settings_section_about">О приложении</string>
+    <string name="settings_preview">Предпросмотр</string>
+    <string name="settings_preview_sample">Пример приложения</string>
+    <string name="settings_icon_pack">Набор иконок</string>
+    <string name="settings_icon_pack_default">По умолчанию</string>
+    <string name="settings_icon_pack_no_icons">Отсутствует</string>
+    <string name="settings_icon_pack_none">Наборы иконок не найдены.</string>
+    <string name="settings_icon_size">Размер иконки</string>
+    <string name="settings_text_size">Размер текста</string>
+    <string name="settings_favorite_spacing">Отступы между избранными</string>
+    <string name="settings_font">Шрифт</string>
+    <string name="settings_text_color">Цвет текста</string>
+    <string name="settings_text_color_detail">При автоматическом режиме система считывает обои и выбирает наилучший вариант читаемости.</string>
+    <string name="settings_show_names">Отображать названия приложений рядом с иконками</string>
+    <string name="settings_hide_status_bar">Скрыть строку состояния на главном экране</string>
+    <string name="settings_hide_status_bar_applist">Скрыть строку состояния в меню приложений</string>
+    <string name="settings_status_bar_timeout">Время ожидания перед скрытием: </string>
+    <string name="settings_dim_home">Процент затемнения обоев на главном экране</string>
+    <string name="settings_dim_applist">Процент затемнения обоев в меню приложений</string>
+    <string name="settings_haptics">Виброотклик</string>
+    <string name="settings_haptics_detail">Следует настройке виброотклика вашей системы.</string>
+    <string name="settings_edge_side">Край для открытия списка приложений</string>
+    <string name="settings_double_tap_lock">Двойное касание для блокировки экрана</string>
+    <string name="settings_double_tap_lock_detail">Коснитесь дважды по алфавитной волне</string>
+    <string name="settings_lock_needs_accessibility">Требует включённой настройки в специальных возможностях. Если эта опция недоступна, разрешите доступ к настройкам в меню информации о приложении ( ⋮ ).</string>
+    <string name="settings_always_show_az">Отображать алфавитную волну на главном экране</string>
+    <string name="settings_show_alphabet">Отображать алфавитную волну в меню приложений</string>
+    <string name="settings_edge_zone_width">Ширина боковой области</string>
+    <string name="settings_swipe_up_list">Провести вверх для открытия меню приложений</string>
+    <string name="settings_swipe_up_list_detail">Смахните вверх за пределы нижней границы домашнего экрана</string>
+    <string name="settings_quick_launch_left">Действие на свайп влево (ниже избранных)</string>
+    <string name="settings_quick_launch_right">Действие на свайп вправо (ниже избранных)</string>
+    <string name="settings_quick_launch_none">Ничего</string>
+    <string name="settings_search_bar">Панель поиска в меню приложений</string>
+    <string name="settings_search_bar_detail">Фильтрует список по запросу</string>
+    <string name="settings_search_bar_bottom">Панель поиска внизу</string>
+    <string name="settings_search_hidden">Отображать скрытое в результатах поиска</string>
+    <string name="settings_search_hidden_detail">При включении данной опции, скрытые приложения будут отображаться при вводе имени</string>
+    <string name="settings_sort_by_usage">Сортировать по частоте использование</string>
+    <string name="settings_sort_by_usage_detail">В каждой букве часто используемое отобразится сверху</string>
+    <string name="settings_alignment_favorites">Выравнивание избранного</string>
+    <string name="settings_alignment_applist">Выравнивание меню приложений</string>
+    <string name="settings_icon_side">Расположение иконок</string>
+    <string name="settings_shade_gesture">Отображение уведомлений при свайпе вниз</string>
+    <string name="settings_shade_ready">Готово — потяните вниз на главном экране.</string>
+    <string name="settings_shade_not_ready">Потяните вниз на главном экране. Если ничего не происходит, Включите Victoria Launcher в специальных возможностях. Если и эта опция недоступна, то для начала разрешите доступ к настройкам в меню информации о приложении.</string>
+    <string name="settings_enable">Включить</string>
+    <string name="settings_app_info">Информация о приложении</string>
+    <string name="settings_now_playing_show">Отобразить виджет &quot;Сейчас играет&quot;</string>
+    <string name="settings_notification_access_granted">Доступ к уведомлениям предоставлен</string>
+    <string name="settings_notification_access_missing">Доступ к уведомлениям не был предоставлен</string>
+    <string name="settings_notification_access_detail">Необходимо для отображения информации о текущей песне</string>
+    <string name="settings_open_settings">Открыть настройки</string>
+    <string name="settings_favorites">Избранные</string>
+    <string name="settings_favorites_detail">Выберите приложения, которые будут отображаться на главном экране.</string>
+    <string name="settings_hidden_apps">Скрытые приложения</string>
+    <string name="hidden_count">%1$d скрыто со списка приложений</string>
+    <string name="hidden_add_apps">Можно скрыть</string>
+    <string name="settings_hidden_none">Нет скрытых приложений</string>
+    <string name="settings_hidden_count">Скрыто: %1$d шт.</string>
+    <string name="settings_version">Версия: %1$s</string>
+    <string name="settings_less">Меньше</string>
+    <string name="settings_more">Больше</string>
+
+    <!-- Font choices -->
+    <string name="font_system">Системный</string>
+    <string name="font_sans_serif">Sans serif</string>
+    <string name="font_serif">Serif</string>
+    <string name="font_monospace">Моноширинный</string>
+
+    <!-- Text color choices -->
+    <string name="text_color_auto">Авто</string>
+    <string name="text_color_light">Светлый</string>
+    <string name="text_color_dark">Тёмный</string>
+
+    <!-- Alignment choices -->
+    <string name="alignment_left">Слева</string>
+    <string name="alignment_center">По центру</string>
+    <string name="alignment_right">Справа</string>
+
+    <!-- Edge choices -->
+    <string name="edge_left">Слева</string>
+    <string name="edge_right">Справа</string>
+    <string name="edge_both">Оба</string>
+
+    <!-- Избранное / скрытое / Папки -->
+    <string name="favorites_title">Избранное</string>
+    <string name="favorites_count">Избранных: %1$d</string>
+    <string name="folder_title_fallback">Папка</string>
+    <string name="folder_gone">Данной папки не существует.</string>
+    <string name="folder_member_count">Элементов в папке: %1$d — переместите для сортировки</string>
+    <string name="folder_add_apps">Больше</string>
+    <string name="folder_member_missing">Приложение недоступно</string>
+    <string name="folder_picker_title">Переместить %1$s в…</string>
+    <string name="folder_picker_app_count">Приложений: %1$d</string>
+    <string name="folder_picker_new">Новая папка</string>
+    <string name="folder_picker_new_detail">Приложение было перемещено в новую папку.</string>
+
+    <!-- Выбор иконок -->
+    <string name="icon_picker_title">Иконка для %1$s</string>
+    <string name="icon_picker_gallery">Галерея…</string>
+    <string name="icon_picker_reset">Сбросить иконку</string>
+    <string name="icon_picker_no_packs">Наборы иконок не найдены. Установите их через Play Store или выберите изображение из галереи.</string>
+    <string name="icon_picker_search">Поиск</string>
+    <string name="icon_picker_clear_search">Очистить</string>
+    <string name="icon_picker_not_browsable">Данный набор не поддерживает поиск иконок.</string>
+    <string name="icon_picker_no_matches">Иконок по запросу “%1$s” не найдено.</string>
+
+    <!-- Приветствие -->
+    <string name="welcome_title">Приветствую в Victoria Launcher</string>
+    <string name="welcome_favorites">Удерживайте по свободному месту чтобы вызвать меню настроек и добавления избранных.</string>
+    <string name="welcome_widget">Проведите пальцем от любого края экрана, чтобы открыть все приложения, и поведите пальцем по алфавитной волне чтобы перейти к нужной букве.</string>
+    <string name="welcome_layout">В режиме редактирования главного экрана вы можете передвигать объекты и настраивать отступы.</string>
+    <string name="welcome_got_it">Понятно!</string>
+
+    <!-- Виджеты -->
+    <string name="widget_add">Добавить виджет</string>
+    <string name="widget_add_another">Добавить больше виджетов</string>
+    <string name="widget_remove_this">Убрать виджет</string>
+    <string name="widget_unavailable">Виджет не доступен</string>
+    <string name="widget_change_settings">Настройки виджета</string>
+    <string name="widget_none_found">Виджеты не найдены.</string>
+
+    <!-- Сейчас играет -->
+    <string name="now_playing_enable_access">Разрешить доступ к текущему воспроизведению</string>
+    <string name="now_playing_open_failed">Невозможно открыть текущий плеер</string>
+    <string name="now_playing_unknown_title">Неизвестный</string>
+    <string name="now_playing_previous">Предыдущий</string>
+    <string name="now_playing_play_pause">Воспроизвести/Приостановить</string>
+    <string name="now_playing_next">Следующий</string>
+</resources>
+
