@@ -1,0 +1,213 @@
+<resources>
+    <string name="app_name">Victoria Launcher</string>
+    <string name="accessibility_description">Ermöglicht das Öffnen der Benachrichtigungsleiste per Wischen nach unten. Victoria Launcher liest keine Bildschirminhalte und reagiert nicht darauf.</string>
+
+    <!-- Shared actions -->
+    <string name="action_back">Zurück</string>
+    <string name="action_save">Speichern</string>
+    <string name="action_cancel">Abbrechen</string>
+    <string name="action_reset">Zurücksetzen</string>
+    <string name="action_create">Erstellen</string>
+    <string name="action_done">Fertig</string>
+    <string name="action_remove">Entfernen</string>
+    <string name="action_app_info">App-Info</string>
+    <string name="action_edit_layout">Layout bearbeiten</string>
+    <string name="action_edit_icon_and_name">Symbol & Name bearbeiten</string>
+    <string name="action_move_to_folder">In Ordner verschieben…</string>
+    <string name="action_change_icon">Symbol ändern…</string>
+    <string name="action_open_settings">Victoria Launcher-Einstellungen</string>
+
+    <!-- Home screen -->
+    <string name="home_drag_handle">Neu anordnen</string>
+    <string name="home_no_favorites_title">Noch keine Favoriten</string>
+    <string name="home_no_favorites_body">Berühre den Bildschirmrand, um die App-Liste zu öffnen, oder wähle deine Favoriten aus der Liste unten.</string>
+    <string name="home_choose_favorites">Favoriten auswählen</string>
+    <string name="home_folder_choose_apps">Ordner verwalten</string>
+    <string name="home_folder_delete">Ordner löschen</string>
+    <string name="home_folder_remove_app">Aus Ordner entfernen</string>
+    <string name="home_folder_empty">Leer — Ordner lange drücken, um Apps auszuwählen</string>
+    <string name="home_folder_name_label">Ordnername</string>
+    <string name="home_folder_use_previews">App-Vorschauen verwenden</string>
+    <string name="home_display_name_label">Anzeigename</string>
+
+    <!-- Edit-mode drag handles -->
+    <string name="handle_side_padding">Seitenabstand</string>
+    <string name="handle_widget_top">Widget oben</string>
+    <string name="handle_widget_bottom">Widget unten</string>
+    <string name="handle_widget_height">Widget-Höhe</string>
+    <string name="handle_widget_side_padding">Widget-Seitenabstand</string>
+    <string name="handle_widget_offset_x">Widget links / rechts</string>
+    <string name="handle_az_range">Bereich der A-Z-Leiste</string>
+    <string name="edit_value_range">%1$d bis %2$d dp</string>
+    <string name="handle_favorites_top">Favoriten oben</string>
+    <string name="handle_favorites_bottom">Favoriten unten</string>
+    <string name="handle_now_playing_top">Now Playing oben</string>
+    <string name="handle_now_playing_bottom">Now Playing unten</string>
+    <string name="handle_now_playing_height">Now Playing-Höhe</string>
+
+    <!-- App list -->
+    <string name="applist_add_favorite">Zu Favoriten hinzufügen</string>
+    <string name="applist_remove_favorite">Aus Favoriten entfernen</string>
+    <string name="applist_hide">Aus Liste ausblenden</string>
+
+    <string name="applist_band_hint">Ziehe den Balken, um ihn zu verschieben, oder einen der Anfasser, um die Größe zu ändern</string>
+    <string name="applist_band_top">Oberer Rand der A-Z-Leiste</string>
+    <string name="applist_band_bottom">Unterer Rand der A-Z-Leiste</string>
+
+    <string name="applist_search">Apps suchen</string>
+
+    <!-- Toasts -->
+    <string name="toast_enable_accessibility_shade">Aktiviere Victoria Launcher unter Einstellungen → Bedienungshilfen, um Benachrichtigungen zu öffnen</string>
+    <string name="toast_enable_accessibility_lock">Aktiviere Victoria Launcher unter Einstellungen → Bedienungshilfen, um den Bildschirm zu sperren</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Victoria Launcher-Einstellungen</string>
+    <string name="settings_section_appearance">Darstellung</string>
+    <string name="settings_section_behavior">Verhalten</string>
+    <string name="settings_section_now_playing">Now Playing</string>
+    <string name="settings_section_apps">Apps</string>
+    <string name="settings_section_about">Über</string>
+    <string name="settings_preview">Vorschau</string>
+    <string name="settings_preview_sample">Beispiel-App</string>
+    <string name="settings_icon_pack">Icon-Pack</string>
+    <string name="settings_icon_pack_default">Standard</string>
+    <string name="settings_icon_pack_no_icons">Keine</string>
+    <string name="settings_icon_pack_none">Auf diesem Gerät wurden keine Icon-Pack-Apps gefunden.</string>
+    <string name="settings_icon_size">Symbolgröße</string>
+    <string name="settings_text_size">Textgröße</string>
+    <string name="settings_favorite_spacing">Abstand zwischen Favoriten</string>
+    <string name="settings_font">Schriftart</string>
+    <string name="settings_text_color">Textfarbe</string>
+    <string name="settings_text_color_detail">„Automatisch“ liest das Hintergrundbild aus und wählt die besser lesbare Farbe</string>
+    <string name="settings_show_names">App-Namen neben Favoritensymbolen anzeigen</string>
+    <string name="settings_hide_status_bar">Statusleiste auf dem Startbildschirm ausblenden</string>
+    <string name="settings_hide_status_bar_applist">Statusleiste in der App-Liste ausblenden</string>
+    <string name="settings_status_bar_timeout">Statusleiste bleibt für</string>
+    <string name="settings_dim_home">Hintergrundbild auf dem Startbildschirm abdunkeln</string>
+    <string name="settings_dim_applist">Hintergrundbild hinter der App-Liste abdunkeln</string>
+    <string name="settings_haptics">Haptisches Feedback</string>
+    <string name="settings_haptics_detail">Folgt der Systemeinstellung für Vibration beim Tippen</string>
+    <string name="settings_edge_side">Welcher Rand die App-Liste öffnet</string>
+    <string name="settings_double_tap_lock">Doppeltippen zum Sperren des Bildschirms</string>
+    <string name="settings_double_tap_lock_detail">Tippe zweimal auf die A-Z-Leiste</string>
+    <string name="settings_lock_needs_accessibility">Erfordert, dass Victoria Launcher unter „Bedienungshilfen“ aktiviert ist. Falls der Schalter ausgegraut ist, öffne zuerst die App-Info und erlaube eingeschränkte Einstellungen über das ⋮-Menü.</string>
+    <string name="settings_always_show_az">A-Z immer anzeigen</string>
+    <string name="settings_show_alphabet">A-Z in der App-Liste anzeigen</string>
+    <string name="settings_edge_zone_width">Breite des Randbereichs zum Wischen</string>
+    <string name="settings_swipe_up_list">Nach oben wischen für die App-Liste</string>
+    <string name="settings_swipe_up_list_detail">Über das Ende des Startbildschirms hinaus nach oben schieben</string>
+    <string name="settings_quick_launch_left">Nach links wischen unter den Favoriten</string>
+    <string name="settings_quick_launch_right">Nach rechts wischen unter den Favoriten</string>
+    <string name="settings_quick_launch_none">Keine</string>
+    <string name="settings_search_bar">Suchleiste in der App-Liste</string>
+    <string name="settings_search_bar_detail">Ein Feld zum Filtern der Liste nach Namen</string>
+    <string name="settings_search_bar_bottom">Suchleiste am unteren Rand</string>
+    <string name="settings_search_hidden">Suche findet ausgeblendete Apps</string>
+    <string name="settings_search_hidden_detail">Aus der Liste ausgeblendete Apps erscheinen trotzdem, wenn du nach ihrem Namen suchst</string>
+    <string name="settings_sort_by_usage">Nach Nutzungshäufigkeit sortieren</string>
+    <string name="settings_sort_by_usage_detail">Innerhalb jedes Buchstabens die häufigsten zuerst</string>
+    <string name="settings_alignment_favorites">Ausrichtung der Favoriten</string>
+    <string name="settings_alignment_applist">Ausrichtung der App-Liste</string>
+    <string name="settings_icon_side">Symbolseite</string>
+    <string name="settings_shade_gesture">Nach unten wischen für Benachrichtigungen</string>
+    <string name="settings_shade_ready">Bereit — ziehe auf dem Startbildschirm nach unten</string>
+    <string name="settings_shade_not_ready">Ziehe auf dem Startbildschirm nach unten. Wenn nichts passiert, aktiviere Victoria Launcher unter „Bedienungshilfen“ — und falls der Schalter ausgegraut ist, erlaube zuerst eingeschränkte Einstellungen über die App-Info.</string>
+    <string name="settings_enable">Aktivieren</string>
+    <string name="settings_app_info">App-Info</string>
+    <string name="settings_now_playing_show">Now Playing-Widget anzeigen</string>
+    <string name="settings_notification_access_granted">Benachrichtigungszugriff erteilt</string>
+    <string name="settings_notification_access_missing">Benachrichtigungszugriff nicht erteilt</string>
+    <string name="settings_notification_access_detail">Erforderlich, um den aktuell laufenden Titel anzuzeigen</string>
+    <string name="settings_open_settings">Einstellungen öffnen</string>
+    <string name="settings_favorites">Favoriten</string>
+    <string name="settings_favorites_detail">Wähle, welche Apps auf dem Startbildschirm liegen</string>
+    <string name="settings_hidden_apps">Ausgeblendete Apps</string>
+    <string name="hidden_count">%1$d aus der App-Liste ausgeblendet</string>
+    <string name="hidden_add_apps">Alles andere</string>
+    <string name="settings_hidden_none">Keine ausgeblendet</string>
+    <string name="settings_hidden_count">%1$d ausgeblendet</string>
+    <string name="settings_version">Version %1$s</string>
+    <string name="settings_less">Weniger</string>
+    <string name="settings_more">Mehr</string>
+
+    <!-- Font choices -->
+    <string name="font_system">System</string>
+    <string name="font_sans_serif">Sans Serif</string>
+    <string name="font_serif">Serif</string>
+    <string name="font_monospace">Monospace</string>
+    <string name="font_custom">Eigene…</string>
+    <string name="font_custom_pick">Schriftdatei auswählen</string>
+    <string name="font_custom_detail">Eine .ttf- oder .otf-Datei, die in den Launcher kopiert wird, damit sie auch beim Verschieben der Datei erhalten bleibt</string>
+    <string name="font_custom_failed">Diese Datei konnte nicht als Schriftart gelesen werden</string>
+    <string name="text_color_material">Material</string>
+    <string name="text_color_custom">Eigene</string>
+    <string name="text_color_pick">Farbe auswählen</string>
+    <string name="icon_shape">Symbolform</string>
+    <string name="icon_shape_detail">Formt nur adaptive Symbole um; ältere bleiben unverändert</string>
+    <string name="icon_shape_system">System</string>
+    <string name="icon_shape_circle">Kreis</string>
+    <string name="icon_shape_rounded">Abgerundet</string>
+    <string name="icon_shape_square">Quadrat</string>
+    <string name="settings_icon_pack_themed">Thematisch</string>
+
+    <!-- Text color choices -->
+    <string name="text_color_auto">Automatisch</string>
+    <string name="text_color_light">Hell</string>
+    <string name="text_color_dark">Dunkel</string>
+
+    <!-- Alignment choices -->
+    <string name="alignment_left">Links</string>
+    <string name="alignment_center">Mittig</string>
+    <string name="alignment_right">Rechts</string>
+
+    <!-- Edge choices -->
+    <string name="edge_left">Links</string>
+    <string name="edge_right">Rechts</string>
+    <string name="edge_both">Beide</string>
+
+    <!-- Favorites / hidden / folder pickers -->
+    <string name="favorites_title">Favoriten</string>
+    <string name="favorites_count">%1$d auf deinem Startbildschirm</string>
+    <string name="folder_title_fallback">Ordner</string>
+    <string name="folder_gone">Dieser Ordner existiert nicht mehr.</string>
+    <string name="folder_member_count">%1$d in diesem Ordner — zum Neuordnen ziehen</string>
+    <string name="folder_add_apps">Weitere hinzufügen</string>
+    <string name="folder_member_missing">App ist nicht mehr installiert</string>
+    <string name="folder_picker_title">%1$s verschieben nach…</string>
+    <string name="folder_picker_app_count">%1$d Apps</string>
+    <string name="folder_picker_new">Neuer Ordner</string>
+    <string name="folder_picker_new_detail">Die App wird in den neuen Ordner auf deinem Startbildschirm verschoben.</string>
+
+    <!-- Icon picker -->
+    <string name="icon_picker_title">Symbol für %1$s</string>
+    <string name="icon_picker_gallery">Galerie…</string>
+    <string name="icon_picker_reset">Auf Standard zurücksetzen</string>
+    <string name="icon_picker_no_packs">Keine Icon-Packs installiert. Installiere ein Icon-Pack aus dem Play Store oder wähle ein Bild aus deiner Galerie.</string>
+    <string name="icon_picker_search">Symbole suchen</string>
+    <string name="icon_picker_clear_search">Suche löschen</string>
+    <string name="icon_picker_not_browsable">Dieses Pack stellt keine durchsuchbare Symbolliste bereit.</string>
+    <string name="icon_picker_no_matches">Keine Symbole passen zu „%1$s“.</string>
+
+    <!-- Welcome -->
+    <string name="welcome_title">Willkommen bei Victoria</string>
+    <string name="welcome_favorites">Drücke lange auf das Hintergrundbild, um Favoriten oder ein Widget hinzuzufügen oder die Einstellungen zu öffnen.</string>
+    <string name="welcome_widget">Wische von einem der Bildschirmränder herein, um alle Apps zu sehen, und fahre über die A-Z-Leiste, um zu einem Buchstaben zu springen.</string>
+    <string name="welcome_layout">Mit „Layout bearbeiten“ kannst du Elemente verschieben und die Abstände festlegen.</string>
+    <string name="welcome_got_it">Verstanden</string>
+
+    <!-- Widgets -->
+    <string name="widget_add">Widget hinzufügen</string>
+    <string name="widget_add_another">Weiteres Widget hinzufügen</string>
+    <string name="widget_remove_this">Dieses Widget entfernen</string>
+    <string name="widget_unavailable">Dieses Widget ist nicht mehr verfügbar</string>
+    <string name="widget_change_settings">Widget-Einstellungen ändern</string>
+    <string name="widget_none_found">Auf diesem Gerät wurden keine Widgets gefunden.</string>
+
+    <!-- Now Playing -->
+    <string name="now_playing_enable_access">Now Playing-Zugriff aktivieren</string>
+    <string name="now_playing_open_failed">Die abspielende App kann nicht geöffnet werden</string>
+    <string name="now_playing_unknown_title">Unbekannter Titel</string>
+    <string name="now_playing_previous">Zurück</string>
+    <string name="now_playing_play_pause">Wiedergabe/Pause</string>
+    <string name="now_playing_next">Weiter</string>
+</resources>
