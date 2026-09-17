@@ -13,6 +13,7 @@ import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.Until
+import dev.victorialauncher.data.Folder
 import dev.victorialauncher.data.Prefs
 import dev.victorialauncher.data.USER_TYPE_PROFILE_PRIVATE
 import kotlinx.coroutines.flow.first
@@ -49,6 +50,7 @@ class PrivateSpaceLauncherTest {
 
     private lateinit var privateUser: UserHandle
     private val favoritesAdded = mutableListOf<String>()
+    private val foldersAdded = mutableListOf<String>()
 
     @Before
     fun setUp() {
@@ -77,8 +79,12 @@ class PrivateSpaceLauncherTest {
     fun tearDown() {
         if (!this::privateUser.isInitialized) return
         device.executeShellCommand("pm install-existing --user 0 $PRIVATE_APP_PACKAGE")
-        runBlocking { favoritesAdded.forEach { key -> Prefs(context).removeFavorite(key) } }
+        runBlocking {
+            favoritesAdded.forEach { key -> Prefs(context).removeFavorite(key) }
+            foldersAdded.forEach { id -> Prefs(context).deleteFolder(id) }
+        }
         favoritesAdded.clear()
+        foldersAdded.clear()
         setLocked(false)
     }
 
@@ -240,6 +246,52 @@ class PrivateSpaceLauncherTest {
         )
     }
 
+    /**
+     * The dialog that moves an app into a folder says how big each folder is, and that number
+     * is read while the space is locked — so counting what the folder stores rather than what
+     * it can show would print the number of private apps in it, folder by folder, beside a
+     * home-screen badge that counts them the other way.
+     */
+    @Test
+    fun theFolderPickerCountsOnlyWhatALockedSpaceStillShows() {
+        folder(FOLDER_NAME, listOf(mainAppKey(), privateAppKey()))
+        setLocked(true)
+
+        // Long-pressing a row in the A-Z list is how the dialog is reached; any app will do,
+        // and this one is in the main profile so it is there to be pressed while locked.
+        searchFor(SHARED_SEARCH)
+        assertTrue(
+            "the list never showed $MAIN_APP_LABEL, so there was nothing to long-press",
+            LauncherTestUtils.waitForText(MAIN_APP_LABEL),
+        )
+        device.findObject(By.text(MAIN_APP_LABEL)).longClick()
+        assertTrue(
+            "long-pressing the row did not open its menu",
+            LauncherTestUtils.waitForText(MOVE_TO_FOLDER_LABEL),
+        )
+        device.findObject(By.text(MOVE_TO_FOLDER_LABEL)).click()
+
+        assertTrue(
+            "the folder picker never listed the folder",
+            LauncherTestUtils.waitForText(FOLDER_NAME),
+        )
+        assertTrue(
+            "the picker has to count the one member a locked space leaves showing",
+            LauncherTestUtils.waitForText(SHOWN_MEMBER_COUNT),
+        )
+        assertFalse(
+            "the picker counted the private member, which says how many are in the space",
+            device.hasObject(By.text(STORED_MEMBER_COUNT)),
+        )
+    }
+
+    /** Stores a folder for the duration, and deletes it again in tearDown. */
+    private fun folder(name: String, apps: List<String>) {
+        val id = "test-" + SystemClock.uptimeMillis().toString(36)
+        foldersAdded += id
+        runBlocking { Prefs(context).upsertFolder(Folder(id = id, name = name, apps = apps)) }
+    }
+
     /** Stores a favorite for the duration, and takes it away again in tearDown. */
     private fun favorite(key: String) {
         favoritesAdded += key
@@ -344,6 +396,12 @@ class PrivateSpaceLauncherTest {
         const val PRIVATE_ROW_LABEL = "Private space"
         const val PRIVATE_ROW_SEARCH = "Private spac"
         const val MISSING_ROW_LABEL = "App no longer installed"
+        const val MOVE_TO_FOLDER_LABEL = "Move to folder…"
+
+        /** A folder holding one main-profile app and one private one, read while locked. */
+        const val FOLDER_NAME = "Mixed folder"
+        const val SHOWN_MEMBER_COUNT = "1 apps"
+        const val STORED_MEMBER_COUNT = "2 apps"
         const val NO_FAVORITES_LABEL = "0 on your home screen"
         const val CHOOSE_FAVORITES_LABEL = "Choose favorites"
         const val FAVORITES_TITLE = "Favorites"

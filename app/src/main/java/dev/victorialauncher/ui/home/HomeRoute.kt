@@ -724,6 +724,10 @@ fun HomeRoute(
             FolderPickerDialog(
                 appLabel = nameOverrides[target.key] ?: target.label,
                 folders = folders,
+                // The rows this launcher can actually draw, which is what the home screen's
+                // own badge counts. A folder's stored keys include whatever a locked private
+                // space is hiding.
+                memberCount = { folder -> folder.apps.count { it in appsByKey } },
                 onPickFolder = { folder ->
                     scope.launch { app.prefs.addAppToFolder(folder.id, target.key) }
                     folderPickerFor = null
