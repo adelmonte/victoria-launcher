@@ -54,6 +54,19 @@ sealed interface PrivateSpace {
     fun conceals(key: String): Boolean = isConcealed(concealedSerial, key)
 
     /**
+     * Whether there is a padlock to offer at all: a space this pass could name, or one that
+     * named itself earlier in this session and will not now.
+     *
+     * The second half is what keeps a space reachable through a read that failed. [Uncertain]
+     * with no profile to point at is treated as locked everywhere else, and a locked space
+     * whose row has gone has no way back in — nothing here re-reads on its own, so it would
+     * stay that way until something else happened to reload. The row discloses nothing it has
+     * not already disclosed: it is offered only because a private space positively answered
+     * earlier, and pressing it resolves the space again before it acts on anything.
+     */
+    val offersPadlockRow: Boolean get() = user != null || serial != 0L
+
+    /**
      * Whether a stored key that names nothing on screen has to be left out of the screens that
      * list stored keys, rather than shown as a row saying the app is gone.
      *

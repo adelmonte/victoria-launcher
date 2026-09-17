@@ -240,6 +240,16 @@ class PrivateSpaceTest {
     }
 
     @Test
+    fun `a space that answered earlier keeps its padlock when a later read cannot name it`() {
+        // The row is the only way into a locked space, and nothing here re-reads on its own,
+        // so a row dropped on one failed read stays dropped.
+        assertTrue(PrivateSpace.Uncertain(user = null, serial = SERIAL).offersPadlockRow)
+        // Nothing has ever said there is a space, so there is nothing to offer a padlock for.
+        assertFalse(PrivateSpace.Uncertain(user = null, serial = 0L).offersPadlockRow)
+        assertFalse(PrivateSpace.Absent.offersPadlockRow)
+    }
+
+    @Test
     fun `a key is concealed only while its own profile is the locked one`() {
         assertTrue(isConcealed(10L, "$appKey|u10"))
         assertTrue(isConcealed(10L, EntryKeys.shortcut("org.browser", "id", userSerial = 10L)))

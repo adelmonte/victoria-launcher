@@ -225,8 +225,12 @@ class AppRepository(
      */
     fun privateSpaceRow(state: PrivateSpace): List<AppInfo> {
         // Offered for any profile this pass could name, including one it could not describe:
-        // that one is treated as locked, and a locked space has to keep its way back in.
-        if (state.user == null) return emptyList()
+        // that one is treated as locked, and a locked space has to keep its way back in. And
+        // for a space that named itself earlier in this session and will not now, where there
+        // is no profile left to point at — see PrivateSpace.offersPadlockRow.
+        if (!state.offersPadlockRow) return emptyList()
+        // Unlocked is the only state with an open padlock, and it always names its profile,
+        // so a row offered without one is always the closed padlock.
         val className =
             if (state is PrivateSpace.Unlocked) PRIVATE_SPACE_UNLOCKED_CLASS else PRIVATE_SPACE_LOCKED_CLASS
         return listOf(
