@@ -30,6 +30,8 @@ import androidx.compose.ui.unit.dp
 import dev.victorialauncher.R
 import dev.victorialauncher.data.AppInfo
 import dev.victorialauncher.data.Folder
+import dev.victorialauncher.data.PrivateSpace
+import dev.victorialauncher.data.restoreConcealed
 import dev.victorialauncher.ui.common.AppIcon
 
 /**
@@ -43,6 +45,8 @@ import dev.victorialauncher.ui.common.AppIcon
 fun FolderAppsScreen(
     folder: Folder?,
     allApps: List<AppInfo>,
+    /** So a member that lives in a locked private space can be left out of this screen. */
+    privateSpace: PrivateSpace,
     nameOverrides: Map<String, String>,
     iconSizeDp: Int,
     onSetInFolder: (AppInfo, Boolean) -> Unit,
@@ -52,6 +56,9 @@ fun FolderAppsScreen(
     val surface = MaterialTheme.colorScheme.surface
     val members = folder?.apps.orEmpty()
     val memberSet = members.toSet()
+    // Left out rather than shown as a missing row, for the same reason as in the favorites
+    // screen: a row saying an app is gone still says how many the locked space holds.
+    val shownMembers = remember(members, privateSpace) { members.filterNot(privateSpace::conceals) }
 
     Scaffold(
         containerColor = surface,
@@ -76,11 +83,15 @@ fun FolderAppsScreen(
 
         LazyColumn(contentPadding = PaddingValues(vertical = 8.dp), modifier = Modifier.padding(padding)) {
             item {
-                ListSectionLabel(stringResource(R.string.folder_member_count, members.size))
+                ListSectionLabel(stringResource(R.string.folder_member_count, shownMembers.size))
             }
 
             item {
-                ReorderableRows(keys = members, onReorder = onReorder) { key ->
+                ReorderableRows(
+                    keys = shownMembers,
+                    // Put back what was left out, or the first drag would drop it.
+                    onReorder = { order -> onReorder(restoreConcealed(members, order, privateSpace::conceals)) },
+                ) { key ->
                     val app = appsByKey[key]
                     if (app != null) {
                         AppIcon(app = app, sizeDp = minOf(iconSizeDp, 44))

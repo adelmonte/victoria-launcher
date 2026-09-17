@@ -38,6 +38,7 @@ import android.widget.Toast
 import dev.victorialauncher.data.IconShape
 import dev.victorialauncher.data.AppFont
 import dev.victorialauncher.data.AppInfo
+import dev.victorialauncher.data.PrivateSpace
 import dev.victorialauncher.data.AzStripVisibility
 import dev.victorialauncher.data.EdgeSide
 import dev.victorialauncher.data.HomeAlignment
@@ -100,8 +101,18 @@ fun VictoriaNavHost(
     // the first composition is what stalled the cold start. Load it off the main thread and
     // let the home screen render against an empty list for the first frame.
     var allApps by remember { mutableStateOf(emptyList<AppInfo>()) }
+    // Kept beside the list because the settings screens need it for keys whose rows are
+    // deliberately absent: a favorite inside a locked private space has nothing to look up.
+    var privateSpace by remember { mutableStateOf<PrivateSpace>(PrivateSpace.Absent) }
     suspend fun reloadApps() {
-        allApps = withContext(Dispatchers.Default) { app.appRepository.queryAllApps() }
+        val (state, apps) = withContext(Dispatchers.Default) {
+            // Resolved once and handed on, so the list and what the settings screens conceal
+            // can never disagree about whether the space was open when it was read.
+            val state = app.appRepository.privateSpace()
+            state to app.appRepository.queryAllApps(state)
+        }
+        privateSpace = state
+        allApps = apps
     }
     LaunchedEffect(Unit) { reloadApps() }
 
@@ -132,11 +143,16 @@ fun VictoriaNavHost(
         }
         runCatching { launcherApps.registerCallback(callback) }
 
-        // Locking a private space removes the whole profile rather than any package, so it
-        // arrives as one of these instead and no package callback ever fires.
+        // Locking or unlocking a private space changes no package, so no package callback
+        // ever fires for it — it arrives as one of these instead. Android 15 sends PROFILE_-
+        // UNAVAILABLE then PROFILE_INACCESSIBLE on locking and the matching pair on
+        // unlocking, including when the screen going off re-locks the space on its own.
+        // Written as strings because the Intent constants are newer than this app's minimum.
         val filter = IntentFilter().apply {
             addAction(Intent.ACTION_MANAGED_PROFILE_AVAILABLE)
             addAction(Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE)
+            addAction("android.intent.action.PROFILE_AVAILABLE")
+            addAction("android.intent.action.PROFILE_UNAVAILABLE")
             addAction("android.intent.action.PROFILE_ACCESSIBLE")
             addAction("android.intent.action.PROFILE_INACCESSIBLE")
             addAction("android.intent.action.PROFILE_ADDED")
@@ -571,6 +587,7 @@ fun VictoriaNavHost(
                 allApps = allApps,
                 favoriteKeys = favoriteKeys,
                 folders = folders,
+                privateSpace = privateSpace,
                 nameOverrides = nameOverrides,
                 iconSizeDp = iconSizeDp,
                 onReorder = { keys -> scope.launch { app.prefs.setFavorites(keys) } },
@@ -588,6 +605,7 @@ fun VictoriaNavHost(
             FolderAppsScreen(
                 folder = foldersById[id],
                 allApps = allApps,
+                privateSpace = privateSpace,
                 nameOverrides = nameOverrides,
                 iconSizeDp = iconSizeDp,
                 onSetInFolder = { appInfo, inFolder ->

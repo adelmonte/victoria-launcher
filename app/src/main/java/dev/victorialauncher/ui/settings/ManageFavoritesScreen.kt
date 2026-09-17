@@ -30,7 +30,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.unit.dp
 import dev.victorialauncher.data.AppInfo
 import dev.victorialauncher.data.Folder
+import dev.victorialauncher.data.PrivateSpace
 import dev.victorialauncher.data.folderIdFromToken
+import dev.victorialauncher.data.restoreConcealed
 import dev.victorialauncher.ui.common.AppIcon
 import dev.victorialauncher.R
 import androidx.compose.ui.res.stringResource
@@ -48,6 +50,8 @@ fun ManageFavoritesScreen(
     allApps: List<AppInfo>,
     favoriteKeys: List<String>,
     folders: List<Folder>,
+    /** So a favorite that lives in a locked private space can be left out of this screen. */
+    privateSpace: PrivateSpace,
     nameOverrides: Map<String, String>,
     iconSizeDp: Int,
     onSetFavorite: (AppInfo, Boolean) -> Unit,
@@ -56,6 +60,12 @@ fun ManageFavoritesScreen(
 ) {
     val surface = MaterialTheme.colorScheme.surface
     val favorites = favoriteKeys.toSet()
+    // A favorite inside a locked private space is left out entirely, rather than shown as the
+    // row that says an app is missing: that row would still say how many are in there. The
+    // stored keys are untouched, so those favorites come back when the space is opened.
+    val shownKeys = remember(favoriteKeys, privateSpace) {
+        favoriteKeys.filterNot(privateSpace::conceals)
+    }
     val appsByKey = remember(allApps) { allApps.associateBy { it.key } }
     val foldersById = remember(folders) { folders.associateBy { it.id } }
 
@@ -78,11 +88,17 @@ fun ManageFavoritesScreen(
             modifier = Modifier.padding(padding),
         ) {
             item {
-                ListSectionLabel(stringResource(R.string.favorites_count, favorites.size))
+                ListSectionLabel(stringResource(R.string.favorites_count, shownKeys.size))
             }
 
             item {
-                ReorderableRows(keys = favoriteKeys, onReorder = onReorder) { key ->
+                ReorderableRows(
+                    keys = shownKeys,
+                    // What was left out goes back where it was. The screen writes back the
+                    // whole list it was given, so without this the first drag would delete
+                    // every favorite the locked space is hiding.
+                    onReorder = { order -> onReorder(restoreConcealed(favoriteKeys, order, privateSpace::conceals)) },
+                ) { key ->
                     val folder = folderIdFromToken(key)?.let { foldersById[it] }
                     val app = appsByKey[key]
                     when {
