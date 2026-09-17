@@ -11,6 +11,7 @@ import android.content.res.Resources
 import java.util.Locale
 import android.os.Build
 import android.os.Process
+import android.os.UserHandle
 import android.os.UserManager
 import android.graphics.drawable.Drawable
 import android.net.Uri
@@ -33,18 +34,47 @@ class AppRepository(
         get() = context.getSystemService(UserManager::class.java)
 
     /**
-     * Every launchable activity across every profile the launcher can see.
+     * The last serial a private space positively reported, kept only so that a read which
+     * fails does not un-conceal what an earlier read concealed. In memory and never written
+     * down: it is a fact about this device right now, and a file recording that a private
+     * space exists is itself something for someone to find on the phone.
+     */
+    @Volatile
+    private var lastKnownPrivateSerial: Long = 0L
+
+    /**
+     * Every launchable activity across every profile the launcher may show, decided profile by
+     * profile before any of it is turned into rows.
      *
      * LauncherApps rather than PackageManager, because queryIntentActivities only ever sees
      * the profile we are running in — a work profile or a private space is invisible to it.
      * LauncherApps also hands back the badged icon and the per-profile label, which is what
      * marks a work app as a work app.
+     *
+     * The decision is made here, by UserHandle, rather than by filtering finished rows by
+     * serial afterwards, because a profile whose serial could not be read produces rows whose
+     * keys are indistinguishable from the main profile's — there is nothing left to filter by
+     * at that point, and those keys would be stored into favorites and launch counts.
      */
     fun queryAllApps(privateSpace: PrivateSpace = privateSpace()): List<AppInfo> {
         val profiles = runCatching { userManager.userProfiles }.getOrNull().orEmpty()
+        val mainUser = Process.myUserHandle()
         return profiles
             .flatMap { user ->
-                val serial = runCatching { userManager.getSerialNumberForUser(user) }.getOrDefault(0L)
+                val isMain = user == mainUser
+                val serial = runCatching { userManager.getSerialNumberForUser(user) }.getOrNull()
+                // Only asked about a profile the answers could change anything for: the one we
+                // run in is always listed, and below Android 15 there is no private space for
+                // either answer to describe.
+                val classify = !isMain && Build.VERSION.SDK_INT >= PRIVATE_SPACE_SDK
+                val listed = shouldListProfile(
+                    isMainUser = isMain,
+                    sdk = Build.VERSION.SDK_INT,
+                    userType = if (classify) userType(user) else null,
+                    quietMode = if (classify) quietMode(user) else null,
+                    serial = serial,
+                )
+                if (!listed) return@flatMap emptyList()
                 // Asking about a profile we are not the launcher for throws rather than
                 // returning nothing, and one inaccessible profile must not lose the rest.
                 runCatching { launcherApps.getActivityList(null, user) }
@@ -55,7 +85,9 @@ class AppRepository(
                             componentName = info.componentName,
                             label = info.label?.toString() ?: info.componentName.packageName,
                             user = user,
-                            userSerial = serial,
+                            // Null only reaches here for the profile we run in, whose serial is
+                            // zero anyway; every other profile without one was dropped above.
+                            userSerial = serial ?: 0L,
                         )
                     }
             }
@@ -64,16 +96,29 @@ class AppRepository(
             // which task is home until the default launcher is set again. Nothing good comes
             // of listing the launcher inside its own app list.
             .filterNot { it.componentName.packageName == context.packageName }
-            // A locked private space answers LauncherApps exactly as an open one does: the
-            // profile is still listed and every activity in it is still handed back, measured
-            // on Android 15. Nothing about the lock hides them, so the launcher has to — by
-            // serial, rather than by trusting an empty answer that never comes.
+            // Belt as well as braces. The profiles above are read one call at a time, so the
+            // lock can be granted between the state this list was asked for and the quiet mode
+            // read here — and it is granted before the profile has actually stopped. A caller
+            // that has just locked the space hands that state in, and this drops what it names
+            // however the system happens to be answering at this instant.
             .filterNot { privateSpace.conceals(it.key) }
             .distinctBy { it.key }
             .sortedBy { it.label.lowercase() }
             // After the own-package filter, which would otherwise drop it: the row is ours.
             .plus(privateSpaceRow(privateSpace))
     }
+
+    /**
+     * What kind of profile this is, or null when the platform will not say — which everything
+     * here reads as "it might be the private one" and treats accordingly.
+     */
+    private fun userType(user: UserHandle): String? =
+        if (Build.VERSION.SDK_INT < PRIVATE_SPACE_SDK) null
+        else runCatching { launcherApps.getLauncherUserInfo(user)?.userType }.getOrNull()
+
+    /** Whether the profile is switched off, or null when the platform will not say. */
+    private fun quietMode(user: UserHandle): Boolean? =
+        runCatching { userManager.isQuietModeEnabled(user) }.getOrNull()
 
     /**
      * The private space as this launcher can see it right now.
@@ -84,32 +129,61 @@ class AppRepository(
      *
      * Every call is runCatching-wrapped: they throw when the launcher is not the default home,
      * which is the condition Android puts on the permission, and a launcher that is not the
-     * default home must behave exactly as it did before any of this existed.
+     * default home must behave exactly as it did before any of this existed. What a failure
+     * never produces is [PrivateSpace.Absent], which conceals nothing: not being able to read
+     * the space is not the same as there not being one, and only the second of those is safe
+     * to act on.
      */
     fun privateSpace(): PrivateSpace {
         // getLauncherUserInfo arrived in API 35, which is also the first Android to have a
         // private space at all, so below it there is nothing to look for.
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.VANILLA_ICE_CREAM) return PrivateSpace.Absent
+        if (Build.VERSION.SDK_INT < PRIVATE_SPACE_SDK) return PrivateSpace.Absent
+        val mainUser = Process.myUserHandle()
         // LauncherApps.profiles rather than UserManager.userProfiles: without the permission
         // UserManager still lists the private profile while LauncherApps does not, and it is
         // LauncherApps that decides whether anything inside it can be read.
-        val profiles = runCatching { launcherApps.profiles }.getOrNull().orEmpty()
+        val profiles = runCatching { launcherApps.profiles }.getOrNull()
+            // The list itself refusing is not an answer of "there is no private space".
+            ?: return uncertain(user = null)
+        // A profile that would not say what it is could be the private one, so a pass that
+        // found no private space but did meet one of those has not established anything.
+        var unclassified = false
         for (user in profiles) {
-            val type = runCatching { launcherApps.getLauncherUserInfo(user)?.userType }.getOrNull()
-            val quiet = runCatching { userManager.isQuietModeEnabled(user) }.getOrNull() ?: continue
-            val serial = runCatching { userManager.getSerialNumberForUser(user) }.getOrDefault(0L)
+            if (user == mainUser) continue
+            val type = userType(user)
+            if (type == null) {
+                unclassified = true
+                continue
+            }
+            if (type != USER_TYPE_PROFILE_PRIVATE) continue
             // Zero is the main profile's serial, so a profile reporting it means the lookup
-            // failed. Concealing by serial would then conceal nothing, which is the one
-            // outcome worth refusing outright.
-            if (serial == 0L) continue
-            return when (privateSpaceKind(type, quiet)) {
-                PrivateSpaceKind.ABSENT -> continue
-                PrivateSpaceKind.LOCKED -> PrivateSpace.Locked(user, serial)
+            // failed. Concealing by a zero serial conceals nothing, which is the one outcome
+            // worth refusing outright — so it becomes an uncertain space rather than an open
+            // one, and falls back to the last serial this space was known by.
+            val serial = runCatching { userManager.getSerialNumberForUser(user) }.getOrNull()
+                ?.takeIf { it != 0L }
+                ?: return uncertain(user)
+            lastKnownPrivateSerial = serial
+            return when (privateSpaceKind(type, quietMode(user))) {
                 PrivateSpaceKind.UNLOCKED -> PrivateSpace.Unlocked(user, serial)
+                // Locked, and also the unreachable case: the type was matched just above, and
+                // locked is the reading to take if that ever stopped being true.
+                else -> PrivateSpace.Locked(user, serial)
             }
         }
-        return PrivateSpace.Absent
+        // Nothing here said it was a private space. That is only an absence if every profile
+        // did say what it was, and if no space has answered earlier in this session — a space
+        // that has gone missing from a list it used to be in is a read that failed, not a
+        // space that was deleted, and the difference is not one to guess in this direction.
+        return if (unclassified || lastKnownPrivateSerial != 0L) uncertain(null) else PrivateSpace.Absent
     }
+
+    /**
+     * A space we know is there, or might be, and cannot describe: concealed by the last serial
+     * it was known by, which is zero when it has never given one up.
+     */
+    private fun uncertain(user: UserHandle?): PrivateSpace =
+        PrivateSpace.Uncertain(user, lastKnownPrivateSerial)
 
     /**
      * Locks an open space and asks for a locked one to be opened. What that takes is the
@@ -117,12 +191,12 @@ class AppRepository(
      * front of the unlock, and this returns false until that has been answered.
      */
     fun togglePrivateSpace(): Boolean {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.VANILLA_ICE_CREAM) return false
-        val (lock, user) = when (val state = privateSpace()) {
-            PrivateSpace.Absent -> return false
-            is PrivateSpace.Locked -> false to state.user
-            is PrivateSpace.Unlocked -> true to state.user
-        }
+        if (Build.VERSION.SDK_INT < PRIVATE_SPACE_SDK) return false
+        val state = privateSpace()
+        // Nothing to ask about without a profile to ask about it. An uncertain space with one
+        // is treated as locked, like everywhere else, so pressing the row tries to open it.
+        val user = state.user ?: return false
+        val lock = state is PrivateSpace.Unlocked
         return runCatching { userManager.requestQuietModeEnabled(lock, user) }.getOrDefault(false)
     }
 
@@ -133,12 +207,12 @@ class AppRepository(
      * and says which padlock it is in its class name — which is also what tells the icon cache
      * the two apart, since that cache is keyed by the row and not by the state of the device.
      */
-    private fun privateSpaceRow(state: PrivateSpace): List<AppInfo> {
-        val className = when (state) {
-            PrivateSpace.Absent -> return emptyList()
-            is PrivateSpace.Locked -> PRIVATE_SPACE_LOCKED_CLASS
-            is PrivateSpace.Unlocked -> PRIVATE_SPACE_UNLOCKED_CLASS
-        }
+    fun privateSpaceRow(state: PrivateSpace): List<AppInfo> {
+        // Offered for any profile this pass could name, including one it could not describe:
+        // that one is treated as locked, and a locked space has to keep its way back in.
+        if (state.user == null) return emptyList()
+        val className =
+            if (state is PrivateSpace.Unlocked) PRIVATE_SPACE_UNLOCKED_CLASS else PRIVATE_SPACE_LOCKED_CLASS
         return listOf(
             AppInfo(
                 componentName = ComponentName(context.packageName, className),

@@ -31,6 +31,7 @@ import dev.victorialauncher.R
 import dev.victorialauncher.data.AppInfo
 import dev.victorialauncher.data.Folder
 import dev.victorialauncher.data.PrivateSpace
+import dev.victorialauncher.data.concealsStored
 import dev.victorialauncher.data.restoreConcealed
 import dev.victorialauncher.ui.common.AppIcon
 
@@ -56,9 +57,14 @@ fun FolderAppsScreen(
     val surface = MaterialTheme.colorScheme.surface
     val members = folder?.apps.orEmpty()
     val memberSet = members.toSet()
+    val appsByKey = remember(allApps) { allApps.associateBy { it.key } }
     // Left out rather than shown as a missing row, for the same reason as in the favorites
-    // screen: a row saying an app is gone still says how many the locked space holds.
-    val shownMembers = remember(members, privateSpace) { members.filterNot(privateSpace::conceals) }
+    // screen: a row saying an app is gone still says how many the locked space holds. With a
+    // space that could not be read there is no serial to recognise its members by, so every
+    // member that names nothing goes the same way.
+    val shownMembers = remember(members, privateSpace, appsByKey) {
+        members.filterNot { key -> privateSpace.concealsStored(key, key in appsByKey) }
+    }
 
     Scaffold(
         containerColor = surface,
@@ -78,8 +84,6 @@ fun FolderAppsScreen(
             Text(stringResource(R.string.folder_gone), modifier = Modifier.padding(padding).padding(20.dp))
             return@Scaffold
         }
-
-        val appsByKey = remember(allApps) { allApps.associateBy { it.key } }
 
         LazyColumn(contentPadding = PaddingValues(vertical = 8.dp), modifier = Modifier.padding(padding)) {
             item {

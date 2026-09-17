@@ -15,6 +15,14 @@ class PrivateSpaceTest {
 
     private val appKey = "com.example.app/com.example.app.MainActivity"
 
+    private companion object {
+        const val MANAGED = "android.os.usertype.profile.MANAGED"
+        const val CLONE = "android.os.usertype.profile.CLONE"
+
+        /** Any second profile's serial; a real one is never zero. */
+        const val SERIAL = 7L
+    }
+
     @Test
     fun `only a private profile in quiet mode is a locked space`() {
         assertEquals(
@@ -25,6 +33,16 @@ class PrivateSpaceTest {
             PrivateSpaceKind.UNLOCKED,
             privateSpaceKind(USER_TYPE_PROFILE_PRIVATE, quietMode = false),
         )
+    }
+
+    @Test
+    fun `a lock nobody would report is read as locked`() {
+        assertEquals(
+            PrivateSpaceKind.LOCKED,
+            privateSpaceKind(USER_TYPE_PROFILE_PRIVATE, quietMode = null),
+        )
+        assertEquals(PrivateSpaceKind.ABSENT, privateSpaceKind("android.os.usertype.profile.MANAGED", null))
+        assertEquals(PrivateSpaceKind.ABSENT, privateSpaceKind(null, null))
     }
 
     @Test
@@ -45,6 +63,119 @@ class PrivateSpaceTest {
     fun `the user type is matched exactly`() {
         assertEquals(PrivateSpaceKind.ABSENT, privateSpaceKind("android.os.usertype.profile.PRIVATE ", true))
         assertEquals(PrivateSpaceKind.ABSENT, privateSpaceKind("ANDROID.OS.USERTYPE.PROFILE.PRIVATE", true))
+    }
+
+    // The listing decision, profile by profile, in full. Every row of this table where the
+    // platform did not answer has to come out "not listed": the launcher is the only thing
+    // hiding a locked private space, so an unknown that resolves the other way is the whole
+    // disclosure, not a smaller list.
+
+    @Test
+    fun `the profile we run in is always listed, whatever else is unknown`() {
+        for (sdk in listOf(26, 34, PRIVATE_SPACE_SDK, 36)) {
+            for (type in listOf(null, USER_TYPE_PROFILE_PRIVATE, MANAGED)) {
+                for (quiet in listOf(null, true, false)) {
+                    for (serial in listOf(null, 0L, 7L)) {
+                        assertTrue(
+                            "main user, sdk $sdk, type $type, quiet $quiet, serial $serial",
+                            shouldListProfile(true, sdk, type, quiet, serial),
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    @Test
+    fun `a second profile with no readable serial is never listed, on any Android`() {
+        // Its rows would be keyed as the main profile's: indistinguishable from real ones,
+        // stored into favorites and launch counts, and out of reach of concealment by serial.
+        for (sdk in listOf(26, 34, PRIVATE_SPACE_SDK, 36)) {
+            for (type in listOf(null, USER_TYPE_PROFILE_PRIVATE, MANAGED)) {
+                for (quiet in listOf(null, true, false)) {
+                    for (serial in listOf(null, 0L)) {
+                        assertFalse(
+                            "sdk $sdk, type $type, quiet $quiet, serial $serial",
+                            shouldListProfile(false, sdk, type, quiet, serial),
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    @Test
+    fun `below Android 15 a second profile with a serial is listed as it always was`() {
+        for (sdk in listOf(26, 34)) {
+            for (type in listOf(null, MANAGED, CLONE, USER_TYPE_PROFILE_PRIVATE)) {
+                for (quiet in listOf(null, true, false)) {
+                    assertTrue(
+                        "sdk $sdk, type $type, quiet $quiet",
+                        shouldListProfile(false, sdk, type, quiet, SERIAL),
+                    )
+                }
+            }
+        }
+    }
+
+    @Test
+    fun `a private profile is listed only while it positively says it is open`() {
+        for (sdk in listOf(PRIVATE_SPACE_SDK, 36)) {
+            assertTrue(shouldListProfile(false, sdk, USER_TYPE_PROFILE_PRIVATE, false, SERIAL))
+            assertFalse(shouldListProfile(false, sdk, USER_TYPE_PROFILE_PRIVATE, true, SERIAL))
+            // The lock the platform would not report: unknown is locked.
+            assertFalse(shouldListProfile(false, sdk, USER_TYPE_PROFILE_PRIVATE, null, SERIAL))
+        }
+    }
+
+    @Test
+    fun `a profile that will not say what it is is never listed`() {
+        // It might be the private one, and there is nothing else to tell from.
+        for (sdk in listOf(PRIVATE_SPACE_SDK, 36)) {
+            for (quiet in listOf(null, true, false)) {
+                assertFalse("sdk $sdk, quiet $quiet", shouldListProfile(false, sdk, null, quiet, SERIAL))
+            }
+        }
+    }
+
+    @Test
+    fun `work and clone profiles are listed as they always were`() {
+        for (type in listOf(MANAGED, CLONE)) {
+            for (quiet in listOf(null, true, false)) {
+                assertTrue(
+                    "type $type, quiet $quiet",
+                    shouldListProfile(false, PRIVATE_SPACE_SDK, type, quiet, SERIAL),
+                )
+            }
+        }
+    }
+
+    @Test
+    fun `a space that could not be read conceals by the serial it was last known by`() {
+        val uncertain = PrivateSpace.Uncertain(user = null, serial = 10L)
+        assertEquals(10L, uncertain.concealedSerial)
+        assertTrue(uncertain.conceals("$appKey|u10"))
+        assertFalse(uncertain.conceals("$appKey|u11"))
+        assertFalse(uncertain.conceals(appKey))
+    }
+
+    @Test
+    fun `a space that was never named conceals every stored key that names nothing`() {
+        // No serial to match against, so the only thing left to go by is that the key resolves
+        // to nothing — which is exactly what a private key does while the space is locked.
+        val unnamed = PrivateSpace.Uncertain(user = null, serial = 0L)
+        assertTrue(unnamed.concealsStored("$appKey|u10", resolves = false))
+        assertTrue(unnamed.concealsStored(appKey, resolves = false))
+        // Something still on screen is still shown; this hides rows, not the whole screen.
+        assertFalse(unnamed.concealsStored("$appKey|u10", resolves = true))
+        assertFalse(unnamed.concealsStored(appKey, resolves = true))
+    }
+
+    @Test
+    fun `with the space read properly an app that really is gone still says so`() {
+        assertFalse(PrivateSpace.Absent.concealsUnresolved)
+        assertFalse(PrivateSpace.Absent.concealsStored(appKey, resolves = false))
+        assertTrue(PrivateSpace.Uncertain(user = null, serial = 0L).concealsUnresolved)
     }
 
     @Test

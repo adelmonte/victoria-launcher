@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import dev.victorialauncher.data.AppInfo
 import dev.victorialauncher.data.Folder
 import dev.victorialauncher.data.PrivateSpace
+import dev.victorialauncher.data.concealsStored
 import dev.victorialauncher.data.folderIdFromToken
 import dev.victorialauncher.data.restoreConcealed
 import dev.victorialauncher.ui.common.AppIcon
@@ -60,14 +61,19 @@ fun ManageFavoritesScreen(
 ) {
     val surface = MaterialTheme.colorScheme.surface
     val favorites = favoriteKeys.toSet()
-    // A favorite inside a locked private space is left out entirely, rather than shown as the
-    // row that says an app is missing: that row would still say how many are in there. The
-    // stored keys are untouched, so those favorites come back when the space is opened.
-    val shownKeys = remember(favoriteKeys, privateSpace) {
-        favoriteKeys.filterNot(privateSpace::conceals)
-    }
     val appsByKey = remember(allApps) { allApps.associateBy { it.key } }
     val foldersById = remember(folders) { folders.associateBy { it.id } }
+    // A favorite inside a locked private space is left out entirely, rather than shown as the
+    // row that says an app is missing: that row would still say how many are in there. The
+    // stored keys are untouched, so those favorites come back when the space is opened. When
+    // the space itself could not be read, the same goes for any favorite that names nothing,
+    // since there is then no serial to tell a private one from an uninstalled one.
+    val shownKeys = remember(favoriteKeys, privateSpace, appsByKey, foldersById) {
+        favoriteKeys.filterNot { key ->
+            val resolves = key in appsByKey || folderIdFromToken(key)?.let { it in foldersById } == true
+            privateSpace.concealsStored(key, resolves)
+        }
+    }
 
     Scaffold(
         containerColor = surface,
