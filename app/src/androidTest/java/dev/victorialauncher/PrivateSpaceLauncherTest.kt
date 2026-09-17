@@ -4,6 +4,7 @@ package dev.victorialauncher
 import android.content.Context
 import android.content.pm.LauncherApps
 import android.os.Build
+import android.os.Process
 import android.os.SystemClock
 import android.os.UserHandle
 import android.os.UserManager
@@ -47,7 +48,7 @@ class PrivateSpaceLauncherTest {
     private val launcherApps: LauncherApps get() = context.getSystemService(LauncherApps::class.java)
 
     private lateinit var privateUser: UserHandle
-    private var favoriteAdded: String? = null
+    private val favoritesAdded = mutableListOf<String>()
 
     @Before
     fun setUp() {
@@ -76,7 +77,8 @@ class PrivateSpaceLauncherTest {
     fun tearDown() {
         if (!this::privateUser.isInitialized) return
         device.executeShellCommand("pm install-existing --user 0 $PRIVATE_APP_PACKAGE")
-        favoriteAdded?.let { key -> runBlocking { Prefs(context).removeFavorite(key) } }
+        runBlocking { favoritesAdded.forEach { key -> Prefs(context).removeFavorite(key) } }
+        favoritesAdded.clear()
         setLocked(false)
     }
 
@@ -99,7 +101,14 @@ class PrivateSpaceLauncherTest {
     @Test
     fun lockingTheSpaceTakesItsAppsOutOfTheListAndOutOfSearch() {
         setLocked(true)
-        searchFor(PRIVATE_APP_SEARCH)
+        // One query that matches an app in each profile, and the main profile's has to be
+        // there. That is what makes the other one's absence mean anything: a list that never
+        // opened, or a filter that matched nothing at all, would otherwise pass this.
+        searchFor(SHARED_SEARCH)
+        assertTrue(
+            "the search found no $MAIN_APP_LABEL either, so it proves nothing about $PRIVATE_APP_LABEL",
+            LauncherTestUtils.waitForText(MAIN_APP_LABEL),
+        )
         assertFalse(
             "a locked private space's app was reachable by searching the list",
             LauncherTestUtils.waitForText(PRIVATE_APP_LABEL, ABSENCE_MS),
@@ -115,8 +124,7 @@ class PrivateSpaceLauncherTest {
     @Test
     fun aFavoriteInsideALockedSpaceLeavesTheHomeScreenAndTheFavoritesScreen() {
         val key = privateAppKey()
-        favoriteAdded = key
-        runBlocking { Prefs(context).addFavorite(key) }
+        favorite(key)
 
         setLocked(false)
         LauncherTestUtils.goHome()
@@ -163,6 +171,79 @@ class PrivateSpaceLauncherTest {
             "pressing the row did not open the space",
             waitForQuietMode(false),
         )
+    }
+
+    @Test
+    fun pressingThePadlockTakesAPrivateFavoriteOffTheHomeScreenAtOnce() {
+        favorite(privateAppKey())
+        // A favorite from each profile, because the private one's absence is only meaningful
+        // beside something still there: the two are drawn in the same pass, so once the main
+        // profile's is back on screen the other one would be too if it had survived.
+        favorite(mainAppKey())
+        setLocked(false)
+        LauncherTestUtils.goHome()
+        assertTrue(
+            "expected the favorite to be on the home screen while the space is unlocked",
+            LauncherTestUtils.waitForText(PRIVATE_APP_LABEL),
+        )
+
+        searchFor(PRIVATE_ROW_SEARCH)
+        assertTrue(LauncherTestUtils.waitForText(PRIVATE_ROW_LABEL))
+        device.findObject(By.text(PRIVATE_ROW_LABEL)).click()
+
+        // The whole point of the press: what it hides has to be gone before anyone holding the
+        // phone could read it, which is why this window is a short one. Re-reading every app of
+        // every profile, which is what used to have to finish first, takes far longer.
+        assertTrue(
+            "the home screen never came back after the padlock was pressed",
+            device.wait(Until.hasObject(By.text(MAIN_APP_LABEL)), CONCEAL_MS),
+        )
+        assertFalse(
+            "the private favorite was still on the home screen beside the main profile's",
+            device.hasObject(By.text(PRIVATE_APP_LABEL)),
+        )
+        assertTrue("pressing the row did not lock the space", waitForQuietMode(true))
+    }
+
+    /**
+     * The space locks itself whenever the screen goes off, so it is routinely locked while the
+     * launcher is not the thing on screen, and what says so can be missed.
+     *
+     * This is the whole return path — the broadcast and the check made on becoming visible
+     * both run here, and nothing in a test can silence one to leave the other. What it pins
+     * down is the behavior that matters: after time away, a space that locked while we were
+     * gone is concealed by the time the home screen is back.
+     */
+    @Test
+    fun aSpaceLockedWhileTheLauncherWasAwayIsConcealedOnTheWayBack() {
+        favorite(privateAppKey())
+        favorite(mainAppKey())
+        setLocked(false)
+        LauncherTestUtils.goHome()
+        assertTrue(LauncherTestUtils.waitForText(PRIVATE_APP_LABEL))
+
+        // Away, rather than merely covered: the launcher is stopped while this happens.
+        device.executeShellCommand("am start -a android.settings.SETTINGS")
+        check(device.wait(Until.hasObject(By.pkg("com.android.settings")), 10_000L)) {
+            "the settings app never came to the foreground"
+        }
+        setLocked(true)
+
+        LauncherTestUtils.goHome()
+        assertTrue(
+            "the home screen came back without its main-profile favorite, so it proves nothing",
+            LauncherTestUtils.waitForText(MAIN_APP_LABEL),
+        )
+        assertFalse(
+            "a private favorite was still on the home screen after the space locked while away",
+            LauncherTestUtils.waitForText(PRIVATE_APP_LABEL, ABSENCE_MS),
+        )
+    }
+
+    /** Stores a favorite for the duration, and takes it away again in tearDown. */
+    private fun favorite(key: String) {
+        favoritesAdded += key
+        runBlocking { Prefs(context).addFavorite(key) }
     }
 
     /**
@@ -218,6 +299,16 @@ class PrivateSpaceLauncherTest {
         return activity.componentName.flattenToString() + "|u" + serial
     }
 
+    /** The main profile's keys have no profile in them, which is what makes them the old ones. */
+    private fun mainAppKey(): String {
+        val activity = checkNotNull(
+            runCatching { launcherApps.getActivityList(MAIN_APP_PACKAGE, Process.myUserHandle()) }
+                .getOrNull()
+                ?.firstOrNull()
+        ) { "$MAIN_APP_PACKAGE is not installed in the main profile" }
+        return activity.componentName.flattenToString()
+    }
+
     private fun setLocked(locked: Boolean) {
         if (userManager.isQuietModeEnabled(privateUser) == locked) return
         userManager.requestQuietModeEnabled(locked, privateUser)
@@ -239,6 +330,17 @@ class PrivateSpaceLauncherTest {
 
         /** Only part of the name, so the search box never holds the text waited for below. */
         const val PRIVATE_APP_SEARCH = "Cloc"
+
+        /**
+         * An app that is in the main profile and stays there, so a search can show that the
+         * list it is being asked about is a live one.
+         */
+        const val MAIN_APP_PACKAGE = "com.android.chrome"
+        const val MAIN_APP_LABEL = "Chrome"
+
+        /** Matches both names, and neither exactly, so the search box is never what is found. */
+        const val SHARED_SEARCH = "C"
+
         const val PRIVATE_ROW_LABEL = "Private space"
         const val PRIVATE_ROW_SEARCH = "Private spac"
         const val MISSING_ROW_LABEL = "App no longer installed"
@@ -251,6 +353,9 @@ class PrivateSpaceLauncherTest {
 
         /** How long something absent is given to turn up before it counts as absent. */
         const val ABSENCE_MS = 3_000L
+
+        /** How long a lock may take to reach the screen before it is no longer immediate. */
+        const val CONCEAL_MS = 1_500L
         const val QUIET_MODE_MS = 15_000L
     }
 }
