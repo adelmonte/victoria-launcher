@@ -590,7 +590,12 @@ fun VictoriaNavHost(
                         if (add) app.prefs.addFavorite(appInfo.key) else app.prefs.removeFavorite(appInfo.key)
                     }
                 },
-                onForget = { key -> scope.launch { app.prefs.forgetEntry(key) } },
+                // Missing here can just mean a locked private space or a paused work profile,
+                // both of which come back — so this only drops the favorite, the same as
+                // unticking a row that IS resolved. forgetEntry's wider wipe (rename, icon,
+                // folder, hidden, launch count) is for a shortcut that is actually gone for
+                // good, which AppRepository.unpin already calls on its own.
+                onForget = { key -> scope.launch { app.prefs.removeFavorite(key) } },
                 onBack = { navController.popBackStack() },
             )
         }

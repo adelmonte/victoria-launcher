@@ -51,7 +51,12 @@ fun ManageFavoritesScreen(
     nameOverrides: Map<String, String>,
     iconSizeDp: Int,
     onSetFavorite: (AppInfo, Boolean) -> Unit,
-    /** Drops a key nothing can resolve any more; see the row that offers it. */
+    /**
+     * Unticks a key nothing can resolve right now; see the row that offers it. Only ever drops
+     * the favorite, not the row's rename/icon/folder/hidden/launch-count — a locked private
+     * space or a paused work profile can make a real app or shortcut "missing" temporarily,
+     * and those come back.
+     */
     onForget: (String) -> Unit,
     onReorder: (List<String>) -> Unit,
     onBack: () -> Unit,
