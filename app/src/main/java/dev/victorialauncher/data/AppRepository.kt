@@ -6,15 +6,23 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.LauncherApps
 import android.content.pm.PackageManager
+import android.content.pm.ShortcutInfo
 import android.content.res.Configuration
 import android.content.res.Resources
 import java.util.Locale
 import android.os.Process
+import android.os.UserHandle
 import android.os.UserManager
 import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.provider.Settings
+import android.widget.Toast
+import dev.victorialauncher.R
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class AppRepository(
@@ -64,12 +72,123 @@ class AppRepository(
             // which task is home until the default launcher is set again. Nothing good comes
             // of listing the launcher inside its own app list.
             .filterNot { it.componentName.packageName == context.packageName }
+            // After that filter rather than before it: the reason for it is that starting our
+            // own launcher activity corrupts the HOME task, which says nothing about a
+            // shortcut, and one we published ourselves is started through LauncherApps like
+            // any other.
+            .plus(queryPinnedShortcuts())
             .distinctBy { it.key }
             .sortedBy { it.label.lowercase() }
     }
 
+    /**
+     * Bumped when the pinned set changes without any package changing — the confirm screen
+     * accepting one, or a menu unpinning one. Nothing else would tell the list to be built
+     * again, because no app was installed, removed or updated.
+     */
+    private val _shortcutChanges = MutableStateFlow(0)
+    val shortcutChanges: StateFlow<Int> = _shortcutChanges.asStateFlow()
+
+    fun noteShortcutsChanged() {
+        _shortcutChanges.update { it + 1 }
+    }
+
+    private data class PinnedShortcut(val info: ShortcutInfo, val user: UserHandle, val serial: Long)
+
+    /**
+     * Only the device's current home app may ask about shortcuts at all; anyone else is
+     * answered with a SecurityException rather than an empty list. So every call below asks
+     * this first, and a launcher that is not the one in use simply lists no shortcuts.
+     */
+    private fun hasShortcutHostPermission(): Boolean =
+        runCatching { launcherApps.hasShortcutHostPermission() }.getOrDefault(false)
+
+    private fun pinnedShortcuts(): List<PinnedShortcut> {
+        if (!hasShortcutHostPermission()) return emptyList()
+        val profiles = runCatching { userManager.userProfiles }.getOrNull().orEmpty()
+        return profiles.flatMap { user ->
+            val serial = runCatching { userManager.getSerialNumberForUser(user) }.getOrDefault(0L)
+            val query = LauncherApps.ShortcutQuery()
+                .setQueryFlags(LauncherApps.ShortcutQuery.FLAG_MATCH_PINNED)
+            runCatching { launcherApps.getShortcuts(query, user) }
+                .getOrNull()
+                .orEmpty()
+                .map { PinnedShortcut(it, user, serial) }
+        }
+    }
+
+    /** Every pinned shortcut, as an ordinary row. */
+    private fun queryPinnedShortcuts(): List<AppInfo> = pinnedShortcuts().map { pinned ->
+        val info = pinned.info
+        AppInfo(
+            // A shortcut need not name an activity of its own, and one that does not still
+            // has to answer for its package: that is what the in-list package search matches
+            // on and what the icon falls back to.
+            componentName = info.activity ?: ComponentName(info.`package`, ""),
+            label = info.shortLabel?.toString() ?: info.longLabel?.toString() ?: info.`package`,
+            user = pinned.user,
+            userSerial = pinned.serial,
+            kind = EntryKind.SHORTCUT,
+            shortcutId = info.id,
+            disabled = !info.isEnabled,
+        )
+    }
+
+    /** The live ShortcutInfo behind a row, for its icon, its reason for being off, or a pin. */
+    private fun findShortcut(app: AppInfo): ShortcutInfo? {
+        val id = app.shortcutId ?: return null
+        if (!hasShortcutHostPermission()) return null
+        val query = LauncherApps.ShortcutQuery()
+            .setQueryFlags(LauncherApps.ShortcutQuery.FLAG_MATCH_PINNED)
+            .setPackage(app.packageName)
+            .setShortcutIds(listOf(id))
+        return runCatching { launcherApps.getShortcuts(query, app.user ?: Process.myUserHandle()) }
+            .getOrNull()
+            ?.firstOrNull()
+    }
+
+    /**
+     * Hands the package back every id it still has pinned, minus this one: pinShortcuts does
+     * not remove one shortcut, it replaces the whole pinned set for a package in a profile,
+     * so anything left out of that list is unpinned along with it.
+     *
+     * Then everything stored under the key goes too. An app can be reinstalled and find its
+     * name, icon and place waiting; an unpinned shortcut never comes back, so what is left
+     * behind is only clutter nothing can reach.
+     */
+    fun unpin(app: AppInfo) {
+        if (app.kind != EntryKind.SHORTCUT) return
+        val id = app.shortcutId ?: return
+        val removed = EntryKeys.ShortcutRef(app.packageName, id, app.userSerial)
+        val pinned = pinnedShortcuts().map {
+            EntryKeys.ShortcutRef(it.info.`package`, it.info.id, it.serial)
+        }
+        runCatching {
+            launcherApps.pinShortcuts(
+                app.packageName,
+                PinnedShortcuts.remainingIds(pinned, removed),
+                app.user ?: Process.myUserHandle(),
+            )
+        }
+        scope.launch { prefs.forgetEntry(app.key) }
+        noteShortcutsChanged()
+    }
+
+    /**
+     * A shortcut the user has just agreed to pin. It joins their favorites, because "add to
+     * the home screen" is what they were asked; the write is on the app's own scope so it
+     * outlives the confirm screen, which finishes the moment they tap.
+     */
+    fun addPinnedShortcut(key: String) {
+        scope.launch { prefs.addFavorite(key) }
+        noteShortcutsChanged()
+    }
+
     /** Badged by the system, so a work or private-space app is recognizable at a glance. */
     fun loadIcon(app: AppInfo): Drawable {
+        // A shortcut's own picture, badged with the app that published it. Falling through
+        // means it has none of its own, and the publisher's app icon below is the answer.
+        if (app.kind == EntryKind.SHORTCUT) shortcutIcon(app)?.let { return it }
         val user = app.user
         if (user != null) {
             val activity = runCatching {
@@ -91,6 +210,13 @@ class AppRepository(
         }
     }
 
+    private fun shortcutIcon(app: AppInfo): Drawable? {
+        val info = findShortcut(app) ?: return null
+        val density = context.resources.configuration.densityDpi
+        return runCatching { launcherApps.getShortcutBadgedIconDrawable(info, density) }.getOrNull()
+            ?: runCatching { launcherApps.getShortcutIconDrawable(info, density) }.getOrNull()
+    }
+
     // An app's label comes back in the device's language, so on a Japanese phone the English
     // name is nowhere in the list. Loading it means asking the app's own resources for the
     // label a second time through an English configuration, which is a whole resource table
@@ -98,24 +224,33 @@ class AppRepository(
     // answer is kept.
     private val englishLabels = mutableMapOf<String, String?>()
 
-    /** The app's name in English, or null if it has none or it is the name we already have. */
-    fun englishLabel(app: AppInfo): String? = englishLabels.getOrPut(app.key) {
-        runCatching {
-            val info = pm.getActivityInfo(app.componentName, 0)
-            val labelRes = if (info.labelRes != 0) info.labelRes else info.applicationInfo.labelRes
-            if (labelRes == 0) return@runCatching null
-            val res = pm.getResourcesForApplication(info.applicationInfo)
-            val config = Configuration(res.configuration).apply { setLocale(Locale.ENGLISH) }
-            res.getString(labelRes).takeIf { it.isNotBlank() }?.let { english ->
-                // The context-adjusted resources fall back to the default language when an app
-                // ships no English, which just hands the same name back.
-                Resources(res.assets, res.displayMetrics, config).getString(labelRes)
-            }
-        }.getOrNull()
+    /**
+     * The app's name in English, or null if it has none or it is the name we already have.
+     *
+     * Null for anything that is not an app: a shortcut is named by whoever pinned it, and
+     * there are no resources of its own to ask a second time.
+     */
+    fun englishLabel(app: AppInfo): String? {
+        if (app.kind != EntryKind.APP) return null
+        return englishLabels.getOrPut(app.key) {
+            runCatching {
+                val info = pm.getActivityInfo(app.componentName, 0)
+                val labelRes = if (info.labelRes != 0) info.labelRes else info.applicationInfo.labelRes
+                if (labelRes == 0) return@runCatching null
+                val res = pm.getResourcesForApplication(info.applicationInfo)
+                val config = Configuration(res.configuration).apply { setLocale(Locale.ENGLISH) }
+                res.getString(labelRes).takeIf { it.isNotBlank() }?.let { english ->
+                    // The context-adjusted resources fall back to the default language when an app
+                    // ships no English, which just hands the same name back.
+                    Resources(res.assets, res.displayMetrics, config).getString(labelRes)
+                }
+            }.getOrNull()
+        }
     }
 
     /** Returns false if the app could not be started, so callers can undo whatever they hid. */
     fun launch(app: AppInfo): Boolean {
+        if (app.kind == EntryKind.SHORTCUT) return launchShortcut(app)
         if (app.componentName.packageName == context.packageName) return false
         val started = runCatching {
             // Through LauncherApps so an app in another profile starts as that profile; a
@@ -141,7 +276,33 @@ class AppRepository(
         return started
     }
 
+    private fun launchShortcut(app: AppInfo): Boolean {
+        val id = app.shortcutId ?: return false
+        if (app.disabled) {
+            // The publisher's own wording wherever there is any: it is the only thing that
+            // can say why, and "sign in again to use this" beats a shrug.
+            val message = findShortcut(app)?.disabledMessage?.toString()?.takeIf { it.isNotBlank() }
+                ?: context.getString(R.string.shortcut_unavailable)
+            Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+            return false
+        }
+        // Through LauncherApps and nothing else. The Intent inside a ShortcutInfo belongs to
+        // the app that published it and is never handed to a launcher; rebuilding one from
+        // its parts would be starting something on that app's behalf that it did not ask for.
+        val started = runCatching {
+            launcherApps.startShortcut(app.packageName, id, null, null, app.user ?: Process.myUserHandle())
+            true
+        }.getOrDefault(false)
+        if (started) {
+            scope.launch { prefs.incrementLaunchCount(app.key) }
+        }
+        return started
+    }
+
     fun openAppInfo(app: AppInfo) {
+        // Only an app has one. The menus leave the item out for everything else; this is so a
+        // caller that has not can do no harm.
+        if (app.kind != EntryKind.APP) return
         val user = app.user
         if (user != null) {
             val shown = runCatching {

@@ -16,6 +16,7 @@
     <string name="action_move_to_folder">Mover a carpeta…</string>
     <string name="action_change_icon">Cambiar icono…</string>
     <string name="action_open_settings">Ajustes de Victoria Launcher</string>
+    <string name="action_remove_shortcut">Quitar acceso directo</string>
 
     <!-- Home screen -->
     <string name="home_drag_handle">Reordenar</string>
@@ -221,6 +222,12 @@
     <string name="widget_unavailable">Este widget ya no está disponible</string>
     <string name="widget_change_settings">Cambiar los ajustes del widget</string>
     <string name="widget_none_found">No se han encontrado widgets en este dispositivo.</string>
+
+    <!-- Accesos directos anclados -->
+    <string name="shortcut_unavailable">Este acceso directo ya no está disponible</string>
+    <string name="shortcut_pin_title">¿Añadir a la pantalla de inicio?</string>
+    <string name="shortcut_pin_from">De %1$s</string>
+    <string name="shortcut_pin_add">Añadir</string>
 
     <!-- Now Playing -->
     <string name="now_playing_enable_access">Activar el acceso para Reproduciendo ahora</string>

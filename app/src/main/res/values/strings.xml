@@ -16,6 +16,7 @@
     <string name="action_move_to_folder">Move to folder…</string>
     <string name="action_change_icon">Change icon…</string>
     <string name="action_open_settings">Victoria Launcher settings</string>
+    <string name="action_remove_shortcut">Remove shortcut</string>
 
     <!-- Home screen -->
     <string name="home_drag_handle">Reorder</string>
@@ -221,6 +222,12 @@
     <string name="widget_unavailable">This widget is no longer available</string>
     <string name="widget_change_settings">Change widget settings</string>
     <string name="widget_none_found">No widgets found on this device.</string>
+
+    <!-- Pinned shortcuts -->
+    <string name="shortcut_unavailable">This shortcut is no longer available</string>
+    <string name="shortcut_pin_title">Add to home screen?</string>
+    <string name="shortcut_pin_from">From %1$s</string>
+    <string name="shortcut_pin_add">Add</string>
 
     <!-- Now Playing -->
     <string name="now_playing_enable_access">Enable Now Playing access</string>
