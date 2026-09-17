@@ -9,5 +9,5 @@
   So it is excluded, and with nothing else to exclude that leaves this a short list.
 -->
 <full-backup-content>
-    <exclude domain="file" path="datastore/victoria_prefs.preferences_pb" />
+    <exclude domain="file" path="datastore" />
 </full-backup-content>

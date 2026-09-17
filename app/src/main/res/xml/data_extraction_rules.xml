@@ -8,9 +8,9 @@
 -->
 <data-extraction-rules>
     <cloud-backup>
-        <exclude domain="file" path="datastore/victoria_prefs.preferences_pb" />
+        <exclude domain="file" path="datastore" />
     </cloud-backup>
     <device-transfer>
-        <exclude domain="file" path="datastore/victoria_prefs.preferences_pb" />
+        <exclude domain="file" path="datastore" />
     </device-transfer>
 </data-extraction-rules>
