@@ -51,6 +51,7 @@ import dev.victorialauncher.TypedKey
 import dev.victorialauncher.VictoriaApp
 import dev.victorialauncher.data.AppInfo
 import dev.victorialauncher.data.EntryKind
+import dev.victorialauncher.data.restoreConcealed
 import dev.victorialauncher.data.AzStripVisibility
 import dev.victorialauncher.data.EdgeSide
 import dev.victorialauncher.data.HomeAlignment
@@ -520,7 +521,13 @@ fun HomeRoute(
                 onMoveToFolder = { folderPickerFor = it },
                 onReorderHome = { newFavKeys, newWidgetPos ->
                     scope.launch {
-                        app.prefs.setFavorites(newFavKeys)
+                        // The home screen draws only the favorites that resolve to a row, and
+                        // this hands back the order of what it drew. Written as it stands, that
+                        // would replace the stored list and delete every favorite that drew
+                        // nothing — which is exactly what a locked private space's favorites
+                        // do. Whatever drew no row goes back where it was.
+                        val drawn = newFavKeys.toSet()
+                        app.prefs.setFavorites(restoreConcealed(favoriteKeys, newFavKeys) { it !in drawn })
                         app.prefs.setWidgetPosition(newWidgetPos)
                     }
                 },

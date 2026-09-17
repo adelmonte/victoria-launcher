@@ -365,4 +365,17 @@ class PrivateSpaceTest {
         val stored = listOf("a", "b", "c")
         assertEquals(listOf("c", "a", "b"), restoreConcealed(stored, listOf("c", "a", "b")) { false })
     }
+
+    @Test
+    fun `a drag on the home screen puts back every favorite that drew no row`() {
+        // The home screen hands back only what it drew. A locked space's favorites draw nothing,
+        // and so does a favorite whose app is gone; neither is the drag's to delete.
+        val stored = listOf("signal/Main", "private/Main|u11", "photos/Main", "gone/Main")
+        val drawnInNewOrder = listOf("photos/Main", "signal/Main")
+        val drawn = drawnInNewOrder.toSet()
+        assertEquals(
+            listOf("photos/Main", "private/Main|u11", "signal/Main", "gone/Main"),
+            restoreConcealed(stored, drawnInNewOrder) { it !in drawn },
+        )
+    }
 }
