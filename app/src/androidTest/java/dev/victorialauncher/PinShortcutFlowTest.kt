@@ -1,16 +1,23 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 package dev.victorialauncher
 
+import android.app.ActivityManager
 import android.content.Intent
+import android.content.pm.LauncherApps
 import android.content.pm.ShortcutInfo
 import android.content.pm.ShortcutManager
 import android.net.Uri
+import android.os.Process
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.Until
+import dev.victorialauncher.data.EntryKeys
+import dev.victorialauncher.data.Prefs
 import dev.victorialauncher.shortcut.PinShortcutActivity
+import kotlinx.coroutines.runBlocking
+import org.junit.After
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
@@ -39,6 +46,10 @@ class PinShortcutFlowTest {
 
     private val shortcutLabel = "Pinned example page"
 
+    // Every id this test class pins, so tearDown can unpin exactly what it pinned and nothing
+    // that was already on a shared emulator for some other reason.
+    private val pinnedIds = mutableListOf<String>()
+
     @Before
     fun setUp() {
         device = LauncherTestUtils.uiDevice()
@@ -47,12 +58,69 @@ class PinShortcutFlowTest {
         LauncherTestUtils.goHome()
     }
 
+    /**
+     * Leaves the shared emulator the way this test class found it: pinShortcuts with every id
+     * this class pinned removed unpins them all in one call (the same replace-the-whole-set
+     * shape [dev.victorialauncher.data.PinnedShortcuts] exists to get right elsewhere), and
+     * forgetEntry drops whatever favorites/name/icon/launch-count rows they left behind.
+     */
+    @After
+    fun tearDown() = runBlocking {
+        if (pinnedIds.isEmpty()) return@runBlocking
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        val launcherApps = context.getSystemService(LauncherApps::class.java)
+        runCatching { launcherApps.pinShortcuts(targetPackage, emptyList(), Process.myUserHandle()) }
+        val prefs = Prefs(context.applicationContext)
+        pinnedIds.forEach { id -> prefs.forgetEntry(EntryKeys.shortcut(targetPackage, id, 0L)) }
+        pinnedIds.clear()
+    }
+
     // Instrumented test names become DEX method names, which can't contain spaces — so these
     // stay camelCase rather than the backtick style used in app/src/test.
 
     @Test
     fun acceptingAPinRequestPutsTheShortcutOnTheHomeScreen() {
         pinThroughTheConfirmation("pin-shortcut-flow-test", shortcutLabel)
+    }
+
+    @Test
+    fun removingOneSiblingShortcutLeavesTheOtherPinnedAndOnScreen() {
+        // pinShortcuts REPLACES the whole pinned set for a package in one call (see
+        // PinnedShortcuts's own doc comment) — this is the regression that shape makes possible:
+        // unpinning one shortcut from a package must not silently unpin every other one from it.
+        val keptId = "pin-shortcut-sibling-keep"
+        val keptLabel = "Pinned page to keep"
+        val removedId = "pin-shortcut-sibling-remove"
+        val removedLabel = "Pinned page to remove sibling"
+        pinThroughTheConfirmation(keptId, keptLabel)
+        pinThroughTheConfirmation(removedId, removedLabel)
+
+        val row = device.wait(Until.findObject(By.text(removedLabel)), 10_000L)
+        assertNotNull("expected the second pinned shortcut's row to long-press", row)
+        row.longClick()
+        val remove = device.wait(Until.findObject(By.text("Remove shortcut")), 10_000L)
+        assertNotNull("expected the row's menu to offer Remove shortcut", remove)
+        remove.click()
+
+        assertTrue(
+            "expected only the removed shortcut's row to go",
+            device.wait(Until.gone(By.text(removedLabel)), 10_000L),
+        )
+        assertTrue(
+            "expected the sibling shortcut to still be on the home screen",
+            LauncherTestUtils.waitForText(keptLabel),
+        )
+        val manager = InstrumentationRegistry.getInstrumentation().targetContext
+            .getSystemService(ShortcutManager::class.java)
+        assertFalse(
+            "the removed shortcut must no longer be pinned",
+            manager.pinnedShortcuts.any { it.id == removedId },
+        )
+        assertTrue(
+            "the sibling shortcut from the same package must still be pinned with the system, " +
+                "not just still shown",
+            manager.pinnedShortcuts.any { it.id == keptId },
+        )
     }
 
     @Test
@@ -94,6 +162,9 @@ class PinShortcutFlowTest {
             "the pin request was refused before any confirmation was shown",
             manager.requestPinShortcut(shortcut, null),
         )
+        // Tracked before tapping Add: if the assertion below fails, the shortcut is still
+        // pinned with the system and tearDown must still clean it up.
+        pinnedIds += id
 
         val add = device.wait(Until.findObject(By.text("Add")), 10_000L)
         assertNotNull("expected the pin confirmation to offer Add", add)
@@ -108,13 +179,28 @@ class PinShortcutFlowTest {
 
     @Test
     fun anEmptyPinIntentFinishesInsteadOfCrashing() {
-        // Nothing stops another app starting an exported activity with whatever it likes.
+        // Nothing stops another app starting an exported activity with whatever it likes. The
+        // old version of this assertion (only "some window of ours is on screen") could never
+        // fail: the confirm dialog is drawn by this same package, so it would have passed
+        // whether or not the dialog wrongly appeared. This checks the two things that
+        // distinguish "finished cleanly" from either failure mode.
         val context = InstrumentationRegistry.getInstrumentation().targetContext
         context.startActivity(
             Intent(context, PinShortcutActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         )
+
+        assertFalse(
+            "an empty pin intent must never raise the confirm dialog",
+            device.wait(Until.hasObject(By.text(context.getString(R.string.shortcut_pin_title))), 3_000L),
+        )
+        val activityManager = context.getSystemService(ActivityManager::class.java)
         assertTrue(
-            "expected the launcher still to be what is on screen, with no dialog and no crash",
+            "a crash would restart the process; finding it still running is what shows " +
+                "onCreate returned instead of throwing",
+            activityManager.runningAppProcesses.orEmpty().any { it.processName == targetPackage },
+        )
+        assertTrue(
+            "expected the launcher still to be what is on screen",
             device.wait(Until.hasObject(By.pkg(targetPackage).depth(0)), 10_000L),
         )
     }
