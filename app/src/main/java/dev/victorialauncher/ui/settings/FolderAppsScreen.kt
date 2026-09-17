@@ -62,9 +62,14 @@ fun FolderAppsScreen(
     // screen: a row saying an app is gone still says how many the locked space holds. With a
     // space that could not be read there is no serial to recognise its members by, so every
     // member that names nothing goes the same way.
-    val shownMembers = remember(members, privateSpace, appsByKey) {
-        members.filterNot { key -> privateSpace.concealsStored(key, key in appsByKey) }
+    //
+    // One predicate, and the reorder below puts members back with this same one: a rule that
+    // hides more than the rule that restores loses everything between the two on the first
+    // drag, because the screen writes back the whole list it was given.
+    val conceal: (String) -> Boolean = remember(privateSpace, appsByKey) {
+        { key -> privateSpace.concealsStored(key, key in appsByKey) }
     }
+    val shownMembers = remember(members, conceal) { members.filterNot(conceal) }
 
     Scaffold(
         containerColor = surface,
@@ -93,8 +98,9 @@ fun FolderAppsScreen(
             item {
                 ReorderableRows(
                     keys = shownMembers,
-                    // Put back what was left out, or the first drag would drop it.
-                    onReorder = { order -> onReorder(restoreConcealed(members, order, privateSpace::conceals)) },
+                    // Put back what was left out, by the rule that left it out, or the first
+                    // drag would drop it.
+                    onReorder = { order -> onReorder(restoreConcealed(members, order, conceal)) },
                 ) { key ->
                     val app = appsByKey[key]
                     if (app != null) {

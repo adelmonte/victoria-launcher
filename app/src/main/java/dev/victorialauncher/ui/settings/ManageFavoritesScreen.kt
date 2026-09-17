@@ -68,12 +68,18 @@ fun ManageFavoritesScreen(
     // stored keys are untouched, so those favorites come back when the space is opened. When
     // the space itself could not be read, the same goes for any favorite that names nothing,
     // since there is then no serial to tell a private one from an uninstalled one.
-    val shownKeys = remember(favoriteKeys, privateSpace, appsByKey, foldersById) {
-        favoriteKeys.filterNot { key ->
+    //
+    // One predicate, and the reorder below puts rows back with this same one. Hiding by a wide
+    // rule and restoring by a narrower one leaves the keys between the two in neither list,
+    // and the restore reads a list that is shorter than it expected as rows the user deleted —
+    // so the first drag would write that deletion to the store.
+    val conceal: (String) -> Boolean = remember(privateSpace, appsByKey, foldersById) {
+        { key ->
             val resolves = key in appsByKey || folderIdFromToken(key)?.let { it in foldersById } == true
             privateSpace.concealsStored(key, resolves)
         }
     }
+    val shownKeys = remember(favoriteKeys, conceal) { favoriteKeys.filterNot(conceal) }
 
     Scaffold(
         containerColor = surface,
@@ -100,10 +106,10 @@ fun ManageFavoritesScreen(
             item {
                 ReorderableRows(
                     keys = shownKeys,
-                    // What was left out goes back where it was. The screen writes back the
-                    // whole list it was given, so without this the first drag would delete
-                    // every favorite the locked space is hiding.
-                    onReorder = { order -> onReorder(restoreConcealed(favoriteKeys, order, privateSpace::conceals)) },
+                    // What was left out goes back where it was, by the rule that left it
+                    // out. The screen writes back the whole list it was given, so without this
+                    // the first drag would delete every favorite this screen is hiding.
+                    onReorder = { order -> onReorder(restoreConcealed(favoriteKeys, order, conceal)) },
                 ) { key ->
                     val folder = folderIdFromToken(key)?.let { foldersById[it] }
                     val app = appsByKey[key]

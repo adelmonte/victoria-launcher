@@ -232,6 +232,63 @@ class PrivateSpaceTest {
         )
     }
 
+    // The screens hide with concealsStored and restore with the same predicate. These build
+    // `shown` with a predicate that is WIDER than conceals — which is what an uncertain space
+    // gives them — and then check that nothing at all leaves the store across a reorder, an
+    // add and a remove. Restoring with the narrower `conceals` instead silently drops every
+    // key between the two rules the first time anything is dragged, and the store is what a
+    // screen writes back, so the drop is permanent.
+
+    /** An uncertain space with no serial: everything that names nothing is hidden. */
+    private val unnamedSpace = PrivateSpace.Uncertain(user = null, serial = 0L)
+
+    /** Two keys have rows to draw; the other two do not, for two different reasons. */
+    private fun hidesUnresolved(key: String): Boolean =
+        unnamedSpace.concealsStored(key, resolves = key == "a" || key == "c")
+
+    @Test
+    fun `a key hidden for naming nothing survives a reorder of what is shown`() {
+        val stored = listOf("a", "gone", "c", "b|u10")
+        val shown = stored.filterNot(::hidesUnresolved)
+        assertEquals(listOf("a", "c"), shown)
+
+        assertEquals(
+            listOf("c", "gone", "a", "b|u10"),
+            restoreConcealed(stored, listOf("c", "a"), ::hidesUnresolved),
+        )
+        // And an untouched screen writes back exactly what it was given.
+        assertEquals(stored, restoreConcealed(stored, shown, ::hidesUnresolved))
+    }
+
+    @Test
+    fun `a key hidden for naming nothing survives one being added`() {
+        val stored = listOf("a", "gone", "c", "b|u10")
+        assertEquals(
+            listOf("a", "gone", "c", "b|u10", "new"),
+            restoreConcealed(stored, listOf("a", "c", "new"), ::hidesUnresolved),
+        )
+    }
+
+    @Test
+    fun `a key hidden for naming nothing survives another being removed`() {
+        val stored = listOf("a", "gone", "c", "b|u10")
+        assertEquals(
+            listOf("c", "gone", "b|u10"),
+            restoreConcealed(stored, listOf("c"), ::hidesUnresolved),
+        )
+    }
+
+    @Test
+    fun `restoring by the narrower rule is what loses them`() {
+        // The bug this pins down, stated as the difference between the two predicates: with
+        // `conceals` there is nothing to match "gone" and the reorder reads one key short.
+        val stored = listOf("a", "gone", "c", "b|u10")
+        val shown = stored.filterNot(::hidesUnresolved)
+        val byTheNarrowRule = restoreConcealed(stored, shown, unnamedSpace::conceals)
+        assertFalse("this is the deletion the screens must not perform", "gone" in byTheNarrowRule)
+        assertTrue("and the same rule kept everything", "gone" in restoreConcealed(stored, shown, ::hidesUnresolved))
+    }
+
     @Test
     fun `with nothing concealed reordering is exactly what the screen said`() {
         val stored = listOf("a", "b", "c")
