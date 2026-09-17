@@ -223,7 +223,7 @@
     <string name="widget_change_settings">Cambiar los ajustes del widget</string>
     <string name="widget_none_found">No se han encontrado widgets en este dispositivo.</string>
 
-    <!-- Accesos directos anclados -->
+    <!-- Pinned shortcuts -->
     <string name="shortcut_unavailable">Este acceso directo ya no está disponible</string>
     <string name="shortcut_pin_title">¿Añadir a la pantalla de inicio?</string>
     <string name="shortcut_pin_from">De %1$s</string>

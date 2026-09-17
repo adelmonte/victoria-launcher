@@ -89,7 +89,7 @@ class AppRepository(
     private val _shortcutChanges = MutableStateFlow(0)
     val shortcutChanges: StateFlow<Int> = _shortcutChanges.asStateFlow()
 
-    fun noteShortcutsChanged() {
+    private fun noteShortcutsChanged() {
         _shortcutChanges.update { it + 1 }
     }
 
