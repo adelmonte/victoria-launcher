@@ -27,8 +27,11 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -191,6 +194,29 @@ fun VictoriaNavHost(
             runCatching { launcherApps.unregisterCallback(callback) }
             context.unregisterReceiver(receiver)
         }
+    }
+
+    // A broadcast is the only other thing that ever says the space has locked, and it is one
+    // thing: it is only heard while this is composed, the system re-locks the space by itself
+    // whenever the screen goes off, and a lock that was missed stays missed until something
+    // else happens to reload. Coming back to the launcher is the moment that matters, so the
+    // state is read again there — a handful of binder calls, with the enumeration behind it
+    // only when the answer actually changed.
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event != Lifecycle.Event.ON_START) return@LifecycleEventObserver
+            scope.launch {
+                val state = withContext(Dispatchers.Default) { app.appRepository.privateSpace() }
+                if (state != privateSpace) {
+                    adoptPrivateSpace(state)
+                    clearIconCache()
+                    reloadApps(state)
+                }
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
     val hiddenApps by app.prefs.hiddenApps.collectAsState(initial = emptySet())
