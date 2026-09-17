@@ -6,6 +6,21 @@ import android.os.UserHandle
 import androidx.compose.runtime.Immutable
 
 /**
+ * What a row is. Everything that lists, sorts, searches, renames or files rows away treats them
+ * alike; only starting one, finding its icon and the menu it offers depend on this.
+ */
+enum class EntryKind {
+    /** An installed app's launchable activity. */
+    APP,
+
+    /** A shortcut another app asked to have pinned, such as a browser's bookmark. */
+    SHORTCUT,
+
+    /** The entry that asks for a query and hands it to a search engine. */
+    SEARCH,
+}
+
+/**
  * A ComponentName is immutable, but it comes from the platform with no stability information,
  * so Compose infers this whole class as unstable and stops every row that takes one from ever
  * skipping recomposition. The annotation states what is already true.
@@ -18,6 +33,11 @@ data class AppInfo(
     val user: UserHandle? = null,
     /** The profile's serial. Zero is the main profile, which is what every old key assumed. */
     val userSerial: Long = 0L,
+    val kind: EntryKind = EntryKind.APP,
+    /** The publisher's id for a pinned shortcut. Null for every other kind. */
+    val shortcutId: String? = null,
+    /** A shortcut its publisher has switched off: still listed, shown dimmed, never started. */
+    val disabled: Boolean = false,
 ) {
     // Held rather than derived: this is the map key for overrides, favorites and list item
     // keys, so it is asked for several times per visible row per frame while scrubbing, and
@@ -26,9 +46,15 @@ data class AppInfo(
     // The main profile's key is byte-for-byte what it was before profiles existed, so every
     // stored favorite, rename, icon and hidden entry still matches. Only apps from a second
     // profile carry the suffix, and those could not have been stored before anyway.
-    val key: String =
-        if (userSerial == 0L) componentName.flattenToString()
-        else componentName.flattenToString() + "|u" + userSerial
+    //
+    // A shortcut or the search entry has no activity of its own to name it, so its key carries
+    // a prefix no component can start with. See EntryKeys.
+    val key: String = when (kind) {
+        EntryKind.APP -> EntryKeys.app(componentName.flattenToString(), userSerial)
+        EntryKind.SHORTCUT ->
+            EntryKeys.shortcut(componentName.packageName, shortcutId.orEmpty(), userSerial)
+        EntryKind.SEARCH -> EntryKeys.SEARCH
+    }
 
     val packageName: String get() = componentName.packageName
 }
