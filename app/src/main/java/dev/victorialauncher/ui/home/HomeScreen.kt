@@ -98,6 +98,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import dev.victorialauncher.data.AppInfo
+import dev.victorialauncher.data.EntryKind
 import dev.victorialauncher.data.Folder
 import dev.victorialauncher.data.QuickLaunchSlot
 import dev.victorialauncher.data.HomeAlignment
@@ -1040,11 +1041,15 @@ private fun FavoriteRow(
                 leadingIcon = { Icon(Icons.Filled.Edit, contentDescription = null) },
                 onClick = onEditLayout,
             )
-            DropdownMenuItem(
-                text = { Text(stringResource(R.string.action_app_info)) },
-                leadingIcon = { Icon(Icons.Filled.Info, contentDescription = null) },
-                onClick = onAppInfo,
-            )
+            // Only an installed app has a settings screen to open; a row that stands for
+            // something else would send the system looking for a package that is not there.
+            if (app.kind == EntryKind.APP) {
+                DropdownMenuItem(
+                    text = { Text(stringResource(R.string.action_app_info)) },
+                    leadingIcon = { Icon(Icons.Filled.Info, contentDescription = null) },
+                    onClick = onAppInfo,
+                )
+            }
             DropdownMenuItem(
                 text = { Text(stringResource(R.string.action_remove)) },
                 leadingIcon = { Icon(Icons.Filled.Delete, contentDescription = null) },
@@ -1251,11 +1256,13 @@ private fun FolderRow(
                         offset = memberMenuOffset,
                         onDismissRequest = { memberMenuFor = null },
                     ) {
-                        DropdownMenuItem(
-                            text = { Text(stringResource(R.string.action_app_info)) },
-                            leadingIcon = { Icon(Icons.Filled.Info, contentDescription = null) },
-                            onClick = { memberMenuFor = null; onMemberAppInfo(member) },
-                        )
+                        if (member.kind == EntryKind.APP) {
+                            DropdownMenuItem(
+                                text = { Text(stringResource(R.string.action_app_info)) },
+                                leadingIcon = { Icon(Icons.Filled.Info, contentDescription = null) },
+                                onClick = { memberMenuFor = null; onMemberAppInfo(member) },
+                            )
+                        }
                         DropdownMenuItem(
                             text = { Text(stringResource(R.string.action_edit_icon_and_name)) },
                             leadingIcon = { Icon(Icons.Filled.Tune, contentDescription = null) },

@@ -50,6 +50,7 @@ import androidx.lifecycle.LifecycleEventObserver
 import dev.victorialauncher.TypedKey
 import dev.victorialauncher.VictoriaApp
 import dev.victorialauncher.data.AppInfo
+import dev.victorialauncher.data.EntryKind
 import dev.victorialauncher.data.AzStripVisibility
 import dev.victorialauncher.data.EdgeSide
 import dev.victorialauncher.data.HomeAlignment
@@ -304,6 +305,14 @@ fun HomeRoute(
         }
     }
 
+    // The one place a row press is turned into something happening. Every row in the launcher
+    // arrives here, so a row that is not an app is recognised once, here, rather than in each
+    // of the four places a press is wired up.
+    fun launchEntry(entry: AppInfo): Boolean = when (entry.kind) {
+        EntryKind.PRIVATE_SPACE -> app.appRepository.togglePrivateSpace()
+        else -> app.appRepository.launch(entry)
+    }
+
     LaunchedEffect(settings.edgeSide) { scrub.syncRestingSide(settings.edgeSide) }
 
     // BACK on the home screen must do nothing whatsoever.
@@ -485,9 +494,9 @@ fun HomeRoute(
                 nowPlayingHeightDp = settings.nowPlayingHeightDp,
                 onResizeNowPlaying = { scope.launch { app.prefs.setNowPlayingHeightDp(it) } },
                 widgetActions = widgetActions,
-                onLaunch = { app.appRepository.launch(it) },
+                onLaunch = { launchEntry(it) },
                 onRemoveFavorite = { scope.launch { app.prefs.removeFavorite(it.key) } },
-                onOpenFolderApp = { app.appRepository.launch(it) },
+                onOpenFolderApp = { launchEntry(it) },
                 onRenameFolder = { folder, name ->
                     scope.launch { app.prefs.upsertFolder(folder.copy(name = name)) }
                 },
@@ -580,7 +589,7 @@ fun HomeRoute(
                         QuickLaunchSlot.LEFT -> settings.quickLaunchLeft
                         QuickLaunchSlot.RIGHT -> settings.quickLaunchRight
                     }
-                    target?.let { app.appRepository.launch(it) }
+                    target?.let { launchEntry(it) }
                 },
                 onPeekStatusBar = onPeekStatusBar,
                 onExpandShade = {
@@ -628,8 +637,11 @@ fun HomeRoute(
                 visible = appListVisible,
                 favoriteKeys = remember(favoriteKeys) { favoriteKeys.toSet() },
                 onLaunch = { appInfo ->
-                    // A launch that never got off the ground leaves nothing to wait for.
-                    if (app.appRepository.launch(appInfo)) closeAfterLaunch() else closeAppList()
+                    // A launch that never got off the ground leaves nothing to wait for, and
+                    // the private-space row has nothing coming to the foreground either — it
+                    // changes what this very list holds, so it wants the list out of the way.
+                    val acted = launchEntry(appInfo)
+                    if (acted && appInfo.kind == EntryKind.APP) closeAfterLaunch() else closeAppList()
                 },
                 onSetFavorite = { appInfo, add ->
                     scope.launch {
