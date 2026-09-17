@@ -185,6 +185,14 @@ class AppRepository(
         val pinned = pinnedShortcuts().map {
             EntryKeys.ShortcutRef(it.info.`package`, it.info.id, it.serial)
         }
+        // pinShortcuts replaces the whole pinned set for a package in a profile. If the list
+        // just read does not even contain the shortcut being removed, that profile could not
+        // be read this time, and what would be handed back is an empty list — unpinning every
+        // other shortcut the package has there. Better to do nothing and say so.
+        if (removed !in pinned) {
+            Toast.makeText(context, R.string.shortcut_unpin_failed, Toast.LENGTH_SHORT).show()
+            return
+        }
         val unpinned = runCatching {
             launcherApps.pinShortcuts(
                 app.packageName,
