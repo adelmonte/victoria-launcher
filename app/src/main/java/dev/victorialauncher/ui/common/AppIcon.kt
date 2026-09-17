@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.graphics.drawable.toBitmap
 import dev.victorialauncher.VictoriaApp
 import dev.victorialauncher.data.AppInfo
+import dev.victorialauncher.data.EntryKind
 import dev.victorialauncher.data.IconShape
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -240,6 +241,13 @@ private fun resolveDrawable(
     overrideValue: String?,
 ): Drawable =
     decodeIconOverride(context, victoriaApp, overrideValue)
-        ?: victoriaApp.iconPackRepository.getIcon(iconPackPackage, app.componentName) {
+        ?: if (app.kind != EntryKind.APP) {
+            // An icon pack is matched by component, and a shortcut carries its publisher's:
+            // every bookmark would come back wearing the browser's icon instead of its own,
+            // which is the one thing that tells two of them apart.
             victoriaApp.appRepository.loadIcon(app)
+        } else {
+            victoriaApp.iconPackRepository.getIcon(iconPackPackage, app.componentName) {
+                victoriaApp.appRepository.loadIcon(app)
+            }
         }
