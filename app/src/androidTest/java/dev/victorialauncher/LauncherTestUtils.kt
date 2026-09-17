@@ -59,7 +59,17 @@ object LauncherTestUtils {
     }
 
     /** Bounded retries for [openAppList]; see the comment there for why a single attempt isn't reliable. */
-    private const val OPEN_LIST_ATTEMPTS = 5
+    private const val OPEN_LIST_ATTEMPTS = 3
+
+    /**
+     * Heights to try the opening swipe at, as a fraction of the screen.
+     *
+     * The reclaimed strip sits around the vertical center of the scrub band, and that band
+     * follows the favorites until someone sets one by hand — so a home screen with favorites on
+     * it gives back a different part of the edge than an empty one does, and nothing observable
+     * says which. Tried at a few heights for the same reason the wallpaper's menu is.
+     */
+    private val OPEN_LIST_HEIGHTS = listOf(0.6f, 0.78f, 0.45f, 0.88f, 0.3f)
 
     /**
      * Opens the full A-Z app list the way a person would: touch down inside the invisible
@@ -72,8 +82,9 @@ object LauncherTestUtils {
      * screen's outer edges, and the app can only ask the system to give a strip of it back
      * (`View.setSystemGestureExclusionRects`) around the vertical center of the scrub band —
      * not the full screen height. A touch-down outside that reclaimed strip goes to the
-     * system's back gesture instead of the app, so this targets the vertical center of the
-     * screen, where that reclaimed strip lives for the default (unedited) band.
+     * system's back gesture instead of the app, so this works down a short list of heights
+     * rather than one, starting with the middle of the screen where the strip sits for a home
+     * screen with nothing on it.
      *
      * Even inside the right strip, the very first swipe right after HOME can race the system:
      * it takes a moment after `setSystemGestureExclusionRects` is called for the window manager
@@ -92,14 +103,16 @@ object LauncherTestUtils {
         val device = uiDevice()
         val startX = device.displayWidth - 2
         val endX = (device.displayWidth * 0.6f).toInt()
-        val y = (device.displayHeight * 0.6f).toInt()
-        repeat(OPEN_LIST_ATTEMPTS) {
-            device.swipe(startX, y, endX, y, 60)
-            if (device.wait(Until.hasObject(By.text("Search apps")), 1_000L)) return
+        for (fraction in OPEN_LIST_HEIGHTS) {
+            val y = (device.displayHeight * fraction).toInt()
+            repeat(OPEN_LIST_ATTEMPTS) {
+                device.swipe(startX, y, endX, y, 60)
+                if (device.wait(Until.hasObject(By.text("Search apps")), 1_000L)) return
+            }
         }
         // Said here, where it happened, rather than left for whatever looks for a row next
         // to report as a row that is missing.
-        error("the app list did not open after $OPEN_LIST_ATTEMPTS swipes")
+        error("the app list did not open after ${OPEN_LIST_ATTEMPTS * OPEN_LIST_HEIGHTS.size} swipes")
     }
 
     /**
