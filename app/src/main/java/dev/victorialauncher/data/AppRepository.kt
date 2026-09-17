@@ -118,21 +118,30 @@ class AppRepository(
     }
 
     /** Every pinned shortcut, as an ordinary row. */
-    private fun queryPinnedShortcuts(): List<AppInfo> = pinnedShortcuts().map { pinned ->
-        val info = pinned.info
-        AppInfo(
-            // A shortcut need not name an activity of its own, and one that does not still
-            // has to answer for its package: that is what the in-list package search matches
-            // on and what the icon falls back to.
-            componentName = info.activity ?: ComponentName(info.`package`, ""),
-            label = info.shortLabel?.toString() ?: info.longLabel?.toString() ?: info.`package`,
-            user = pinned.user,
-            userSerial = pinned.serial,
-            kind = EntryKind.SHORTCUT,
-            shortcutId = info.id,
-            disabled = !info.isEnabled,
-        )
-    }
+    private fun queryPinnedShortcuts(): List<AppInfo> = pinnedShortcuts()
+        // An id that would corrupt the newline-joined favorites list (CR-4) is not something
+        // this store can hold at all, so such a shortcut never becomes a row in the first
+        // place — PinShortcutActivity applies the same check before it can ever be pinned.
+        .filter { EntryKeys.isStorableShortcutId(it.info.id) }
+        .map { pinned ->
+            val info = pinned.info
+            AppInfo(
+                // Always the publisher's own package, never `info.activity`'s — the activity
+                // names which of the publisher's screens the shortcut opens, and is not
+                // guaranteed to agree with `info.package` in shape even though it always does
+                // in practice. Everything downstream (AppInfo.key, AppInfo.packageName, the
+                // in-list package search, the icon-pack lookup skip, unpin's own
+                // `pinShortcuts(pkg, …)` call) has to agree on one package, and the publisher's
+                // is the only one guaranteed to be that shortcut's.
+                componentName = ComponentName(info.`package`, info.activity?.className ?: ""),
+                label = info.shortLabel?.toString() ?: info.longLabel?.toString() ?: info.`package`,
+                user = pinned.user,
+                userSerial = pinned.serial,
+                kind = EntryKind.SHORTCUT,
+                shortcutId = info.id,
+                disabled = !info.isEnabled,
+            )
+        }
 
     /** The live ShortcutInfo behind a row, for its icon, its reason for being off, or a pin. */
     private fun findShortcut(app: AppInfo): ShortcutInfo? {

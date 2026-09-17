@@ -21,6 +21,21 @@ object EntryKeys {
     private const val USER_SUFFIX = "|u"
     private val userSuffixPattern = Regex("""\|u(\d+)$""")
 
+    /** The longest shortcut id this store will keep; a publisher's id has no length limit of its own. */
+    private const val MAX_SHORTCUT_ID_LENGTH = 1024
+
+    /**
+     * Whether a publisher's shortcut id is safe to keep at all.
+     *
+     * Favorites are stored as one newline-joined string ([Prefs.readFavorites]), so an id
+     * carrying `\n` — or any other ISO control character, which is never meaningful in an id —
+     * would corrupt that list for every favorite after it, not just itself. A shortcut whose id
+     * fails this is refused rather than stored: [dev.victorialauncher.data.AppRepository]
+     * filters it out of the pinned list, and the pin confirmation refuses to accept it.
+     */
+    fun isStorableShortcutId(id: String): Boolean =
+        id.isNotEmpty() && id.length <= MAX_SHORTCUT_ID_LENGTH && id.none { Character.isISOControl(it) }
+
     /**
      * The main profile's key is byte-for-byte what it was before profiles existed, so every
      * stored favorite, rename, icon and hidden entry still matches. Only apps from a second
