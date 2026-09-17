@@ -47,6 +47,23 @@
             android:taskAffinity=""
             android:theme="@style/Theme.VictoriaLauncher" />
 
+        <!-- The one component another app can reach, and the only way in is the system
+             raising it on behalf of an app that asked for a shortcut to be pinned. It is
+             answered and gone, so it stays out of recents and off the back stack, and it
+             keeps its own task affinity rather than joining the HOME task it appears over. -->
+        <activity
+            android:name=".shortcut.PinShortcutActivity"
+            android:exported="true"
+            android:excludeFromRecents="true"
+            android:noHistory="true"
+            android:taskAffinity=""
+            android:theme="@style/Theme.VictoriaLauncher.PinShortcut">
+            <intent-filter>
+                <action android:name="android.content.pm.action.CONFIRM_PIN_SHORTCUT" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
         <service
             android:name=".service.VictoriaAccessibilityService"
             android:exported="true"

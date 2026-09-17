@@ -8,4 +8,12 @@
         <item name="android:navigationBarColor">@android:color/transparent</item>
         <item name="android:windowLightStatusBar">false</item>
     </style>
+
+    <!-- The pin-confirm screen is one dialog over whatever was already on screen, so its
+         window shows none of its own and no wallpaper: the dialog draws its own scrim. -->
+    <style name="Theme.VictoriaLauncher.PinShortcut" parent="Theme.VictoriaLauncher">
+        <item name="android:windowShowWallpaper">false</item>
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowAnimationStyle">@android:style/Animation.Dialog</item>
+    </style>
 </resources>
