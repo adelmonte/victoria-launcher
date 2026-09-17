@@ -225,6 +225,10 @@ fun VictoriaNavHost(
     val contentColor = rememberContentColor(textColorMode, textColorCustom)
 
     val appsByKey = remember(allApps) { allApps.associateBy { it.key } }
+    // The number the hidden-apps screen itself arrives at, rather than the size of the stored
+    // set: that screen lists rows, and a hidden app inside a locked private space has no row.
+    // Counting the stored set in the subtitle says out loud how many apps are in there.
+    val hiddenShownCount = remember(allApps, hiddenApps) { allApps.count { it.key in hiddenApps } }
     val foldersById = remember(folders) { folders.associateBy { it.id } }
 
     // A favorites row is an app or a folder; both come out of the same ordered token list.
@@ -448,7 +452,7 @@ fun VictoriaNavHost(
             val iconPacks = remember { app.iconPackRepository.getInstalledIconPacks() }
             val listenerEnabled = remember(homeIntentTick) { isListenerEnabled(context) }
             SettingsScreen(
-                hiddenCount = hiddenApps.size,
+                hiddenCount = hiddenShownCount,
                 iconPacks = iconPacks,
                 iconPackPackage = iconPackPackage,
                 showAppIcons = showAppIcons,
