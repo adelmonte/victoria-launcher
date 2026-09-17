@@ -21,6 +21,20 @@ class PrivateSpaceTest {
 
         /** Any second profile's serial; a real one is never zero. */
         const val SERIAL = 7L
+
+        /** Nothing concealed, missing rows shown: both Absent and Unlocked amount to this. */
+        val ABSENT_OR_UNLOCKED = 0L to false
+
+        /** A space positively read and positively shut: its serial, missing rows shown. */
+        val LOCKED = SERIAL to false
+
+        /** A space that answered earlier and will not describe itself now. */
+        val UNCERTAIN_KNOWN = SERIAL to true
+
+        /** A space that might be there and has never given up a serial. */
+        val UNCERTAIN_UNNAMED = 0L to true
+
+        val EVERY_STATE = listOf(ABSENT_OR_UNLOCKED, LOCKED, UNCERTAIN_KNOWN, UNCERTAIN_UNNAMED)
     }
 
     @Test
@@ -176,6 +190,53 @@ class PrivateSpaceTest {
         assertFalse(PrivateSpace.Absent.concealsUnresolved)
         assertFalse(PrivateSpace.Absent.concealsStored(appKey, resolves = false))
         assertTrue(PrivateSpace.Uncertain(user = null, serial = 0L).concealsUnresolved)
+    }
+
+    // What a screen listing stored keys leaves out, over every state it can be handed. The
+    // states are given as the pair of values they amount to, because Locked and Unlocked need
+    // a UserHandle no JVM test can build — and nothing in this decision reads one.
+
+    private fun Pair<Long, Boolean>.hides(key: String, resolves: Boolean) =
+        concealsStoredKey(first, second, key, resolves)
+
+    @Test
+    fun `a second profile's key that names nothing is carried in every state, never shown`() {
+        // Absent is what a launcher that is not the default home reports on a fresh process:
+        // the private profile is invisible to it, nothing is left unclassified, and no serial
+        // has been seen — so a private favorite stored earlier names nothing, and an "app no
+        // longer installed" row for it would be both a count of what is in the space and a
+        // checkbox that throws the owner's favorite away.
+        val privateKey = "$appKey|u$SERIAL"
+        val otherProfileKey = "$appKey|u11"
+        for (state in EVERY_STATE) {
+            assertTrue("$state", state.hides(privateKey, resolves = false))
+            assertTrue("$state", state.hides(otherProfileKey, resolves = false))
+        }
+    }
+
+    @Test
+    fun `a main-profile key that names nothing still gets its removable row`() {
+        // The one case that row is for, and it says nothing about a private space: an ordinary
+        // app that was uninstalled. Only the state that cannot tell the two apart hides it.
+        assertFalse(ABSENT_OR_UNLOCKED.hides(appKey, resolves = false))
+        assertFalse(LOCKED.hides(appKey, resolves = false))
+        assertTrue(UNCERTAIN_KNOWN.hides(appKey, resolves = false))
+        assertTrue(UNCERTAIN_UNNAMED.hides(appKey, resolves = false))
+    }
+
+    @Test
+    fun `a key that does name a row is shown unless its own space is the locked one`() {
+        // Carrying is for keys with no row. A work app, or a private app while the space is
+        // open, has one, and leaving it out would hide an app visible everywhere else.
+        val otherProfileKey = "$appKey|u11"
+        for (state in EVERY_STATE) {
+            assertFalse("$state", state.hides(appKey, resolves = true))
+            assertFalse("$state", state.hides(otherProfileKey, resolves = true))
+        }
+        // The locked space's own key goes whether or not it still names a row: the row only
+        // outlives the lock by a moment, and the key is what says which profile it is in.
+        assertTrue(LOCKED.hides("$appKey|u$SERIAL", resolves = true))
+        assertTrue(UNCERTAIN_KNOWN.hides("$appKey|u$SERIAL", resolves = true))
     }
 
     @Test

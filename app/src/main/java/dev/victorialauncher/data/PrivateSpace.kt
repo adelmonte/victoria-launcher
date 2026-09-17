@@ -146,13 +146,46 @@ fun isConcealed(concealedSerial: Long, key: String): Boolean =
  * Whether a stored key has to be left out of a screen that lists stored keys, where [resolves]
  * says whether the key still names something that screen could draw.
  *
- * Two reasons to leave one out, and the second is the quiet one: a key belonging to the space
- * while it is locked, and any key at all that names nothing while the space cannot be named
- * either. A row that says an app is no longer installed is still a row, and a handful of them
- * says how many apps are in there.
+ * Three reasons to leave one out, and the last two are the quiet ones.
+ *
+ * A key belonging to the space while it is locked, which is the obvious one.
+ *
+ * Any key at all that names nothing while the space cannot be named either, because there is
+ * then no serial to recognise a private key by. A row that says an app is no longer installed
+ * is still a row, and a handful of them says how many apps are in there.
+ *
+ * And a key from any profile but the main one that names nothing — in every state, [Absent]
+ * included. [Absent] is what a launcher that is not the default home reports on a fresh
+ * process: the private profile is invisible to it, nothing is left unclassified, and no serial
+ * has been seen yet, so a stored private favorite resolves to nothing and would be drawn as an
+ * "app no longer installed" row. That row is countable and it can be ticked away, which is
+ * both halves of the threat at once — how many are in there, and the owner's favorites gone
+ * for good at the hands of whoever is holding the phone.
+ *
+ * The cost is that favorites left behind by a private space that was deleted, or a work
+ * profile that was removed, sit in storage where nothing will ever offer to remove them. Only
+ * a main-profile key that names nothing gets the row that says so.
  */
 fun PrivateSpace.concealsStored(key: String, resolves: Boolean): Boolean =
-    conceals(key) || (!resolves && concealsUnresolved)
+    concealsStoredKey(concealedSerial, concealsUnresolved, key, resolves)
+
+/**
+ * [PrivateSpace.concealsStored] told the two things it decides from rather than reading them
+ * off a state, like [shouldListProfile] above, so the whole table can be tested on the JVM: a
+ * UserHandle cannot be built there, and nothing in this decision has ever looked at one.
+ *
+ * The four states collapse to three rows here. [PrivateSpace.Absent] and
+ * [PrivateSpace.Unlocked] are the same pair of values — nothing concealed, missing rows shown
+ * — which is why they behave identically, and the last reason below is what keeps them safe
+ * anyway.
+ */
+fun concealsStoredKey(
+    concealedSerial: Long,
+    concealsUnresolved: Boolean,
+    key: String,
+    resolves: Boolean,
+): Boolean = isConcealed(concealedSerial, key) ||
+    (!resolves && (concealsUnresolved || EntryKeys.userSerial(key) != 0L))
 
 /**
  * Puts back the keys a screen left out, in the places they were, so reordering what is on
