@@ -44,6 +44,10 @@ class LauncherSmokeTest {
     fun theEdgeGestureOpensTheAppListWhichListsSettings() {
         LauncherTestUtils.goHome()
         LauncherTestUtils.openAppList()
+        // Wherever Settings sorts among what is installed, this brings its row on screen.
+        // Only part of the name is typed: the box holding the whole of it would itself be the
+        // text waited for below, and the check could then never fail.
+        LauncherTestUtils.filterAppList("Setti")
         assertTrue(
             "expected the A-Z app list to be open and showing a Settings entry",
             LauncherTestUtils.waitForText("Settings"),

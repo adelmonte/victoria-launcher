@@ -6,6 +6,8 @@ import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.Until
+import dev.victorialauncher.data.Prefs
+import kotlinx.coroutines.runBlocking
 
 /**
  * Shared black-box helpers for the UiAutomator-driven launcher tests.
@@ -80,6 +82,13 @@ object LauncherTestUtils {
      * placeholder, rather than guessing a fixed delay.
      */
     fun openAppList() {
+        // The list's search box is how an open list is recognised below, and whether it is
+        // shown is a setting. Its default depends on whether any setting existed before the
+        // app first ran, so a test that stores one in its set-up would otherwise decide, by
+        // nothing more than the order the tests happen to run in, whether this can succeed.
+        val context = InstrumentationRegistry.getInstrumentation().targetContext.applicationContext
+        runBlocking { Prefs(context).setAppListSearchEnabled(true) }
+
         val device = uiDevice()
         val startX = device.displayWidth - 2
         val endX = (device.displayWidth * 0.6f).toInt()
@@ -88,6 +97,20 @@ object LauncherTestUtils {
             device.swipe(startX, y, endX, y, 60)
             if (device.wait(Until.hasObject(By.text("Search apps")), 1_000L)) return
         }
+        // Said here, where it happened, rather than left for whatever looks for a row next
+        // to report as a row that is missing.
+        error("the app list did not open after $OPEN_LIST_ATTEMPTS swipes")
+    }
+
+    /**
+     * Types into the open app list's own search box. The list only composes the rows on
+     * screen, so one far down it does not exist for a test to find until something brings it
+     * into view, and how far down depends on what else is installed.
+     */
+    fun filterAppList(text: String) {
+        val box = uiDevice().wait(Until.findObject(By.clazz("android.widget.EditText")), WAIT_MS)
+            ?: error("the app list's search box never appeared")
+        box.text = text
     }
 
     /** Waits for a node with this exact visible text to appear, e.g. an app label. */
