@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Android 11 and below: what the system's own backup agent copies off the device.
+
+  Everything the app stores lives in one DataStore file, and that file is the same one the
+  Export button is careful to strip a private space out of. Left in, a system backup carries
+  what the export refuses to: the component names of apps inside the private space, their
+  renames, their icon overrides, whether they were hidden, and how many times each was opened.
+  So it is excluded, and with nothing else to exclude that leaves this a short list.
+-->
+<full-backup-content>
+    <exclude domain="file" path="datastore/victoria_prefs.preferences_pb" />
+</full-backup-content>
