@@ -228,11 +228,15 @@ fun VictoriaNavHost(
         val observer = LifecycleEventObserver { _, event ->
             if (event != Lifecycle.Event.ON_START) return@LifecycleEventObserver
             scope.launch {
-                val state = withContext(Dispatchers.Default) { app.appRepository.privateSpace() }
-                if (state == appsAndSpace.privateSpace) return@launch
-                // Only once there is something to do with it: a number taken to decide nothing
-                // changed would supersede a reload already running and leave the list as it was.
+                val probe = withContext(Dispatchers.Default) { app.appRepository.privateSpace() }
+                if (probe == appsAndSpace.privateSpace) return@launch
+                // Only once there is something to do: a number taken to decide nothing changed
+                // would supersede a reload already running and leave the list as it was. But
+                // the read above was made before the number, so something newer may have
+                // published in between — a lock, say — and acting on it now would outrank that.
+                // So the number is taken first and the space is read again under it.
                 val pass = reloadOrder.begin()
+                val state = withContext(Dispatchers.Default) { app.appRepository.privateSpace() }
                 adoptPrivateSpace(state, pass)
                 clearIconCache()
                 reloadApps(state, pass)
