@@ -13,14 +13,18 @@ import org.json.JSONObject
 // Kept free of Android/DataStore types, like the rest of this file's neighbors, so the decision
 // can be tested on the JVM; Prefs.exportJson is the only caller.
 
-private const val PREF_FAVORITES = "favorites_order"
-private const val PREF_FOLDERS = "folders_json"
-private const val PREF_HIDDEN_APPS = "hidden_apps"
-private const val PREF_NAME_OVERRIDES = "name_overrides_json"
-private const val PREF_ICON_OVERRIDES = "icon_overrides_json"
-private const val PREF_LAUNCH_COUNTS = "launch_counts_json"
-private const val PREF_QUICK_LAUNCH_LEFT = "quick_launch_left_key"
-private const val PREF_QUICK_LAUNCH_RIGHT = "quick_launch_right_key"
+// The names live here rather than in Prefs, and Prefs builds its keys from them, because these
+// are the settings whose contents are app keys — which is this file's whole subject, and only
+// incidentally the store's. Written out in both places they could drift apart with every test
+// still green, and the drift would silently put the private space back into the backups.
+internal const val PREF_FAVORITES = "favorites_order"
+internal const val PREF_FOLDERS = "folders_json"
+internal const val PREF_HIDDEN_APPS = "hidden_apps"
+internal const val PREF_NAME_OVERRIDES = "name_overrides_json"
+internal const val PREF_ICON_OVERRIDES = "icon_overrides_json"
+internal const val PREF_LAUNCH_COUNTS = "launch_counts_json"
+internal const val PREF_QUICK_LAUNCH_LEFT = "quick_launch_left_key"
+internal const val PREF_QUICK_LAUNCH_RIGHT = "quick_launch_right_key"
 
 /**
  * Strips [privateSerial]'s keys out of one stored preference's value, given the DataStore name
