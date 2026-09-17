@@ -5,10 +5,11 @@ import org.json.JSONArray
 import org.json.JSONObject
 
 // What a backup leaves out so it never names a private app or says how often it was opened —
-// whether or not the space happens to be unlocked at the moment someone exports. A private
-// profile's serial is also useless in a backup on its own terms: it will not match on another
-// device, or even this one after the space is recreated, so there is nothing to gain by keeping
-// it and a privacy cost to keeping it anyway.
+// whether or not the space happens to be unlocked at the moment someone exports, and whether
+// or not the launcher can say which profile the private one is. A profile's serial is useless
+// in a backup on its own terms: it will not match on another device, or even this one after
+// the profile is recreated, so there is nothing to gain by keeping it and a privacy cost to
+// keeping it anyway.
 //
 // Kept free of Android/DataStore types, like the rest of this file's neighbors, so the decision
 // can be tested on the JVM; Prefs.exportJson is the only caller.
@@ -27,9 +28,20 @@ internal const val PREF_QUICK_LAUNCH_LEFT = "quick_launch_left_key"
 internal const val PREF_QUICK_LAUNCH_RIGHT = "quick_launch_right_key"
 
 /**
- * Strips [privateSerial]'s keys out of one stored preference's value, given the DataStore name
- * that names its shape. [privateSerial] is null or zero when there is no private space, which
- * strips nothing.
+ * Strips every second profile's keys out of one stored preference's value, given the DataStore
+ * name that names its shape. [stripOtherProfiles] is false only when the launcher positively
+ * established there is no private space, which strips nothing; see [stripsOtherProfiles].
+ *
+ * Which serial is the private one is deliberately not part of this. The state that most needs
+ * stripping is the one where that serial is unknown — a space this launcher can see is there,
+ * or might be, and cannot describe — and a strip keyed on the serial does nothing at all in
+ * exactly that state, writing every `…|u<serial>` key and its launch count into a file the
+ * user is then told was saved. Matching the suffix instead needs nothing to be known.
+ *
+ * A work profile's keys go with them. They could not be restored anywhere either — serials are
+ * per-device and do not survive the profile being recreated — so an export that keeps them
+ * gains an entry that will never match, at the cost of a rule that has to be sure which second
+ * profile is which before it can be safe.
  *
  * Returns the value to export, or null when the whole entry should be dropped rather than kept
  * empty — a quick-launch slot pointed at a private app has nothing left to point at once that
@@ -38,14 +50,15 @@ internal const val PREF_QUICK_LAUNCH_RIGHT = "quick_launch_right_key"
  * whose members was private stays a folder, just an empty one, because the folder itself (its
  * name, its icon) is the user's, not a secret.
  *
- * A preference name this doesn't recognize, and a value with nothing of [privateSerial]'s in it,
- * comes back as exactly the object it was handed — never a rebuilt copy — so an export with no
- * private space touched is byte-for-byte what it always was.
+ * A preference name this doesn't recognize, and a value with no second profile's key in it,
+ * comes back as exactly the object it was handed — never a rebuilt copy — so an export from a
+ * device with no private space is byte-for-byte what it always was.
  */
-fun stripPrivateSpaceFromExport(name: String, value: Any, privateSerial: Long?): Any? {
-    val serial = privateSerial ?: 0L
-    if (serial == 0L) return value
-    val isPrivate = { key: String -> isConcealed(serial, key) }
+fun stripPrivateSpaceFromExport(name: String, value: Any, stripOtherProfiles: Boolean): Any? {
+    if (!stripOtherProfiles) return value
+    // The main profile's keys have never carried a suffix, so this is every key that belongs
+    // to any other profile — which is what a backup has to leave behind, and all of it.
+    val isPrivate = { key: String -> EntryKeys.userSerial(key) != 0L }
 
     return when (name) {
         PREF_FAVORITES -> (value as? String)?.let { stripNewlineList(it, isPrivate) } ?: value
@@ -105,7 +118,7 @@ private fun stripFoldersJson(raw: String, isPrivate: (String) -> Boolean): Strin
 
 /**
  * Name overrides, icon overrides and launch counts are all a JSON object keyed by app key; this
- * drops the entries whose key is [privateSerial]'s.
+ * drops the entries whose key belongs to a second profile.
  */
 private fun stripJsonMap(raw: String, isPrivate: (String) -> Boolean): String {
     val obj = runCatching { JSONObject(raw) }.getOrNull() ?: return raw
@@ -114,3 +127,13 @@ private fun stripJsonMap(raw: String, isPrivate: (String) -> Boolean): String {
     toDrop.forEach { obj.remove(it) }
     return obj.toString()
 }
+
+/**
+ * Whether an export has to leave every second profile's keys out of itself.
+ *
+ * True in every state but [PrivateSpace.Absent], including the two that know exactly which
+ * serial is the private one. Only [PrivateSpace.Absent] is a positive answer that there is no
+ * private space to protect; [PrivateSpace.Uncertain] is the launcher saying it does not know,
+ * and a backup written on a "do not know" has to assume there is something to leave out.
+ */
+val PrivateSpace.stripsOtherProfiles: Boolean get() = this != PrivateSpace.Absent

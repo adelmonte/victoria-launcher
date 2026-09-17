@@ -53,6 +53,7 @@ import dev.victorialauncher.data.TextColorMode
 import androidx.compose.ui.res.stringResource
 import dev.victorialauncher.R
 import dev.victorialauncher.data.folderIdFromToken
+import dev.victorialauncher.data.stripsOtherProfiles
 import dev.victorialauncher.media.isListenerEnabled
 import dev.victorialauncher.service.SystemUi
 import dev.victorialauncher.ui.common.IconPickerScreen
@@ -345,12 +346,13 @@ fun VictoriaNavHost(
     ) { uri ->
         if (uri == null) return@rememberLauncherForActivityResult
         scope.launch {
-            // Both Locked and Unlocked have a real serial to strip; only Absent's is zero,
-            // which is exportJson's own signal that there is nothing to leave out.
-            val privateSerial = privateSpace.serial.takeIf { it != 0L }
+            // Every state but Absent strips, including the ones with no serial to strip by:
+            // an unreadable space is the case most in need of it, and it is the case a strip
+            // keyed on the serial does nothing in.
+            val stripOtherProfiles = privateSpace.stripsOtherProfiles
             val omittedPrivateSpace = withContext(Dispatchers.IO) {
                 runCatching {
-                    val result = app.prefs.exportJson(privateSerial)
+                    val result = app.prefs.exportJson(stripOtherProfiles)
                     context.contentResolver.openOutputStream(uri)?.use { it.write(result.json.toByteArray()) }
                         ?: return@runCatching null
                     result.omittedPrivateSpace

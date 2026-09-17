@@ -153,12 +153,12 @@ class Prefs(private val context: Context) {
      * this class otherwise avoids; the caller already has it from the same read that decided
      * what to show on screen.
      */
-    suspend fun exportJson(privateSerial: Long? = null): ExportResult {
+    suspend fun exportJson(stripOtherProfiles: Boolean): ExportResult {
         val stored = data.first()
         val values = JSONObject()
         var omittedPrivateSpace = false
         stored.asMap().forEach { (key, rawValue) ->
-            val value = stripPrivateSpaceFromExport(key.name, rawValue, privateSerial)
+            val value = stripPrivateSpaceFromExport(key.name, rawValue, stripOtherProfiles)
             if (value == null) {
                 omittedPrivateSpace = true
                 return@forEach
