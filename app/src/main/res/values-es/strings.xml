@@ -155,6 +155,7 @@
     <string name="settings_import">Importar ajustes</string>
     <string name="settings_import_detail">Sustituye todo por un archivo guardado antes</string>
     <string name="settings_export_done">Ajustes guardados</string>
+    <string name="settings_export_done_private_omitted">Ajustes guardados. Se omitieron las apps de tu espacio privado.</string>
     <string name="settings_import_done">Ajustes restaurados</string>
     <string name="settings_backup_failed">No se ha podido leer ese archivo</string>
     <string name="settings_dim_color">Color de atenuación</string>

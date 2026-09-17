@@ -269,17 +269,24 @@ fun VictoriaNavHost(
     ) { uri ->
         if (uri == null) return@rememberLauncherForActivityResult
         scope.launch {
-            val ok = withContext(Dispatchers.IO) {
+            // Both Locked and Unlocked have a real serial to strip; only Absent's is zero,
+            // which is exportJson's own signal that there is nothing to leave out.
+            val privateSerial = privateSpace.serial.takeIf { it != 0L }
+            val omittedPrivateSpace = withContext(Dispatchers.IO) {
                 runCatching {
-                    val json = app.prefs.exportJson()
-                    context.contentResolver.openOutputStream(uri)?.use { it.write(json.toByteArray()) }
-                        ?: return@runCatching false
-                    true
-                }.getOrDefault(false)
+                    val result = app.prefs.exportJson(privateSerial)
+                    context.contentResolver.openOutputStream(uri)?.use { it.write(result.json.toByteArray()) }
+                        ?: return@runCatching null
+                    result.omittedPrivateSpace
+                }.getOrNull()
             }
             Toast.makeText(
                 context,
-                if (ok) R.string.settings_export_done else R.string.settings_backup_failed,
+                when (omittedPrivateSpace) {
+                    null -> R.string.settings_backup_failed
+                    true -> R.string.settings_export_done_private_omitted
+                    false -> R.string.settings_export_done
+                },
                 Toast.LENGTH_SHORT,
             ).show()
         }
