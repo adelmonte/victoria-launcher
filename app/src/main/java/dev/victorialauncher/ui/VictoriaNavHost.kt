@@ -8,6 +8,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.LauncherApps
+import android.content.pm.ShortcutInfo
 import android.os.UserHandle
 import android.net.Uri
 import android.provider.Settings
@@ -103,7 +104,10 @@ fun VictoriaNavHost(
     suspend fun reloadApps() {
         allApps = withContext(Dispatchers.Default) { app.appRepository.queryAllApps() }
     }
-    LaunchedEffect(Unit) { reloadApps() }
+    // A shortcut pinned through the confirm screen, or unpinned from a menu, changes what
+    // there is to list without any package changing — so nothing here would otherwise notice.
+    val shortcutChanges by app.appRepository.shortcutChanges.collectAsState()
+    LaunchedEffect(shortcutChanges) { reloadApps() }
 
     // Before anything the user does can write to the store, so "the store is empty" still
     // means "this is a first run" when it is read.
@@ -129,6 +133,13 @@ fun VictoriaNavHost(
             override fun onPackageChanged(packageName: String?, user: UserHandle?) = refresh()
             override fun onPackagesAvailable(names: Array<out String>?, user: UserHandle?, replacing: Boolean) = refresh()
             override fun onPackagesUnavailable(names: Array<out String>?, user: UserHandle?, replacing: Boolean) = refresh()
+            // A shortcut can be added, renamed, re-iconed or switched off while we are
+            // showing it, none of which is a package change.
+            override fun onShortcutsChanged(
+                packageName: String,
+                shortcuts: MutableList<ShortcutInfo>,
+                user: UserHandle,
+            ) = refresh()
         }
         runCatching { launcherApps.registerCallback(callback) }
 
@@ -579,6 +590,7 @@ fun VictoriaNavHost(
                         if (add) app.prefs.addFavorite(appInfo.key) else app.prefs.removeFavorite(appInfo.key)
                     }
                 },
+                onForget = { key -> scope.launch { app.prefs.forgetEntry(key) } },
                 onBack = { navController.popBackStack() },
             )
         }
@@ -600,6 +612,7 @@ fun VictoriaNavHost(
                     }
                 },
                 onReorder = { keys -> scope.launch { app.prefs.setFolderApps(id, keys) } },
+                onForget = { key -> scope.launch { app.prefs.removeAppFromFolder(id, key) } },
                 onBack = { navController.popBackStack() },
             )
         }

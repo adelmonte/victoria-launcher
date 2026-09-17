@@ -46,6 +46,8 @@ fun FolderAppsScreen(
     nameOverrides: Map<String, String>,
     iconSizeDp: Int,
     onSetInFolder: (AppInfo, Boolean) -> Unit,
+    /** Drops a key nothing can resolve any more; see the row that offers it. */
+    onForget: (String) -> Unit,
     onReorder: (List<String>) -> Unit,
     onBack: () -> Unit,
 ) {
@@ -92,14 +94,17 @@ fun FolderAppsScreen(
                         )
                         Checkbox(checked = true, onCheckedChange = { onSetInFolder(app, false) })
                     } else {
-                        // Installed when it was added, gone now. Shown rather than skipped so
-                        // the count matches what is listed.
+                        // Installed when it was added, gone now — or a shortcut its publisher
+                        // withdrew. Shown rather than skipped so the count matches what is
+                        // listed, and with the same untick as the rows around it, because
+                        // otherwise it is a member that can never be got rid of.
                         Text(
                             stringResource(R.string.folder_member_missing),
                             style = MaterialTheme.typography.bodyLarge,
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
                             modifier = Modifier.weight(1f),
                         )
+                        Checkbox(checked = true, onCheckedChange = { onForget(key) })
                     }
                 }
             }

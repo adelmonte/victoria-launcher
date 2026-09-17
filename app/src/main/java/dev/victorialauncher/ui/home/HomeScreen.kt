@@ -53,6 +53,7 @@ import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.LinkOff
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material3.AlertDialog
@@ -98,6 +99,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import dev.victorialauncher.data.AppInfo
+import dev.victorialauncher.data.EntryKind
 import dev.victorialauncher.data.Folder
 import dev.victorialauncher.data.QuickLaunchSlot
 import dev.victorialauncher.data.HomeAlignment
@@ -216,6 +218,7 @@ fun HomeScreen(
     onSetName: (AppInfo, String?) -> Unit,
     onChangeIcon: (AppInfo) -> Unit,
     onAppInfo: (AppInfo) -> Unit,
+    onUnpinShortcut: (AppInfo) -> Unit,
     onOpenSettings: () -> Unit,
 ) {    fun displayName(app: AppInfo) = nameOverrides[app.key] ?: app.label
 
@@ -788,6 +791,7 @@ fun HomeScreen(
                             onOpenApp = onOpenFolderApp,
                             onRemoveApp = { member -> onRemoveFromFolder(item.folder, member) },
                             onMemberAppInfo = onAppInfo,
+                            onMemberUnpin = onUnpinShortcut,
                             onMemberEditIconName = { member -> renameDialogFor = member },
                             onOpenSettings = onOpenSettings,
                         )
@@ -813,6 +817,7 @@ fun HomeScreen(
                             onMoveToFolder = { menuForKey = null; onMoveToFolder(item.app) },
                             onEditLayout = { menuForKey = null; onEditModeChange(true) },
                             onAppInfo = { menuForKey = null; onAppInfo(item.app) },
+                            onUnpin = { menuForKey = null; onUnpinShortcut(item.app) },
                             onRemove = { menuForKey = null; onRemoveFavorite(item.app) },
                             onEditIconName = { menuForKey = null; renameDialogFor = item.app },
                             onOpenSettings = { menuForKey = null; onOpenSettings() },
@@ -959,6 +964,7 @@ private fun FavoriteRow(
     onMoveToFolder: () -> Unit,
     onEditLayout: () -> Unit,
     onAppInfo: () -> Unit,
+    onUnpin: () -> Unit,
     onRemove: () -> Unit,
     onEditIconName: () -> Unit,
     onOpenSettings: () -> Unit,
@@ -1011,7 +1017,10 @@ private fun FavoriteRow(
             ) { labelModifier ->
                 Text(
                     label,
-                    color = contentColor,
+                    // Same dimming a hidden app gets in the A-Z list: a shortcut its
+                    // publisher has switched off is still listed, but tapping it only
+                    // explains why it will not open.
+                    color = if (app.disabled) contentColor.copy(alpha = 0.5f) else contentColor,
                     fontSize = labelSizeSp.sp,
                     modifier = labelModifier,
                     textAlign = alignment.textAlign(),
@@ -1040,11 +1049,23 @@ private fun FavoriteRow(
                 leadingIcon = { Icon(Icons.Filled.Edit, contentDescription = null) },
                 onClick = onEditLayout,
             )
-            DropdownMenuItem(
-                text = { Text(stringResource(R.string.action_app_info)) },
-                leadingIcon = { Icon(Icons.Filled.Info, contentDescription = null) },
-                onClick = onAppInfo,
-            )
+            // App info belongs to an app; there is no package screen to open for a shortcut.
+            if (app.kind == EntryKind.APP) {
+                DropdownMenuItem(
+                    text = { Text(stringResource(R.string.action_app_info)) },
+                    leadingIcon = { Icon(Icons.Filled.Info, contentDescription = null) },
+                    onClick = onAppInfo,
+                )
+            }
+            // Distinct from Remove below, which only takes it off the home screen: this hands
+            // it back to the app that pinned it, and it leaves the launcher entirely.
+            if (app.kind == EntryKind.SHORTCUT) {
+                DropdownMenuItem(
+                    text = { Text(stringResource(R.string.action_remove_shortcut)) },
+                    leadingIcon = { Icon(Icons.Filled.LinkOff, contentDescription = null) },
+                    onClick = onUnpin,
+                )
+            }
             DropdownMenuItem(
                 text = { Text(stringResource(R.string.action_remove)) },
                 leadingIcon = { Icon(Icons.Filled.Delete, contentDescription = null) },
@@ -1096,6 +1117,7 @@ private fun FolderRow(
     onOpenApp: (AppInfo) -> Unit,
     onRemoveApp: (AppInfo) -> Unit,
     onMemberAppInfo: (AppInfo) -> Unit,
+    onMemberUnpin: (AppInfo) -> Unit,
     onMemberEditIconName: (AppInfo) -> Unit,
     onOpenSettings: () -> Unit,
 ) {
@@ -1238,7 +1260,7 @@ private fun FolderRow(
                         ) { labelModifier ->
                             Text(
                                 displayName(member),
-                                color = contentColor,
+                                color = if (member.disabled) contentColor.copy(alpha = 0.5f) else contentColor,
                                 fontSize = labelSizeSp.sp,
                                 modifier = labelModifier,
                                 textAlign = alignment.textAlign(),
@@ -1251,11 +1273,20 @@ private fun FolderRow(
                         offset = memberMenuOffset,
                         onDismissRequest = { memberMenuFor = null },
                     ) {
-                        DropdownMenuItem(
-                            text = { Text(stringResource(R.string.action_app_info)) },
-                            leadingIcon = { Icon(Icons.Filled.Info, contentDescription = null) },
-                            onClick = { memberMenuFor = null; onMemberAppInfo(member) },
-                        )
+                        if (member.kind == EntryKind.APP) {
+                            DropdownMenuItem(
+                                text = { Text(stringResource(R.string.action_app_info)) },
+                                leadingIcon = { Icon(Icons.Filled.Info, contentDescription = null) },
+                                onClick = { memberMenuFor = null; onMemberAppInfo(member) },
+                            )
+                        }
+                        if (member.kind == EntryKind.SHORTCUT) {
+                            DropdownMenuItem(
+                                text = { Text(stringResource(R.string.action_remove_shortcut)) },
+                                leadingIcon = { Icon(Icons.Filled.LinkOff, contentDescription = null) },
+                                onClick = { memberMenuFor = null; onMemberUnpin(member) },
+                            )
+                        }
                         DropdownMenuItem(
                             text = { Text(stringResource(R.string.action_edit_icon_and_name)) },
                             leadingIcon = { Icon(Icons.Filled.Tune, contentDescription = null) },

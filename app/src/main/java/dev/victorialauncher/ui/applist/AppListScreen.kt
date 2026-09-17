@@ -56,6 +56,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.LinkOff
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.StarBorder
@@ -104,6 +105,7 @@ import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import dev.victorialauncher.data.AppInfo
+import dev.victorialauncher.data.EntryKind
 import dev.victorialauncher.data.EdgeSide
 import dev.victorialauncher.data.HomeAlignment
 import dev.victorialauncher.data.IconSide
@@ -192,6 +194,7 @@ fun AppListScreen(
     onSetName: (AppInfo, String?) -> Unit,
     onChangeIcon: (AppInfo) -> Unit,
     onAppInfo: (AppInfo) -> Unit,
+    onUnpinShortcut: (AppInfo) -> Unit,
     onHideApp: (AppInfo, Boolean) -> Unit,
     /** Which apps are hidden, so a search that turns one up can say so and put it back. */
     hiddenApps: Set<String>,
@@ -865,6 +868,7 @@ fun AppListScreen(
                         onSetFavorite = { onSetFavorite(row.app, it) },
                         onEdit = { editDialogFor = row.app },
                         onAppInfo = { onAppInfo(row.app) },
+                        onUnpin = { onUnpinShortcut(row.app) },
                         onHide = { onHideApp(row.app, row.app.key !in hiddenApps) },
                         isHidden = row.app.key in hiddenApps,
                         onMoveToFolder = { onMoveToFolder(row.app) },
@@ -1024,6 +1028,7 @@ private fun AppRow(
     onSetFavorite: (Boolean) -> Unit,
     onEdit: () -> Unit,
     onAppInfo: () -> Unit,
+    onUnpin: () -> Unit,
     onHide: () -> Unit,
     onMoveToFolder: () -> Unit,
     /** Hidden apps only ever reach this list through a search. */
@@ -1078,8 +1083,10 @@ private fun AppRow(
                 Text(
                     label,
                     // Dimmed, because a hidden app only ever turns up here through a search
-                    // and nothing else on the row says it is one.
-                    color = if (isHidden) contentColor.copy(alpha = 0.5f) else contentColor,
+                    // and nothing else on the row says it is one. A shortcut its publisher
+                    // has switched off gets the same treatment, for the same reason: it is
+                    // listed, but tapping it only explains why it will not open.
+                    color = if (isHidden || app.disabled) contentColor.copy(alpha = 0.5f) else contentColor,
                     fontSize = labelSizeSp.sp,
                     modifier = labelModifier,
                     textAlign = when (alignment) {
@@ -1126,11 +1133,23 @@ private fun AppRow(
                 leadingIcon = { Icon(Icons.Filled.Tune, contentDescription = null) },
                 onClick = { onDismissMenu(); onEdit() },
             )
-            DropdownMenuItem(
-                text = { Text(stringResource(R.string.action_app_info)) },
-                leadingIcon = { Icon(Icons.Filled.Info, contentDescription = null) },
-                onClick = { onDismissMenu(); onAppInfo() },
-            )
+            // App info belongs to an app; there is no package screen to open for a shortcut.
+            if (app.kind == EntryKind.APP) {
+                DropdownMenuItem(
+                    text = { Text(stringResource(R.string.action_app_info)) },
+                    leadingIcon = { Icon(Icons.Filled.Info, contentDescription = null) },
+                    onClick = { onDismissMenu(); onAppInfo() },
+                )
+            }
+            // Hands the shortcut back to the app that pinned it, which is the only way one
+            // ever leaves: nothing uninstalls a shortcut.
+            if (app.kind == EntryKind.SHORTCUT) {
+                DropdownMenuItem(
+                    text = { Text(stringResource(R.string.action_remove_shortcut)) },
+                    leadingIcon = { Icon(Icons.Filled.LinkOff, contentDescription = null) },
+                    onClick = { onDismissMenu(); onUnpin() },
+                )
+            }
             DropdownMenuItem(
                 text = { Text(stringResource(R.string.action_move_to_folder)) },
                 leadingIcon = { Icon(Icons.Filled.Folder, contentDescription = null) },

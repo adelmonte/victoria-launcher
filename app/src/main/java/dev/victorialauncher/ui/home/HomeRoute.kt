@@ -598,6 +598,7 @@ fun HomeRoute(
                 onSetName = { appInfo, name -> scope.launch { app.prefs.setNameOverride(appInfo.key, name) } },
                 onChangeIcon = { appInfo -> onNavigate(iconPickerRoute(appInfo.key)) },
                 onAppInfo = { app.appRepository.openAppInfo(it) },
+                onUnpinShortcut = { app.appRepository.unpin(it) },
                 onOpenSettings = { onNavigate("settings") },
             )
         }
@@ -642,6 +643,7 @@ fun HomeRoute(
                     onNavigate(iconPickerRoute(appInfo.key))
                 },
                 onAppInfo = { app.appRepository.openAppInfo(it) },
+                onUnpinShortcut = { appInfo -> closeAppList(); app.appRepository.unpin(appInfo) },
                 onHideApp = { appInfo, hide -> scope.launch { app.prefs.setHidden(appInfo.key, hide) } },
                 hiddenApps = hiddenApps,
                 onMoveToFolder = { appInfo -> closeAppList(); folderPickerFor = appInfo },
