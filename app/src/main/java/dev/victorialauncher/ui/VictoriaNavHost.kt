@@ -104,24 +104,34 @@ fun VictoriaNavHost(
     // Enumerating every installed app costs a PackageManager round trip per app; doing it in
     // the first composition is what stalled the cold start. Load it off the main thread and
     // let the home screen render against an empty list for the first frame.
-    var allApps by remember { mutableStateOf(emptyList<AppInfo>()) }
+    var appsAndSpace by remember { mutableStateOf(AppsAndSpace(PrivateSpace.Absent, emptyList())) }
+    val allApps = appsAndSpace.apps
     // Kept beside the list because the settings screens need it for keys whose rows are
     // deliberately absent: a favorite inside a locked private space has nothing to look up.
-    var privateSpace by remember { mutableStateOf<PrivateSpace>(PrivateSpace.Absent) }
+    val privateSpace = appsAndSpace.privateSpace
+    // Reloads are started from half a dozen independent places and overlap; this is what keeps
+    // the most recently read answer the one on screen. See [ReloadOrder].
+    val reloadOrder = remember { ReloadOrder() }
+
     /**
      * [known] is the state to enumerate against when the caller already has one it trusts more
      * than a fresh read would be — a lock it has just been granted, which the system has not
      * finished applying and would still describe as an open space.
+     *
+     * [pass] is the number this reload took from [reloadOrder] before it read anything.
      */
-    suspend fun reloadApps(known: PrivateSpace? = null) {
+    suspend fun reloadApps(known: PrivateSpace?, pass: Long) {
         val (state, apps) = withContext(Dispatchers.Default) {
             // Resolved once and handed on, so the list and what the settings screens conceal
             // can never disagree about whether the space was open when it was read.
             val state = known ?: app.appRepository.privateSpace()
             state to app.appRepository.queryAllApps(state)
         }
-        privateSpace = state
-        allApps = apps
+        // Overtaken while it ran: this list was enumerated against a state that is no longer
+        // the newest thing known about the device, and publishing it would put a locked
+        // space's apps back under an open padlock. Nothing is lost by dropping it — the pass
+        // that overtook this one publishes a list of its own.
+        if (reloadOrder.mayPublish(pass)) appsAndSpace = AppsAndSpace(state, apps)
     }
 
     /**
@@ -131,13 +141,20 @@ fun VictoriaNavHost(
      * The reload is a full enumeration: every profile, every activity, an icon cache thrown
      * away and rebuilt. That is long enough to read the names off a home screen, and a lock
      * that only takes effect at the end of it has left them there for exactly that long.
+     *
+     * Publishes nothing once [pass] has been superseded, for the same reason the reload does
+     * not: this state was read before a newer one, and the direction a stale state goes wrong
+     * in is the one that un-conceals.
      */
-    fun adoptPrivateSpace(state: PrivateSpace) {
-        privateSpace = state
-        allApps = allApps.filterNot { it.kind == EntryKind.PRIVATE_SPACE || state.conceals(it.key) } +
-            app.appRepository.privateSpaceRow(state)
+    fun adoptPrivateSpace(state: PrivateSpace, pass: Long) {
+        if (!reloadOrder.mayPublish(pass)) return
+        appsAndSpace = AppsAndSpace(
+            state,
+            appsAndSpace.apps.filterNot { it.kind == EntryKind.PRIVATE_SPACE || state.conceals(it.key) } +
+                app.appRepository.privateSpaceRow(state),
+        )
     }
-    LaunchedEffect(Unit) { reloadApps() }
+    LaunchedEffect(Unit) { reloadApps(known = null, pass = reloadOrder.begin()) }
 
     // Before anything the user does can write to the store, so "the store is empty" still
     // means "this is a first run" when it is read.
@@ -147,14 +164,17 @@ fun VictoriaNavHost(
         val launcherApps = context.getSystemService(LauncherApps::class.java)
         fun refresh() {
             scope.launch {
+                // Taken before the read, so anything already enumerating is superseded by the
+                // moment this pass looked rather than by the moment it finished.
+                val pass = reloadOrder.begin()
                 // The private space first and on its own: whatever it conceals leaves the list
                 // that is on screen now, rather than when the enumeration below comes back.
                 val state = withContext(Dispatchers.Default) { app.appRepository.privateSpace() }
-                adoptPrivateSpace(state)
+                adoptPrivateSpace(state, pass)
                 // An app that ships a new icon in an update changes none of the cache
                 // key's components, so nothing else would invalidate the stale bitmap.
                 clearIconCache()
-                reloadApps(state)
+                reloadApps(state, pass)
             }
         }
 
@@ -208,11 +228,13 @@ fun VictoriaNavHost(
             if (event != Lifecycle.Event.ON_START) return@LifecycleEventObserver
             scope.launch {
                 val state = withContext(Dispatchers.Default) { app.appRepository.privateSpace() }
-                if (state != privateSpace) {
-                    adoptPrivateSpace(state)
-                    clearIconCache()
-                    reloadApps(state)
-                }
+                if (state == appsAndSpace.privateSpace) return@launch
+                // Only once there is something to do with it: a number taken to decide nothing
+                // changed would supersede a reload already running and leave the list as it was.
+                val pass = reloadOrder.begin()
+                adoptPrivateSpace(state, pass)
+                clearIconCache()
+                reloadApps(state, pass)
             }
         }
         lifecycleOwner.lifecycle.addObserver(observer)
@@ -497,13 +519,18 @@ fun VictoriaNavHost(
                 onTogglePrivateSpace = {
                     scope.launch {
                         val locked = app.appRepository.togglePrivateSpace()
+                        // Taken after the system has answered, not before: on a phone with a
+                        // screen lock the authentication in front of an unlock takes as long
+                        // as the person does, and a pass held open across it would supersede
+                        // every reload started while the dialog was up.
+                        val pass = reloadOrder.begin()
                         // Granted means locked, and locked is concealed here and now: the
                         // broadcast that says so arrives well after the profile has stopped.
-                        if (locked != null) adoptPrivateSpace(locked)
+                        if (locked != null) adoptPrivateSpace(locked, pass)
                         clearIconCache()
                         // Enumerated against the lock rather than against what the system says
                         // this instant, which for the next moment is still an open space.
-                        reloadApps(locked)
+                        reloadApps(locked, pass)
                     }
                 },
                 onNavigate = { route -> navController.navigate(route) },
@@ -767,3 +794,13 @@ fun VictoriaNavHost(
         }
     }
 }
+
+/**
+ * The app list and the private-space state it was enumerated against, held as one value.
+ *
+ * Two pieces of state would let a composition see a list from one read beside a state from
+ * another, and every consumer needs them to agree: the settings screens decide what to conceal
+ * from the state and then look the rest up in the list, and the home screen draws the padlock
+ * from one and the rows from the other. Published together, there is no such moment.
+ */
+private data class AppsAndSpace(val privateSpace: PrivateSpace, val apps: List<AppInfo>)
