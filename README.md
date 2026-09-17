@@ -43,8 +43,10 @@ Worth knowing about in **Settings**:
   service — if that toggle is greyed out, open App info and allow restricted
   settings first (Android blocks it for apps installed outside a store)
 
-Work profiles and private space are picked up automatically; a locked private
-space simply hides its apps until you unlock it.
+Work profiles are picked up automatically. A private space needs Android 15 or
+later and this app set as your default home app; while it is unlocked its apps
+are listed like any others, and a "Private space" padlock entry locks and
+unlocks it.
 
 ## Changelog
 
