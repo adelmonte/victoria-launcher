@@ -170,9 +170,13 @@ class AppRepository(
      * not remove one shortcut, it replaces the whole pinned set for a package in a profile,
      * so anything left out of that list is unpinned along with it.
      *
-     * Then everything stored under the key goes too. An app can be reinstalled and find its
-     * name, icon and place waiting; an unpinned shortcut never comes back, so what is left
-     * behind is only clutter nothing can reach.
+     * Then everything stored under the key goes too, but only once that call has actually
+     * gone through: if it threw — the host permission was lost, the profile went away mid-
+     * call — the shortcut is still pinned with the system, and forgetting its name, icon,
+     * folder, hidden flag, launch count and quick-launch slot now would strand them with
+     * nothing left to reconnect them to. An app can be reinstalled and find those waiting;
+     * an unpinned shortcut never comes back, so what is left behind after a real unpin is
+     * only clutter nothing can reach.
      */
     fun unpin(app: AppInfo) {
         if (app.kind != EntryKind.SHORTCUT) return
@@ -181,12 +185,16 @@ class AppRepository(
         val pinned = pinnedShortcuts().map {
             EntryKeys.ShortcutRef(it.info.`package`, it.info.id, it.serial)
         }
-        runCatching {
+        val unpinned = runCatching {
             launcherApps.pinShortcuts(
                 app.packageName,
                 PinnedShortcuts.remainingIds(pinned, removed),
                 app.user ?: Process.myUserHandle(),
             )
+        }.isSuccess
+        if (!unpinned) {
+            Toast.makeText(context, R.string.shortcut_unpin_failed, Toast.LENGTH_SHORT).show()
+            return
         }
         scope.launch { prefs.forgetEntry(app.key) }
         noteShortcutsChanged()

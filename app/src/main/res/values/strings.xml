@@ -229,6 +229,7 @@
     <string name="shortcut_pin_from">From %1$s</string>
     <string name="shortcut_pin_add">Add</string>
     <string name="shortcut_pin_failed">Couldn\'t confirm the shortcut was pinned</string>
+    <string name="shortcut_unpin_failed">Couldn\'t remove the shortcut</string>
 
     <!-- Now Playing -->
     <string name="now_playing_enable_access">Enable Now Playing access</string>

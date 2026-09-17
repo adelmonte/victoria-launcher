@@ -229,6 +229,7 @@
     <string name="shortcut_pin_from">De %1$s</string>
     <string name="shortcut_pin_add">Añadir</string>
     <string name="shortcut_pin_failed">No se pudo confirmar que se fijara el acceso directo</string>
+    <string name="shortcut_unpin_failed">No se pudo quitar el acceso directo</string>
 
     <!-- Now Playing -->
     <string name="now_playing_enable_access">Activar el acceso para Reproduciendo ahora</string>
