@@ -62,10 +62,16 @@ class PinShortcutFlowTest {
      * Leaves the shared emulator the way this test class found it: pinShortcuts with every id
      * this class pinned removed unpins them all in one call (the same replace-the-whole-set
      * shape [dev.victorialauncher.data.PinnedShortcuts] exists to get right elsewhere), and
-     * forgetEntry drops whatever favorites/name/icon/launch-count rows they left behind.
+     * forgetEntry drops whatever favorites/name/icon/launch-count rows they left behind. The
+     * orientation lock is undone unconditionally, even for a test that never touched it, since
+     * it is shared state on this emulator and would otherwise leave every test after it running
+     * sideways.
      */
     @After
     fun tearDown() = runBlocking {
+        device.setOrientationNatural()
+        device.unfreezeRotation()
+
         if (pinnedIds.isEmpty()) return@runBlocking
         val context = InstrumentationRegistry.getInstrumentation().targetContext
         val launcherApps = context.getSystemService(LauncherApps::class.java)
@@ -81,6 +87,51 @@ class PinShortcutFlowTest {
     @Test
     fun acceptingAPinRequestPutsTheShortcutOnTheHomeScreen() {
         pinThroughTheConfirmation("pin-shortcut-flow-test", shortcutLabel)
+    }
+
+    /**
+     * [PinShortcutActivity] is `noHistory` and declares no `configChanges`, so a rotation
+     * recreates or finishes it. The write used to ride that screen's own coroutine scope and
+     * could lose out to exactly this: the confirm screen going away the instant after Add is
+     * tapped, before its ~1 s poll of the system had a chance to finish. Now that the poll and
+     * the favorite write live on the repository's application-scope instead, rotating right
+     * after the tap must not be able to touch them.
+     */
+    @Test
+    fun rotatingTheDeviceRightAfterAddStillPinsTheShortcut() {
+        val id = "pin-shortcut-rotate-test"
+        val label = "Pinned page surviving rotation"
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        val manager = context.getSystemService(ShortcutManager::class.java)
+        assertTrue(
+            "the launcher under test must be the default home before it can host a pin request",
+            manager.isRequestPinShortcutSupported,
+        )
+
+        val shortcut = ShortcutInfo.Builder(context, id)
+            .setShortLabel(label)
+            .setIntent(Intent(Intent.ACTION_VIEW, Uri.parse("https://example.org")))
+            .build()
+        assertTrue(
+            "the pin request was refused before any confirmation was shown",
+            manager.requestPinShortcut(shortcut, null),
+        )
+        // Tracked before tapping Add, same as pinThroughTheConfirmation: if the assertion
+        // below fails, the shortcut can still be pinned with the system and tearDown must
+        // still clean it up.
+        pinnedIds += id
+
+        val add = device.wait(Until.findObject(By.text("Add")), 10_000L)
+        assertNotNull("expected the pin confirmation to offer Add", add)
+        add.click()
+        device.setOrientationLeft()
+
+        LauncherTestUtils.goHome()
+        assertTrue(
+            "expected the shortcut to still be pinned even though the confirm screen was " +
+                "rotated away the instant after Add was tapped",
+            LauncherTestUtils.waitForText(label),
+        )
     }
 
     @Test
