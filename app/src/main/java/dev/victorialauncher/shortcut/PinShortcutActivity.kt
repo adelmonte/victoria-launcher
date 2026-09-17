@@ -5,6 +5,7 @@ import android.content.pm.LauncherApps
 import android.content.pm.ShortcutInfo
 import android.graphics.drawable.Drawable
 import android.os.Bundle
+import android.os.Process
 import android.os.UserManager
 import android.widget.ImageView
 import androidx.activity.ComponentActivity
@@ -152,16 +153,22 @@ class PinShortcutActivity : ComponentActivity() {
     private fun accept(request: LauncherApps.PinItemRequest, shortcut: ShortcutInfo) {
         if (accepted) return
         accepted = true
-        if (!runCatching { request.accept() }.getOrDefault(false)) {
-            finish()
-            return
-        }
         val pkg = shortcut.`package`
         val id = shortcut.id
         val user = shortcut.userHandle
-        val serial = runCatching {
-            getSystemService(UserManager::class.java).getSerialNumberForUser(user)
-        }.getOrDefault(0L)
+        // Read before accepting, not after. The serial is what ties the stored key to the
+        // profile the shortcut lives in, and a shortcut from another profile filed under the
+        // main profile's key would never match its own row. If it cannot be read there is no
+        // right key to store, so the request is left unanswered rather than pinned and lost.
+        val serial = if (user == Process.myUserHandle()) 0L else {
+            runCatching { getSystemService(UserManager::class.java).getSerialNumberForUser(user) }
+                .getOrNull()
+                ?.takeIf { it != 0L }
+        }
+        if (serial == null || !runCatching { request.accept() }.getOrDefault(false)) {
+            finish()
+            return
+        }
         (application as VictoriaApp).appRepository.confirmPinnedShortcut(pkg, id, user, serial)
         finish()
     }
