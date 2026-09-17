@@ -29,8 +29,8 @@ internal const val PREF_QUICK_LAUNCH_RIGHT = "quick_launch_right_key"
 
 /**
  * Strips every second profile's keys out of one stored preference's value, given the DataStore
- * name that names its shape. [stripOtherProfiles] is false only when the launcher positively
- * established there is no private space, which strips nothing; see [stripsOtherProfiles].
+ * name that names its shape. [stripOtherProfiles] false strips nothing and hands the value
+ * back untouched; every export passes true, see [stripsOtherProfiles].
  *
  * Which serial is the private one is deliberately not part of this. The state that most needs
  * stripping is the one where that serial is unknown — a space this launcher can see is there,
@@ -129,11 +129,18 @@ private fun stripJsonMap(raw: String, isPrivate: (String) -> Boolean): String {
 }
 
 /**
- * Whether an export has to leave every second profile's keys out of itself.
+ * Whether an export has to leave every second profile's keys out of itself. Always.
  *
- * True in every state but [PrivateSpace.Absent], including the two that know exactly which
- * serial is the private one. Only [PrivateSpace.Absent] is a positive answer that there is no
- * private space to protect; [PrivateSpace.Uncertain] is the launcher saying it does not know,
- * and a backup written on a "do not know" has to assume there is something to leave out.
+ * It used to be true in every state but [PrivateSpace.Absent], on the reasoning that Absent is a
+ * positive answer that there is no private space to protect. It is not always that: a launcher
+ * that is not the default home is shown no private profile at all, reads that as Absent, can
+ * still be opened from another launcher's drawer and asked to export — with a private space's
+ * favorites, renames and launch counts sitting in its storage.
+ *
+ * Nothing is lost by always doing it. A profile's serial does not survive to another device or
+ * a recreated profile, so such a key could never have matched anything on restore; and where
+ * there genuinely is no second profile there are no such keys, and the export comes out
+ * byte-for-byte as it always did.
  */
-val PrivateSpace.stripsOtherProfiles: Boolean get() = this != PrivateSpace.Absent
+@Suppress("UnusedReceiverParameter")
+val PrivateSpace.stripsOtherProfiles: Boolean get() = true

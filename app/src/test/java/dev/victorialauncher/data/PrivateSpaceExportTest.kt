@@ -177,18 +177,21 @@ class PrivateSpaceExportTest {
     }
 
     @Test
-    fun `only a positive answer of no private space keeps a second profile's keys`() {
-        assertFalse(
-            "Absent is the one state that positively rules a private space out",
-            PrivateSpace.Absent.stripsOtherProfiles,
-        )
-        // The state a serial-keyed strip did nothing in: a space that might be there and has
-        // never said which profile it is.
+    fun `every state leaves a second profile's keys out, the absent one included`() {
+        // Absent is also what a launcher that is not the default home sees, with a private
+        // space's favorites in its storage, so it cannot be the one state that keeps them.
+        assertTrue(PrivateSpace.Absent.stripsOtherProfiles)
         assertTrue(PrivateSpace.Uncertain(user = null, serial = 0L).stripsOtherProfiles)
-        // And one that answered earlier in the session and will not describe itself now.
         assertTrue(PrivateSpace.Uncertain(user = null, serial = privateSerial).stripsOtherProfiles)
-        // Locked and Unlocked need a UserHandle no JVM test can build. Neither is Absent, so
-        // both strip; they are also the two states where the serial was known all along.
+    }
+
+    @Test
+    fun `an export with no second profile's keys in it comes out exactly as it went in`() {
+        // Which is what always stripping costs a phone that has no private space: nothing.
+        val favorites = "com.a/com.a.Main\nfolder:abc\nshortcut:org.browser/id"
+        assertSame(favorites, stripPrivateSpaceFromExport(PREF_FAVORITES, favorites, stripOtherProfiles = true))
+        val hidden = setOf("com.a/com.a.Main")
+        assertSame(hidden, stripPrivateSpaceFromExport(PREF_HIDDEN_APPS, hidden, stripOtherProfiles = true))
     }
 
     @Test
