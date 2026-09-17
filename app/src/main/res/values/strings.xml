@@ -228,6 +228,7 @@
     <string name="shortcut_pin_title">Add to home screen?</string>
     <string name="shortcut_pin_from">From %1$s</string>
     <string name="shortcut_pin_add">Add</string>
+    <string name="shortcut_pin_failed">Couldn\'t confirm the shortcut was pinned</string>
 
     <!-- Now Playing -->
     <string name="now_playing_enable_access">Enable Now Playing access</string>

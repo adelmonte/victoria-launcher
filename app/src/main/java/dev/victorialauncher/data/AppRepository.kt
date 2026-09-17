@@ -19,12 +19,14 @@ import android.provider.Settings
 import android.widget.Toast
 import dev.victorialauncher.R
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /** A few tries spread over about a second, since a pin request's shortcut can take a moment
  *  to show up in the system's own pinned set after [LauncherApps.PinItemRequest.accept]
@@ -211,6 +213,13 @@ class AppRepository(
             if (waitUntilPinned(pkg, id, user)) {
                 prefs.addFavorite(EntryKeys.shortcut(pkg, id, serial))
                 noteShortcutsChanged()
+            } else {
+                // This whole coroutine runs on the repository's Default-dispatched scope, so
+                // a Toast here needs Main asked for explicitly rather than however Toast.show
+                // elsewhere in this class gets it for free by already being called from the UI.
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(context, R.string.shortcut_pin_failed, Toast.LENGTH_SHORT).show()
+                }
             }
         }
     }

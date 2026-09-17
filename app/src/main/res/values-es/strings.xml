@@ -228,6 +228,7 @@
     <string name="shortcut_pin_title">¿Añadir a la pantalla de inicio?</string>
     <string name="shortcut_pin_from">De %1$s</string>
     <string name="shortcut_pin_add">Añadir</string>
+    <string name="shortcut_pin_failed">No se pudo confirmar que se fijara el acceso directo</string>
 
     <!-- Now Playing -->
     <string name="now_playing_enable_access">Activar el acceso para Reproduciendo ahora</string>
