@@ -38,6 +38,7 @@ import android.widget.Toast
 import dev.victorialauncher.data.IconShape
 import dev.victorialauncher.data.AppFont
 import dev.victorialauncher.data.AppInfo
+import dev.victorialauncher.data.EntryKind
 import dev.victorialauncher.data.PrivateSpace
 import dev.victorialauncher.data.AzStripVisibility
 import dev.victorialauncher.data.EdgeSide
@@ -104,15 +105,34 @@ fun VictoriaNavHost(
     // Kept beside the list because the settings screens need it for keys whose rows are
     // deliberately absent: a favorite inside a locked private space has nothing to look up.
     var privateSpace by remember { mutableStateOf<PrivateSpace>(PrivateSpace.Absent) }
-    suspend fun reloadApps() {
+    /**
+     * [known] is the state to enumerate against when the caller already has one it trusts more
+     * than a fresh read would be — a lock it has just been granted, which the system has not
+     * finished applying and would still describe as an open space.
+     */
+    suspend fun reloadApps(known: PrivateSpace? = null) {
         val (state, apps) = withContext(Dispatchers.Default) {
             // Resolved once and handed on, so the list and what the settings screens conceal
             // can never disagree about whether the space was open when it was read.
-            val state = app.appRepository.privateSpace()
+            val state = known ?: app.appRepository.privateSpace()
             state to app.appRepository.queryAllApps(state)
         }
         privateSpace = state
         allApps = apps
+    }
+
+    /**
+     * Takes a state that has just been resolved and acts on what it conceals at once, on the
+     * list already in hand, before the reload that will take a moment.
+     *
+     * The reload is a full enumeration: every profile, every activity, an icon cache thrown
+     * away and rebuilt. That is long enough to read the names off a home screen, and a lock
+     * that only takes effect at the end of it has left them there for exactly that long.
+     */
+    fun adoptPrivateSpace(state: PrivateSpace) {
+        privateSpace = state
+        allApps = allApps.filterNot { it.kind == EntryKind.PRIVATE_SPACE || state.conceals(it.key) } +
+            app.appRepository.privateSpaceRow(state)
     }
     LaunchedEffect(Unit) { reloadApps() }
 
@@ -124,10 +144,14 @@ fun VictoriaNavHost(
         val launcherApps = context.getSystemService(LauncherApps::class.java)
         fun refresh() {
             scope.launch {
+                // The private space first and on its own: whatever it conceals leaves the list
+                // that is on screen now, rather than when the enumeration below comes back.
+                val state = withContext(Dispatchers.Default) { app.appRepository.privateSpace() }
+                adoptPrivateSpace(state)
                 // An app that ships a new icon in an update changes none of the cache
                 // key's components, so nothing else would invalidate the stale bitmap.
                 clearIconCache()
-                reloadApps()
+                reloadApps(state)
             }
         }
 
@@ -444,6 +468,18 @@ fun VictoriaNavHost(
                 onClearScrubBand = { scope.launch { app.prefs.clearScrubBand() } },
                 onPeekStatusBar = onPeekStatusBar,
                 onAppListVisibleChange = onAppListVisibleChange,
+                onTogglePrivateSpace = {
+                    scope.launch {
+                        val locked = app.appRepository.togglePrivateSpace()
+                        // Granted means locked, and locked is concealed here and now: the
+                        // broadcast that says so arrives well after the profile has stopped.
+                        if (locked != null) adoptPrivateSpace(locked)
+                        clearIconCache()
+                        // Enumerated against the lock rather than against what the system says
+                        // this instant, which for the next moment is still an open space.
+                        reloadApps(locked)
+                    }
+                },
                 onNavigate = { route -> navController.navigate(route) },
             )
         }

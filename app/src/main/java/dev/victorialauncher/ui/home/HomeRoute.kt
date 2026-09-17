@@ -133,6 +133,8 @@ fun HomeRoute(
     onClearScrubBand: () -> Unit,
     onPeekStatusBar: () -> Unit,
     onAppListVisibleChange: (Boolean) -> Unit,
+    /** Locks an open private space or asks for a locked one to be opened, off this thread. */
+    onTogglePrivateSpace: () -> Unit,
     onNavigate: (String) -> Unit,
 ) {
     val context = LocalContext.current
@@ -309,7 +311,14 @@ fun HomeRoute(
     // arrives here, so a row that is not an app is recognised once, here, rather than in each
     // of the four places a press is wired up.
     fun launchEntry(entry: AppInfo): Boolean = when (entry.kind) {
-        EntryKind.PRIVATE_SPACE -> app.appRepository.togglePrivateSpace()
+        // Handed off rather than done here: locking or unlocking is several binder calls and
+        // possibly the system's own authentication screen, which is not a press's work to do
+        // on the main thread. True because the press was acted on — there is simply nothing
+        // coming to the foreground to wait for.
+        EntryKind.PRIVATE_SPACE -> {
+            onTogglePrivateSpace()
+            true
+        }
         else -> app.appRepository.launch(entry)
     }
 

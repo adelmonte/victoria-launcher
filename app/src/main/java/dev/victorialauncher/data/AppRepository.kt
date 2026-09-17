@@ -19,7 +19,9 @@ import android.provider.Settings
 import androidx.core.content.ContextCompat
 import dev.victorialauncher.R
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class AppRepository(
     private val context: Context,
@@ -188,16 +190,30 @@ class AppRepository(
     /**
      * Locks an open space and asks for a locked one to be opened. What that takes is the
      * system's to decide: on a phone with a screen lock it puts its own authentication in
-     * front of the unlock, and this returns false until that has been answered.
+     * front of the unlock, and this answers null until that has been answered.
+     *
+     * Returns the state to hold from now on when a lock was granted, so whoever pressed the
+     * row can conceal at that moment rather than waiting for the broadcast that follows. Null
+     * when nothing was granted, and null for an unlock: nothing is exposed by an unlock being
+     * a moment late, and there is nothing to list until the profile is actually up again.
+     *
+     * Suspending because this is several binder calls and, on a phone with a screen lock, the
+     * system's own authentication — none of which belongs on the main thread, and all of which
+     * starts from a press on a row.
      */
-    fun togglePrivateSpace(): Boolean {
-        if (Build.VERSION.SDK_INT < PRIVATE_SPACE_SDK) return false
+    suspend fun togglePrivateSpace(): PrivateSpace? = withContext(Dispatchers.IO) {
+        if (Build.VERSION.SDK_INT < PRIVATE_SPACE_SDK) return@withContext null
         val state = privateSpace()
         // Nothing to ask about without a profile to ask about it. An uncertain space with one
         // is treated as locked, like everywhere else, so pressing the row tries to open it.
-        val user = state.user ?: return false
+        val user = state.user ?: return@withContext null
         val lock = state is PrivateSpace.Unlocked
-        return runCatching { userManager.requestQuietModeEnabled(lock, user) }.getOrDefault(false)
+        val granted = runCatching { userManager.requestQuietModeEnabled(lock, user) }.getOrDefault(false)
+        if (!granted || !lock) return@withContext null
+        // The profile takes a moment to actually stop after the lock is granted. This state is
+        // what the caller holds and hands to the enumeration that follows: asked again right
+        // now, the system would describe an open space and list everything inside it.
+        PrivateSpace.Locked(user, state.serial)
     }
 
     /**
