@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Android 12 and above, where cloud backup and device-to-device transfer are asked about
+  separately. The same file is excluded from both: a transfer is a copy of the data off this
+  phone just as much as a backup is, and the private space it names does not travel with it.
+
+  See backup_rules.xml for what is in that file and why it does not belong in either.
+-->
+<data-extraction-rules>
+    <cloud-backup>
+        <exclude domain="file" path="datastore" />
+    </cloud-backup>
+    <device-transfer>
+        <exclude domain="file" path="datastore" />
+    </device-transfer>
+</data-extraction-rules>

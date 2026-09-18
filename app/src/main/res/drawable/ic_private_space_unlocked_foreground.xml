@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Same body, shackle swung clear of it on one side: open. -->
+    <path
+        android:pathData="M66,52 v-12 a12,12 0 0 0 -24,0 v4"
+        android:strokeColor="@color/launcher_fg"
+        android:strokeWidth="7"
+        android:strokeLineCap="round"
+        android:fillColor="#00000000" />
+    <path
+        android:pathData="M40,50 h28 a6,6 0 0 1 6,6 v20 a6,6 0 0 1 -6,6 h-28 a6,6 0 0 1 -6,-6 v-20 a6,6 0 0 1 6,-6 z"
+        android:fillColor="@color/launcher_fg" />
+    <path
+        android:pathData="M54,60 m-4,0 a4,4 0 1 0 8,0 a4,4 0 1 0 -8,0 z"
+        android:fillColor="@color/launcher_bg" />
+    <path
+        android:pathData="M51,63 h6 v11 h-6 z"
+        android:fillColor="@color/launcher_bg" />
+</vector>

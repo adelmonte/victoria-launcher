@@ -104,6 +104,7 @@ import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import dev.victorialauncher.data.AppInfo
+import dev.victorialauncher.data.EntryKind
 import dev.victorialauncher.data.EdgeSide
 import dev.victorialauncher.data.HomeAlignment
 import dev.victorialauncher.data.IconSide
@@ -1126,11 +1127,15 @@ private fun AppRow(
                 leadingIcon = { Icon(Icons.Filled.Tune, contentDescription = null) },
                 onClick = { onDismissMenu(); onEdit() },
             )
-            DropdownMenuItem(
-                text = { Text(stringResource(R.string.action_app_info)) },
-                leadingIcon = { Icon(Icons.Filled.Info, contentDescription = null) },
-                onClick = { onDismissMenu(); onAppInfo() },
-            )
+            // Only an installed app has a settings screen to open; a row that stands for
+            // something else would send the system looking for a package that is not there.
+            if (app.kind == EntryKind.APP) {
+                DropdownMenuItem(
+                    text = { Text(stringResource(R.string.action_app_info)) },
+                    leadingIcon = { Icon(Icons.Filled.Info, contentDescription = null) },
+                    onClick = { onDismissMenu(); onAppInfo() },
+                )
+            }
             DropdownMenuItem(
                 text = { Text(stringResource(R.string.action_move_to_folder)) },
                 leadingIcon = { Icon(Icons.Filled.Folder, contentDescription = null) },

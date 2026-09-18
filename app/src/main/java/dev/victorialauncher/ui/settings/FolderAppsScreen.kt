@@ -30,6 +30,9 @@ import androidx.compose.ui.unit.dp
 import dev.victorialauncher.R
 import dev.victorialauncher.data.AppInfo
 import dev.victorialauncher.data.Folder
+import dev.victorialauncher.data.PrivateSpace
+import dev.victorialauncher.data.concealsStored
+import dev.victorialauncher.data.restoreConcealed
 import dev.victorialauncher.ui.common.AppIcon
 
 /**
@@ -43,6 +46,8 @@ import dev.victorialauncher.ui.common.AppIcon
 fun FolderAppsScreen(
     folder: Folder?,
     allApps: List<AppInfo>,
+    /** So a member that lives in a locked private space can be left out of this screen. */
+    privateSpace: PrivateSpace,
     nameOverrides: Map<String, String>,
     iconSizeDp: Int,
     onSetInFolder: (AppInfo, Boolean) -> Unit,
@@ -52,6 +57,19 @@ fun FolderAppsScreen(
     val surface = MaterialTheme.colorScheme.surface
     val members = folder?.apps.orEmpty()
     val memberSet = members.toSet()
+    val appsByKey = remember(allApps) { allApps.associateBy { it.key } }
+    // Left out rather than shown as a missing row, for the same reason as in the favorites
+    // screen: a row saying an app is gone still says how many the locked space holds. With a
+    // space that could not be read there is no serial to recognise its members by, so every
+    // member that names nothing goes the same way.
+    //
+    // One predicate, and the reorder below puts members back with this same one: a rule that
+    // hides more than the rule that restores loses everything between the two on the first
+    // drag, because the screen writes back the whole list it was given.
+    val conceal: (String) -> Boolean = remember(privateSpace, appsByKey) {
+        { key -> privateSpace.concealsStored(key, key in appsByKey) }
+    }
+    val shownMembers = remember(members, conceal) { members.filterNot(conceal) }
 
     Scaffold(
         containerColor = surface,
@@ -72,15 +90,18 @@ fun FolderAppsScreen(
             return@Scaffold
         }
 
-        val appsByKey = remember(allApps) { allApps.associateBy { it.key } }
-
         LazyColumn(contentPadding = PaddingValues(vertical = 8.dp), modifier = Modifier.padding(padding)) {
             item {
-                ListSectionLabel(stringResource(R.string.folder_member_count, members.size))
+                ListSectionLabel(stringResource(R.string.folder_member_count, shownMembers.size))
             }
 
             item {
-                ReorderableRows(keys = members, onReorder = onReorder) { key ->
+                ReorderableRows(
+                    keys = shownMembers,
+                    // Put back what was left out, by the rule that left it out, or the first
+                    // drag would drop it.
+                    onReorder = { order -> onReorder(restoreConcealed(members, order, conceal)) },
+                ) { key ->
                     val app = appsByKey[key]
                     if (app != null) {
                         AppIcon(app = app, sizeDp = minOf(iconSizeDp, 44))

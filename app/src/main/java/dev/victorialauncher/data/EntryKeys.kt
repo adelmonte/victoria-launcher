@@ -1,0 +1,74 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+package dev.victorialauncher.data
+
+/**
+ * The strings that identify a row everywhere it is stored: favorites, folders, renames, icon
+ * overrides, the hidden set and launch counts. Nothing that stores a key ever looks inside it,
+ * so a new kind of row only needs a key that cannot be mistaken for one of the others.
+ *
+ * An app's key is its flattened ComponentName, `package/class`, and a folder's token starts
+ * with `folder:`. Java package names cannot contain a colon, so a prefix ending in one can
+ * never be the start of an app key.
+ *
+ * Kept free of Android types so all of it can be tested on the JVM.
+ */
+object EntryKeys {
+    const val SHORTCUT_PREFIX = "shortcut:"
+
+    /** The one search entry. The suffix leaves room for more than one later. */
+    const val SEARCH = "search:default"
+
+    /** The one row that locks and unlocks the private space. */
+    const val PRIVATE_SPACE = "private:space"
+
+    private const val USER_SUFFIX = "|u"
+    private val userSuffixPattern = Regex("""\|u(\d+)$""")
+
+    /**
+     * The main profile's key is byte-for-byte what it was before profiles existed, so every
+     * stored favorite, rename, icon and hidden entry still matches. Only apps from a second
+     * profile carry the suffix, and those could not have been stored before anyway.
+     */
+    fun app(flattenedComponent: String, userSerial: Long = 0L): String =
+        if (userSerial == 0L) flattenedComponent else flattenedComponent + USER_SUFFIX + userSerial
+
+    fun shortcut(packageName: String, shortcutId: String, userSerial: Long = 0L): String =
+        app("$SHORTCUT_PREFIX$packageName/$shortcutId", userSerial)
+
+    fun isShortcut(key: String): Boolean = key.startsWith(SHORTCUT_PREFIX)
+
+    fun isSearch(key: String): Boolean = key == SEARCH
+
+    fun isPrivateSpace(key: String): Boolean = key == PRIVATE_SPACE
+
+    /**
+     * Which profile a stored key belongs to: the trailing `|u<serial>`, or zero, which is what
+     * a key without one has always meant. Read from the key rather than from the row it names,
+     * because a locked private space's rows are deliberately not there to be looked up.
+     */
+    fun userSerial(key: String): Long =
+        userSuffixPattern.find(key)?.groupValues?.get(1)?.toLongOrNull() ?: 0L
+
+    data class ShortcutRef(val packageName: String, val shortcutId: String, val userSerial: Long)
+
+    /**
+     * Null for anything that is not a well-formed shortcut key. A package name cannot contain
+     * a slash, so the first one ends it; the publisher chooses the id, which may contain
+     * anything, including slashes. A trailing `|u<digits>` is always read as the profile, so an
+     * id that itself ends that way in the main profile comes back as a different id in another
+     * profile. The key still identifies one row and never matches a real shortcut by mistake,
+     * because the lookup is by the parsed pair and that pair does not exist.
+     */
+    fun parseShortcut(key: String): ShortcutRef? {
+        if (!isShortcut(key)) return null
+        var body = key.removePrefix(SHORTCUT_PREFIX)
+        var serial = 0L
+        userSuffixPattern.find(body)?.let { match ->
+            serial = match.groupValues[1].toLongOrNull() ?: return null
+            body = body.substring(0, match.range.first)
+        }
+        val slash = body.indexOf('/')
+        if (slash <= 0 || slash == body.length - 1) return null
+        return ShortcutRef(body.substring(0, slash), body.substring(slash + 1), serial)
+    }
+}
