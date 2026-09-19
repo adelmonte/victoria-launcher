@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.graphics.drawable.toBitmap
 import dev.victorialauncher.VictoriaApp
 import dev.victorialauncher.data.AppInfo
+import dev.victorialauncher.data.ShortcutSwipe
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -81,16 +82,23 @@ fun AppShortcutItems(app: AppInfo, expanded: Boolean, onStarted: () -> Unit) {
 private const val ICON_PX = 72
 
 /**
- * Swipe a row from left to right to reach what the app publishes.
+ * Swipe a row sideways to reach what the app publishes.
  *
  * A separate gesture from the long press on purpose: shortcuts are used daily and the menu
  * behind a long press is set-up-and-done, so they do not belong in the same place.
  *
+ * One direction, chosen in settings, so the other stays free to mean something later. It fires
+ * once per drag rather than per pixel, and only past a distance no tap wanders.
+ *
  * Nothing happens on a row whose app publishes none. There is no way to know that before
  * asking, and asking every row up front is a call into the system per app.
  */
-fun Modifier.shortcutSwipe(enabled: Boolean, onSwipe: (Offset) -> Unit): Modifier =
-    if (!enabled) this else this.pointerInput(Unit) {
+fun Modifier.swipeForShortcuts(
+    mode: ShortcutSwipe,
+    enabled: Boolean,
+    onSwipe: (Offset) -> Unit,
+): Modifier =
+    if (mode == ShortcutSwipe.OFF || !enabled) this else this.pointerInput(mode) {
         var travelled = 0f
         var start = Offset.Zero
         var fired = false
@@ -100,9 +108,12 @@ fun Modifier.shortcutSwipe(enabled: Boolean, onSwipe: (Offset) -> Unit): Modifie
             onDragCancel = { },
         ) { change, amount ->
             travelled += amount
-            // Only rightward, and only once: leftward is left alone so it can mean something
-            // else later, and a long drag should open one menu rather than a menu per pixel.
-            if (!fired && travelled > SWIPE_THRESHOLD_PX) {
+            val far = when (mode) {
+                ShortcutSwipe.RIGHT -> travelled > SWIPE_THRESHOLD_PX
+                ShortcutSwipe.LEFT -> travelled < -SWIPE_THRESHOLD_PX
+                ShortcutSwipe.OFF -> false
+            }
+            if (!fired && far) {
                 fired = true
                 change.consume()
                 onSwipe(start)

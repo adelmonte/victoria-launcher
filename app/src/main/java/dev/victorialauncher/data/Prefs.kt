@@ -21,6 +21,14 @@ import org.json.JSONObject
 
 enum class EdgeSide { LEFT, RIGHT, BOTH }
 
+/**
+ * Which way an app row is swiped to reach the shortcuts it publishes.
+ *
+ * A direction and not a switch because only one of the two does anything, and which one should
+ * be the useful one is a question about the hand holding the phone.
+ */
+enum class ShortcutSwipe { OFF, RIGHT, LEFT }
+
 /** Which edge favorites and app rows line up against. */
 enum class HomeAlignment { LEFT, CENTER, RIGHT }
 
@@ -76,6 +84,7 @@ class Prefs(private val context: Context) {
         val DIM_COLOR = intPreferencesKey("dim_color")
         val ALLOW_ROTATION = booleanPreferencesKey("allow_rotation")
         val SWIPE_FOR_SHORTCUTS = booleanPreferencesKey("swipe_for_shortcuts")
+        val SHORTCUT_SWIPE = stringPreferencesKey("shortcut_swipe")
         val THEMED_ICONS = booleanPreferencesKey("themed_icons")
         val ICON_SHAPE = stringPreferencesKey("icon_shape")
         val HIDE_STATUS_BAR = booleanPreferencesKey("hide_status_bar")
@@ -286,8 +295,16 @@ class Prefs(private val context: Context) {
      * in the long-press menu, which is for setting a row up rather than using it. Off is for
      * anyone who would rather their rows answered only to a tap.
      */
-    val swipeForShortcuts: Flow<Boolean> =
-        data.map { it[Keys.SWIPE_FOR_SHORTCUTS] ?: true }.distinctUntilChanged()
+    /**
+     * Falls back to the switch this replaced, so anyone who had turned it off stays off and
+     * everyone else keeps the direction it always had.
+     */
+    val shortcutSwipe: Flow<ShortcutSwipe> =
+        data.map { prefs ->
+            prefs[Keys.SHORTCUT_SWIPE]
+                ?.let { name -> runCatching { ShortcutSwipe.valueOf(name) }.getOrNull() }
+                ?: if (prefs[Keys.SWIPE_FOR_SHORTCUTS] == false) ShortcutSwipe.OFF else ShortcutSwipe.RIGHT
+        }.distinctUntilChanged()
 
     /**
      * Whether the launcher turns with the device.
@@ -672,8 +689,12 @@ class Prefs(private val context: Context) {
         }
     }
 
-    suspend fun setSwipeForShortcuts(v: Boolean) {
-        context.dataStore.edit { it[Keys.SWIPE_FOR_SHORTCUTS] = v }
+    suspend fun setShortcutSwipe(v: ShortcutSwipe) {
+        context.dataStore.edit {
+            it[Keys.SHORTCUT_SWIPE] = v.name
+            // Mirrored, so a downgrade to the version that only had a switch reads it right.
+            it[Keys.SWIPE_FOR_SHORTCUTS] = v != ShortcutSwipe.OFF
+        }
     }
 
     suspend fun setAllowRotation(v: Boolean) {

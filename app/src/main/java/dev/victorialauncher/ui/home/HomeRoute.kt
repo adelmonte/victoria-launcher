@@ -52,6 +52,7 @@ import dev.victorialauncher.VictoriaApp
 import dev.victorialauncher.data.AppInfo
 import dev.victorialauncher.data.AzStripVisibility
 import dev.victorialauncher.data.EdgeSide
+import dev.victorialauncher.data.ShortcutSwipe
 import dev.victorialauncher.data.HomeAlignment
 import dev.victorialauncher.data.IconSide
 import dev.victorialauncher.data.Folder
@@ -476,7 +477,7 @@ fun HomeRoute(
         ) {
             HomeScreen(
                 stripInsetSide = if (!stripAlwaysVisible) null else settings.edgeSide,
-                swipeForShortcuts = settings.swipeForShortcuts,
+                shortcutSwipe = settings.shortcutSwipe,
                 favorites = favorites,
                 nameOverrides = nameOverrides,
                 iconSizeDp = settings.iconSizeDp,
@@ -666,7 +667,7 @@ fun HomeRoute(
                 edgeSide = settings.edgeSide,
                 statusBarHidden = settings.hideStatusBarAppList,
                 searchModel = searchModel,
-                swipeForShortcuts = settings.swipeForShortcuts,
+                shortcutSwipe = settings.shortcutSwipe,
                 searchEnabled = settings.appListSearch,
                 searchAtBottom = settings.appListSearchBottom,
                 listState = appListState,
@@ -799,7 +800,7 @@ data class HomeSettings(
     val nowPlayingEnabled: Boolean,
     val edgeSide: EdgeSide,
     val azStripVisibility: AzStripVisibility,
-    val swipeForShortcuts: Boolean,
+    val shortcutSwipe: ShortcutSwipe,
     val showAlphabet: Boolean,
     val alignment: HomeAlignment,
     val appListAlignment: HomeAlignment,

@@ -100,6 +100,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import dev.victorialauncher.data.AppInfo
 import dev.victorialauncher.data.EdgeSide
+import dev.victorialauncher.data.ShortcutSwipe
 import dev.victorialauncher.data.EntryKind
 import dev.victorialauncher.data.Folder
 import dev.victorialauncher.data.QuickLaunchSlot
@@ -112,7 +113,7 @@ import dev.victorialauncher.media.NowPlayingWidget
 import dev.victorialauncher.media.openNowPlayingApp
 import dev.victorialauncher.service.HapticUtil
 import dev.victorialauncher.ui.common.AppIcon
-import dev.victorialauncher.ui.common.shortcutSwipe
+import dev.victorialauncher.ui.common.swipeForShortcuts
 import dev.victorialauncher.ui.common.AppShortcutMenu
 import dev.victorialauncher.ui.common.TouchAnchoredMenu
 import dev.victorialauncher.ui.common.LocalIconConfig
@@ -169,7 +170,7 @@ fun HomeScreen(
     /** The side an always-present A-Z strip occupies, so content can keep out from under it. */
     stripInsetSide: EdgeSide?,
     /** Whether a sideways swipe on a row offers its app's shortcuts. */
-    swipeForShortcuts: Boolean,
+    shortcutSwipe: ShortcutSwipe,
     favorites: List<FavoriteEntry>,
     nameOverrides: Map<String, String>,
     iconSizeDp: Int,
@@ -766,7 +767,7 @@ fun HomeScreen(
                         }
 
                         is HomeItem.FolderItem -> FolderRow(
-                            swipeForShortcuts = swipeForShortcuts,
+                            shortcutSwipe = shortcutSwipe,
                             folder = item.folder,
                             members = item.folder.apps.mapNotNull { appsByKey[it] },
                             expanded = item.folder.id in expandedFolders,
@@ -805,7 +806,7 @@ fun HomeScreen(
                         )
 
                         is HomeItem.Favorite -> FavoriteRow(
-                            swipeForShortcuts = swipeForShortcuts,
+                            shortcutSwipe = shortcutSwipe,
                             app = item.app,
                             label = displayName(item.app),
                             editMode = editMode,
@@ -952,7 +953,7 @@ fun HomeScreen(
 /** One favorite: icon, optional name, press highlight and its context menu. */
 @Composable
 private fun FavoriteRow(
-    swipeForShortcuts: Boolean,
+    shortcutSwipe: ShortcutSwipe,
     app: AppInfo,
     label: String,
     editMode: Boolean,
@@ -1002,7 +1003,7 @@ private fun FavoriteRow(
                     } else {
                         Modifier
                             .recordTouchPosition(touchPosition)
-                            .shortcutSwipe(swipeForShortcuts && app.kind == EntryKind.APP) { start ->
+                            .swipeForShortcuts(shortcutSwipe, app.kind == EntryKind.APP) { start ->
                                 shortcutOffset = with(density) { DpOffset(start.x.toDp(), start.y.toDp()) }
                                 shortcutMenu = true
                             }
@@ -1108,7 +1109,7 @@ private fun FavoriteRow(
 /** A folder row, which expands in place to show its apps. */
 @Composable
 private fun FolderRow(
-    swipeForShortcuts: Boolean,
+    shortcutSwipe: ShortcutSwipe,
     folder: Folder,
     members: List<AppInfo>,
     expanded: Boolean,
@@ -1255,7 +1256,7 @@ private fun FolderRow(
                                 end = if (alignment == HomeAlignment.RIGHT) (sidePaddingDp + 24).dp else sidePaddingDp.dp,
                             )
                             .recordTouchPosition(memberTouch)
-                            .shortcutSwipe(swipeForShortcuts && member.kind == EntryKind.APP) { start ->
+                            .swipeForShortcuts(shortcutSwipe, member.kind == EntryKind.APP) { start ->
                                 memberShortcutOffset =
                                     with(density) { DpOffset(start.x.toDp(), start.y.toDp()) }
                                 memberShortcutFor = member.key

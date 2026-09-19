@@ -6,6 +6,7 @@ import dev.victorialauncher.R
 import dev.victorialauncher.data.AppFont
 import dev.victorialauncher.data.AzStripVisibility
 import dev.victorialauncher.data.EdgeSide
+import dev.victorialauncher.data.ShortcutSwipe
 import dev.victorialauncher.data.HomeAlignment
 import dev.victorialauncher.data.IconShape
 import dev.victorialauncher.data.IconSide
@@ -48,6 +49,13 @@ fun EdgeSide.labelRes(): Int = when (this) {
     EdgeSide.LEFT -> R.string.edge_left
     EdgeSide.RIGHT -> R.string.edge_right
     EdgeSide.BOTH -> R.string.edge_both
+}
+
+@StringRes
+fun ShortcutSwipe.labelRes(): Int = when (this) {
+    ShortcutSwipe.OFF -> R.string.shortcut_swipe_off
+    ShortcutSwipe.RIGHT -> R.string.shortcut_swipe_right
+    ShortcutSwipe.LEFT -> R.string.shortcut_swipe_left
 }
 
 @StringRes

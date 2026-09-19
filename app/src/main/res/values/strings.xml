@@ -149,7 +149,10 @@
     <string name="text_color_custom">Custom</string>
     <string name="text_color_pick">Pick a color</string>
     <string name="settings_swipe_shortcuts">Swipe an app for its shortcuts</string>
-    <string name="settings_swipe_shortcuts_detail">Swipe a favorite or a row in the app list from left to right. Apps that publish none do nothing</string>
+    <string name="settings_swipe_shortcuts_detail">Swipe a favorite or a row in the app list. Apps that publish none do nothing</string>
+    <string name="shortcut_swipe_off">Off</string>
+    <string name="shortcut_swipe_right">Swipe right</string>
+    <string name="shortcut_swipe_left">Swipe left</string>
     <string name="settings_allow_rotation">Rotate with the device</string>
     <string name="settings_allow_rotation_detail">Off on phones: sideways there is about a third of the height this layout needs. On by default on tablets</string>
     <string name="settings_section_backup">Backup</string>

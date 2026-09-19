@@ -82,6 +82,7 @@ import dev.victorialauncher.data.AppInfo
 import dev.victorialauncher.data.AzStripVisibility
 import dev.victorialauncher.data.IconShape
 import dev.victorialauncher.data.EdgeSide
+import dev.victorialauncher.data.ShortcutSwipe
 import dev.victorialauncher.data.HomeAlignment
 import dev.victorialauncher.data.IconSide
 import dev.victorialauncher.data.QuickLaunchSlot
@@ -113,7 +114,7 @@ fun SettingsScreen(
     textColorCustom: Int,
     dimColor: Int,
     allowRotation: Boolean,
-    swipeForShortcuts: Boolean,
+    shortcutSwipe: ShortcutSwipe,
     fontFile: String?,
     iconShape: IconShape,
     themedIcons: Boolean,
@@ -150,7 +151,7 @@ fun SettingsScreen(
     onSetTextColorCustom: (Int) -> Unit,
     onSetDimColor: (Int) -> Unit,
     onSetAllowRotation: (Boolean) -> Unit,
-    onSetSwipeForShortcuts: (Boolean) -> Unit,
+    onSetShortcutSwipe: (ShortcutSwipe) -> Unit,
     onExportSettings: () -> Unit,
     onImportSettings: () -> Unit,
     onPickFontFile: (Uri) -> Unit,
@@ -456,12 +457,7 @@ fun SettingsScreen(
                         onCheckedChange = onSetSwipeUpOpensList,
                     )
                     RowDivider()
-                    SwitchRowWithDetail(
-                        label = stringResource(R.string.settings_swipe_shortcuts),
-                        detail = stringResource(R.string.settings_swipe_shortcuts_detail),
-                        checked = swipeForShortcuts,
-                        onCheckedChange = onSetSwipeForShortcuts,
-                    )
+                    ShortcutSwipeRow(shortcutSwipe, onSetShortcutSwipe)
                     RowDivider()
                     SwitchRowWithDetail(
                         label = stringResource(R.string.settings_allow_rotation),
@@ -1251,6 +1247,26 @@ private fun IconSideRow(selected: IconSide, onSelect: (IconSide) -> Unit) {
                     selected = option == selected,
                     onClick = { onSelect(option) },
                 )
+            }
+        }
+    }
+}
+
+@Composable
+private fun ShortcutSwipeRow(selected: ShortcutSwipe, onSelect: (ShortcutSwipe) -> Unit) {
+    Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)) {
+        Text(stringResource(R.string.settings_swipe_shortcuts), style = MaterialTheme.typography.bodyMedium)
+        Text(
+            stringResource(R.string.settings_swipe_shortcuts_detail),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+        )
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(top = 10.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            ShortcutSwipe.entries.forEach { mode ->
+                FilledChip(stringResource(mode.labelRes()), selected == mode) { onSelect(mode) }
             }
         }
     }
