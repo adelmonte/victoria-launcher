@@ -1,0 +1,6 @@
+New:
+* The clock widget can show the battery, and the time, date and battery each take their own opacity.
+* Choose which way an app is swiped for its shortcuts, or turn the swipe off.
+
+Fixed:
+* The first tap on the A-Z strip after the launcher started sometimes opened the app list at A instead of the letter tapped.
