@@ -1,0 +1,6 @@
+New:
+* Android 15's private space. Its apps are listed while it is unlocked, and a "Private space" padlock entry locks and unlocks it. Needs Victoria set as your default home app.
+* Swipe below your favorites to launch an app, and the app can slide in from the edge the swipe came from. Off by default, under Behavior.
+
+Changed:
+* Android's automatic backup no longer copies your settings: it cannot leave your private space out of them. Use Export settings, which can.
