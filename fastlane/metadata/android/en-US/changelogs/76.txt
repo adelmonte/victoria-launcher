@@ -1,0 +1,2 @@
+Fixed:
+* Swiping sideways between widgets works again when one of them scrolls. Up and down still scrolls the widget.
