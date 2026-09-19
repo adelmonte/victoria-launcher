@@ -1,0 +1,6 @@
+New:
+* Swipe an app from left to right for its shortcuts. Long press still opens the menu. On by default, and in Settings if you would rather it were not.
+* The clock widget takes a text color, and the date has its own size.
+
+Fixed:
+* The clock widget's size setting did nothing. It works now, and reaches further in both directions.
