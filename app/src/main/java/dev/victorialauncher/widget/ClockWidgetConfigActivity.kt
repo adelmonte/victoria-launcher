@@ -8,11 +8,17 @@ import android.os.Bundle
 import android.text.format.DateFormat
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
@@ -29,11 +35,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlin.math.roundToInt
 import dev.victorialauncher.R
+import androidx.compose.foundation.shape.CircleShape
+import dev.victorialauncher.ui.settings.ColorPickerDialog
 import dev.victorialauncher.ui.settings.FilledChip
 import dev.victorialauncher.ui.settings.SliderRow
 import dev.victorialauncher.ui.theme.VictoriaTheme
@@ -87,7 +96,21 @@ class ClockWidgetConfigActivity : ComponentActivity() {
                         ) {
                             HourSection(config) { config = config.copy(hourFormat = it) }
                             DateSection(config) { config = config.copy(datePattern = it) }
-                            SizeSection(config) { config = config.copy(timeSizeSp = it) }
+                            SizeSection(
+                                label = stringResource(R.string.widget_clock_size),
+                                value = config.timeSizeSp,
+                                range = ClockWidgetConfig.SIZE_RANGE,
+                                color = config.textColor,
+                            ) { config = config.copy(timeSizeSp = it) }
+                            if (config.datePattern != null) {
+                                SizeSection(
+                                    label = stringResource(R.string.widget_clock_date_size),
+                                    value = config.dateSizeSp,
+                                    range = ClockWidgetConfig.DATE_SIZE_RANGE,
+                                    color = config.textColor,
+                                ) { config = config.copy(dateSizeSp = it) }
+                            }
+                            ColorSection(config) { config = config.copy(textColor = it) }
 
                             Row {
                                 TextButton(onClick = { finish() }) {
@@ -174,25 +197,74 @@ private fun DateSection(config: ClockWidgetConfig, onSelect: (String?) -> Unit) 
 }
 
 @Composable
-private fun SizeSection(config: ClockWidgetConfig, onSelect: (Int) -> Unit) {
-    val range = ClockWidgetConfig.SIZE_RANGE
+private fun SizeSection(
+    label: String,
+    value: Int,
+    range: IntRange,
+    color: Int,
+    onSelect: (Int) -> Unit,
+) {
     Column {
         // The same row the rest of the launcher sets a size with: minus and plus for one step
         // at a time, and the slider for crossing the range.
         SliderRow(
-            label = stringResource(R.string.widget_clock_size),
-            value = config.timeSizeSp.toFloat(),
+            label = label,
+            value = value.toFloat(),
             range = range.first.toFloat()..range.last.toFloat(),
-            valueLabel = config.timeSizeSp.toString(),
+            valueLabel = value.toString(),
             onValueChange = { onSelect(it.roundToInt().coerceIn(range)) },
         )
-        // Shown at the size being chosen, so the number means something before saving.
-        Text(
-            stringResource(R.string.widget_clock_size_preview),
-            fontSize = config.timeSizeSp.sp,
-            maxLines = 1,
-            color = MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.padding(start = 16.dp),
+        // Shown at the size and color being chosen, so the numbers mean something before
+        // saving. Boxed at a fixed height so the rest of the screen does not jump around as
+        // the slider moves, and scrollable sideways because a large size runs off the edge.
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(72.dp)
+                .horizontalScroll(rememberScrollState()),
+            contentAlignment = Alignment.CenterStart,
+        ) {
+            Text(
+                stringResource(R.string.widget_clock_size_preview),
+                fontSize = value.sp,
+                lineHeight = value.sp,
+                maxLines = 1,
+                color = Color(color),
+                modifier = Modifier.padding(start = 16.dp),
+            )
+        }
+    }
+}
+
+/**
+ * The widget's text color.
+ *
+ * A color and not a font: RemoteViews can be told a color, but a typeface has to already exist
+ * in the package drawing the view, and the host draws this one. A font chosen in settings is a
+ * file this app loaded, which the host has no way to use.
+ */
+@Composable
+private fun ColorSection(config: ClockWidgetConfig, onSelect: (Int) -> Unit) {
+    var picking by remember { mutableStateOf(false) }
+    Column {
+        Text(stringResource(R.string.widget_clock_color), style = MaterialTheme.typography.bodyMedium)
+        Chips {
+            FilledChip(stringResource(R.string.widget_clock_color_pick), selected = false) {
+                picking = true
+            }
+            Box(
+                modifier = Modifier
+                    .size(32.dp)
+                    .background(Color(config.textColor), CircleShape)
+                    .border(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f), CircleShape)
+            )
+        }
+    }
+    if (picking) {
+        ColorPickerDialog(
+            initial = config.textColor,
+            onConfirm = { onSelect(it); picking = false },
+            onDismiss = { picking = false },
         )
     }
 }

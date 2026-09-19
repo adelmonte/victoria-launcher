@@ -17,15 +17,16 @@ data class ClockWidgetConfig(
     val hourFormat: HourFormat,
     val datePattern: String?,
     val timeSizeSp: Int,
+    val dateSizeSp: Int,
+    val textColor: Int,
 ) {
     enum class HourFormat { SYSTEM, TWELVE, TWENTY_FOUR }
-
-    /** The date line is this much smaller than the time, so one size setting sets both. */
-    val dateSizeSp: Int get() = (timeSizeSp * 0.34f).toInt().coerceAtLeast(11)
 
     companion object {
         private const val FILE = "clock_widget"
         private const val DEFAULT_SIZE_SP = 44
+        private const val DEFAULT_DATE_SIZE_SP = 16
+        private const val DEFAULT_COLOR = 0xFFFFFFFF.toInt()
 
         /** Weekday, day, month — short enough for a narrow widget and clear in any language. */
         const val DEFAULT_DATE = "EEE, d MMM"
@@ -40,8 +41,8 @@ data class ClockWidgetConfig(
         )
 
         /** Small steps, since the right size depends on the height the widget was given. */
-        val SIZE_RANGE = 20..96
-        const val SIZE_STEP = 2
+        val SIZE_RANGE = 16..160
+        val DATE_SIZE_RANGE = 10..72
 
         fun read(context: Context, widgetId: Int): ClockWidgetConfig {
             val prefs = context.getSharedPreferences(FILE, Context.MODE_PRIVATE)
@@ -55,6 +56,8 @@ data class ClockWidgetConfig(
                 hourFormat = hour,
                 datePattern = stored.takeIf { it.isNotEmpty() },
                 timeSizeSp = prefs.getInt(key("size", widgetId), DEFAULT_SIZE_SP),
+                dateSizeSp = prefs.getInt(key("dateSize", widgetId), DEFAULT_DATE_SIZE_SP),
+                textColor = prefs.getInt(key("color", widgetId), DEFAULT_COLOR),
             )
         }
 
@@ -63,6 +66,8 @@ data class ClockWidgetConfig(
                 .putString(key("hour", widgetId), config.hourFormat.name)
                 .putString(key("date", widgetId), config.datePattern.orEmpty())
                 .putInt(key("size", widgetId), config.timeSizeSp)
+                .putInt(key("dateSize", widgetId), config.dateSizeSp)
+                .putInt(key("color", widgetId), config.textColor)
                 .apply()
         }
 
@@ -72,6 +77,8 @@ data class ClockWidgetConfig(
                 .remove(key("hour", widgetId))
                 .remove(key("date", widgetId))
                 .remove(key("size", widgetId))
+                .remove(key("dateSize", widgetId))
+                .remove(key("color", widgetId))
                 .apply()
         }
 

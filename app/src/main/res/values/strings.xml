@@ -232,7 +232,10 @@
     <string name="widget_clock_hour_24">24-hour</string>
     <string name="widget_clock_date_format">Date</string>
     <string name="widget_clock_date_none">No date</string>
-    <string name="widget_clock_size">Size</string>
+    <string name="widget_clock_size">Time size</string>
+    <string name="widget_clock_date_size">Date size</string>
+    <string name="widget_clock_color">Color</string>
+    <string name="widget_clock_color_pick">Choose</string>
     <string name="widget_clock_size_preview">12:34</string>
     <string name="widget_add_another">Add another widget</string>
     <string name="widget_remove_this">Remove this widget</string>

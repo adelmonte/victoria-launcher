@@ -69,6 +69,7 @@ class ClockWidgetProvider : AppWidgetProvider() {
                     }
                 }
                 setTextViewTextSize(R.id.widget_time, TypedValue.COMPLEX_UNIT_SP, config.timeSizeSp.toFloat())
+                setTextColor(R.id.widget_time, config.textColor)
 
                 val date = config.datePattern
                 if (date == null) {
@@ -78,6 +79,7 @@ class ClockWidgetProvider : AppWidgetProvider() {
                     setCharSequence(R.id.widget_date, "setFormat12Hour", date)
                     setCharSequence(R.id.widget_date, "setFormat24Hour", date)
                     setTextViewTextSize(R.id.widget_date, TypedValue.COMPLEX_UNIT_SP, config.dateSizeSp.toFloat())
+                    setTextColor(R.id.widget_date, config.textColor)
                 }
 
                 setOnClickPendingIntent(R.id.widget_time, open(context, clockIntent(context), widgetId * 2))
