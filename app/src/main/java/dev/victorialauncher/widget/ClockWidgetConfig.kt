@@ -18,15 +18,25 @@ data class ClockWidgetConfig(
     val datePattern: String?,
     val timeSizeSp: Int,
     val dateSizeSp: Int,
+    val showBattery: Boolean,
+    val batterySizeSp: Int,
     val textColor: Int,
+    val timeOpacity: Int,
+    val dateOpacity: Int,
+    val batteryOpacity: Int,
 ) {
     enum class HourFormat { SYSTEM, TWELVE, TWENTY_FOUR }
+
+    /** The color as one row should draw it, since each row is faded on its own. */
+    fun colorAt(opacity: Int): Int = opacityOf(textColor, opacity)
 
     companion object {
         private const val FILE = "clock_widget"
         private const val DEFAULT_SIZE_SP = 44
         private const val DEFAULT_DATE_SIZE_SP = 16
+        private const val DEFAULT_BATTERY_SIZE_SP = 14
         private const val DEFAULT_COLOR = 0xFFFFFFFF.toInt()
+        private const val DEFAULT_OPACITY = 100
 
         /** Weekday, day, month — short enough for a narrow widget and clear in any language. */
         const val DEFAULT_DATE = "EEE, d MMM"
@@ -44,6 +54,15 @@ data class ClockWidgetConfig(
         val SIZE_RANGE = 16..160
         val DATE_SIZE_RANGE = 10..72
 
+        /** Stops short of nothing at all: an invisible row looks like a broken widget. */
+        val OPACITY_RANGE = 10..100
+
+        /** Shared with the settings preview, so what is shown there is what is drawn. */
+        fun opacityOf(color: Int, opacity: Int): Int {
+            val alpha = (opacity.coerceIn(OPACITY_RANGE) * 255 / 100) shl 24
+            return alpha or (color and 0x00FFFFFF)
+        }
+
         fun read(context: Context, widgetId: Int): ClockWidgetConfig {
             val prefs = context.getSharedPreferences(FILE, Context.MODE_PRIVATE)
             val hour = runCatching {
@@ -57,7 +76,12 @@ data class ClockWidgetConfig(
                 datePattern = stored.takeIf { it.isNotEmpty() },
                 timeSizeSp = prefs.getInt(key("size", widgetId), DEFAULT_SIZE_SP),
                 dateSizeSp = prefs.getInt(key("dateSize", widgetId), DEFAULT_DATE_SIZE_SP),
+                showBattery = prefs.getBoolean(key("battery", widgetId), false),
+                batterySizeSp = prefs.getInt(key("batterySize", widgetId), DEFAULT_BATTERY_SIZE_SP),
                 textColor = prefs.getInt(key("color", widgetId), DEFAULT_COLOR),
+                timeOpacity = prefs.getInt(key("timeOpacity", widgetId), DEFAULT_OPACITY),
+                dateOpacity = prefs.getInt(key("dateOpacity", widgetId), DEFAULT_OPACITY),
+                batteryOpacity = prefs.getInt(key("batteryOpacity", widgetId), DEFAULT_OPACITY),
             )
         }
 
@@ -67,7 +91,12 @@ data class ClockWidgetConfig(
                 .putString(key("date", widgetId), config.datePattern.orEmpty())
                 .putInt(key("size", widgetId), config.timeSizeSp)
                 .putInt(key("dateSize", widgetId), config.dateSizeSp)
+                .putBoolean(key("battery", widgetId), config.showBattery)
+                .putInt(key("batterySize", widgetId), config.batterySizeSp)
                 .putInt(key("color", widgetId), config.textColor)
+                .putInt(key("timeOpacity", widgetId), config.timeOpacity)
+                .putInt(key("dateOpacity", widgetId), config.dateOpacity)
+                .putInt(key("batteryOpacity", widgetId), config.batteryOpacity)
                 .apply()
         }
 
@@ -78,7 +107,12 @@ data class ClockWidgetConfig(
                 .remove(key("date", widgetId))
                 .remove(key("size", widgetId))
                 .remove(key("dateSize", widgetId))
+                .remove(key("battery", widgetId))
+                .remove(key("batterySize", widgetId))
                 .remove(key("color", widgetId))
+                .remove(key("timeOpacity", widgetId))
+                .remove(key("dateOpacity", widgetId))
+                .remove(key("batteryOpacity", widgetId))
                 .apply()
         }
 

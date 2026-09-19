@@ -237,6 +237,14 @@
     <string name="widget_clock_color">Color</string>
     <string name="widget_clock_color_pick">Choose</string>
     <string name="widget_clock_size_preview">12:34</string>
+    <string name="widget_clock_battery">Battery</string>
+    <string name="widget_clock_battery_show">Show</string>
+    <string name="widget_clock_battery_hide">Hide</string>
+    <string name="widget_clock_battery_size">Battery size</string>
+    <string name="widget_clock_battery_percent">%1$d%%</string>
+    <string name="widget_clock_time_opacity">Time opacity</string>
+    <string name="widget_clock_date_opacity">Date opacity</string>
+    <string name="widget_clock_battery_opacity">Battery opacity</string>
     <string name="widget_add_another">Add another widget</string>
     <string name="widget_remove_this">Remove this widget</string>
     <string name="widget_unavailable">This widget is no longer available</string>

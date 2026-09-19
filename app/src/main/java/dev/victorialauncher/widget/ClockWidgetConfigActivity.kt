@@ -96,21 +96,51 @@ class ClockWidgetConfigActivity : ComponentActivity() {
                         ) {
                             HourSection(config) { config = config.copy(hourFormat = it) }
                             DateSection(config) { config = config.copy(datePattern = it) }
-                            SizeSection(
-                                label = stringResource(R.string.widget_clock_size),
-                                value = config.timeSizeSp,
-                                range = ClockWidgetConfig.SIZE_RANGE,
-                                color = config.textColor,
-                            ) { config = config.copy(timeSizeSp = it) }
-                            if (config.datePattern != null) {
-                                SizeSection(
-                                    label = stringResource(R.string.widget_clock_date_size),
-                                    value = config.dateSizeSp,
-                                    range = ClockWidgetConfig.DATE_SIZE_RANGE,
-                                    color = config.textColor,
-                                ) { config = config.copy(dateSizeSp = it) }
-                            }
+                            BatterySection(config) { config = config.copy(showBattery = it) }
                             ColorSection(config) { config = config.copy(textColor = it) }
+
+                            TextSection(
+                                sizeLabel = stringResource(R.string.widget_clock_size),
+                                opacityLabel = stringResource(R.string.widget_clock_time_opacity),
+                                preview = stringResource(R.string.widget_clock_size_preview),
+                                size = config.timeSizeSp,
+                                sizeRange = ClockWidgetConfig.SIZE_RANGE,
+                                opacity = config.timeOpacity,
+                                color = config.textColor,
+                                onSize = { config = config.copy(timeSizeSp = it) },
+                                onOpacity = { config = config.copy(timeOpacity = it) },
+                            )
+                            config.datePattern?.let { pattern ->
+                                TextSection(
+                                    sizeLabel = stringResource(R.string.widget_clock_date_size),
+                                    opacityLabel = stringResource(R.string.widget_clock_date_opacity),
+                                    preview = runCatching {
+                                        DateFormat.format(pattern, Date()).toString()
+                                    }.getOrDefault(pattern),
+                                    size = config.dateSizeSp,
+                                    sizeRange = ClockWidgetConfig.DATE_SIZE_RANGE,
+                                    opacity = config.dateOpacity,
+                                    color = config.textColor,
+                                    onSize = { config = config.copy(dateSizeSp = it) },
+                                    onOpacity = { config = config.copy(dateOpacity = it) },
+                                )
+                            }
+                            if (config.showBattery) {
+                                TextSection(
+                                    sizeLabel = stringResource(R.string.widget_clock_battery_size),
+                                    opacityLabel = stringResource(R.string.widget_clock_battery_opacity),
+                                    preview = stringResource(
+                                        R.string.widget_clock_battery_percent,
+                                        ClockWidgetBattery.percent(this@ClockWidgetConfigActivity) ?: 100,
+                                    ),
+                                    size = config.batterySizeSp,
+                                    sizeRange = ClockWidgetConfig.DATE_SIZE_RANGE,
+                                    opacity = config.batteryOpacity,
+                                    color = config.textColor,
+                                    onSize = { config = config.copy(batterySizeSp = it) },
+                                    onOpacity = { config = config.copy(batteryOpacity = it) },
+                                )
+                            }
 
                             Row {
                                 TextButton(onClick = { finish() }) {
@@ -196,27 +226,44 @@ private fun DateSection(config: ClockWidgetConfig, onSelect: (String?) -> Unit) 
     }
 }
 
+/**
+ * One row of the widget: how big it is, how strongly it is drawn, and what that looks like.
+ *
+ * Size and opacity together rather than as two lists of sliders, because the preview under them
+ * answers for both at once and there is otherwise no way to tell what a number means.
+ */
 @Composable
-private fun SizeSection(
-    label: String,
-    value: Int,
-    range: IntRange,
+private fun TextSection(
+    sizeLabel: String,
+    opacityLabel: String,
+    preview: String,
+    size: Int,
+    sizeRange: IntRange,
+    opacity: Int,
     color: Int,
-    onSelect: (Int) -> Unit,
+    onSize: (Int) -> Unit,
+    onOpacity: (Int) -> Unit,
 ) {
+    val opacityRange = ClockWidgetConfig.OPACITY_RANGE
     Column {
         // The same row the rest of the launcher sets a size with: minus and plus for one step
         // at a time, and the slider for crossing the range.
         SliderRow(
-            label = label,
-            value = value.toFloat(),
-            range = range.first.toFloat()..range.last.toFloat(),
-            valueLabel = value.toString(),
-            onValueChange = { onSelect(it.roundToInt().coerceIn(range)) },
+            label = sizeLabel,
+            value = size.toFloat(),
+            range = sizeRange.first.toFloat()..sizeRange.last.toFloat(),
+            valueLabel = size.toString(),
+            onValueChange = { onSize(it.roundToInt().coerceIn(sizeRange)) },
         )
-        // Shown at the size and color being chosen, so the numbers mean something before
-        // saving. Boxed at a fixed height so the rest of the screen does not jump around as
-        // the slider moves, and scrollable sideways because a large size runs off the edge.
+        SliderRow(
+            label = opacityLabel,
+            value = opacity.toFloat(),
+            range = opacityRange.first.toFloat()..opacityRange.last.toFloat(),
+            valueLabel = "$opacity%",
+            onValueChange = { onOpacity(it.roundToInt().coerceIn(opacityRange)) },
+        )
+        // Boxed at a fixed height so the rest of the screen does not jump around as the slider
+        // moves, and scrollable sideways because a large size runs off the edge.
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -225,13 +272,28 @@ private fun SizeSection(
             contentAlignment = Alignment.CenterStart,
         ) {
             Text(
-                stringResource(R.string.widget_clock_size_preview),
-                fontSize = value.sp,
-                lineHeight = value.sp,
+                preview,
+                fontSize = size.sp,
+                lineHeight = size.sp,
                 maxLines = 1,
-                color = Color(color),
+                color = Color(ClockWidgetConfig.opacityOf(color, opacity)),
                 modifier = Modifier.padding(start = 16.dp),
             )
+        }
+    }
+}
+
+@Composable
+private fun BatterySection(config: ClockWidgetConfig, onSelect: (Boolean) -> Unit) {
+    Column {
+        Text(stringResource(R.string.widget_clock_battery), style = MaterialTheme.typography.bodyMedium)
+        Chips {
+            FilledChip(stringResource(R.string.widget_clock_battery_show), config.showBattery) {
+                onSelect(true)
+            }
+            FilledChip(stringResource(R.string.widget_clock_battery_hide), !config.showBattery) {
+                onSelect(false)
+            }
         }
     }
 }

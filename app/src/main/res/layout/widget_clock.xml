@@ -4,7 +4,8 @@
   date opens the calendar, which is what each of them is for.
 
   Both fill the width, so a tap anywhere along a row lands on something rather than only on the
-  characters themselves. Their height is whatever the chosen size needs: sharing the slot's
+  characters themselves. The battery is a plain TextView and not a third clock: it is the one
+  line here that does not come from the time, so it is written out on each draw. Their height is whatever the chosen size needs: sharing the slot's
   height between them by weight instead meant a size larger than its share was cut off, and the
   size is the one thing here that is asked for outright.
 
@@ -52,4 +53,19 @@
         android:shadowDy="1"
         android:shadowRadius="4"
         android:contentDescription="@string/widget_clock_date" />
+
+    <TextView
+        android:id="@+id/widget_battery"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="@color/widget_clock_text"
+        android:textSize="14sp"
+        android:maxLines="1"
+        android:visibility="gone"
+        android:gravity="start"
+        android:shadowColor="#80000000"
+        android:shadowDx="0"
+        android:shadowDy="1"
+        android:shadowRadius="4"
+        android:contentDescription="@string/widget_clock_battery" />
 </LinearLayout>
