@@ -3,6 +3,9 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.VIBRATE" />
+    <!-- Tapping the clock widget opens the alarm app. Some OEM clocks gate their own
+         SHOW_ALARMS activity behind this, and it is granted at install with no prompt. -->
+    <uses-permission android:name="com.android.alarm.permission.SET_ALARM" />
     <uses-permission android:name="android.permission.EXPAND_STATUS_BAR" />
     <!-- A launcher must be able to see every installed app, icon pack, and widget provider
          on the device; without this, PackageManager silently filters almost everything out
@@ -76,6 +79,34 @@
                 android:name="android.accessibilityservice"
                 android:resource="@xml/accessibility_service_config" />
         </service>
+
+        <!-- The clock widget's own settings. Exported because the system starts it on behalf
+             of whichever launcher is showing the widget, including this one. -->
+        <activity
+            android:name=".widget.ClockWidgetConfigActivity"
+            android:exported="true"
+            android:excludeFromRecents="true"
+            android:taskAffinity=""
+            android:theme="@style/Theme.VictoriaLauncher">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
+        <!-- The launcher's own clock widget. Exported because every widget provider is: the
+             system reads it on behalf of whichever host is showing it. -->
+        <receiver
+            android:name=".widget.ClockWidgetProvider"
+            android:exported="true"
+            android:label="@string/widget_clock_label">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_clock_info" />
+        </receiver>
 
         <service
             android:name=".media.NowPlayingListenerService"

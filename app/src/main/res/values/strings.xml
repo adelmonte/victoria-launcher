@@ -220,6 +220,18 @@
 
     <!-- Widgets -->
     <string name="widget_add">Add widget</string>
+    <string name="widget_clock_label">Clock and date</string>
+    <string name="widget_clock_description">The time and date, in the launcher\'s own style</string>
+    <string name="widget_clock_time">Time</string>
+    <string name="widget_clock_date">Date</string>
+    <string name="widget_clock_hour">Clock</string>
+    <string name="widget_clock_hour_system">System</string>
+    <string name="widget_clock_hour_12">12-hour</string>
+    <string name="widget_clock_hour_24">24-hour</string>
+    <string name="widget_clock_date_format">Date</string>
+    <string name="widget_clock_date_none">No date</string>
+    <string name="widget_clock_size">Size</string>
+    <string name="widget_clock_size_preview">12:34</string>
     <string name="widget_add_another">Add another widget</string>
     <string name="widget_remove_this">Remove this widget</string>
     <string name="widget_unavailable">This widget is no longer available</string>

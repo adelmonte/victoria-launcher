@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  The launcher's own clock. Two tap targets on purpose: the time opens the clock app and the
+  date opens the calendar, which is what each of them is for.
+
+  Both fill the width and carry their share of the height, so a tap anywhere along a row lands
+  on something. Sized to wrap_content instead, they sat at the left of a slot that is mostly
+  empty, and a tap in that empty part reached nothing at all.
+
+  TextClock rather than a label this app keeps updating: it ticks on its own inside the host,
+  follows the system's 12- and 24-hour setting, and localizes both formats without being told.
+  autoSize lets the time grow into whatever height the slot has been given.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center_vertical"
+    android:paddingStart="4dp"
+    android:paddingEnd="4dp">
+
+    <TextClock
+        android:id="@+id/widget_time"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="2"
+        android:format12Hour="h:mm"
+        android:format24Hour="HH:mm"
+        android:textColor="@color/widget_clock_text"
+        android:textSize="44sp"
+        android:autoSizeTextType="uniform"
+        android:autoSizeMinTextSize="24sp"
+        android:autoSizeMaxTextSize="52sp"
+        android:maxLines="1"
+        android:gravity="bottom|start"
+        android:shadowColor="#80000000"
+        android:shadowDx="0"
+        android:shadowDy="1"
+        android:shadowRadius="4"
+        android:contentDescription="@string/widget_clock_time" />
+
+    <TextClock
+        android:id="@+id/widget_date"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:format12Hour="EEEE, d MMMM"
+        android:format24Hour="EEEE, d MMMM"
+        android:textColor="@color/widget_clock_text"
+        android:textSize="16sp"
+        android:autoSizeTextType="uniform"
+        android:autoSizeMinTextSize="12sp"
+        android:autoSizeMaxTextSize="22sp"
+        android:maxLines="1"
+        android:gravity="top|start"
+        android:shadowColor="#80000000"
+        android:shadowDx="0"
+        android:shadowDy="1"
+        android:shadowRadius="4"
+        android:contentDescription="@string/widget_clock_date" />
+</LinearLayout>

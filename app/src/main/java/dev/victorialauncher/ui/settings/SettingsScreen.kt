@@ -754,8 +754,9 @@ private fun SwitchRowWithDetail(
 }
 
 /** Slider plus a pair of steppers, since dragging to an exact value is fiddly. */
+/** Shared with the clock widget's own settings, so a size is set the same way everywhere. */
 @Composable
-private fun SliderRow(
+internal fun SliderRow(
     label: String,
     value: Float,
     range: ClosedFloatingPointRange<Float>,
@@ -1261,8 +1262,9 @@ private fun EdgeSideRow(selected: EdgeSide, onSelect: (EdgeSide) -> Unit) {
     }
 }
 
+/** Shared with the clock widget's own settings, which offers the same kind of choices. */
 @Composable
-private fun FilledChip(
+internal fun FilledChip(
     label: String,
     selected: Boolean,
     fontFamily: FontFamily? = null,

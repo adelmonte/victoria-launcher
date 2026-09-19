@@ -1,0 +1,118 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+package dev.victorialauncher.widget
+
+import android.app.PendingIntent
+import android.appwidget.AppWidgetManager
+import android.appwidget.AppWidgetProvider
+import android.content.ComponentName
+import android.content.Context
+import android.content.Intent
+import android.provider.AlarmClock
+import android.provider.CalendarContract
+import android.util.TypedValue
+import android.view.View
+import android.widget.RemoteViews
+import dev.victorialauncher.R
+
+/**
+ * A clock and date, so a fresh launcher has something on it without hunting for a widget that
+ * suits it.
+ *
+ * The views tick by themselves — TextClock runs inside whichever host draws it and follows the
+ * system's 12- or 24-hour setting — so this provider is only ever asked to say where a tap
+ * goes. There is no update interval and nothing is scheduled.
+ */
+class ClockWidgetProvider : AppWidgetProvider() {
+
+    override fun onUpdate(context: Context, manager: AppWidgetManager, ids: IntArray) {
+        ids.forEach { render(context, manager, it) }
+    }
+
+    /** Settings belong to one widget, so each is drawn from its own. */
+    override fun onDeleted(context: Context, ids: IntArray) {
+        ids.forEach { ClockWidgetConfig.forget(context, it) }
+    }
+
+    companion object {
+        private const val REQUEST_CLOCK = 1
+        private const val REQUEST_CALENDAR = 2
+
+        fun componentName(context: Context) =
+            ComponentName(context, ClockWidgetProvider::class.java)
+
+        /**
+         * Draws one widget as its own settings ask.
+         *
+         * Forcing 12 or 24 hours means giving TextClock the same pattern for both, since it
+         * picks between them by the system setting and would otherwise ignore the choice.
+         *
+         * The request codes carry the widget id, or two clocks would share one PendingIntent
+         * and the second would silently take the first's target.
+         */
+        fun render(context: Context, manager: AppWidgetManager, widgetId: Int) {
+            val config = ClockWidgetConfig.read(context, widgetId)
+            val twelve = "h:mm"
+            val twentyFour = "HH:mm"
+            val views = RemoteViews(context.packageName, R.layout.widget_clock).apply {
+                when (config.hourFormat) {
+                    ClockWidgetConfig.HourFormat.SYSTEM -> {
+                        setCharSequence(R.id.widget_time, "setFormat12Hour", twelve)
+                        setCharSequence(R.id.widget_time, "setFormat24Hour", twentyFour)
+                    }
+                    ClockWidgetConfig.HourFormat.TWELVE -> {
+                        setCharSequence(R.id.widget_time, "setFormat12Hour", twelve)
+                        setCharSequence(R.id.widget_time, "setFormat24Hour", twelve)
+                    }
+                    ClockWidgetConfig.HourFormat.TWENTY_FOUR -> {
+                        setCharSequence(R.id.widget_time, "setFormat12Hour", twentyFour)
+                        setCharSequence(R.id.widget_time, "setFormat24Hour", twentyFour)
+                    }
+                }
+                setTextViewTextSize(R.id.widget_time, TypedValue.COMPLEX_UNIT_SP, config.timeSizeSp.toFloat())
+
+                val date = config.datePattern
+                if (date == null) {
+                    setViewVisibility(R.id.widget_date, View.GONE)
+                } else {
+                    setViewVisibility(R.id.widget_date, View.VISIBLE)
+                    setCharSequence(R.id.widget_date, "setFormat12Hour", date)
+                    setCharSequence(R.id.widget_date, "setFormat24Hour", date)
+                    setTextViewTextSize(R.id.widget_date, TypedValue.COMPLEX_UNIT_SP, config.dateSizeSp.toFloat())
+                }
+
+                setOnClickPendingIntent(R.id.widget_time, open(context, clockIntent(context), widgetId * 2))
+                setOnClickPendingIntent(R.id.widget_date, open(context, calendarIntent(), widgetId * 2 + 1))
+            }
+            manager.updateAppWidget(widgetId, views)
+        }
+
+        private fun open(context: Context, intent: Intent, requestCode: Int): PendingIntent? =
+            runCatching {
+                PendingIntent.getActivity(
+                    context,
+                    requestCode,
+                    intent,
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+                )
+            }.getOrNull()
+
+        private fun clockIntent(context: Context): Intent {
+            val showAlarms = Intent(AlarmClock.ACTION_SHOW_ALARMS)
+            val handler = runCatching {
+                context.packageManager.resolveActivity(showAlarms, 0)
+            }.getOrNull()?.activityInfo
+            if (handler != null && handler.exported) {
+                return showAlarms
+                    .setClassName(handler.packageName, handler.name)
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+            val launch = handler?.packageName
+                ?.let { runCatching { context.packageManager.getLaunchIntentForPackage(it) }.getOrNull() }
+            return (launch ?: showAlarms).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
+
+        private fun calendarIntent() = Intent(Intent.ACTION_VIEW)
+            .setData(CalendarContract.CONTENT_URI.buildUpon().appendPath("time").build())
+            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+    }
+}
