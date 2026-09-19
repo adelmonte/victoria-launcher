@@ -235,6 +235,7 @@ fun AppListScreen(
     // behind the overlay never sees the letter change. currentY/currentPull stay as
     // function references so their callers read them in the draw phase, not composition.
     val scrubLetter = scrub.letter
+    val scrubPlacement = scrub.placement
     val scrubbing = scrub.scrubbing
     val activeSide = scrub.side
     val scrubY = remember(scrub) { scrub::currentY }
@@ -295,8 +296,11 @@ fun AppListScreen(
     // The LazyColumn always holds the full list — while scrubbing it's just hidden and
     // pre-scrolled, with the letter's apps drawn over the top. Filtering the rows themselves
     // meant that on release the unfiltered list was briefly parked back at A.
-    val scrubRowIndex = remember(displayModel, scrubLetter) {
-        val letter = scrubLetter ?: return@remember -1
+    // From the placement and not from the live letter: the letter is gone by the time a quick
+    // tap has composed anything, and the list is placed by what was asked for, not by what is
+    // still under a finger.
+    val scrubRowIndex = remember(displayModel, scrubPlacement) {
+        val letter = scrubPlacement?.letter ?: return@remember -1
         displayModel.letterIndex.firstOrNull { it.first == letter }?.second ?: -1
     }
 
@@ -373,8 +377,19 @@ fun AppListScreen(
             overPull = 0f
             stretchPx = 0f
             collapsing = false
-            listState.scrollToItem(0)
+            scrub.clearPlacement()
+            return@LaunchedEffect
         }
+        // Back to the top on the way in rather than on the way out, and only when nothing has
+        // asked for a letter.
+        //
+        // Hidden, this overlay is measured but never placed, and a scroll waits for a layout
+        // that is not coming — so a scroll-to-top issued on close sat pending from then until
+        // the list was next placed, which is the moment it opens. It and the tap's own scroll
+        // then woke on the same layout pass and raced for the scroll mutex, and when the stale
+        // one landed second the list opened at A having been told to go to N. Only ever on the
+        // first open after the launcher started, because only then is one left pending.
+        if (scrub.placement == null) listState.scrollToItem(0)
     }
 
     // How much of the scrub placement padding is still sitting on screen at each end, over and
@@ -444,7 +459,7 @@ fun AppListScreen(
         if (compensate > 0f) listState.dispatchRawDelta(-compensate)
     }
 
-    LaunchedEffect(scrubRowIndex, displayModel) {
+    LaunchedEffect(scrubRowIndex, scrubPlacement, displayModel) {
         if (scrubRowIndex < 0) return@LaunchedEffect
         listState.scrollToItem(scrubRowIndex)
         // The next letter's header ends this section. Walking the rows to find it copied the

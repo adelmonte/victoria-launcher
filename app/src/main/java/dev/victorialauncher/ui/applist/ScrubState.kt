@@ -30,6 +30,22 @@ class ScrubState {
     var letter by mutableStateOf<Char?>(null)
         private set
 
+    /**
+     * The letter a gesture asked the list to be parked at, with a count of the asking.
+     *
+     * Separate from [letter], which is what the fingertip is on right now and is dropped the
+     * instant it lifts. A tap quick enough to land and lift inside one frame set a letter and
+     * cleared it again before anything had composed, so the list opened at A having been told
+     * about M and back. The request outlives the touch; the count is what tells a second ask
+     * for the same letter from the first.
+     */
+    var placement by mutableStateOf<Placement?>(null)
+        private set
+
+    private var placementCount = 0L
+
+    data class Placement(val letter: Char, val count: Long)
+
     /** True while a finger is down on an edge zone. */
     var active by mutableStateOf(false)
         private set
@@ -81,6 +97,9 @@ class ScrubState {
         active = true
         scrubbing = false
         releasing = false
+        // Every gesture asks afresh, so picking the same letter twice places the list twice —
+        // the second time is someone who scrolled away and wants to be back there.
+        placement = null
     }
 
     /** Called once the gesture passes touch slop, never for a tap. */
@@ -92,6 +111,14 @@ class ScrubState {
         this.y = y
         this.pull = inwardPx
         this.letter = letter
+        if (letter != null && letter != placement?.letter) {
+            placement = Placement(letter, ++placementCount)
+        }
+    }
+
+    /** Forgotten when the list closes, so the next opening starts where the list does. */
+    fun clearPlacement() {
+        placement = null
     }
 
     /** Releases the elastic pull back to the strip. Suspends until the spring settles. */
@@ -117,6 +144,7 @@ class ScrubState {
         active = false
         scrubbing = false
         letter = null
+        placement = null
         releasing = false
         pull = 0f
     }
