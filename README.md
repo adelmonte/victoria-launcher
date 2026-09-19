@@ -48,6 +48,11 @@ later and this app set as your default home app; while it is unlocked its apps
 are listed like any others, and a "Private space" padlock entry locks and
 unlocks it.
 
+Use **Export settings** to save your setup. Android's own automatic backup
+deliberately skips it: everything is stored in one file that names every app you
+have arranged, private space included, and a backup that runs without the app
+cannot leave those out. Export can, and does.
+
 ## Changelog
 
 Per-release notes live in
