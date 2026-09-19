@@ -1,0 +1,5 @@
+New:
+* After a crash, About offers to copy the details for a bug report. Nothing is sent anywhere.
+
+Fixed:
+* Apps inside a folder now offer their shortcuts on long-press, like every other row.
