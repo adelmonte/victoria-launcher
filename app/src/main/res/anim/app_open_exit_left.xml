@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  The home screen gives way to the left. It travels a quarter of the width rather than all of
+  it, so the app looks like it is sliding over the launcher instead of shoving it off.
+-->
+<set xmlns:android="http://schemas.android.com/apk/res/android"
+    android:interpolator="@android:interpolator/decelerate_quad">
+    <translate
+        android:fromXDelta="0"
+        android:toXDelta="-25%p"
+        android:duration="@integer/app_open_slide_ms" />
+</set>

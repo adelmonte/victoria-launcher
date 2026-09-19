@@ -58,6 +58,7 @@ import dev.victorialauncher.data.IconSide
 import dev.victorialauncher.data.Folder
 import dev.victorialauncher.data.HomePaddings
 import dev.victorialauncher.data.QuickLaunchSlot
+import dev.victorialauncher.data.SlideFrom
 import dev.victorialauncher.data.PaddingSlot
 import dev.victorialauncher.data.folderToken
 import dev.victorialauncher.media.NowPlayingBus
@@ -593,7 +594,13 @@ fun HomeRoute(
                         QuickLaunchSlot.LEFT -> settings.quickLaunchLeft
                         QuickLaunchSlot.RIGHT -> settings.quickLaunchRight
                     }
-                    target?.let { app.appRepository.launch(it) }
+                    // A swipe that carried the screen left brings what it fetched in from the
+                    // right, the way any two things side by side would move.
+                    val slide = if (!settings.quickLaunchSlide) null else when (slot) {
+                        QuickLaunchSlot.LEFT -> SlideFrom.RIGHT
+                        QuickLaunchSlot.RIGHT -> SlideFrom.LEFT
+                    }
+                    target?.let { app.appRepository.launch(it, slide) }
                 },
                 onPeekStatusBar = onPeekStatusBar,
                 onExpandShade = {
@@ -814,6 +821,7 @@ data class HomeSettings(
     val appListSearchHidden: Boolean,
     val hideStatusBarAppList: Boolean,
     val sortByUsage: Boolean,
+    val quickLaunchSlide: Boolean,
     val quickLaunchLeft: AppInfo?,
     val quickLaunchRight: AppInfo?,
     /** Place the favorites by measurement, until the user sets a padding of their own. */

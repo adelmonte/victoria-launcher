@@ -209,6 +209,7 @@ fun VictoriaNavHost(
     val rotatesByDefault = LocalConfiguration.current.smallestScreenWidthDp >= 600
     val allowRotationPref by app.prefs.allowRotation.collectAsState(initial = null)
     val shortcutSwipe by app.prefs.shortcutSwipe.collectAsState(initial = ShortcutSwipe.RIGHT)
+    val quickLaunchSlide by app.prefs.quickLaunchSlide.collectAsState(initial = false)
     val allowRotation = allowRotationPref ?: rotatesByDefault
     val iconShape by app.prefs.iconShape.collectAsState(initial = IconShape.SYSTEM)
     val themedIcons by app.prefs.themedIcons.collectAsState(initial = false)
@@ -343,6 +344,7 @@ fun VictoriaNavHost(
         appListSearchHidden = appListSearchHidden,
         hideStatusBarAppList = hideStatusBarAppList,
         sortByUsage = sortByUsage,
+        quickLaunchSlide = quickLaunchSlide,
         quickLaunchLeft = quickLaunchLeftKey?.let { appsByKey[it] },
         quickLaunchRight = quickLaunchRightKey?.let { appsByKey[it] },
         // Both flows start null/true so nothing is centered or offered before the stored
@@ -529,6 +531,8 @@ fun VictoriaNavHost(
                 onSetDimColor = { scope.launch { app.prefs.setDimColor(it) } },
                 onSetAllowRotation = { scope.launch { app.prefs.setAllowRotation(it) } },
                 onSetShortcutSwipe = { scope.launch { app.prefs.setShortcutSwipe(it) } },
+                quickLaunchSlide = quickLaunchSlide,
+                onSetQuickLaunchSlide = { scope.launch { app.prefs.setQuickLaunchSlide(it) } },
                 onExportSettings = { exportLauncher.launch("victoria-launcher-settings.json") },
                 onImportSettings = { importLauncher.launch(arrayOf("application/json", "text/plain", "*/*")) },
                 onSetIconShape = { scope.launch { app.prefs.setIconShape(it); clearIconCache() } },

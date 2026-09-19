@@ -150,6 +150,8 @@
     <string name="text_color_pick">Pick a color</string>
     <string name="settings_swipe_shortcuts">Swipe an app for its shortcuts</string>
     <string name="settings_swipe_shortcuts_detail">Swipe a favorite or a row in the app list. Apps that publish none do nothing</string>
+    <string name="settings_quick_launch_slide">Slide the app in</string>
+    <string name="settings_quick_launch_slide_detail">Carry the app in from the edge the swipe came from, instead of the system\'s own opening animation. Some devices ignore it</string>
     <string name="shortcut_swipe_off">Off</string>
     <string name="shortcut_swipe_right">Swipe right</string>
     <string name="shortcut_swipe_left">Swipe left</string>

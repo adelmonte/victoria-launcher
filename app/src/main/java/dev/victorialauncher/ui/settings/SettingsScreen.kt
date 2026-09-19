@@ -168,6 +168,8 @@ fun SettingsScreen(
     onSetAppListSearch: (Boolean) -> Unit,
     onSetAppListSearchBottom: (Boolean) -> Unit,
     onSetAppListSearchHidden: (Boolean) -> Unit,
+    quickLaunchSlide: Boolean,
+    onSetQuickLaunchSlide: (Boolean) -> Unit,
     quickLaunchLeftLabel: String?,
     quickLaunchRightLabel: String?,
     onOpenQuickLaunchPicker: (QuickLaunchSlot) -> Unit,
@@ -448,6 +450,13 @@ fun SettingsScreen(
                         label = stringResource(R.string.settings_quick_launch_right),
                         value = quickLaunchRightLabel,
                         onClick = { onOpenQuickLaunchPicker(QuickLaunchSlot.RIGHT) },
+                    )
+                    RowDivider()
+                    SwitchRowWithDetail(
+                        label = stringResource(R.string.settings_quick_launch_slide),
+                        detail = stringResource(R.string.settings_quick_launch_slide_detail),
+                        checked = quickLaunchSlide,
+                        onCheckedChange = onSetQuickLaunchSlide,
                     )
                     RowDivider()
                     SwitchRowWithDetail(

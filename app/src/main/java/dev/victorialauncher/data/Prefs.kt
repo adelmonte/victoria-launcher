@@ -37,6 +37,9 @@ enum class IconSide { LEFT, RIGHT }
 
 /** The two swipe directions under the favorites that can launch an app. */
 enum class QuickLaunchSlot { LEFT, RIGHT }
+
+/** Which edge an app is carried in from when it is opened by a sideways swipe. */
+enum class SlideFrom { LEFT, RIGHT }
 enum class AppFont { SYSTEM, SANS_SERIF, SERIF, MONOSPACE, CUSTOM }
 
 /** AUTO picks light or dark text from the wallpaper's own colors. */
@@ -85,6 +88,7 @@ class Prefs(private val context: Context) {
         val ALLOW_ROTATION = booleanPreferencesKey("allow_rotation")
         val SWIPE_FOR_SHORTCUTS = booleanPreferencesKey("swipe_for_shortcuts")
         val SHORTCUT_SWIPE = stringPreferencesKey("shortcut_swipe")
+        val QUICK_LAUNCH_SLIDE = booleanPreferencesKey("quick_launch_slide")
         val THEMED_ICONS = booleanPreferencesKey("themed_icons")
         val ICON_SHAPE = stringPreferencesKey("icon_shape")
         val HIDE_STATUS_BAR = booleanPreferencesKey("hide_status_bar")
@@ -295,6 +299,14 @@ class Prefs(private val context: Context) {
      * in the long-press menu, which is for setting a row up rather than using it. Off is for
      * anyone who would rather their rows answered only to a tap.
      */
+    /**
+     * Off by default. It replaces the system's own opening animation, which is what everything
+     * else on the device does, and it is the sort of thing that goes wrong on a device whose
+     * animations already do.
+     */
+    val quickLaunchSlide: Flow<Boolean> =
+        data.map { it[Keys.QUICK_LAUNCH_SLIDE] ?: false }.distinctUntilChanged()
+
     /**
      * Falls back to the switch this replaced, so anyone who had turned it off stays off and
      * everyone else keeps the direction it always had.
@@ -687,6 +699,10 @@ class Prefs(private val context: Context) {
         context.dataStore.edit { pref ->
             if (path == null) pref.remove(Keys.FONT_FILE) else pref[Keys.FONT_FILE] = path
         }
+    }
+
+    suspend fun setQuickLaunchSlide(v: Boolean) {
+        context.dataStore.edit { it[Keys.QUICK_LAUNCH_SLIDE] = v }
     }
 
     suspend fun setShortcutSwipe(v: ShortcutSwipe) {

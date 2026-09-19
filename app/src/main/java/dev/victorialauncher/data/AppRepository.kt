@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 package dev.victorialauncher.data
 
+import android.app.ActivityOptions
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -10,6 +11,7 @@ import android.content.pm.ShortcutInfo
 import android.content.res.Configuration
 import android.content.res.Resources
 import java.util.Locale
+import android.os.Bundle
 import android.os.Process
 import android.os.UserHandle
 import android.os.UserManager
@@ -362,14 +364,21 @@ class AppRepository(
         }
     }
 
-    /** Returns false if the app could not be started, so callers can undo whatever they hid. */
-    fun launch(app: AppInfo): Boolean {
-        if (app.kind == EntryKind.SHORTCUT) return launchShortcut(app)
+    /**
+     * Returns false if the app could not be started, so callers can undo whatever they hid.
+     *
+     * [slideFrom] replaces the system's own opening animation with one that carries the app in
+     * from an edge. Only a gesture that moved sideways has any business asking for it, and only
+     * then because the app arriving the same way the finger went is the whole point.
+     */
+    fun launch(app: AppInfo, slideFrom: SlideFrom? = null): Boolean {
+        if (app.kind == EntryKind.SHORTCUT) return launchShortcut(app, slideFrom)
         if (app.componentName.packageName == context.packageName) return false
+        val options = slideOptions(slideFrom)
         val started = runCatching {
             // Through LauncherApps so an app in another profile starts as that profile; a
             // plain startActivity would look for it in ours and find nothing.
-            launcherApps.startMainActivity(app.componentName, app.user ?: Process.myUserHandle(), null, null)
+            launcherApps.startMainActivity(app.componentName, app.user ?: Process.myUserHandle(), null, options)
             true
         }.getOrElse {
             runCatching {
@@ -377,7 +386,8 @@ class AppRepository(
                     Intent(Intent.ACTION_MAIN)
                         .addCategory(Intent.CATEGORY_LAUNCHER)
                         .setComponent(app.componentName)
-                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
+                    options,
                 )
                 true
             }.getOrDefault(false)
@@ -390,7 +400,19 @@ class AppRepository(
         return started
     }
 
-    private fun launchShortcut(app: AppInfo): Boolean {
+    /**
+     * The animation as a bundle, or null to leave the system's alone.
+     *
+     * A ROM is free to ignore it, and one that has animations turned off will. Nothing here
+     * depends on it being honored — it is the opening of the app that matters.
+     */
+    private fun slideOptions(slideFrom: SlideFrom?): Bundle? = slideFrom?.let { side ->
+        val enter = if (side == SlideFrom.RIGHT) R.anim.app_open_enter_right else R.anim.app_open_enter_left
+        val exit = if (side == SlideFrom.RIGHT) R.anim.app_open_exit_left else R.anim.app_open_exit_right
+        runCatching { ActivityOptions.makeCustomAnimation(context, enter, exit).toBundle() }.getOrNull()
+    }
+
+    private fun launchShortcut(app: AppInfo, slideFrom: SlideFrom? = null): Boolean {
         val id = app.shortcutId ?: return false
         if (app.disabled) {
             // The publisher's own wording wherever there is any: it is the only thing that
@@ -404,7 +426,13 @@ class AppRepository(
         // the app that published it and is never handed to a launcher; rebuilding one from
         // its parts would be starting something on that app's behalf that it did not ask for.
         val started = runCatching {
-            launcherApps.startShortcut(app.packageName, id, null, null, app.user ?: Process.myUserHandle())
+            launcherApps.startShortcut(
+                app.packageName,
+                id,
+                null,
+                slideOptions(slideFrom),
+                app.user ?: Process.myUserHandle(),
+            )
             true
         }.getOrDefault(false)
         if (started) {

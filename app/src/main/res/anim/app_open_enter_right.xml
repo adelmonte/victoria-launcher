@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The app arrives from the right, for a swipe that carried the home screen left. -->
+<set xmlns:android="http://schemas.android.com/apk/res/android"
+    android:interpolator="@android:interpolator/decelerate_quad">
+    <translate
+        android:fromXDelta="100%p"
+        android:toXDelta="0"
+        android:duration="@integer/app_open_slide_ms" />
+</set>

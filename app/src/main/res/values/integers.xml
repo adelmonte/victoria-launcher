@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Long enough to read as movement, short enough not to sit between a swipe and an app. -->
+    <integer name="app_open_slide_ms">220</integer>
+</resources>
