@@ -1068,7 +1068,9 @@ private fun FavoriteRow(
                 leadingIcon = { Icon(Icons.Filled.Edit, contentDescription = null) },
                 onClick = onEditLayout,
             )
-            // App info belongs to an app; there is no package screen to open for a shortcut.
+            // Only an installed app has a settings screen to open; a row that stands for
+            // something else — a shortcut, the private space — would send the system looking
+            // for a package that is not there.
             if (app.kind == EntryKind.APP) {
                 DropdownMenuItem(
                     text = { Text(stringResource(R.string.action_app_info)) },

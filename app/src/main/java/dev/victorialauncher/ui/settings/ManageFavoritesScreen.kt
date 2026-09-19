@@ -30,7 +30,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.unit.dp
 import dev.victorialauncher.data.AppInfo
 import dev.victorialauncher.data.Folder
+import dev.victorialauncher.data.PrivateSpace
+import dev.victorialauncher.data.concealsStored
 import dev.victorialauncher.data.folderIdFromToken
+import dev.victorialauncher.data.restoreConcealed
 import dev.victorialauncher.ui.common.AppIcon
 import dev.victorialauncher.R
 import androidx.compose.ui.res.stringResource
@@ -48,6 +51,8 @@ fun ManageFavoritesScreen(
     allApps: List<AppInfo>,
     favoriteKeys: List<String>,
     folders: List<Folder>,
+    /** So a favorite that lives in a locked private space can be left out of this screen. */
+    privateSpace: PrivateSpace,
     nameOverrides: Map<String, String>,
     iconSizeDp: Int,
     onSetFavorite: (AppInfo, Boolean) -> Unit,
@@ -65,6 +70,23 @@ fun ManageFavoritesScreen(
     val favorites = favoriteKeys.toSet()
     val appsByKey = remember(allApps) { allApps.associateBy { it.key } }
     val foldersById = remember(folders) { folders.associateBy { it.id } }
+    // A favorite inside a locked private space is left out entirely, rather than shown as the
+    // row that says an app is missing: that row would still say how many are in there. The
+    // stored keys are untouched, so those favorites come back when the space is opened. When
+    // the space itself could not be read, the same goes for any favorite that names nothing,
+    // since there is then no serial to tell a private one from an uninstalled one.
+    //
+    // One predicate, and the reorder below puts rows back with this same one. Hiding by a wide
+    // rule and restoring by a narrower one leaves the keys between the two in neither list,
+    // and the restore reads a list that is shorter than it expected as rows the user deleted —
+    // so the first drag would write that deletion to the store.
+    val conceal: (String) -> Boolean = remember(privateSpace, appsByKey, foldersById) {
+        { key ->
+            val resolves = key in appsByKey || folderIdFromToken(key)?.let { it in foldersById } == true
+            privateSpace.concealsStored(key, resolves)
+        }
+    }
+    val shownKeys = remember(favoriteKeys, conceal) { favoriteKeys.filterNot(conceal) }
 
     Scaffold(
         containerColor = surface,
@@ -85,11 +107,17 @@ fun ManageFavoritesScreen(
             modifier = Modifier.padding(padding),
         ) {
             item {
-                ListSectionLabel(stringResource(R.string.favorites_count, favorites.size))
+                ListSectionLabel(stringResource(R.string.favorites_count, shownKeys.size))
             }
 
             item {
-                ReorderableRows(keys = favoriteKeys, onReorder = onReorder) { key ->
+                ReorderableRows(
+                    keys = shownKeys,
+                    // What was left out goes back where it was, by the rule that left it
+                    // out. The screen writes back the whole list it was given, so without this
+                    // the first drag would delete every favorite this screen is hiding.
+                    onReorder = { order -> onReorder(restoreConcealed(favoriteKeys, order, conceal)) },
+                ) { key ->
                     val folder = folderIdFromToken(key)?.let { foldersById[it] }
                     val app = appsByKey[key]
                     when {

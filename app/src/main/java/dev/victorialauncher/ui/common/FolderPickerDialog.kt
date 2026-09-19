@@ -39,6 +39,13 @@ import androidx.compose.ui.res.stringResource
 fun FolderPickerDialog(
     appLabel: String,
     folders: List<Folder>,
+    /**
+     * How many of a folder's members have a row to draw right now, rather than how many keys
+     * it stores. The two differ by exactly the number of that folder's apps inside a locked
+     * private space, and the home screen's own badge already counts the live ones — so a
+     * dialog counting stored keys beside it would say, folder by folder, how many are in there.
+     */
+    memberCount: (Folder) -> Int,
     onPickFolder: (Folder) -> Unit,
     onCreateFolder: (String) -> Unit,
     onDismiss: () -> Unit,
@@ -65,7 +72,7 @@ fun FolderPickerDialog(
                             Column(Modifier.weight(1f)) {
                                 Text(folder.name, style = MaterialTheme.typography.bodyLarge)
                                 Text(
-                                    stringResource(R.string.folder_picker_app_count, folder.apps.size),
+                                    stringResource(R.string.folder_picker_app_count, memberCount(folder)),
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                                 )

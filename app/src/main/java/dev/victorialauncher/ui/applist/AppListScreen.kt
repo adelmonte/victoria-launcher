@@ -106,10 +106,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import dev.victorialauncher.data.AppInfo
 import dev.victorialauncher.data.EdgeSide
-import dev.victorialauncher.data.ShortcutSwipe
 import dev.victorialauncher.data.EntryKind
 import dev.victorialauncher.data.HomeAlignment
 import dev.victorialauncher.data.IconSide
+import dev.victorialauncher.data.ShortcutSwipe
 import dev.victorialauncher.ui.common.AppIcon
 import dev.victorialauncher.ui.common.AppShortcutMenu
 import dev.victorialauncher.ui.common.swipeForShortcuts
@@ -1161,7 +1161,9 @@ private fun AppRow(
                 leadingIcon = { Icon(Icons.Filled.Tune, contentDescription = null) },
                 onClick = { onDismissMenu(); onEdit() },
             )
-            // App info belongs to an app; there is no package screen to open for a shortcut.
+            // Only an installed app has a settings screen to open; a row that stands for
+            // something else — a shortcut, the private space — would send the system looking
+            // for a package that is not there.
             if (app.kind == EntryKind.APP) {
                 DropdownMenuItem(
                     text = { Text(stringResource(R.string.action_app_info)) },

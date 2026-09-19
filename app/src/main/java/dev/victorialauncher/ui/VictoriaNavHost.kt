@@ -28,8 +28,11 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -39,6 +42,8 @@ import android.widget.Toast
 import dev.victorialauncher.data.IconShape
 import dev.victorialauncher.data.AppFont
 import dev.victorialauncher.data.AppInfo
+import dev.victorialauncher.data.EntryKind
+import dev.victorialauncher.data.PrivateSpace
 import dev.victorialauncher.data.AzStripVisibility
 import dev.victorialauncher.data.EdgeSide
 import dev.victorialauncher.data.ShortcutSwipe
@@ -50,6 +55,7 @@ import dev.victorialauncher.data.TextColorMode
 import androidx.compose.ui.res.stringResource
 import dev.victorialauncher.R
 import dev.victorialauncher.data.folderIdFromToken
+import dev.victorialauncher.data.stripsOtherProfiles
 import dev.victorialauncher.media.isListenerEnabled
 import dev.victorialauncher.service.SystemUi
 import dev.victorialauncher.ui.common.IconPickerScreen
@@ -102,14 +108,62 @@ fun VictoriaNavHost(
     // Enumerating every installed app costs a PackageManager round trip per app; doing it in
     // the first composition is what stalled the cold start. Load it off the main thread and
     // let the home screen render against an empty list for the first frame.
-    var allApps by remember { mutableStateOf(emptyList<AppInfo>()) }
-    suspend fun reloadApps() {
-        allApps = withContext(Dispatchers.Default) { app.appRepository.queryAllApps() }
+    var appsAndSpace by remember { mutableStateOf(AppsAndSpace(PrivateSpace.Absent, emptyList())) }
+    val allApps = appsAndSpace.apps
+    // Kept beside the list because the settings screens need it for keys whose rows are
+    // deliberately absent: a favorite inside a locked private space has nothing to look up.
+    val privateSpace = appsAndSpace.privateSpace
+    // Reloads are started from half a dozen independent places and overlap; this is what keeps
+    // the most recently read answer the one on screen. See [ReloadOrder].
+    val reloadOrder = remember { ReloadOrder() }
+
+    /**
+     * [known] is the state to enumerate against when the caller already has one it trusts more
+     * than a fresh read would be — a lock it has just been granted, which the system has not
+     * finished applying and would still describe as an open space.
+     *
+     * [pass] is the number this reload took from [reloadOrder] before it read anything.
+     */
+    suspend fun reloadApps(known: PrivateSpace?, pass: Long) {
+        val (state, apps) = withContext(Dispatchers.Default) {
+            // Resolved once and handed on, so the list and what the settings screens conceal
+            // can never disagree about whether the space was open when it was read.
+            val state = known ?: app.appRepository.privateSpace()
+            state to app.appRepository.queryAllApps(state)
+        }
+        // Overtaken while it ran: this list was enumerated against a state that is no longer
+        // the newest thing known about the device, and publishing it would put a locked
+        // space's apps back under an open padlock. Nothing is lost by dropping it — the pass
+        // that overtook this one publishes a list of its own.
+        if (reloadOrder.mayPublish(pass)) appsAndSpace = AppsAndSpace(state, apps)
     }
+
     // A shortcut pinned through the confirm screen, or unpinned from a menu, changes what
     // there is to list without any package changing — so nothing here would otherwise notice.
     val shortcutChanges by app.appRepository.shortcutChanges.collectAsState()
-    LaunchedEffect(shortcutChanges) { reloadApps() }
+    LaunchedEffect(shortcutChanges) { reloadApps(known = null, pass = reloadOrder.begin()) }
+
+    /**
+     * Takes a state that has just been resolved and acts on what it conceals at once, on the
+     * list already in hand, before the reload that will take a moment.
+     *
+     * The reload is a full enumeration: every profile, every activity, an icon cache thrown
+     * away and rebuilt. That is long enough to read the names off a home screen, and a lock
+     * that only takes effect at the end of it has left them there for exactly that long.
+     *
+     * Publishes nothing once [pass] has been superseded, for the same reason the reload does
+     * not: this state was read before a newer one, and the direction a stale state goes wrong
+     * in is the one that un-conceals.
+     */
+    fun adoptPrivateSpace(state: PrivateSpace, pass: Long) {
+        if (!reloadOrder.mayPublish(pass)) return
+        appsAndSpace = AppsAndSpace(
+            state,
+            appsAndSpace.apps.filterNot { it.kind == EntryKind.PRIVATE_SPACE || state.conceals(it.key) } +
+                app.appRepository.privateSpaceRow(state),
+        )
+    }
+    LaunchedEffect(Unit) { reloadApps(known = null, pass = reloadOrder.begin()) }
 
     // Before anything the user does can write to the store, so "the store is empty" still
     // means "this is a first run" when it is read.
@@ -119,10 +173,17 @@ fun VictoriaNavHost(
         val launcherApps = context.getSystemService(LauncherApps::class.java)
         fun refresh() {
             scope.launch {
+                // Taken before the read, so anything already enumerating is superseded by the
+                // moment this pass looked rather than by the moment it finished.
+                val pass = reloadOrder.begin()
+                // The private space first and on its own: whatever it conceals leaves the list
+                // that is on screen now, rather than when the enumeration below comes back.
+                val state = withContext(Dispatchers.Default) { app.appRepository.privateSpace() }
+                adoptPrivateSpace(state, pass)
                 // An app that ships a new icon in an update changes none of the cache
                 // key's components, so nothing else would invalidate the stale bitmap.
                 clearIconCache()
-                reloadApps()
+                reloadApps(state, pass)
             }
         }
 
@@ -145,11 +206,16 @@ fun VictoriaNavHost(
         }
         runCatching { launcherApps.registerCallback(callback) }
 
-        // Locking a private space removes the whole profile rather than any package, so it
-        // arrives as one of these instead and no package callback ever fires.
+        // Locking or unlocking a private space changes no package, so no package callback
+        // ever fires for it — it arrives as one of these instead. Android 15 sends PROFILE_-
+        // UNAVAILABLE then PROFILE_INACCESSIBLE on locking and the matching pair on
+        // unlocking, including when the screen going off re-locks the space on its own.
+        // Written as strings because the Intent constants are newer than this app's minimum.
         val filter = IntentFilter().apply {
             addAction(Intent.ACTION_MANAGED_PROFILE_AVAILABLE)
             addAction(Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE)
+            addAction("android.intent.action.PROFILE_AVAILABLE")
+            addAction("android.intent.action.PROFILE_UNAVAILABLE")
             addAction("android.intent.action.PROFILE_ACCESSIBLE")
             addAction("android.intent.action.PROFILE_INACCESSIBLE")
             addAction("android.intent.action.PROFILE_ADDED")
@@ -164,6 +230,35 @@ fun VictoriaNavHost(
             runCatching { launcherApps.unregisterCallback(callback) }
             context.unregisterReceiver(receiver)
         }
+    }
+
+    // A broadcast is the only other thing that ever says the space has locked, and it is one
+    // thing: it is only heard while this is composed, the system re-locks the space by itself
+    // whenever the screen goes off, and a lock that was missed stays missed until something
+    // else happens to reload. Coming back to the launcher is the moment that matters, so the
+    // state is read again there — a handful of binder calls, with the enumeration behind it
+    // only when the answer actually changed.
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event != Lifecycle.Event.ON_START) return@LifecycleEventObserver
+            scope.launch {
+                val probe = withContext(Dispatchers.Default) { app.appRepository.privateSpace() }
+                if (probe == appsAndSpace.privateSpace) return@launch
+                // Only once there is something to do: a number taken to decide nothing changed
+                // would supersede a reload already running and leave the list as it was. But
+                // the read above was made before the number, so something newer may have
+                // published in between — a lock, say — and acting on it now would outrank that.
+                // So the number is taken first and the space is read again under it.
+                val pass = reloadOrder.begin()
+                val state = withContext(Dispatchers.Default) { app.appRepository.privateSpace() }
+                adoptPrivateSpace(state, pass)
+                clearIconCache()
+                reloadApps(state, pass)
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
     val hiddenApps by app.prefs.hiddenApps.collectAsState(initial = emptySet())
@@ -245,6 +340,10 @@ fun VictoriaNavHost(
     val contentColor = rememberContentColor(textColorMode, textColorCustom)
 
     val appsByKey = remember(allApps) { allApps.associateBy { it.key } }
+    // The number the hidden-apps screen itself arrives at, rather than the size of the stored
+    // set: that screen lists rows, and a hidden app inside a locked private space has no row.
+    // Counting the stored set in the subtitle says out loud how many apps are in there.
+    val hiddenShownCount = remember(allApps, hiddenApps) { allApps.count { it.key in hiddenApps } }
     val foldersById = remember(folders) { folders.associateBy { it.id } }
 
     // A favorites row is an app or a folder; both come out of the same ordered token list.
@@ -289,17 +388,25 @@ fun VictoriaNavHost(
     ) { uri ->
         if (uri == null) return@rememberLauncherForActivityResult
         scope.launch {
-            val ok = withContext(Dispatchers.IO) {
+            // Every state but Absent strips, including the ones with no serial to strip by:
+            // an unreadable space is the case most in need of it, and it is the case a strip
+            // keyed on the serial does nothing in.
+            val stripOtherProfiles = privateSpace.stripsOtherProfiles
+            val omittedPrivateSpace = withContext(Dispatchers.IO) {
                 runCatching {
-                    val json = app.prefs.exportJson()
-                    context.contentResolver.openOutputStream(uri)?.use { it.write(json.toByteArray()) }
-                        ?: return@runCatching false
-                    true
-                }.getOrDefault(false)
+                    val result = app.prefs.exportJson(stripOtherProfiles)
+                    context.contentResolver.openOutputStream(uri)?.use { it.write(result.json.toByteArray()) }
+                        ?: return@runCatching null
+                    result.omittedPrivateSpace
+                }.getOrNull()
             }
             Toast.makeText(
                 context,
-                if (ok) R.string.settings_export_done else R.string.settings_backup_failed,
+                when (omittedPrivateSpace) {
+                    null -> R.string.settings_backup_failed
+                    true -> R.string.settings_export_done_private_omitted
+                    false -> R.string.settings_export_done
+                },
                 Toast.LENGTH_SHORT,
             ).show()
         }
@@ -455,6 +562,23 @@ fun VictoriaNavHost(
                 onClearScrubBand = { scope.launch { app.prefs.clearScrubBand() } },
                 onPeekStatusBar = onPeekStatusBar,
                 onAppListVisibleChange = onAppListVisibleChange,
+                onTogglePrivateSpace = {
+                    scope.launch {
+                        val locked = app.appRepository.togglePrivateSpace()
+                        // Taken after the system has answered, not before: on a phone with a
+                        // screen lock the authentication in front of an unlock takes as long
+                        // as the person does, and a pass held open across it would supersede
+                        // every reload started while the dialog was up.
+                        val pass = reloadOrder.begin()
+                        // Granted means locked, and locked is concealed here and now: the
+                        // broadcast that says so arrives well after the profile has stopped.
+                        if (locked != null) adoptPrivateSpace(locked, pass)
+                        clearIconCache()
+                        // Enumerated against the lock rather than against what the system says
+                        // this instant, which for the next moment is still an open space.
+                        reloadApps(locked, pass)
+                    }
+                },
                 onNavigate = { route -> navController.navigate(route) },
             )
         }
@@ -463,7 +587,7 @@ fun VictoriaNavHost(
             val iconPacks = remember { app.iconPackRepository.getInstalledIconPacks() }
             val listenerEnabled = remember(homeIntentTick) { isListenerEnabled(context) }
             SettingsScreen(
-                hiddenCount = hiddenApps.size,
+                hiddenCount = hiddenShownCount,
                 iconPacks = iconPacks,
                 iconPackPackage = iconPackPackage,
                 showAppIcons = showAppIcons,
@@ -613,6 +737,7 @@ fun VictoriaNavHost(
                 allApps = allApps,
                 favoriteKeys = favoriteKeys,
                 folders = folders,
+                privateSpace = privateSpace,
                 nameOverrides = nameOverrides,
                 iconSizeDp = iconSizeDp,
                 onReorder = { keys -> scope.launch { app.prefs.setFavorites(keys) } },
@@ -636,6 +761,7 @@ fun VictoriaNavHost(
             FolderAppsScreen(
                 folder = foldersById[id],
                 allApps = allApps,
+                privateSpace = privateSpace,
                 nameOverrides = nameOverrides,
                 iconSizeDp = iconSizeDp,
                 onSetInFolder = { appInfo, inFolder ->
@@ -725,3 +851,13 @@ fun VictoriaNavHost(
         }
     }
 }
+
+/**
+ * The app list and the private-space state it was enumerated against, held as one value.
+ *
+ * Two pieces of state would let a composition see a list from one read beside a state from
+ * another, and every consumer needs them to agree: the settings screens decide what to conceal
+ * from the state and then look the rest up in the list, and the home screen draws the padlock
+ * from one and the rows from the other. Published together, there is no such moment.
+ */
+private data class AppsAndSpace(val privateSpace: PrivateSpace, val apps: List<AppInfo>)

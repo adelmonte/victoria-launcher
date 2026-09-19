@@ -18,6 +18,9 @@ enum class EntryKind {
 
     /** The entry that asks for a query and hands it to a search engine. */
     SEARCH,
+
+    /** The row that locks and unlocks Android's private space. */
+    PRIVATE_SPACE,
 }
 
 /**
@@ -54,6 +57,7 @@ data class AppInfo(
         EntryKind.SHORTCUT ->
             EntryKeys.shortcut(componentName.packageName, shortcutId.orEmpty(), userSerial)
         EntryKind.SEARCH -> EntryKeys.SEARCH
+        EntryKind.PRIVATE_SPACE -> EntryKeys.PRIVATE_SPACE
     }
 
     val packageName: String get() = componentName.packageName

@@ -50,6 +50,8 @@ import androidx.lifecycle.LifecycleEventObserver
 import dev.victorialauncher.TypedKey
 import dev.victorialauncher.VictoriaApp
 import dev.victorialauncher.data.AppInfo
+import dev.victorialauncher.data.EntryKind
+import dev.victorialauncher.data.restoreConcealed
 import dev.victorialauncher.data.AzStripVisibility
 import dev.victorialauncher.data.EdgeSide
 import dev.victorialauncher.data.ShortcutSwipe
@@ -134,6 +136,8 @@ fun HomeRoute(
     onClearScrubBand: () -> Unit,
     onPeekStatusBar: () -> Unit,
     onAppListVisibleChange: (Boolean) -> Unit,
+    /** Locks an open private space or asks for a locked one to be opened, off this thread. */
+    onTogglePrivateSpace: () -> Unit,
     onNavigate: (String) -> Unit,
 ) {
     val context = LocalContext.current
@@ -304,6 +308,21 @@ fun HomeRoute(
             launchClose = null
             closeAppList()
         }
+    }
+
+    // The one place a row press is turned into something happening. Every row in the launcher
+    // arrives here, so a row that is not an app is recognised once, here, rather than in each
+    // of the four places a press is wired up.
+    fun launchEntry(entry: AppInfo, slideFrom: SlideFrom? = null): Boolean = when (entry.kind) {
+        // Handed off rather than done here: locking or unlocking is several binder calls and
+        // possibly the system's own authentication screen, which is not a press's work to do
+        // on the main thread. True because the press was acted on — there is simply nothing
+        // coming to the foreground to wait for.
+        EntryKind.PRIVATE_SPACE -> {
+            onTogglePrivateSpace()
+            true
+        }
+        else -> app.appRepository.launch(entry, slideFrom)
     }
 
     LaunchedEffect(settings.edgeSide) { scrub.syncRestingSide(settings.edgeSide) }
@@ -499,9 +518,9 @@ fun HomeRoute(
                 nowPlayingHeightDp = settings.nowPlayingHeightDp,
                 onResizeNowPlaying = { scope.launch { app.prefs.setNowPlayingHeightDp(it) } },
                 widgetActions = widgetActions,
-                onLaunch = { app.appRepository.launch(it) },
+                onLaunch = { launchEntry(it) },
                 onRemoveFavorite = { scope.launch { app.prefs.removeFavorite(it.key) } },
-                onOpenFolderApp = { app.appRepository.launch(it) },
+                onOpenFolderApp = { launchEntry(it) },
                 onRenameFolder = { folder, name ->
                     scope.launch { app.prefs.upsertFolder(folder.copy(name = name)) }
                 },
@@ -516,7 +535,13 @@ fun HomeRoute(
                 onMoveToFolder = { folderPickerFor = it },
                 onReorderHome = { newFavKeys, newWidgetPos ->
                     scope.launch {
-                        app.prefs.setFavorites(newFavKeys)
+                        // The home screen draws only the favorites that resolve to a row, and
+                        // this hands back the order of what it drew. Written as it stands, that
+                        // would replace the stored list and delete every favorite that drew
+                        // nothing — which is exactly what a locked private space's favorites
+                        // do. Whatever drew no row goes back where it was.
+                        val drawn = newFavKeys.toSet()
+                        app.prefs.setFavorites(restoreConcealed(favoriteKeys, newFavKeys) { it !in drawn })
                         app.prefs.setWidgetPosition(newWidgetPos)
                     }
                 },
@@ -600,7 +625,7 @@ fun HomeRoute(
                         QuickLaunchSlot.LEFT -> SlideFrom.RIGHT
                         QuickLaunchSlot.RIGHT -> SlideFrom.LEFT
                     }
-                    target?.let { app.appRepository.launch(it, slide) }
+                    target?.let { launchEntry(it, slide) }
                 },
                 onPeekStatusBar = onPeekStatusBar,
                 onExpandShade = {
@@ -649,8 +674,11 @@ fun HomeRoute(
                 visible = appListVisible,
                 favoriteKeys = remember(favoriteKeys) { favoriteKeys.toSet() },
                 onLaunch = { appInfo ->
-                    // A launch that never got off the ground leaves nothing to wait for.
-                    if (app.appRepository.launch(appInfo)) closeAfterLaunch() else closeAppList()
+                    // A launch that never got off the ground leaves nothing to wait for, and
+                    // the private-space row has nothing coming to the foreground either — it
+                    // changes what this very list holds, so it wants the list out of the way.
+                    val acted = launchEntry(appInfo)
+                    if (acted && appInfo.kind == EntryKind.APP) closeAfterLaunch() else closeAppList()
                 },
                 onSetFavorite = { appInfo, add ->
                     scope.launch {
@@ -721,6 +749,10 @@ fun HomeRoute(
             FolderPickerDialog(
                 appLabel = nameOverrides[target.key] ?: target.label,
                 folders = folders,
+                // The rows this launcher can actually draw, which is what the home screen's
+                // own badge counts. A folder's stored keys include whatever a locked private
+                // space is hiding.
+                memberCount = { folder -> folder.apps.count { it in appsByKey } },
                 onPickFolder = { folder ->
                     scope.launch { app.prefs.addAppToFolder(folder.id, target.key) }
                     folderPickerFor = null

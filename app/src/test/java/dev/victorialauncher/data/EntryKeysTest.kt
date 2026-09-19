@@ -99,6 +99,39 @@ class EntryKeysTest {
     }
 
     @Test
+    fun `the private space key cannot be mistaken for anything else`() {
+        val private = EntryKeys.PRIVATE_SPACE
+        assertEquals("private:space", private)
+        assertTrue(EntryKeys.isPrivateSpace(private))
+
+        assertNull(folderIdFromToken(private))
+        assertFalse(EntryKeys.isShortcut(private))
+        assertNull(EntryKeys.parseShortcut(private))
+        assertFalse(EntryKeys.isSearch(private))
+
+        assertFalse(EntryKeys.isPrivateSpace(appKey))
+        assertFalse(EntryKeys.isPrivateSpace("$appKey|u10"))
+        assertFalse(EntryKeys.isPrivateSpace(folderToken("abc123")))
+        assertFalse(EntryKeys.isPrivateSpace(EntryKeys.shortcut("org.browser", "id")))
+        assertFalse(EntryKeys.isPrivateSpace(EntryKeys.SEARCH))
+        // An exact match, never a prefix one.
+        assertFalse(EntryKeys.isPrivateSpace("private:space|u10"))
+        assertFalse(EntryKeys.isPrivateSpace("private:spaces"))
+    }
+
+    @Test
+    fun `a key names the profile it was stored for`() {
+        assertEquals(0L, EntryKeys.userSerial(appKey))
+        assertEquals(10L, EntryKeys.userSerial("$appKey|u10"))
+        assertEquals(10L, EntryKeys.userSerial(EntryKeys.shortcut("org.browser", "id", userSerial = 10L)))
+        assertEquals(0L, EntryKeys.userSerial(folderToken("abc123")))
+        assertEquals(0L, EntryKeys.userSerial(EntryKeys.PRIVATE_SPACE))
+        // Not a serial: no digits, and a class name cannot contain the separator anyway.
+        assertEquals(0L, EntryKeys.userSerial("$appKey|uten"))
+        assertEquals(0L, EntryKeys.userSerial("$appKey|u10x"))
+    }
+
+    @Test
     fun `a package named like a prefix cannot forge another kind of key`() {
         // A Java package segment cannot contain a colon, so no real app key starts with a prefix.
         // Even so, the search check is an exact match and never a prefix match.

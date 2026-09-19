@@ -12,10 +12,17 @@
          on Android 11+. This is one of Google's own documented justified uses of the permission. -->
     <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES"
         tools:ignore="QueryAllPackagesPermission" />
+    <!-- Android 15 hides a private space from every app that does not ask for this. Without
+         it the profile is missing from LauncherApps entirely, so its apps can never be listed
+         and the space can never be unlocked from here. Granted at install time, no prompt,
+         and it only takes effect while this launcher holds the home role. -->
+    <uses-permission android:name="android.permission.ACCESS_HIDDEN_PROFILES" />
 
     <application
         android:name=".VictoriaApp"
         android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher"

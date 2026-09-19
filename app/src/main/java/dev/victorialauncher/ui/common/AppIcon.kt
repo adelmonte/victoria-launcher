@@ -72,13 +72,16 @@ private object IconCache {
 
 fun clearIconCache() = IconCache.clear()
 
+// The class name is in here for the rows whose key alone cannot tell two pictures apart: the
+// private-space row keeps one key across locking and unlocking, and the padlock it draws is
+// not the same picture either side of that. For an app it is what the key already says.
 private fun iconCacheKey(
     app: AppInfo,
     iconPack: String?,
     override: String?,
     px: Int,
     style: IconStyle,
-) = "${app.key}|$iconPack|$override|$px|${style.shape}|${style.themed}|${style.background}"
+) = "${app.key}|${app.componentName.className}|$iconPack|$override|$px|${style.shape}|${style.themed}|${style.background}"
 
 /** Everything about how an icon is drawn that is not the icon itself. */
 @Immutable

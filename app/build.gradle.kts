@@ -32,6 +32,7 @@ android {
         versionCode = 79
         versionName = "0.68.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     signingConfigs {
@@ -108,6 +109,13 @@ dependencies {
     testImplementation("junit:junit:4.13.2")
     // Real JSON on the unit-test classpath; the android.jar stub only throws.
     testImplementation("org.json:json:20231013")
+
+    // Black-box instrumented tests: UiAutomator so they can drive the home-screen role
+    // itself (set-default-home, system dialogs) rather than only what runs in-process.
+    androidTestImplementation("androidx.test.ext:junit:1.2.1")
+    androidTestImplementation("androidx.test:runner:1.6.2")
+    androidTestImplementation("androidx.test:rules:1.6.1")
+    androidTestImplementation("androidx.test.uiautomator:uiautomator:2.3.0")
 
     // Black-box instrumented tests: UiAutomator so they can drive the home-screen role
     // itself (set-default-home, system dialogs) rather than only what runs in-process.

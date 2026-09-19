@@ -62,14 +62,20 @@ private val Context.dataStore by preferencesDataStore(name = "victoria_prefs")
 /** Bumped only if the shape of an exported file changes, so an old one can be refused. */
 private const val EXPORT_FORMAT = 1
 
+/** [json] to write out, and whether anything belonging to the private space was left out of it. */
+data class ExportResult(val json: String, val omittedPrivateSpace: Boolean)
+
 class Prefs(private val context: Context) {
 
+    // The settings whose values are app keys take their names from PrivateSpaceExport, which is
+    // what has to recognise every one of them by name to keep a locked space out of a backup. A
+    // name spelled out in both places is a name that can be changed in one of them.
     private object Keys {
-        val HIDDEN_APPS = stringSetPreferencesKey("hidden_apps")
-        val FAVORITES = stringPreferencesKey("favorites_order")
-        val FOLDERS = stringPreferencesKey("folders_json")
-        val NAME_OVERRIDES = stringPreferencesKey("name_overrides_json")
-        val ICON_OVERRIDES = stringPreferencesKey("icon_overrides_json")
+        val HIDDEN_APPS = stringSetPreferencesKey(PREF_HIDDEN_APPS)
+        val FAVORITES = stringPreferencesKey(PREF_FAVORITES)
+        val FOLDERS = stringPreferencesKey(PREF_FOLDERS)
+        val NAME_OVERRIDES = stringPreferencesKey(PREF_NAME_OVERRIDES)
+        val ICON_OVERRIDES = stringPreferencesKey(PREF_ICON_OVERRIDES)
         val ICON_SIZE_DP = intPreferencesKey("icon_size_dp")
         val LABEL_SIZE_SP = intPreferencesKey("label_size_sp")
         val ITEM_SPACING_DP = intPreferencesKey("item_spacing_dp")
@@ -117,10 +123,10 @@ class Prefs(private val context: Context) {
         val APPLIST_SEARCH_BOTTOM = booleanPreferencesKey("applist_search_bottom")
         val APPLIST_SEARCH_HIDDEN = booleanPreferencesKey("applist_search_hidden")
         val SORT_BY_USAGE = booleanPreferencesKey("sort_by_usage")
-        val LAUNCH_COUNTS = stringPreferencesKey("launch_counts_json")
+        val LAUNCH_COUNTS = stringPreferencesKey(PREF_LAUNCH_COUNTS)
         val EDGE_ZONE_WIDTH_DP = intPreferencesKey("edge_zone_width_dp")
-        val QUICK_LAUNCH_LEFT = stringPreferencesKey("quick_launch_left_key")
-        val QUICK_LAUNCH_RIGHT = stringPreferencesKey("quick_launch_right_key")
+        val QUICK_LAUNCH_LEFT = stringPreferencesKey(PREF_QUICK_LAUNCH_LEFT)
+        val QUICK_LAUNCH_RIGHT = stringPreferencesKey(PREF_QUICK_LAUNCH_RIGHT)
         val LAYOUT_DEFAULTS_VERSION = intPreferencesKey("layout_defaults_version")
         val WELCOME_SEEN = booleanPreferencesKey("welcome_seen")
         val SHOW_APP_ICONS = booleanPreferencesKey("show_app_icons")
@@ -154,11 +160,24 @@ class Prefs(private val context: Context) {
      *
      * A custom font is a path into this app's own storage, so it points at nothing on another
      * phone; the font falls back to the default there until one is picked again.
+     *
+     * [privateSerial] is the private space's profile serial, when there is one, so its apps —
+     * and how often they were opened — never leave the device in a file the user can save
+     * anywhere. Passed in rather than looked up here because resolving it needs Android types
+     * this class otherwise avoids; the caller already has it from the same read that decided
+     * what to show on screen.
      */
-    suspend fun exportJson(): String {
+    suspend fun exportJson(stripOtherProfiles: Boolean): ExportResult {
         val stored = data.first()
         val values = JSONObject()
-        stored.asMap().forEach { (key, value) ->
+        var omittedPrivateSpace = false
+        stored.asMap().forEach { (key, rawValue) ->
+            val value = stripPrivateSpaceFromExport(key.name, rawValue, stripOtherProfiles)
+            if (value == null) {
+                omittedPrivateSpace = true
+                return@forEach
+            }
+            if (value != rawValue) omittedPrivateSpace = true
             val entry = JSONObject()
             when (value) {
                 is Boolean -> entry.put("type", "boolean").put("value", value)
@@ -172,11 +191,12 @@ class Prefs(private val context: Context) {
             }
             values.put(key.name, entry)
         }
-        return JSONObject()
+        val json = JSONObject()
             .put("format", EXPORT_FORMAT)
             .put("app", "Victoria Launcher")
             .put("values", values)
             .toString(2)
+        return ExportResult(json, omittedPrivateSpace)
     }
 
     /**

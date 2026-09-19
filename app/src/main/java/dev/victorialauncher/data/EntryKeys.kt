@@ -18,6 +18,9 @@ object EntryKeys {
     /** The one search entry. The suffix leaves room for more than one later. */
     const val SEARCH = "search:default"
 
+    /** The one row that locks and unlocks the private space. */
+    const val PRIVATE_SPACE = "private:space"
+
     private const val USER_SUFFIX = "|u"
     private val userSuffixPattern = Regex("""\|u(\d+)$""")
 
@@ -50,6 +53,16 @@ object EntryKeys {
     fun isShortcut(key: String): Boolean = key.startsWith(SHORTCUT_PREFIX)
 
     fun isSearch(key: String): Boolean = key == SEARCH
+
+    fun isPrivateSpace(key: String): Boolean = key == PRIVATE_SPACE
+
+    /**
+     * Which profile a stored key belongs to: the trailing `|u<serial>`, or zero, which is what
+     * a key without one has always meant. Read from the key rather than from the row it names,
+     * because a locked private space's rows are deliberately not there to be looked up.
+     */
+    fun userSerial(key: String): Long =
+        userSuffixPattern.find(key)?.groupValues?.get(1)?.toLongOrNull() ?: 0L
 
     data class ShortcutRef(val packageName: String, val shortcutId: String, val userSerial: Long)
 
