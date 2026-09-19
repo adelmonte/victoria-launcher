@@ -1,0 +1,3 @@
+New:
+* A clock and date widget of the launcher's own. Tap the time for your clock app, the date for your calendar. Its settings — 12 or 24 hour, date format, size — are in the widget's own menu.
+* A new install starts with the clock already on the home screen.
