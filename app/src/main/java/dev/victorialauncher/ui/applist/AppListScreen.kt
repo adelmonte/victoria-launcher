@@ -110,7 +110,8 @@ import dev.victorialauncher.data.EntryKind
 import dev.victorialauncher.data.HomeAlignment
 import dev.victorialauncher.data.IconSide
 import dev.victorialauncher.ui.common.AppIcon
-import dev.victorialauncher.ui.common.AppShortcutItems
+import dev.victorialauncher.ui.common.AppShortcutMenu
+import dev.victorialauncher.ui.common.shortcutSwipe
 import dev.victorialauncher.ui.common.LocalIconConfig
 import dev.victorialauncher.ui.common.recordTouchPosition
 import dev.victorialauncher.ui.common.EditAppDialog
@@ -213,6 +214,8 @@ fun AppListScreen(
     statusBarHidden: Boolean,
     /** The model a query runs against, which may carry hidden apps the list itself omits. */
     searchModel: AppListModel,
+    /** Whether a sideways swipe on a row offers its app's shortcuts. */
+    swipeForShortcuts: Boolean,
     searchEnabled: Boolean,
     searchAtBottom: Boolean,
     query: String,
@@ -852,6 +855,7 @@ fun AppListScreen(
                 when (row) {
                     is AppListRow.Header -> SectionHeader(row.text, labelSizeSp, contentColor, alignment)
                     is AppListRow.Entry -> AppRow(
+                        swipeForShortcuts = swipeForShortcuts,
                         contentColor = contentColor,
                         alignment = alignment,
                         iconSide = iconSide,
@@ -1012,6 +1016,7 @@ private fun SectionHeader(text: String, labelSizeSp: Int, contentColor: Color, a
 
 @Composable
 private fun AppRow(
+    swipeForShortcuts: Boolean,
     contentColor: Color,
     alignment: HomeAlignment,
     iconSide: IconSide,
@@ -1040,6 +1045,8 @@ private fun AppRow(
     val interaction = remember { MutableInteractionSource() }
     val pressed by interaction.collectIsPressedAsState()
     val density = LocalDensity.current
+    var shortcutMenu by remember { mutableStateOf(false) }
+    var shortcutOffset by remember { mutableStateOf(DpOffset.Zero) }
 
     Box {
         Row(
@@ -1048,6 +1055,10 @@ private fun AppRow(
                 // Ahead of the inset, so the long-press menu is still placed against the
                 // whole row rather than 20dp to the left of the finger.
                 .recordTouchPosition(touchPosition)
+                .shortcutSwipe(swipeForShortcuts && app.kind == EntryKind.APP) { start ->
+                    shortcutOffset = with(density) { DpOffset(start.x.toDp(), start.y.toDp()) }
+                    shortcutMenu = true
+                }
                 .padding(horizontal = 20.dp)
                 .background(
                     color = if (pressed) contentColor.copy(alpha = 0.15f) else Color.Transparent,
@@ -1119,7 +1130,6 @@ private fun AppRow(
         }
 
         DropdownMenu(expanded = menuExpanded, onDismissRequest = onDismissMenu, offset = menuOffset) {
-            AppShortcutItems(app, menuExpanded) { onDismissMenu() }
             DropdownMenuItem(
                 text = { Text(stringResource(if (isFavorite) R.string.applist_remove_favorite else R.string.applist_add_favorite)) },
                 leadingIcon = {

@@ -113,6 +113,7 @@ fun SettingsScreen(
     textColorCustom: Int,
     dimColor: Int,
     allowRotation: Boolean,
+    swipeForShortcuts: Boolean,
     fontFile: String?,
     iconShape: IconShape,
     themedIcons: Boolean,
@@ -149,6 +150,7 @@ fun SettingsScreen(
     onSetTextColorCustom: (Int) -> Unit,
     onSetDimColor: (Int) -> Unit,
     onSetAllowRotation: (Boolean) -> Unit,
+    onSetSwipeForShortcuts: (Boolean) -> Unit,
     onExportSettings: () -> Unit,
     onImportSettings: () -> Unit,
     onPickFontFile: (Uri) -> Unit,
@@ -452,6 +454,13 @@ fun SettingsScreen(
                         detail = stringResource(R.string.settings_swipe_up_list_detail),
                         checked = swipeUpOpensList,
                         onCheckedChange = onSetSwipeUpOpensList,
+                    )
+                    RowDivider()
+                    SwitchRowWithDetail(
+                        label = stringResource(R.string.settings_swipe_shortcuts),
+                        detail = stringResource(R.string.settings_swipe_shortcuts_detail),
+                        checked = swipeForShortcuts,
+                        onCheckedChange = onSetSwipeForShortcuts,
                     )
                     RowDivider()
                     SwitchRowWithDetail(
@@ -1085,7 +1094,7 @@ private fun DimColorRow(dimColor: Int, onSetDimColor: (Int) -> Unit) {
 /** A swatch to tap or a hex value to type; enough for picking a text color, and no library. */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun ColorPickerDialog(initial: Int, onConfirm: (Int) -> Unit, onDismiss: () -> Unit) {
+internal fun ColorPickerDialog(initial: Int, onConfirm: (Int) -> Unit, onDismiss: () -> Unit) {
     var hex by remember { mutableStateOf(String.format("%06X", initial and 0xFFFFFF)) }
     val parsed = remember(hex) { hex.toIntOrNull(16)?.let { 0xFF000000.toInt() or it } }
 

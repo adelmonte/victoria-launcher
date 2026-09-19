@@ -207,6 +207,7 @@ fun VictoriaNavHost(
     val dimColor by app.prefs.dimColor.collectAsState(initial = 0xFF000000.toInt())
     val rotatesByDefault = LocalConfiguration.current.smallestScreenWidthDp >= 600
     val allowRotationPref by app.prefs.allowRotation.collectAsState(initial = null)
+    val swipeForShortcuts by app.prefs.swipeForShortcuts.collectAsState(initial = true)
     val allowRotation = allowRotationPref ?: rotatesByDefault
     val iconShape by app.prefs.iconShape.collectAsState(initial = IconShape.SYSTEM)
     val themedIcons by app.prefs.themedIcons.collectAsState(initial = false)
@@ -327,6 +328,7 @@ fun VictoriaNavHost(
         nowPlayingEnabled = nowPlayingEnabled,
         edgeSide = edgeSide,
         azStripVisibility = azStripVisibility,
+        swipeForShortcuts = swipeForShortcuts,
         showAlphabet = showAlphabet,
         alignment = alignment,
         appListAlignment = appListAlignment,
@@ -489,6 +491,7 @@ fun VictoriaNavHost(
                 textColorCustom = textColorCustom,
                 dimColor = dimColor,
                 allowRotation = allowRotation,
+                swipeForShortcuts = swipeForShortcuts,
                 fontFile = fontFile,
                 iconShape = iconShape,
                 themedIcons = themedIcons,
@@ -524,6 +527,7 @@ fun VictoriaNavHost(
                 onSetTextColorCustom = { scope.launch { app.prefs.setTextColorCustom(it) } },
                 onSetDimColor = { scope.launch { app.prefs.setDimColor(it) } },
                 onSetAllowRotation = { scope.launch { app.prefs.setAllowRotation(it) } },
+                onSetSwipeForShortcuts = { scope.launch { app.prefs.setSwipeForShortcuts(it) } },
                 onExportSettings = { exportLauncher.launch("victoria-launcher-settings.json") },
                 onImportSettings = { importLauncher.launch(arrayOf("application/json", "text/plain", "*/*")) },
                 onSetIconShape = { scope.launch { app.prefs.setIconShape(it); clearIconCache() } },

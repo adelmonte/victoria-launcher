@@ -5,7 +5,6 @@ import android.content.pm.ShortcutInfo
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -14,6 +13,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
@@ -72,8 +75,51 @@ fun AppShortcutItems(app: AppInfo, expanded: Boolean, onStarted: () -> Unit) {
             },
         )
     }
-    HorizontalDivider()
 }
 
 /** Rasterised at menu-icon size; the drawable itself is whatever density the publisher had. */
 private const val ICON_PX = 72
+
+/**
+ * Swipe a row from left to right to reach what the app publishes.
+ *
+ * A separate gesture from the long press on purpose: shortcuts are used daily and the menu
+ * behind a long press is set-up-and-done, so they do not belong in the same place.
+ *
+ * Nothing happens on a row whose app publishes none. There is no way to know that before
+ * asking, and asking every row up front is a call into the system per app.
+ */
+fun Modifier.shortcutSwipe(enabled: Boolean, onSwipe: (Offset) -> Unit): Modifier =
+    if (!enabled) this else this.pointerInput(Unit) {
+        var travelled = 0f
+        var start = Offset.Zero
+        var fired = false
+        detectHorizontalDragGestures(
+            onDragStart = { start = it; travelled = 0f; fired = false },
+            onDragEnd = { },
+            onDragCancel = { },
+        ) { change, amount ->
+            travelled += amount
+            // Only rightward, and only once: leftward is left alone so it can mean something
+            // else later, and a long drag should open one menu rather than a menu per pixel.
+            if (!fired && travelled > SWIPE_THRESHOLD_PX) {
+                fired = true
+                change.consume()
+                onSwipe(start)
+            }
+        }
+    }
+
+/** Far enough not to fire on a tap that wandered, short enough to feel like a flick. */
+private const val SWIPE_THRESHOLD_PX = 90f
+
+/**
+ * The shortcuts on their own, for the swipe. Renders nothing when the app publishes none, so
+ * a swipe on such a row opens an empty popup rather than a stray one.
+ */
+@Composable
+fun AppShortcutMenu(app: AppInfo, expanded: Boolean, offset: DpOffset, onDismiss: () -> Unit) {
+    TouchAnchoredMenu(expanded = expanded, offset = offset, onDismissRequest = onDismiss) {
+        AppShortcutItems(app, expanded) { onDismiss() }
+    }
+}

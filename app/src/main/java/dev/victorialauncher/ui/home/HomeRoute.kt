@@ -476,6 +476,7 @@ fun HomeRoute(
         ) {
             HomeScreen(
                 stripInsetSide = if (!stripAlwaysVisible) null else settings.edgeSide,
+                swipeForShortcuts = settings.swipeForShortcuts,
                 favorites = favorites,
                 nameOverrides = nameOverrides,
                 iconSizeDp = settings.iconSizeDp,
@@ -665,6 +666,7 @@ fun HomeRoute(
                 edgeSide = settings.edgeSide,
                 statusBarHidden = settings.hideStatusBarAppList,
                 searchModel = searchModel,
+                swipeForShortcuts = settings.swipeForShortcuts,
                 searchEnabled = settings.appListSearch,
                 searchAtBottom = settings.appListSearchBottom,
                 listState = appListState,
@@ -797,6 +799,7 @@ data class HomeSettings(
     val nowPlayingEnabled: Boolean,
     val edgeSide: EdgeSide,
     val azStripVisibility: AzStripVisibility,
+    val swipeForShortcuts: Boolean,
     val showAlphabet: Boolean,
     val alignment: HomeAlignment,
     val appListAlignment: HomeAlignment,
