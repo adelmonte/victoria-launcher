@@ -60,6 +60,12 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.activity.compose.BackHandler
 import androidx.annotation.StringRes
 import androidx.compose.foundation.lazy.items
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
+import android.widget.Toast
+import androidx.compose.ui.platform.LocalContext
+import dev.victorialauncher.data.CrashLog
 import androidx.compose.runtime.Composable
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.width
@@ -176,6 +182,10 @@ fun SettingsScreen(
     onBack: () -> Unit,
 ) {
     val surface = MaterialTheme.colorScheme.surface
+    val context = LocalContext.current
+    val clipboard = remember(context) {
+        context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+    }
 
     // A width in dp means nothing until you see it against the screen it is measured on, so
     // adjusting it paints the zone down the edges it would actually occupy. It fades out on
@@ -617,6 +627,24 @@ fun SettingsScreen(
                             stringResource(R.string.settings_version, BuildConfig.VERSION_NAME),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                        )
+                    }
+                    // Only after a crash, so there is nothing here to explain the rest of the
+                    // time. A launcher draws other apps' widgets with their own code, so the
+                    // trace is often the only thing that says whose crash it was.
+                    val crash = remember { CrashLog.read(context) }
+                    var crashCleared by remember { mutableStateOf(false) }
+                    if (crash != null && !crashCleared) {
+                        RowDivider()
+                        BackupRow(
+                            label = stringResource(R.string.settings_crash_copy),
+                            detail = stringResource(R.string.settings_crash_detail),
+                            onClick = {
+                                clipboard.setPrimaryClip(ClipData.newPlainText("Victoria crash", crash))
+                                Toast.makeText(context, R.string.settings_crash_copied, Toast.LENGTH_SHORT).show()
+                                CrashLog.clear(context)
+                                crashCleared = true
+                            },
                         )
                     }
                 }

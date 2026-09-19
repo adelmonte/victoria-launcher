@@ -151,6 +151,9 @@
     <string name="settings_allow_rotation">Rotate with the device</string>
     <string name="settings_allow_rotation_detail">Off on phones: sideways there is about a third of the height this layout needs. On by default on tablets</string>
     <string name="settings_section_backup">Backup</string>
+    <string name="settings_crash_copy">Copy last crash</string>
+    <string name="settings_crash_detail">The launcher stopped unexpectedly. Copy the details to include in a bug report</string>
+    <string name="settings_crash_copied">Crash details copied</string>
     <string name="settings_export">Export settings</string>
     <string name="settings_export_detail">Save favorites, folders, layout and everything else to a file</string>
     <string name="settings_import">Import settings</string>

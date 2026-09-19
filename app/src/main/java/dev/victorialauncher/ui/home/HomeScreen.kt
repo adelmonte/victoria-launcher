@@ -1278,6 +1278,11 @@ private fun FolderRow(
                         offset = memberMenuOffset,
                         onDismissRequest = { memberMenuFor = null },
                     ) {
+                        // A folder member is an app like any other row, so it offers what the
+                        // app publishes the same way the rows outside a folder do.
+                        AppShortcutItems(member, memberMenuFor == member.key) {
+                            memberMenuFor = null
+                        }
                         if (member.kind == EntryKind.APP) {
                             DropdownMenuItem(
                                 text = { Text(stringResource(R.string.action_app_info)) },

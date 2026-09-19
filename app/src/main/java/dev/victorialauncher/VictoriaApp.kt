@@ -4,6 +4,7 @@ package dev.victorialauncher
 import android.app.Application
 import dev.victorialauncher.data.AppRepository
 import dev.victorialauncher.data.IconPackRepository
+import dev.victorialauncher.data.CrashLog
 import dev.victorialauncher.data.Prefs
 import dev.victorialauncher.widget.VictoriaAppWidgetHost
 import kotlinx.coroutines.CoroutineScope
@@ -26,6 +27,8 @@ class VictoriaApp : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        // First, so a crash on the way up is still recorded.
+        CrashLog.install(this)
         prefs = Prefs(this)
         appRepository = AppRepository(this, prefs, appScope)
         iconPackRepository = IconPackRepository(this)
