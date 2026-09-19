@@ -30,7 +30,10 @@ class LongPressFrameLayout(context: Context) : FrameLayout(context) {
     /** Where the current gesture began, so its direction can be judged as it moves. */
     private var downX = 0f
     private var downY = 0f
-    private var releasedSideways = false
+    private var decided = false
+
+    /** Half a touch slop: enough to read a direction, short enough to beat the home screen. */
+    private val decisionSlop get() = touchSlop / 2
     private val touchSlop = ViewConfiguration.get(context).scaledTouchSlop
 
     private val gestureDetector = GestureDetector(
@@ -47,30 +50,31 @@ class LongPressFrameLayout(context: Context) : FrameLayout(context) {
         when (ev.actionMasked) {
             MotionEvent.ACTION_DOWN -> {
                 longPressFired = false
-                releasedSideways = false
+                decided = false
                 downX = ev.x
                 downY = ev.y
-                // Claimed on the press, not once a direction is clear. Waiting was too late:
-                // the home screen's own drag begins at the same touch slop this would have
-                // measured against, and whichever ran first took the gesture — so a list
-                // inside a widget still lost every scroll to the notification shade.
-                //
-                // Only for a widget with something to scroll, though. Claiming for every one
-                // of them took the pull-down with it across the whole slot, including the
-                // bare space around a widget that does not fill it — which is a large part of
-                // the home screen to lose for a gesture most widgets have no use for.
-                if (hasScrollableContent()) parent?.requestDisallowInterceptTouchEvent(true)
             }
 
-            MotionEvent.ACTION_MOVE -> if (!releasedSideways) {
+            MotionEvent.ACTION_MOVE -> if (!decided) {
                 val dx = abs(ev.x - downX)
                 val dy = abs(ev.y - downY)
-                // Handed back as soon as the drag reads as sideways, which is how the pager
-                // moves between widgets. It costs the pager the few pixels before that is
-                // apparent, and it costs a widget nothing: nothing scrolls sideways here.
-                if (dx > touchSlop && dx > dy) {
-                    releasedSideways = true
-                    parent?.requestDisallowInterceptTouchEvent(false)
+                // Decided early, and only for up and down.
+                //
+                // Claiming on the press instead took sideways with it, and handing it back
+                // once the drag turned out to be sideways does not give the pager its chance
+                // again — so a widget that scrolls could never be swiped past. Waiting for a
+                // full touch slop was the other way round: the home screen decides at exactly
+                // that distance, and whichever ran first won, which is how a list inside a
+                // widget lost its scroll to the notification shade.
+                //
+                // Half a slop is far enough to tell a direction and short enough to answer
+                // before the home screen does. Sideways is never claimed, so the pager keeps
+                // it, and a widget with nothing to scroll is never claimed for either.
+                if (dy > decisionSlop && dy > dx) {
+                    decided = true
+                    if (hasScrollableContent()) parent?.requestDisallowInterceptTouchEvent(true)
+                } else if (dx > decisionSlop && dx > dy) {
+                    decided = true
                 }
             }
         }
@@ -107,7 +111,7 @@ class LongPressFrameLayout(context: Context) : FrameLayout(context) {
         gestureDetector.onTouchEvent(event)
         if (event.actionMasked == MotionEvent.ACTION_UP || event.actionMasked == MotionEvent.ACTION_CANCEL) {
             longPressFired = false
-            releasedSideways = false
+            decided = false
             parent?.requestDisallowInterceptTouchEvent(false)
         }
         return true
