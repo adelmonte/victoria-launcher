@@ -10,12 +10,13 @@
     <string name="action_create">Создать</string>
     <string name="action_done">Готово</string>
     <string name="action_remove">Убрать</string>
-    <string name="action_app_info">Информация о приложении</string>
-    <string name="action_edit_layout">Редактировать главный экран</string>
+    <string name="action_app_info">О приложении</string>
+    <string name="action_edit_layout">Редактировать экран</string>
     <string name="action_edit_icon_and_name">Персонализировать</string>
     <string name="action_move_to_folder">Переместить в папку…</string>
     <string name="action_change_icon">Изменить иконку…</string>
-    <string name="action_open_settings">Настройки Victoria Launcher</string>
+    <string name="action_open_settings">Настройки Victoria</string>
+    <string name="action_remove_shortcut">Удалить ярлык</string>
 
     <!-- Главный экран -->
     <string name="home_drag_handle">Сортировать</string>
@@ -27,7 +28,7 @@
     <string name="home_folder_remove_app">Убрать из папки</string>
     <string name="home_folder_empty">Пусто — зажмите для выбора приложений</string>
     <string name="home_folder_name_label">Название папки</string>
-    <string name="home_folder_use_previews">Использовать предпросмотр приложений</string>
+    <string name="home_folder_use_previews">Использовать миниатюры приложений</string>
     <string name="home_display_name_label">Отображаемое имя</string>
 
     <!-- Режим редактирования -->
@@ -36,6 +37,7 @@
     <string name="handle_widget_bottom">Виджет: нижний отступ</string>
     <string name="handle_widget_height">Виджет: ширина</string>
     <string name="handle_widget_side_padding">Виджет: боковой отступ</string>
+    <string name="handle_widget_offset_x">Виджет: сдвиг влево / вправо</string>
     <string name="handle_az_range">Настройка алфавитной волны</string>
     <string name="edit_value_range">от %1$d до %2$d dp</string>
     <string name="handle_favorites_top">Избранное: верхний отступ</string>
@@ -48,6 +50,7 @@
     <string name="applist_add_favorite">Добавить в избранное</string>
     <string name="applist_remove_favorite">Убрать из избранного</string>
     <string name="applist_hide">Скрыть из списка</string>
+    <string name="applist_unhide">Отображать в списке</string>
 
     <string name="applist_band_hint">Удерживайте и ведите для перемещения, или потяните за любой край, чтобы изменить её размер</string>
     <string name="applist_band_top">Верх алфавитной волны</string>
@@ -81,16 +84,20 @@
     <string name="settings_show_names">Отображать названия приложений рядом с иконками</string>
     <string name="settings_hide_status_bar">Скрыть строку состояния на главном экране</string>
     <string name="settings_hide_status_bar_applist">Скрыть строку состояния в меню приложений</string>
-    <string name="settings_status_bar_timeout">Время ожидания перед скрытием: </string>
-    <string name="settings_dim_home">Процент затемнения обоев на главном экране</string>
-    <string name="settings_dim_applist">Процент затемнения обоев в меню приложений</string>
+    <string name="settings_status_bar_timeout">Скрыть статус-бар через: </string>
+    <string name="settings_dim_home">Прозрачность фона на главном экране</string>
+    <string name="settings_dim_applist">Прозрачность фона в меню приложений</string>
     <string name="settings_haptics">Виброотклик</string>
     <string name="settings_haptics_detail">Следует настройке виброотклика вашей системы.</string>
     <string name="settings_edge_side">Край для открытия списка приложений</string>
     <string name="settings_double_tap_lock">Двойное касание для блокировки экрана</string>
     <string name="settings_double_tap_lock_detail">Коснитесь дважды по алфавитной волне</string>
     <string name="settings_lock_needs_accessibility">Требует включённой настройки в специальных возможностях. Если эта опция недоступна, разрешите доступ к настройкам в меню информации о приложении ( ⋮ ).</string>
-    <string name="settings_always_show_az">Отображать алфавитную волну на главном экране</string>
+    <string name="settings_az_visibility">Отображать алфавитную волну на главном экране</string>
+    <string name="az_visibility_never">Никогда</string>
+    <string name="az_visibility_landscape">Только в ландшафтном</string>
+    <string name="az_visibility_always">Всегда</string>
+    <string name="settings_always_show_az">Всегда отображать алфавитную волну</string>
     <string name="settings_show_alphabet">Отображать алфавитную волну в меню приложений</string>
     <string name="settings_edge_zone_width">Ширина боковой области</string>
     <string name="settings_swipe_up_list">Провести вверх для открытия меню приложений</string>
@@ -129,12 +136,42 @@
     <string name="settings_less">Меньше</string>
     <string name="settings_more">Больше</string>
 
-    <!-- Font choices -->
+    <!-- Шрифт -->
     <string name="font_system">Системный</string>
     <string name="font_sans_serif">Sans serif</string>
     <string name="font_serif">Serif</string>
     <string name="font_monospace">Моноширинный</string>
-
+    <string name="font_custom">Свой…</string>
+    <string name="font_custom_pick">Выбрать файл</string>
+    <string name="font_custom_detail">Файл формата .ttf или .otf сохранён внутри лаунчера. При удалении с устройства шрифт не сбросится.</string>
+    <string name="font_custom_failed">Данный файл не является шрифтом</string>
+    <string name="text_color_material">Material</string>
+    <string name="text_color_custom">Свой</string>
+    <string name="text_color_pick">Выбрать цвет</string>
+    <string name="settings_allow_rotation">Разрешить портретный режим</string>
+    <string name="settings_allow_rotation_detail">На телефонах отключено: доступная ширина составляет лишь около трети высоты, необходимой для такой компоновки. На планшетах включено по умолчанию.</string>
+    <string name="settings_section_backup">Резервное копирование</string>
+    <string name="settings_crash_copy">Скопировать последнюю ошибку</string>
+    <string name="settings_crash_detail">Работа программы Victoria Launcher Завершилась с ошибкой. Скопируйте сведения об ошибке, чтобы включить их в отчет об ошибке.</string>
+    <string name="settings_crash_copied">Сведения об ошибке сохранёны в буфере обмена</string>
+    <string name="settings_export">Экспортировать настройк</string>
+    <string name="settings_export_detail">Сохранить избранное, папки, компоновку и прочее в один файл</string>
+    <string name="settings_import">Импортировать настройки</string>
+    <string name="settings_import_detail">Применить с заменой настройки, записанные в файле</string>
+    <string name="settings_export_done">Настройки успешно сохранены</string>
+    <string name="settings_import_done">Настройки успешно загружены</string>
+    <string name="settings_backup_failed">Данный файл не может быть прочтён</string>
+    <string name="settings_dim_color">Цвет фона</string>
+    <string name="settings_dim_color_detail">Каким цветом затемнятся обои. Ползунки выше определяют степень затемнения</string>
+    <string name="color_from_wallpaper">Цвет с обоев</string>
+    <string name="icon_shape">Форма иконки</string>
+    <string name="icon_shape_detail">Меняет форму с адаптивных иконок; остальные - без изменений</string>
+    <string name="icon_shape_system">Системный</string>
+    <string name="icon_shape_circle">Круглый</string>
+    <string name="icon_shape_rounded">Скруглённый</string>
+    <string name="icon_shape_square">Квадратный</string>
+    <string name="settings_icon_pack_themed">Material</string>
+    
     <!-- Text color choices -->
     <string name="text_color_auto">Авто</string>
     <string name="text_color_light">Светлый</string>
@@ -174,7 +211,7 @@
     <string name="icon_picker_no_matches">Иконок по запросу “%1$s” не найдено.</string>
 
     <!-- Приветствие -->
-    <string name="welcome_title">Приветствую в Victoria Launcher</string>
+    <string name="welcome_title">Приветствую в Victoria</string>
     <string name="welcome_favorites">Удерживайте по свободному месту чтобы вызвать меню настроек и добавления избранных.</string>
     <string name="welcome_widget">Проведите пальцем от любого края экрана, чтобы открыть все приложения, и поведите пальцем по алфавитной волне чтобы перейти к нужной букве.</string>
     <string name="welcome_layout">В режиме редактирования главного экрана вы можете передвигать объекты и настраивать отступы.</string>
