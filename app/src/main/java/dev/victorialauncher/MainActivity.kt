@@ -3,8 +3,10 @@ package dev.victorialauncher
 
 import android.content.Intent
 import android.content.pm.ActivityInfo
+import android.os.Build
 import android.os.Bundle
 import android.view.KeyEvent
+import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.CompositionLocalProvider
@@ -60,6 +62,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         WindowCompat.setDecorFitsSystemWindows(window, false)
+        allowDrawingBehindTheCutout()
         // Portrait until told otherwise on a phone, free on a tablet: this is a list down the
         // side of the screen, and a phone sideways has about a third of the height it needs.
         // The setting exists because that is a judgement about a screen rather than about a
@@ -133,6 +136,31 @@ class MainActivity : ComponentActivity() {
                         onAppListVisibleChange = { appListOpen = it },
                     )
                 }
+            }
+        }
+    }
+
+    /**
+     * Lets the window reach the whole screen, cutout included.
+     *
+     * Drawing edge to edge is not on its own enough to be allowed up there. The default rule is
+     * that a window may extend into the cutout only while the cutout is covered by a system bar
+     * — so with the status bar hidden the window is pushed below it instead, and the strip it
+     * leaves behind belongs to nobody: the wallpaper shows through the dim on the home screen
+     * and through the settings screen's own background.
+     *
+     * ALWAYS rather than SHORT_EDGES wherever there is one, because this rotates: sideways the
+     * cutout is on a long edge, which SHORT_EDGES does not cover and which would letterbox the
+     * window all over again. What the insets mean is unchanged — the screens that must keep
+     * clear of the cutout already pad themselves by it.
+     */
+    private fun allowDrawingBehindTheCutout() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P) return
+        window.attributes = window.attributes.apply {
+            layoutInDisplayCutoutMode = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS
+            } else {
+                WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
             }
         }
     }
