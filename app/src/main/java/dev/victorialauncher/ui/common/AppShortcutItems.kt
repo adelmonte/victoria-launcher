@@ -4,6 +4,7 @@ package dev.victorialauncher.ui.common
 import android.content.pm.ShortcutInfo
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -14,13 +15,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.graphics.drawable.toBitmap
 import dev.victorialauncher.VictoriaApp
 import dev.victorialauncher.data.AppInfo
@@ -40,7 +41,12 @@ private const val MAX_SHORTCUTS = 5
  * Emits nothing at all when an app publishes none, so the menu is unchanged for most of them.
  */
 @Composable
-fun AppShortcutItems(app: AppInfo, expanded: Boolean, onStarted: () -> Unit) {
+fun AppShortcutItems(
+    app: AppInfo,
+    expanded: Boolean,
+    labelSizeSp: Int,
+    onStarted: () -> Unit,
+) {
     val context = LocalContext.current
     val victoriaApp = context.applicationContext as VictoriaApp
     val density = LocalConfiguration.current.densityDpi
@@ -58,6 +64,7 @@ fun AppShortcutItems(app: AppInfo, expanded: Boolean, onStarted: () -> Unit) {
     shortcuts.forEach { shortcut ->
         val label = (shortcut.shortLabel ?: shortcut.longLabel)?.toString().orEmpty()
         if (label.isBlank()) return@forEach
+        val iconDp = iconSizeFor(labelSizeSp)
         val icon = remember(shortcut.id, density) {
             runCatching {
                 victoriaApp.appRepository.shortcutIcon(shortcut, density)
@@ -66,9 +73,9 @@ fun AppShortcutItems(app: AppInfo, expanded: Boolean, onStarted: () -> Unit) {
             }.getOrNull()
         }
         DropdownMenuItem(
-            text = { Text(label) },
+            text = { Text(label, fontSize = labelSizeSp.sp) },
             leadingIcon = icon?.let {
-                { Image(bitmap = it, contentDescription = null, modifier = Modifier.size(24.dp)) }
+                { Image(bitmap = it, contentDescription = null, modifier = Modifier.size(iconDp)) }
             },
             onClick = {
                 victoriaApp.appRepository.startAppShortcut(shortcut)
@@ -80,6 +87,16 @@ fun AppShortcutItems(app: AppInfo, expanded: Boolean, onStarted: () -> Unit) {
 
 /** Rasterised at menu-icon size; the drawable itself is whatever density the publisher had. */
 private const val ICON_PX = 72
+
+/**
+ * The icon beside a shortcut, sized from the label it sits next to.
+ *
+ * Tied to the launcher's own label size rather than given a setting of its own: this is the
+ * same list of app names as everywhere else, and a panel that ignored the size set for those
+ * was the thing worth fixing. Bounded so it stays an icon in a menu at either extreme.
+ */
+private fun iconSizeFor(labelSizeSp: Int): Dp =
+    (labelSizeSp * 1.5f).dp.coerceIn(20.dp, 44.dp)
 
 /**
  * Swipe a row sideways to reach what the app publishes.
@@ -96,14 +113,13 @@ private const val ICON_PX = 72
 fun Modifier.swipeForShortcuts(
     mode: ShortcutSwipe,
     enabled: Boolean,
-    onSwipe: (Offset) -> Unit,
+    onSwipe: () -> Unit,
 ): Modifier =
     if (mode == ShortcutSwipe.OFF || !enabled) this else this.pointerInput(mode) {
         var travelled = 0f
-        var start = Offset.Zero
         var fired = false
         detectHorizontalDragGestures(
-            onDragStart = { start = it; travelled = 0f; fired = false },
+            onDragStart = { travelled = 0f; fired = false },
             onDragEnd = { },
             onDragCancel = { },
         ) { change, amount ->
@@ -116,7 +132,7 @@ fun Modifier.swipeForShortcuts(
             if (!fired && far) {
                 fired = true
                 change.consume()
-                onSwipe(start)
+                onSwipe()
             }
         }
     }
@@ -127,10 +143,16 @@ private const val SWIPE_THRESHOLD_PX = 90f
 /**
  * The shortcuts on their own, for the swipe. Renders nothing when the app publishes none, so
  * a swipe on such a row opens an empty popup rather than a stray one.
+ *
+ * Anchored to the row and not to the finger, unlike the long-press menu. That one is opened
+ * from somewhere on a row that may be as tall as a widget, so it has to find the finger; this
+ * one is always a swipe across a row one line high, and following the finger only meant it
+ * landed somewhere slightly different every time. Against the row it is in the same place at
+ * the same size on every use, which is what makes it something you reach for rather than read.
  */
 @Composable
-fun AppShortcutMenu(app: AppInfo, expanded: Boolean, offset: DpOffset, onDismiss: () -> Unit) {
-    TouchAnchoredMenu(expanded = expanded, offset = offset, onDismissRequest = onDismiss) {
-        AppShortcutItems(app, expanded) { onDismiss() }
+fun AppShortcutMenu(app: AppInfo, expanded: Boolean, labelSizeSp: Int, onDismiss: () -> Unit) {
+    DropdownMenu(expanded = expanded, onDismissRequest = onDismiss) {
+        AppShortcutItems(app, expanded, labelSizeSp) { onDismiss() }
     }
 }

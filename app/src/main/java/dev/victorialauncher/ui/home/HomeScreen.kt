@@ -984,7 +984,6 @@ private fun FavoriteRow(
     val pressed by interaction.collectIsPressedAsState()
     val density = LocalDensity.current
     var shortcutMenu by remember { mutableStateOf(false) }
-    var shortcutOffset by remember { mutableStateOf(DpOffset.Zero) }
 
     Box {
         Row(
@@ -1003,8 +1002,7 @@ private fun FavoriteRow(
                     } else {
                         Modifier
                             .recordTouchPosition(touchPosition)
-                            .swipeForShortcuts(shortcutSwipe, app.kind == EntryKind.APP) { start ->
-                                shortcutOffset = with(density) { DpOffset(start.x.toDp(), start.y.toDp()) }
+                            .swipeForShortcuts(shortcutSwipe, app.kind == EntryKind.APP) {
                                 shortcutMenu = true
                             }
                             .combinedClickable(
@@ -1055,7 +1053,7 @@ private fun FavoriteRow(
             )
         }
 
-        AppShortcutMenu(app, shortcutMenu, shortcutOffset) { shortcutMenu = false }
+        AppShortcutMenu(app, shortcutMenu, labelSizeSp) { shortcutMenu = false }
 
         TouchAnchoredMenu(expanded = menuExpanded, offset = menuOffset, onDismissRequest = onDismissMenu) {
             DropdownMenuItem(
@@ -1151,7 +1149,6 @@ private fun FolderRow(
     var memberMenuOffset by remember { mutableStateOf(DpOffset.Zero) }
     val memberTouch = remember { mutableStateOf(Offset.Zero) }
     var memberShortcutFor by remember { mutableStateOf<String?>(null) }
-    var memberShortcutOffset by remember { mutableStateOf(DpOffset.Zero) }
 
     Column {
         Box {
@@ -1258,9 +1255,7 @@ private fun FolderRow(
                                 end = if (alignment == HomeAlignment.RIGHT) (sidePaddingDp + 24).dp else sidePaddingDp.dp,
                             )
                             .recordTouchPosition(memberTouch)
-                            .swipeForShortcuts(shortcutSwipe, member.kind == EntryKind.APP) { start ->
-                                memberShortcutOffset =
-                                    with(density) { DpOffset(start.x.toDp(), start.y.toDp()) }
+                            .swipeForShortcuts(shortcutSwipe, member.kind == EntryKind.APP) {
                                 memberShortcutFor = member.key
                             }
                             // A long press used to throw the app straight out of the folder,
@@ -1300,7 +1295,7 @@ private fun FolderRow(
                     AppShortcutMenu(
                         member,
                         memberShortcutFor == member.key,
-                        memberShortcutOffset,
+                        labelSizeSp,
                     ) { memberShortcutFor = null }
 
                     TouchAnchoredMenu(

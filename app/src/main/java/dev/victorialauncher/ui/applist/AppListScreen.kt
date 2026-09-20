@@ -1062,7 +1062,6 @@ private fun AppRow(
     val pressed by interaction.collectIsPressedAsState()
     val density = LocalDensity.current
     var shortcutMenu by remember { mutableStateOf(false) }
-    var shortcutOffset by remember { mutableStateOf(DpOffset.Zero) }
 
     Box {
         Row(
@@ -1071,8 +1070,7 @@ private fun AppRow(
                 // Ahead of the inset, so the long-press menu is still placed against the
                 // whole row rather than 20dp to the left of the finger.
                 .recordTouchPosition(touchPosition)
-                .swipeForShortcuts(shortcutSwipe, app.kind == EntryKind.APP) { start ->
-                    shortcutOffset = with(density) { DpOffset(start.x.toDp(), start.y.toDp()) }
+                .swipeForShortcuts(shortcutSwipe, app.kind == EntryKind.APP) {
                     shortcutMenu = true
                 }
                 .padding(horizontal = 20.dp)
@@ -1144,6 +1142,8 @@ private fun AppRow(
                 balance()
             }
         }
+
+        AppShortcutMenu(app, shortcutMenu, labelSizeSp) { shortcutMenu = false }
 
         DropdownMenu(expanded = menuExpanded, onDismissRequest = onDismissMenu, offset = menuOffset) {
             DropdownMenuItem(
