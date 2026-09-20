@@ -1,0 +1,3 @@
+Fixed:
+* Dragging on a scrollable widget was hit and miss. The direction was settled a few pixels in and stood by, so a swipe that started slightly across went to the home screen instead of the widget. It now keeps reading until the drag is clearly one or the other.
+* Swiping between stacked widgets needed too precise an angle, for the same reason in reverse.
