@@ -60,20 +60,6 @@ class AppRepository(
     private var lastKnownPrivateSerial: Long = 0L
 
     /**
-     * Every launchable activity across every profile the launcher may show, decided profile by
-     * profile before any of it is turned into rows.
-     *
-     * LauncherApps rather than PackageManager, because queryIntentActivities only ever sees
-     * the profile we are running in — a work profile or a private space is invisible to it.
-     * LauncherApps also hands back the badged icon and the per-profile label, which is what
-     * marks a work app as a work app.
-     *
-     * The decision is made here, by UserHandle, rather than by filtering finished rows by
-     * serial afterwards, because a profile whose serial could not be read produces rows whose
-     * keys are indistinguishable from the main profile's — there is nothing left to filter by
-     * at that point, and those keys would be stored into favorites and launch counts.
-     */
-    /**
      * The serial to key a profile's rows by, or null when nothing from it may be listed. Asked
      * once per profile and used for apps and pinned shortcuts alike: a shortcut pinned inside
      * the private space belongs to it exactly as its apps do.
@@ -98,6 +84,20 @@ class AppRepository(
         return serial ?: 0L
     }
 
+    /**
+     * Every launchable activity across every profile the launcher may show, decided profile by
+     * profile before any of it is turned into rows.
+     *
+     * LauncherApps rather than PackageManager, because queryIntentActivities only ever sees
+     * the profile we are running in — a work profile or a private space is invisible to it.
+     * LauncherApps also hands back the badged icon and the per-profile label, which is what
+     * marks a work app as a work app.
+     *
+     * The decision is made here, by UserHandle, rather than by filtering finished rows by
+     * serial afterwards, because a profile whose serial could not be read produces rows whose
+     * keys are indistinguishable from the main profile's — there is nothing left to filter by
+     * at that point, and those keys would be stored into favorites and launch counts.
+     */
     fun queryAllApps(privateSpace: PrivateSpace = privateSpace()): List<AppInfo> {
         val profiles = runCatching { userManager.userProfiles }.getOrNull().orEmpty()
         val mainUser = Process.myUserHandle()
