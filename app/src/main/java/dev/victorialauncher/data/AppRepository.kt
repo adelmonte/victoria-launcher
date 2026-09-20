@@ -73,25 +73,37 @@ class AppRepository(
      * keys are indistinguishable from the main profile's — there is nothing left to filter by
      * at that point, and those keys would be stored into favorites and launch counts.
      */
+    /**
+     * The serial to key a profile's rows by, or null when nothing from it may be listed. Asked
+     * once per profile and used for apps and pinned shortcuts alike: a shortcut pinned inside
+     * the private space belongs to it exactly as its apps do.
+     */
+    private fun listableSerial(user: UserHandle, mainUser: UserHandle): Long? {
+        val isMain = user == mainUser
+        val serial = runCatching { userManager.getSerialNumberForUser(user) }.getOrNull()
+        // Only asked about a profile the answers could change anything for: the one we
+        // run in is always listed, and below Android 15 there is no private space for
+        // either answer to describe.
+        val classify = !isMain && Build.VERSION.SDK_INT >= PRIVATE_SPACE_SDK
+        val listed = shouldListProfile(
+            isMainUser = isMain,
+            sdk = Build.VERSION.SDK_INT,
+            userType = if (classify) userType(user) else null,
+            quietMode = if (classify) quietMode(user) else null,
+            serial = serial,
+        )
+        if (!listed) return null
+        // Null only reaches here for the profile we run in, whose serial is zero anyway; every
+        // other profile without one was refused above.
+        return serial ?: 0L
+    }
+
     fun queryAllApps(privateSpace: PrivateSpace = privateSpace()): List<AppInfo> {
         val profiles = runCatching { userManager.userProfiles }.getOrNull().orEmpty()
         val mainUser = Process.myUserHandle()
         return profiles
             .flatMap { user ->
-                val isMain = user == mainUser
-                val serial = runCatching { userManager.getSerialNumberForUser(user) }.getOrNull()
-                // Only asked about a profile the answers could change anything for: the one we
-                // run in is always listed, and below Android 15 there is no private space for
-                // either answer to describe.
-                val classify = !isMain && Build.VERSION.SDK_INT >= PRIVATE_SPACE_SDK
-                val listed = shouldListProfile(
-                    isMainUser = isMain,
-                    sdk = Build.VERSION.SDK_INT,
-                    userType = if (classify) userType(user) else null,
-                    quietMode = if (classify) quietMode(user) else null,
-                    serial = serial,
-                )
-                if (!listed) return@flatMap emptyList()
+                val serial = listableSerial(user, mainUser) ?: return@flatMap emptyList()
                 // Asking about a profile we are not the launcher for throws rather than
                 // returning nothing, and one inaccessible profile must not lose the rest.
                 runCatching { launcherApps.getActivityList(null, user) }
@@ -102,9 +114,7 @@ class AppRepository(
                             componentName = info.componentName,
                             label = info.label?.toString() ?: info.componentName.packageName,
                             user = user,
-                            // Null only reaches here for the profile we run in, whose serial is
-                            // zero anyway; every other profile without one was dropped above.
-                            userSerial = serial ?: 0L,
+                            userSerial = serial,
                         )
                     }
             }
@@ -288,8 +298,12 @@ class AppRepository(
     private fun pinnedShortcuts(): List<PinnedShortcut> {
         if (!hasShortcutHostPermission()) return emptyList()
         val profiles = runCatching { userManager.userProfiles }.getOrNull().orEmpty()
+        val mainUser = Process.myUserHandle()
         return profiles.flatMap { user ->
-            val serial = runCatching { userManager.getSerialNumberForUser(user) }.getOrDefault(0L)
+            // The same decision the app list makes, for the same reason: a shortcut read from a
+            // profile whose serial could not be read would be keyed as the main profile's, and
+            // nothing that conceals by serial could reach it afterwards.
+            val serial = listableSerial(user, mainUser) ?: return@flatMap emptyList()
             val query = LauncherApps.ShortcutQuery()
                 .setQueryFlags(LauncherApps.ShortcutQuery.FLAG_MATCH_PINNED)
             runCatching { launcherApps.getShortcuts(query, user) }

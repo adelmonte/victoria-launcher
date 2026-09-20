@@ -107,7 +107,10 @@ class PrivateSpaceTest {
         for (sdk in listOf(26, 34, PRIVATE_SPACE_SDK, 36)) {
             for (type in listOf(null, USER_TYPE_PROFILE_PRIVATE, MANAGED)) {
                 for (quiet in listOf(null, true, false)) {
-                    for (serial in listOf(null, 0L)) {
+                    // -1 is what the platform answers for a user it cannot find, e.g. a
+                    // profile removed between being listed and being asked about. Keying a
+                    // row by it is as unreachable for concealment as keying it by zero.
+                    for (serial in listOf(null, 0L, -1L)) {
                         assertFalse(
                             "sdk $sdk, type $type, quiet $quiet, serial $serial",
                             shouldListProfile(false, sdk, type, quiet, serial),
