@@ -1,0 +1,6 @@
+Fixed:
+* Swiping an app in the app list did nothing. The shortcut panel is shown there now, as it already was on the home screen.
+* With the status bar hidden, a strip along the top went unpainted: the wallpaper showed through the dim on the home screen and through the settings screen's background.
+
+Changed:
+* The shortcut panel opens against the row rather than your finger, so it lands in the same place every time, and it follows the label size set for everything else.
