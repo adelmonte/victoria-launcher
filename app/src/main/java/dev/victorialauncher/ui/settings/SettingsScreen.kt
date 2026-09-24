@@ -836,9 +836,12 @@ private fun SwitchRow(label: String, checked: Boolean, onCheckedChange: (Boolean
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(label, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.weight(1f))
+        // The row is the target, so the switch itself is not one. With both taking a tap, a
+        // press on the switch toggled it and then the row toggled it back, which read as a
+        // switch that would not stay where it was put.
         Switch(
             checked = checked,
-            onCheckedChange = onCheckedChange,
+            onCheckedChange = null,
             colors = SwitchDefaults.colors(checkedTrackColor = MaterialTheme.colorScheme.primary),
         )
     }
@@ -866,9 +869,10 @@ private fun SwitchRowWithDetail(
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
             )
         }
+        // See SwitchRow: the row owns the tap, so the switch does not take one of its own.
         Switch(
             checked = checked,
-            onCheckedChange = onCheckedChange,
+            onCheckedChange = null,
             colors = SwitchDefaults.colors(checkedTrackColor = MaterialTheme.colorScheme.primary),
         )
     }
