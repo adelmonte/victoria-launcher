@@ -145,6 +145,12 @@ fun buildAppListModel(
      * is not A-Z — so scrubbing to B, where its English name Blue would put it, finds nothing.
      */
     englishName: (AppInfo) -> String? = { null },
+    /**
+     * Whether each letter gets a heading row of its own. Without them the letters are still
+     * indexed — at the first app of each instead of at its heading — so the strip still knows
+     * where to send the list.
+     */
+    showHeaders: Boolean = true,
 ): AppListModel {
     val visible = apps.filter { it.key !in hidden }
     val rows = mutableListOf<AppListRow>()
@@ -157,7 +163,7 @@ fun buildAppListModel(
     val letterIndex = mutableListOf<Pair<Char, Int>>()
     byLetter.toSortedMap().forEach { (letter, list) ->
         letterIndex += letter to rows.size
-        rows += AppListRow.Header(letter.toString())
+        if (showHeaders) rows += AppListRow.Header(letter.toString())
         list.sortedWith(
             compareByDescending<AppInfo> { launchCounts[it.key] ?: 0 }
                 .thenBy { displayName(it).lowercase() }
@@ -174,21 +180,35 @@ fun buildAppListModel(
  */
 fun AppListModel.filtered(match: (AppInfo) -> Boolean): AppListModel {
     val kept = mutableListOf<AppListRow>()
-    val letterIndex = mutableListOf<Pair<Char, Int>>()
+    val newIndex = mutableListOf<Pair<Char, Int>>()
     var pendingHeader: AppListRow.Header? = null
 
-    rows.forEach { row ->
+    // Which letter the row being looked at belongs to. Read from the index this model already
+    // carries rather than from the heading above it, because a list drawn without headings has
+    // no heading to read — and the letters still have to come out of it.
+    var cursor = 0
+    var letter: Char? = null
+    var letterKept = false
+
+    rows.forEachIndexed { index, row ->
+        while (cursor < letterIndex.size && letterIndex[cursor].second <= index) {
+            letter = letterIndex[cursor].first
+            letterKept = false
+            cursor++
+        }
         when (row) {
             is AppListRow.Header -> pendingHeader = row
             is AppListRow.Entry -> if (match(row.app)) {
-                pendingHeader?.let { header ->
-                    header.text.firstOrNull()?.let { letterIndex += it to kept.size }
-                    kept += header
-                    pendingHeader = null
+                // Recorded before the heading is added, so the letter points at the heading
+                // where there is one and at its first app where there is not.
+                if (!letterKept) {
+                    letter?.let { newIndex += it to kept.size }
+                    letterKept = true
                 }
+                pendingHeader?.let { kept += it; pendingHeader = null }
                 kept += row
             }
         }
     }
-    return AppListModel(kept, letterIndex)
+    return AppListModel(kept, newIndex)
 }

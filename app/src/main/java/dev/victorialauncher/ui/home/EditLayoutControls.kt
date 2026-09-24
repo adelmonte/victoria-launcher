@@ -89,10 +89,18 @@ fun StepperRow(
     range: IntRange,
     step: Int,
     onChange: (Int) -> Unit,
-    /** The text color chosen in settings, so edit mode reads like the rest of the screen. */
+    /** Kept for the dialog this row opens, which is drawn over the wallpaper rather than on a
+     *  surface of its own. */
     contentColor: Color,
     modifier: Modifier = Modifier,
 ) {
+    // Drawn on a surface of its own rather than in the text color picked for the wallpaper.
+    // That color is one flat answer for the whole screen, and a wallpaper that is dark down one
+    // half and light down the other has no such answer — the labels went invisible over the
+    // half that matched them. These rows are the launcher's own controls, not something laid
+    // over the wallpaper to be read against it, so they bring their own background with them.
+    val surface = MaterialTheme.colorScheme.surface
+    val onSurface = MaterialTheme.colorScheme.onSurface
     var typing by remember { mutableStateOf(false) }
     val canDecrease = value > range.first
     val canIncrease = value < range.last
@@ -103,12 +111,12 @@ fun StepperRow(
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = STEPPER_ROW_INSET)
-            .background(contentColor.copy(alpha = 0.12f), RoundedCornerShape(8.dp)),
+            .background(surface.copy(alpha = 0.92f), RoundedCornerShape(8.dp)),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
             label,
-            color = contentColor,
+            color = onSurface,
             fontSize = 11.sp,
             modifier = Modifier.weight(1f).padding(start = 12.dp),
         )
@@ -116,11 +124,11 @@ fun StepperRow(
             icon = Icons.Filled.Remove,
             description = stringResource(R.string.settings_less),
             enabled = canDecrease,
-            contentColor = contentColor,
+            contentColor = onSurface,
         ) { multiplier -> nudge(-step * multiplier) }
         Text(
             "${value}dp",
-            color = contentColor,
+            color = onSurface,
             fontSize = 12.sp,
             modifier = Modifier
                 .clickable { typing = true }
@@ -130,7 +138,7 @@ fun StepperRow(
             icon = Icons.Filled.Add,
             description = stringResource(R.string.settings_more),
             enabled = canIncrease,
-            contentColor = contentColor,
+            contentColor = onSurface,
         ) { multiplier -> nudge(step * multiplier) }
         Spacer(Modifier.size(STEPPER_TRAILING_GAP))
     }

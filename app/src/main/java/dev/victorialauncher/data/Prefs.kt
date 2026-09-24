@@ -40,6 +40,25 @@ enum class QuickLaunchSlot { LEFT, RIGHT }
 
 /** Which edge an app is carried in from when it is opened by a sideways swipe. */
 enum class SlideFrom { LEFT, RIGHT }
+
+/**
+ * Where the favorites section gets its apps.
+ *
+ * FREQUENT is the same section drawn from what has actually been opened, so everything that
+ * renders a favorite renders one of these too — it is the list that is computed, not the row.
+ */
+enum class FavoritesSource { MANUAL, FREQUENT }
+
+/** Enough to be a shortlist, not so many that the section becomes the app list again. */
+val FREQUENT_RANGE = 3..12
+
+/**
+ * How far down the viewport a scrubbed letter may be parked.
+ *
+ * Stops short of the bottom: the letter is meant to head a section, and parked much lower
+ * there is no room left under it for the section to be.
+ */
+val SECTION_TOP_RANGE = 10..60
 enum class AppFont { SYSTEM, SANS_SERIF, SERIF, MONOSPACE, CUSTOM }
 
 /** AUTO picks light or dark text from the wallpaper's own colors. */
@@ -130,6 +149,13 @@ class Prefs(private val context: Context) {
         val LAYOUT_DEFAULTS_VERSION = intPreferencesKey("layout_defaults_version")
         val WELCOME_SEEN = booleanPreferencesKey("welcome_seen")
         val SHOW_APP_ICONS = booleanPreferencesKey("show_app_icons")
+        val SHOW_FAVORITE_ICONS = booleanPreferencesKey("show_favorite_icons")
+        val FAVORITES_SOURCE = stringPreferencesKey("favorites_source")
+        val FREQUENT_COUNT = intPreferencesKey("frequent_count")
+        val SHOW_LIST_HEADERS = booleanPreferencesKey("show_list_headers")
+        val NOTIFICATION_BADGES = booleanPreferencesKey("notification_badges")
+        val SECTION_TOP_PERCENT = intPreferencesKey("section_top_percent")
+        val CLOSE_FOLDER_ON_LAUNCH = booleanPreferencesKey("close_folder_on_launch")
         val ALIGNMENT = stringPreferencesKey("alignment")
         val APPLIST_ALIGNMENT = stringPreferencesKey("applist_alignment")
         val ICON_SIDE = stringPreferencesKey("icon_side")
@@ -487,6 +513,39 @@ class Prefs(private val context: Context) {
 
     /** Drawing icons at all; off leaves text-only rows everywhere. */
     val showAppIcons: Flow<Boolean> = data.map { it[Keys.SHOW_APP_ICONS] ?: true }.distinctUntilChanged()
+
+    /**
+     * Falls back to the one switch these two were split out of, so anyone who had turned icons
+     * off keeps them off in both places rather than having half of them come back.
+     */
+    val showFavoriteIcons: Flow<Boolean> =
+        data.map { it[Keys.SHOW_FAVORITE_ICONS] ?: it[Keys.SHOW_APP_ICONS] ?: true }
+            .distinctUntilChanged()
+
+    val favoritesSource: Flow<FavoritesSource> =
+        data.map { prefs ->
+            prefs[Keys.FAVORITES_SOURCE]
+                ?.let { name -> runCatching { FavoritesSource.valueOf(name) }.getOrNull() }
+                ?: FavoritesSource.MANUAL
+        }.distinctUntilChanged()
+
+    /** How many of the most-opened apps the favorites section shows when it is computed. */
+    val frequentCount: Flow<Int> =
+        data.map { (it[Keys.FREQUENT_COUNT] ?: 6).coerceIn(FREQUENT_RANGE) }.distinctUntilChanged()
+
+    val showListHeaders: Flow<Boolean> =
+        data.map { it[Keys.SHOW_LIST_HEADERS] ?: true }.distinctUntilChanged()
+
+    val notificationBadges: Flow<Boolean> =
+        data.map { it[Keys.NOTIFICATION_BADGES] ?: false }.distinctUntilChanged()
+
+    /** How far down the screen a scrubbed letter is parked, as a percentage of the viewport. */
+    val sectionTopPercent: Flow<Int> =
+        data.map { (it[Keys.SECTION_TOP_PERCENT] ?: 26).coerceIn(SECTION_TOP_RANGE) }
+            .distinctUntilChanged()
+
+    val closeFolderOnLaunch: Flow<Boolean> =
+        data.map { it[Keys.CLOSE_FOLDER_ON_LAUNCH] ?: false }.distinctUntilChanged()
 
     /**
      * Reads [key], falling back to the shared alignment and then to the old right-handed
@@ -898,6 +957,34 @@ class Prefs(private val context: Context) {
 
     suspend fun setShowAppIcons(v: Boolean) {
         context.dataStore.edit { it[Keys.SHOW_APP_ICONS] = v }
+    }
+
+    suspend fun setShowFavoriteIcons(v: Boolean) {
+        context.dataStore.edit { it[Keys.SHOW_FAVORITE_ICONS] = v }
+    }
+
+    suspend fun setFavoritesSource(v: FavoritesSource) {
+        context.dataStore.edit { it[Keys.FAVORITES_SOURCE] = v.name }
+    }
+
+    suspend fun setFrequentCount(v: Int) {
+        context.dataStore.edit { it[Keys.FREQUENT_COUNT] = v.coerceIn(FREQUENT_RANGE) }
+    }
+
+    suspend fun setShowListHeaders(v: Boolean) {
+        context.dataStore.edit { it[Keys.SHOW_LIST_HEADERS] = v }
+    }
+
+    suspend fun setNotificationBadges(v: Boolean) {
+        context.dataStore.edit { it[Keys.NOTIFICATION_BADGES] = v }
+    }
+
+    suspend fun setSectionTopPercent(v: Int) {
+        context.dataStore.edit { it[Keys.SECTION_TOP_PERCENT] = v.coerceIn(SECTION_TOP_RANGE) }
+    }
+
+    suspend fun setCloseFolderOnLaunch(v: Boolean) {
+        context.dataStore.edit { it[Keys.CLOSE_FOLDER_ON_LAUNCH] = v }
     }
 
     suspend fun setAlignment(v: HomeAlignment) {

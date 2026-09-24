@@ -82,6 +82,9 @@ import dev.victorialauncher.data.AppInfo
 import dev.victorialauncher.data.AzStripVisibility
 import dev.victorialauncher.data.IconShape
 import dev.victorialauncher.data.EdgeSide
+import dev.victorialauncher.data.SECTION_TOP_RANGE
+import dev.victorialauncher.data.FREQUENT_RANGE
+import dev.victorialauncher.data.FavoritesSource
 import dev.victorialauncher.data.ShortcutSwipe
 import dev.victorialauncher.data.HomeAlignment
 import dev.victorialauncher.data.IconSide
@@ -133,6 +136,20 @@ fun SettingsScreen(
     nowPlayingEnabled: Boolean,
     nowPlayingListenerEnabled: Boolean,
     showAppIcons: Boolean,
+    showFavoriteIcons: Boolean,
+    onSetShowFavoriteIcons: (Boolean) -> Unit,
+    showListHeaders: Boolean,
+    onSetShowListHeaders: (Boolean) -> Unit,
+    notificationBadges: Boolean,
+    onSetNotificationBadges: (Boolean) -> Unit,
+    sectionTopPercent: Int,
+    onSetSectionTopPercent: (Int) -> Unit,
+    closeFolderOnLaunch: Boolean,
+    onSetCloseFolderOnLaunch: (Boolean) -> Unit,
+    favoritesSource: FavoritesSource,
+    onSetFavoritesSource: (FavoritesSource) -> Unit,
+    frequentCount: Int,
+    onSetFrequentCount: (Int) -> Unit,
     onSetIconPack: (String?) -> Unit,
     onSetShowAppIcons: (Boolean) -> Unit,
     onSetIconSize: (Int) -> Unit,
@@ -211,6 +228,21 @@ fun SettingsScreen(
         label = "edgePreviewAlpha",
     )
 
+    // The same idea for the scrub line: a percentage means nothing until you see where on this
+    // screen it falls, so setting it draws the line it describes.
+    var sectionPreviewShown by remember { mutableStateOf(false) }
+    var sectionPreviewTick by remember { mutableIntStateOf(0) }
+    LaunchedEffect(sectionPreviewTick) {
+        if (sectionPreviewTick == 0) return@LaunchedEffect
+        sectionPreviewShown = true
+        delay(1400)
+        sectionPreviewShown = false
+    }
+    val sectionPreviewAlpha by animateFloatAsState(
+        if (sectionPreviewShown) 1f else 0f,
+        label = "sectionPreviewAlpha",
+    )
+
     // One screen, shown a section at a time. Separate destinations would mean threading every
     // one of these settings through a route of its own, for a list that is only ever reached
     // from here — so the sections stay where they are and the screen shows one of them.
@@ -281,10 +313,33 @@ fun SettingsScreen(
                         iconPacks,
                         iconPackPackage,
                         showAppIcons,
+                        showFavoriteIcons,
                         themedIcons,
                         onSetIconPack,
                         onSetShowAppIcons,
+                        onSetShowFavoriteIcons,
                         onSetThemedIcons,
+                    )
+                    RowDivider()
+                    // Asked twice rather than once: the favorites are a handful of apps you
+                    // already know by name, and the app list is hundreds you are looking for.
+                    SwitchRow(
+                        stringResource(R.string.settings_icons_favorites),
+                        showFavoriteIcons,
+                        onSetShowFavoriteIcons,
+                    )
+                    RowDivider()
+                    SwitchRow(
+                        stringResource(R.string.settings_icons_app_list),
+                        showAppIcons,
+                        onSetShowAppIcons,
+                    )
+                    RowDivider()
+                    SwitchRowWithDetail(
+                        label = stringResource(R.string.settings_list_headers),
+                        detail = stringResource(R.string.settings_list_headers_detail),
+                        checked = showListHeaders,
+                        onCheckedChange = onSetShowListHeaders,
                     )
                     RowDivider()
                     SliderRow(
@@ -466,6 +521,21 @@ fun SettingsScreen(
                         onCheckedChange = onSetSwipeUpOpensList,
                     )
                     RowDivider()
+                    SliderRow(
+                        label = stringResource(R.string.settings_section_top),
+                        value = sectionTopPercent.toFloat(),
+                        range = SECTION_TOP_RANGE.first.toFloat()..SECTION_TOP_RANGE.last.toFloat(),
+                        valueLabel = "$sectionTopPercent%",
+                        onValueChange = { sectionPreviewTick++; onSetSectionTopPercent(it.toInt()) },
+                    )
+                    RowDivider()
+                    SwitchRowWithDetail(
+                        label = stringResource(R.string.settings_close_folder),
+                        detail = stringResource(R.string.settings_close_folder_detail),
+                        checked = closeFolderOnLaunch,
+                        onCheckedChange = onSetCloseFolderOnLaunch,
+                    )
+                    RowDivider()
                     ShortcutSwipeRow(shortcutSwipe, onSetShortcutSwipe)
                     RowDivider()
                     SwitchRowWithDetail(
@@ -496,6 +566,13 @@ fun SettingsScreen(
                             onCheckedChange = onSetAppListSearchHidden,
                         )
                     }
+                    RowDivider()
+                    FavoritesSourceRow(
+                        favoritesSource,
+                        frequentCount,
+                        onSetFavoritesSource,
+                        onSetFrequentCount,
+                    )
                     RowDivider()
                     SwitchRowWithDetail(
                         label = stringResource(R.string.settings_sort_by_usage),
@@ -530,6 +607,16 @@ fun SettingsScreen(
 
             if (openSection == SettingsSection.NOW_PLAYING) item {
                 Section(stringResource(R.string.settings_section_now_playing)) {
+                    // Here because it reads the same notifications Now Playing does, and needs
+                    // the same permission — putting it under Appearance would ask for that
+                    // access from a screen that says nothing about notifications.
+                    SwitchRowWithDetail(
+                        label = stringResource(R.string.settings_notification_badges),
+                        detail = stringResource(R.string.settings_notification_badges_detail),
+                        checked = notificationBadges,
+                        onCheckedChange = onSetNotificationBadges,
+                    )
+                    RowDivider()
                     SwitchRow(stringResource(R.string.settings_now_playing_show), nowPlayingEnabled, onSetNowPlayingEnabled)
                     if (nowPlayingEnabled) {
                         RowDivider()
@@ -665,6 +752,26 @@ fun SettingsScreen(
             }
         }
     }
+        if (sectionPreviewAlpha > 0f) {
+            // Where the top of a scrubbed letter's section comes to rest, drawn across the
+            // screen it is measured against.
+            Box(
+                Modifier
+                    .align(Alignment.TopStart)
+                    .fillMaxWidth()
+                    .fillMaxHeight(sectionTopPercent / 100f),
+                contentAlignment = Alignment.BottomStart,
+            ) {
+                Box(
+                    Modifier
+                        .fillMaxWidth()
+                        .height(2.dp)
+                        .background(
+                            MaterialTheme.colorScheme.primary.copy(alpha = 0.9f * sectionPreviewAlpha)
+                        ),
+                )
+            }
+        }
         if (edgePreviewAlpha > 0f) {
             val stripe = MaterialTheme.colorScheme.primary.copy(alpha = 0.35f * edgePreviewAlpha)
             if (edgeSide != EdgeSide.RIGHT) {
@@ -818,9 +925,11 @@ private fun IconPackRow(
     packs: List<IconPackRepository.IconPackInfo>,
     selected: String?,
     showIcons: Boolean,
+    showFavoriteIcons: Boolean,
     themed: Boolean,
     onSelect: (String?) -> Unit,
     onSetShowIcons: (Boolean) -> Unit,
+    onSetShowFavoriteIcons: (Boolean) -> Unit,
     onSetThemed: (Boolean) -> Unit,
 ) {
     Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)) {
@@ -835,6 +944,7 @@ private fun IconPackRow(
                 showIcons && !themed && selected == null,
             ) {
                 onSetShowIcons(true)
+                onSetShowFavoriteIcons(true)
                 onSetThemed(false)
                 onSelect(null)
             }
@@ -853,8 +963,16 @@ private fun IconPackRow(
                     onSelect(pack.packageName)
                 }
             }
-            // Not a pack but a choice about packs: draw no icons at all.
-            FilledChip(stringResource(R.string.settings_icon_pack_no_icons), !showIcons) { onSetShowIcons(false) }
+            // Not a pack but a choice about packs: no icons anywhere, in one tap. The two
+            // switches below can say the same thing and more — either surface on its own —
+            // but turning both off is the common answer and should not take two.
+            FilledChip(
+                stringResource(R.string.settings_icon_pack_no_icons),
+                !showIcons && !showFavoriteIcons,
+            ) {
+                onSetShowIcons(false)
+                onSetShowFavoriteIcons(false)
+            }
         }
         if (packs.isEmpty()) {
             Text(
@@ -1258,6 +1376,40 @@ private fun IconSideRow(selected: IconSide, onSelect: (IconSide) -> Unit) {
                 )
             }
         }
+    }
+}
+
+/**
+ * Where the favorites come from: the list you keep, or the apps you actually open.
+ *
+ * The count only appears for the computed one, since the manual list is as long as you made it.
+ */
+@Composable
+private fun FavoritesSourceRow(
+    selected: FavoritesSource,
+    count: Int,
+    onSelect: (FavoritesSource) -> Unit,
+    onSetCount: (Int) -> Unit,
+) {
+    Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)) {
+        Text(stringResource(R.string.settings_favorites_source), style = MaterialTheme.typography.bodyMedium)
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(top = 10.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            FavoritesSource.entries.forEach { source ->
+                FilledChip(stringResource(source.labelRes()), selected == source) { onSelect(source) }
+            }
+        }
+    }
+    if (selected == FavoritesSource.FREQUENT) {
+        SliderRow(
+            label = stringResource(R.string.settings_frequent_count),
+            value = count.toFloat(),
+            range = FREQUENT_RANGE.first.toFloat()..FREQUENT_RANGE.last.toFloat(),
+            valueLabel = count.toString(),
+            onValueChange = { onSetCount(it.toInt()) },
+        )
     }
 }
 

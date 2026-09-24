@@ -80,6 +80,8 @@ fun WidgetSlot(
     heightDp: Int,
     onEditLayout: () -> Unit,
     actions: WidgetSlotActions,
+    /** Bumped when HOME is pressed on a home screen already showing, so the stack goes back. */
+    homeIntentTick: Int,
     modifier: Modifier = Modifier,
 ) {
     var menuExpanded by remember { mutableStateOf(false) }
@@ -119,6 +121,14 @@ fun WidgetSlot(
             }
         } else {
             val pagerState = rememberPagerState(pageCount = { widgetIds.size })
+            // HOME means the home screen as you left it set up, not as you last flicked
+            // through it. Animated rather than snapped: the screen is in front of you when it
+            // happens, and a stack that jumps has nothing to say about where it went.
+            LaunchedEffect(homeIntentTick) {
+                if (homeIntentTick > 0 && pagerState.currentPage != 0) {
+                    pagerState.animateScrollToPage(0)
+                }
+            }
             HorizontalPager(
                 state = pagerState,
                 // Keyed by widget id so adding or removing one doesn't rebuild every host

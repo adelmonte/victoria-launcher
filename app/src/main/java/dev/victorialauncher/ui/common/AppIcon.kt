@@ -5,22 +5,30 @@ import android.content.Context
 import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.util.LruCache
+import androidx.compose.foundation.background
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Text
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.drawable.toBitmap
+import dev.victorialauncher.media.NotificationCountBus
 import dev.victorialauncher.VictoriaApp
 import dev.victorialauncher.data.AppInfo
 import dev.victorialauncher.data.EntryKind
@@ -156,11 +164,20 @@ data class IconConfig(
     val showIcons: Boolean,
     /** Draw the monochrome layer, tinted, instead of the app's own colors. */
     val themed: Boolean,
+    /** Whether an app showing notifications is badged with how many. */
+    val notificationBadges: Boolean,
     val shape: IconShape,
 )
 
 val LocalIconConfig = staticCompositionLocalOf {
-    IconConfig(pack = null, overrides = emptyMap(), showIcons = true, themed = false, shape = IconShape.SYSTEM)
+    IconConfig(
+        pack = null,
+        overrides = emptyMap(),
+        showIcons = true,
+        themed = false,
+        notificationBadges = false,
+        shape = IconShape.SYSTEM,
+    )
 }
 
 @Composable
@@ -196,10 +213,57 @@ fun AppIcon(app: AppInfo, sizeDp: Int, modifier: Modifier = Modifier) {
         }.getOrNull()
     }
 
-    if (bitmap != null) {
-        Image(bitmap = bitmap, contentDescription = app.label, modifier = modifier.size(sizeDp.dp))
-    } else {
-        Box(modifier = modifier.size(sizeDp.dp))
+    // Badged rather than drawn into the bitmap: the count changes while the icon does not, and
+    // baking it in would throw away the cached icon every time a notification arrived.
+    val badge = notificationBadgeCount(app)
+    Box(modifier = modifier.size(sizeDp.dp)) {
+        if (bitmap != null) {
+            Image(
+                bitmap = bitmap,
+                contentDescription = app.label,
+                modifier = Modifier.size(sizeDp.dp),
+            )
+        }
+        if (badge > 0) NotificationBadge(badge, sizeDp, Modifier.align(Alignment.TopEnd))
+    }
+}
+
+/**
+ * How many notifications to show on this app, or zero for none.
+ *
+ * Zero whenever the setting is off or the listener is not connected, so nothing is drawn from
+ * a count that is only as current as the last time the service was alive.
+ */
+@Composable
+private fun notificationBadgeCount(app: AppInfo): Int {
+    if (!LocalIconConfig.current.notificationBadges) return 0
+    val counts by NotificationCountBus.counts.collectAsState()
+    return counts[app.componentName.packageName] ?: 0
+}
+
+/**
+ * The count, in a filled circle at the icon's top corner.
+ *
+ * Sized from the icon rather than fixed, so it stays in proportion at every icon size the
+ * launcher offers. Anything past nine is drawn as 9+: the circle is the signal, and a
+ * three-digit number in it is unreadable at any size an icon is drawn at.
+ */
+@Composable
+private fun NotificationBadge(count: Int, iconSizeDp: Int, modifier: Modifier = Modifier) {
+    val diameter = (iconSizeDp * 0.42f).dp.coerceIn(14.dp, 22.dp)
+    Box(
+        modifier = modifier
+            .size(diameter)
+            .background(MaterialTheme.colorScheme.primary, CircleShape),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(
+            text = if (count > 9) "9+" else count.toString(),
+            color = MaterialTheme.colorScheme.onPrimary,
+            fontSize = (diameter.value * 0.55f).sp,
+            lineHeight = (diameter.value * 0.55f).sp,
+            maxLines = 1,
+        )
     }
 }
 

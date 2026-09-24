@@ -29,6 +29,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -102,6 +104,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.Velocity
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import dev.victorialauncher.data.AppInfo
@@ -123,9 +126,6 @@ import kotlin.math.abs
 import kotlin.math.roundToInt
 import dev.victorialauncher.R
 import androidx.compose.ui.res.stringResource
-
-/** Where the selected letter's section sits, as a fraction down the screen. */
-private const val SECTION_TOP_FRACTION = 0.26f
 
 /**
  * Breathing room above A and below the settings row when no scrub has placed the list.
@@ -219,6 +219,7 @@ fun AppListScreen(
     shortcutSwipe: ShortcutSwipe,
     searchEnabled: Boolean,
     searchAtBottom: Boolean,
+    sectionTopPercent: Int,
     query: String,
     onQueryChange: (String) -> Unit,
     alignment: HomeAlignment,
@@ -291,7 +292,9 @@ fun AppListScreen(
         animationSpec = tween(durationMillis = 180),
         label = "othersAlpha",
     )
-    val sectionTopPx = (viewportHeightPx * SECTION_TOP_FRACTION).roundToInt()
+    // Where a scrubbed letter is parked. A setting because how far up the screen you can
+    // still reach is a fact about the hand and the phone, not something to pick for anyone.
+    val sectionTopPx = (viewportHeightPx * sectionTopPercent / 100f).roundToInt()
 
     // The LazyColumn always holds the full list — while scrubbing it's just hidden and
     // pre-scrolled, with the letter's apps drawn over the top. Filtering the rows themselves
@@ -782,8 +785,14 @@ fun AppListScreen(
                 query = query,
                 onQueryChange = onQueryChange,
                 contentColor = contentColor,
-                activeSide = activeSide,
+                edgeSide = edgeSide,
                 showAlphabet = showAlphabet,
+                onGo = {
+                    displayModel.rows
+                        .filterIsInstance<AppListRow.Entry>()
+                        .firstOrNull()
+                        ?.let { onLaunch(it.app) }
+                },
                 modifier = Modifier.onSizeChanged { searchHeightPx = it.height },
             )
         }
@@ -838,12 +847,14 @@ fun AppListScreen(
                     else -> restingTopPadding
                 }
                 // The strip is drawn over this list, not beside it, so the side it occupies
-                // has to be held clear. Only that side: with both edges enabled the strip is
-                // still only ever on the one you opened from, and insetting the other leaves
-                // a margin against nothing.
+                // has to be held clear. Held on every side the setting allows, not on the one
+                // this scrub happened to come from: with both edges enabled that was whichever
+                // edge you opened from, so every row jumped across the screen when you next
+                // opened from the other one. A margin against an edge the strip can appear on
+                // is worth more than a list that will not stay still.
                 PaddingValues(
-                    start = if (showAlphabet && activeSide == EdgeSide.LEFT) STRIP_INSET else 0.dp,
-                    end = if (showAlphabet && activeSide == EdgeSide.RIGHT) STRIP_INSET else 0.dp,
+                    start = if (showAlphabet && edgeSide != EdgeSide.RIGHT) STRIP_INSET else 0.dp,
+                    end = if (showAlphabet && edgeSide != EdgeSide.LEFT) STRIP_INSET else 0.dp,
                     top = top,
                     bottom = if (searching) SEARCH_EDGE_PADDING else restingBottomPadding,
                 )
@@ -944,8 +955,14 @@ fun AppListScreen(
                 query = query,
                 onQueryChange = onQueryChange,
                 contentColor = contentColor,
-                activeSide = activeSide,
+                edgeSide = edgeSide,
                 showAlphabet = showAlphabet,
+                onGo = {
+                    displayModel.rows
+                        .filterIsInstance<AppListRow.Entry>()
+                        .firstOrNull()
+                        ?.let { onLaunch(it.app) }
+                },
                 atBottom = true,
             )
         }
@@ -1211,8 +1228,10 @@ private fun SearchField(
     query: String,
     onQueryChange: (String) -> Unit,
     contentColor: Color,
-    activeSide: EdgeSide,
+    /** The edges the strip may occupy, so the field keeps clear of the same ones the list does. */
+    edgeSide: EdgeSide,
     showAlphabet: Boolean,
+    onGo: () -> Unit,
     atBottom: Boolean = false,
     modifier: Modifier = Modifier,
 ) {
@@ -1220,6 +1239,10 @@ private fun SearchField(
         value = query,
         onValueChange = onQueryChange,
         singleLine = true,
+        // The key is already there and already means this; asking is the long way round to the
+        // one app you have just finished spelling. Nothing happens when nothing matched.
+        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Go),
+        keyboardActions = KeyboardActions(onGo = { onGo() }),
         placeholder = { Text(stringResource(R.string.applist_search), color = contentColor.copy(alpha = 0.6f)) },
         leadingIcon = {
             Icon(Icons.Filled.Search, contentDescription = null, tint = contentColor.copy(alpha = 0.7f))
@@ -1267,8 +1290,8 @@ private fun SearchField(
             .padding(
                 // Lines up with the rows' own inset instead of hugging the screen edge, and
                 // clears the A-Z strip on whichever side it occupies.
-                start = (if (showAlphabet && activeSide == EdgeSide.LEFT) STRIP_INSET else 0.dp) + 20.dp,
-                end = (if (showAlphabet && activeSide == EdgeSide.RIGHT) STRIP_INSET else 0.dp) + 20.dp,
+                start = (if (showAlphabet && edgeSide != EdgeSide.RIGHT) STRIP_INSET else 0.dp) + 20.dp,
+                end = (if (showAlphabet && edgeSide != EdgeSide.LEFT) STRIP_INSET else 0.dp) + 20.dp,
                 top = if (atBottom) 8.dp else 12.dp,
                 bottom = if (atBottom) 12.dp else 8.dp,
             ),

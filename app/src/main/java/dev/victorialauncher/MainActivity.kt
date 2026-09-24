@@ -109,15 +109,24 @@ class MainActivity : ComponentActivity() {
             val iconOverrides by app.prefs.iconOverrides.collectAsState(initial = emptyMap())
             val showAppIcons by app.prefs.showAppIcons.collectAsState(initial = true)
             val themedIcons by app.prefs.themedIcons.collectAsState(initial = false)
+            val notificationBadges by app.prefs.notificationBadges.collectAsState(initial = false)
             val iconShape by app.prefs.iconShape.collectAsState(initial = IconShape.SYSTEM)
             val iconConfig = remember(
                 iconPackPackage,
                 iconOverrides,
                 showAppIcons,
                 themedIcons,
+                notificationBadges,
                 iconShape,
             ) {
-                IconConfig(iconPackPackage, iconOverrides, showAppIcons, themedIcons, iconShape)
+                IconConfig(
+                    pack = iconPackPackage,
+                    overrides = iconOverrides,
+                    showIcons = showAppIcons,
+                    themed = themedIcons,
+                    notificationBadges = notificationBadges,
+                    shape = iconShape,
+                )
             }
 
             VictoriaTheme(font = font, fontFile = fontFile) {

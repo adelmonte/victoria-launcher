@@ -112,6 +112,7 @@ import dev.victorialauncher.data.PaddingSlot
 import dev.victorialauncher.media.NowPlayingWidget
 import dev.victorialauncher.media.openNowPlayingApp
 import dev.victorialauncher.service.HapticUtil
+import androidx.compose.runtime.CompositionLocalProvider
 import dev.victorialauncher.ui.common.AppIcon
 import dev.victorialauncher.ui.common.swipeForShortcuts
 import dev.victorialauncher.ui.common.AppShortcutMenu
@@ -169,6 +170,14 @@ private fun buildHomeItems(
 fun HomeScreen(
     /** The side an always-present A-Z strip occupies, so content can keep out from under it. */
     stripInsetSide: EdgeSide?,
+    /** Bumped when HOME is pressed on a home screen already showing. */
+    homeIntentTick: Int,
+    /** Whether opening an app from inside a folder closes the folder behind it. */
+    closeFolderOnLaunch: Boolean,
+    /** Whether the favorites draw icons, which is asked separately from the app list. */
+    showFavoriteIcons: Boolean,
+    /** False when the favorites are computed from usage, so there is no order to drag. */
+    favoritesReorderable: Boolean,
     /** Whether a sideways swipe on a row offers its app's shortcuts. */
     shortcutSwipe: ShortcutSwipe,
     favorites: List<FavoriteEntry>,
@@ -390,6 +399,23 @@ fun HomeScreen(
     var peekFired by remember { mutableStateOf(false) }
 
 
+    val baseIconConfig = LocalIconConfig.current
+    val favoriteIconConfig = remember(baseIconConfig, showFavoriteIcons) {
+        baseIconConfig.copy(showIcons = showFavoriteIcons)
+    }
+
+    // An always-on A-Z strip is drawn over this screen rather than beside it, so the side or
+    // sides it can occupy have to be held clear — otherwise it sits on top of the favorites,
+    // which is what it did while this was passed in and never read.
+    val stripInset = remember(stripInsetSide) {
+        when (stripInsetSide) {
+            null -> Modifier
+            EdgeSide.LEFT -> Modifier.padding(start = STRIP_INSET)
+            EdgeSide.RIGHT -> Modifier.padding(end = STRIP_INSET)
+            EdgeSide.BOTH -> Modifier.padding(horizontal = STRIP_INSET)
+        }
+    }
+
     // Free vertical drag with spring bounce at both ends, outside edit mode.
     val offsetY = remember { Animatable(0f) }
     var viewportHeight by remember { mutableIntStateOf(0) }
@@ -397,6 +423,20 @@ fun HomeScreen(
     val minOffset = remember(viewportHeight, contentHeight) {
         minOf(0f, (viewportHeight - contentHeight).toFloat())
     }
+    // Back to the top on HOME, for the same reason the app list closes on it: the home screen
+    // you get back is the one you arranged, not the one you last dragged out of the way.
+    LaunchedEffect(homeIntentTick) {
+        if (homeIntentTick > 0 && offsetY.value != 0f) {
+            offsetY.animateTo(
+                targetValue = 0f,
+                animationSpec = spring(
+                    dampingRatio = Spring.DampingRatioNoBouncy,
+                    stiffness = Spring.StiffnessMedium,
+                ),
+            )
+        }
+    }
+
     // Turning the phone changes how much there is to scroll through. A stack dragged up in
     // landscape kept that offset when the screen went tall again, which left it sitting above
     // the top of the display with nothing on screen to drag it back down by.
@@ -576,10 +616,16 @@ fun HomeScreen(
                     // Outlined rather than bare text: it opens a mode of its own, and as a
                     // plain label beside Done it read as a caption rather than something to
                     // press.
+                    // On their own surface for the same reason the steppers are: over a
+                    // wallpaper that is dark on one side and light on the other, one flat
+                    // content color leaves them unreadable on whichever half matches it.
                     OutlinedButton(
                         onClick = onEditScrubBand,
-                        colors = ButtonDefaults.outlinedButtonColors(contentColor = contentColor),
-                        border = BorderStroke(1.dp, contentColor.copy(alpha = 0.5f)),
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.92f),
+                            contentColor = MaterialTheme.colorScheme.onSurface,
+                        ),
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)),
                         contentPadding = PaddingValues(horizontal = 14.dp, vertical = 6.dp),
                     ) {
                         Icon(
@@ -593,7 +639,10 @@ fun HomeScreen(
                     Spacer(Modifier.weight(1f))
                     TextButton(
                         onClick = { onEditModeChange(false) },
-                        colors = ButtonDefaults.textButtonColors(contentColor = contentColor),
+                        colors = ButtonDefaults.textButtonColors(
+                            containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.92f),
+                            contentColor = MaterialTheme.colorScheme.onSurface,
+                        ),
                     ) {
                         Icon(Icons.Filled.Done, contentDescription = null)
                         Spacer(Modifier.width(4.dp))
@@ -668,16 +717,25 @@ fun HomeScreen(
                         style = MaterialTheme.typography.bodyMedium,
                         textAlign = TextAlign.Center,
                     )
-                    Spacer(Modifier.height(12.dp))
-                    TextButton(onClick = onManageFavorites) { Text(stringResource(R.string.home_choose_favorites)) }
+                    if (favoritesReorderable) {
+                        Spacer(Modifier.height(12.dp))
+                        TextButton(onClick = onManageFavorites) { Text(stringResource(R.string.home_choose_favorites)) }
+                    }
                 }
             }
 
+            // The favorites answer to their own icon setting, so a list of bare names here can
+            // sit above an app list that still has icons. Remembered because LocalIconConfig is
+            // a static local: a fresh instance each composition would invalidate every row
+            // under it on every frame.
+            CompositionLocalProvider(LocalIconConfig provides favoriteIconConfig) {
             displayItems.forEachIndexed { index, item ->
                 // Reordering hangs off a visible grab handle now. It used to be a long press
                 // anywhere on the row, which nothing on screen advertised and which fought
                 // every other thing a long press could mean.
-                val dragHandle = if (editMode) {
+                // No handle on a computed list: its order is the count of openings, and a row
+                // dragged somewhere would be back where it was the next time anything launched.
+                val dragHandle = if (editMode && favoritesReorderable) {
                     Modifier.pointerInput(index, displayItems.size) {
                         detectDragGestures(
                             onDragStart = {
@@ -723,6 +781,10 @@ fun HomeScreen(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
+                        // Not the widget: it has a side padding of its own that someone has
+                        // already set to taste, and moving it would be answering a complaint
+                        // about the favorites by shifting something else.
+                        .then(if (item is HomeItem.Widget) Modifier else stripInset)
                         .onGloballyPositioned { coords ->
                             itemHeights[index] = coords.size.height
                             itemTops[index] = coords.positionInWindow().y
@@ -748,6 +810,7 @@ fun HomeScreen(
                                 heightDp = widgetHeightDp,
                                 onEditLayout = { onEditModeChange(true) },
                                 actions = widgetActions,
+                                homeIntentTick = homeIntentTick,
                                 modifier = Modifier
                                     .offset(x = widgetOffsetXDp.dp)
                                     .fillMaxWidth()
@@ -797,7 +860,15 @@ fun HomeScreen(
                             onEdit = { folderMenuFor = null; folderRenameFor = item.folder },
                             onEditLayout = { folderMenuFor = null; onEditModeChange(true) },
                             onDelete = { folderMenuFor = null; onDeleteFolder(item.folder) },
-                            onOpenApp = onOpenFolderApp,
+                            onOpenApp = { member ->
+                                // Closed as the app starts rather than on the way back: there
+                                // is nothing to come back to yet, and a folder that shuts while
+                                // you are still looking at it is the launcher fidgeting.
+                                if (closeFolderOnLaunch) {
+                                    expandedFolders = expandedFolders - item.folder.id
+                                }
+                                onOpenFolderApp(member)
+                            },
                             onRemoveApp = { member -> onRemoveFromFolder(item.folder, member) },
                             onMemberAppInfo = onAppInfo,
                             onMemberUnpin = onUnpinShortcut,
@@ -887,6 +958,7 @@ fun HomeScreen(
                 } else {
                     Spacer(Modifier.height(itemSpacingDp.dp))
                 }
+            }
             }
         }
 
@@ -1511,6 +1583,9 @@ private fun handleReserve(dragHandle: Modifier?, sidePaddingDp: Int): Dp {
  * a phone on its side keeps rows that are readable rather than a name at one edge and its icon
  * at the other.
  */
+/** How much of an edge an always-on A-Z strip takes, matching what the app list holds clear. */
+private val STRIP_INSET = 56.dp
+
 private val MAX_CONTENT_WIDTH = 600.dp
 
 /** Which side a capped stack sits against, so it stays where the rows are aligned. */

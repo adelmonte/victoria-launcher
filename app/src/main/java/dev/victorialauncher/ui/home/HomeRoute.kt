@@ -54,6 +54,7 @@ import dev.victorialauncher.data.EntryKind
 import dev.victorialauncher.data.restoreConcealed
 import dev.victorialauncher.data.AzStripVisibility
 import dev.victorialauncher.data.EdgeSide
+import dev.victorialauncher.data.FavoritesSource
 import dev.victorialauncher.data.ShortcutSwipe
 import dev.victorialauncher.data.HomeAlignment
 import dev.victorialauncher.data.IconSide
@@ -158,6 +159,7 @@ fun HomeRoute(
         nameOverrides,
         // Empty unless the sort is on, so an ordinary launch doesn't rebuild the whole list.
         if (settings.sortByUsage) launchCounts else emptyMap(),
+        settings.showListHeaders,
     ) {
         val apps = appsByKey.values.toList()
         val counts = if (settings.sortByUsage) launchCounts else emptyMap()
@@ -168,6 +170,7 @@ fun HomeRoute(
                 { nameOverrides[it.key] ?: it.label },
                 counts,
                 englishName = { app.appRepository.englishLabel(it) },
+                showHeaders = settings.showListHeaders,
             )
         }
     }
@@ -178,6 +181,7 @@ fun HomeRoute(
         nameOverrides,
         includeHiddenInSearch,
         if (settings.sortByUsage) launchCounts else emptyMap(),
+        settings.showListHeaders,
     ) {
         val apps = appsByKey.values.toList()
         val counts = if (settings.sortByUsage) launchCounts else emptyMap()
@@ -191,6 +195,7 @@ fun HomeRoute(
                     { nameOverrides[it.key] ?: it.label },
                     counts,
                     englishName = { app.appRepository.englishLabel(it) },
+                    showHeaders = settings.showListHeaders,
                 )
             }
         }
@@ -497,6 +502,10 @@ fun HomeRoute(
         ) {
             HomeScreen(
                 stripInsetSide = if (!stripAlwaysVisible) null else settings.edgeSide,
+                homeIntentTick = homeIntentTick,
+                closeFolderOnLaunch = settings.closeFolderOnLaunch,
+                showFavoriteIcons = settings.showFavoriteIcons,
+                favoritesReorderable = settings.favoritesSource == FavoritesSource.MANUAL,
                 shortcutSwipe = settings.shortcutSwipe,
                 favorites = favorites,
                 nameOverrides = nameOverrides,
@@ -705,6 +714,7 @@ fun HomeRoute(
                 shortcutSwipe = settings.shortcutSwipe,
                 searchEnabled = settings.appListSearch,
                 searchAtBottom = settings.appListSearchBottom,
+                sectionTopPercent = settings.sectionTopPercent,
                 listState = appListState,
                 // Distance still to travel, which is exactly what the collapse transform
                 // takes: the list arrives scaled down and faded, and grows into place.
@@ -850,6 +860,11 @@ data class HomeSettings(
     val swipeUpOpensAppList: Boolean,
     val appListSearch: Boolean,
     val appListSearchBottom: Boolean,
+    val sectionTopPercent: Int,
+    val closeFolderOnLaunch: Boolean,
+    val showListHeaders: Boolean,
+    val showFavoriteIcons: Boolean,
+    val favoritesSource: FavoritesSource,
     val appListSearchHidden: Boolean,
     val hideStatusBarAppList: Boolean,
     val sortByUsage: Boolean,

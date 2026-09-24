@@ -46,6 +46,7 @@ import dev.victorialauncher.data.EntryKind
 import dev.victorialauncher.data.PrivateSpace
 import dev.victorialauncher.data.AzStripVisibility
 import dev.victorialauncher.data.EdgeSide
+import dev.victorialauncher.data.FavoritesSource
 import dev.victorialauncher.data.ShortcutSwipe
 import dev.victorialauncher.data.HomeAlignment
 import dev.victorialauncher.data.IconSide
@@ -291,6 +292,12 @@ fun VictoriaNavHost(
     val swipeUpOpensList by app.prefs.swipeUpOpensList.collectAsState(initial = false)
     val appListSearchEnabled by app.prefs.appListSearchEnabled.collectAsState(initial = false)
     val appListSearchBottom by app.prefs.appListSearchBottom.collectAsState(initial = false)
+    val sectionTopPercent by app.prefs.sectionTopPercent.collectAsState(initial = 26)
+    val closeFolderOnLaunch by app.prefs.closeFolderOnLaunch.collectAsState(initial = false)
+    val showListHeaders by app.prefs.showListHeaders.collectAsState(initial = true)
+    val showFavoriteIcons by app.prefs.showFavoriteIcons.collectAsState(initial = true)
+    val favoritesSource by app.prefs.favoritesSource.collectAsState(initial = FavoritesSource.MANUAL)
+    val frequentCount by app.prefs.frequentCount.collectAsState(initial = 6)
     val appListSearchHidden by app.prefs.appListSearchHidden.collectAsState(initial = false)
     val sortByUsage by app.prefs.sortByUsage.collectAsState(initial = false)
     val launchCounts by app.prefs.launchCounts.collectAsState(initial = emptyMap())
@@ -298,6 +305,7 @@ fun VictoriaNavHost(
     val quickLaunchLeftKey by app.prefs.quickLaunchLeft.collectAsState(initial = null)
     val quickLaunchRightKey by app.prefs.quickLaunchRight.collectAsState(initial = null)
     val showAppIcons by app.prefs.showAppIcons.collectAsState(initial = true)
+    val notificationBadges by app.prefs.notificationBadges.collectAsState(initial = false)
     val fontFile by app.prefs.fontFile.collectAsState(initial = null)
     val textColorCustom by app.prefs.textColorCustom.collectAsState(initial = 0xFFFFFFFF.toInt())
     val dimColor by app.prefs.dimColor.collectAsState(initial = 0xFF000000.toInt())
@@ -347,13 +355,40 @@ fun VictoriaNavHost(
     val foldersById = remember(folders) { folders.associateBy { it.id } }
 
     // A favorites row is an app or a folder; both come out of the same ordered token list.
-    val favoriteEntries = remember(favoriteKeys, appsByKey, foldersById) {
-        favoriteKeys.mapNotNull { token ->
-            val folderId = folderIdFromToken(token)
-            if (folderId != null) {
-                foldersById[folderId]?.let { FavoriteEntry.FolderRef(it) }
-            } else {
-                appsByKey[token]?.let { FavoriteEntry.App(it) }
+    //
+    // Or out of what has actually been opened, when the section is set to keep itself. The rows
+    // are the same rows either way — it is the list that is computed, not what is drawn from it
+    // — so nothing downstream knows or cares which of the two it was handed.
+    //
+    // Folders are not in the computed list: a folder is something someone made, and there is no
+    // count of openings that would put one together.
+    val favoriteEntries = remember(
+        favoritesSource,
+        favoriteKeys,
+        appsByKey,
+        foldersById,
+        if (favoritesSource == FavoritesSource.FREQUENT) launchCounts else emptyMap(),
+        frequentCount,
+    ) {
+        if (favoritesSource == FavoritesSource.FREQUENT) {
+            launchCounts.asSequence()
+                .filter { it.value > 0 }
+                .mapNotNull { (key, count) -> appsByKey[key]?.let { it to count } }
+                .sortedWith(
+                    compareByDescending<Pair<AppInfo, Int>> { it.second }
+                        .thenBy { it.first.label.lowercase() }
+                )
+                .take(frequentCount)
+                .map { FavoriteEntry.App(it.first) }
+                .toList()
+        } else {
+            favoriteKeys.mapNotNull { token ->
+                val folderId = folderIdFromToken(token)
+                if (folderId != null) {
+                    foldersById[folderId]?.let { FavoriteEntry.FolderRef(it) }
+                } else {
+                    appsByKey[token]?.let { FavoriteEntry.App(it) }
+                }
             }
         }
     }
@@ -448,6 +483,11 @@ fun VictoriaNavHost(
         swipeUpOpensAppList = swipeUpOpensList,
         appListSearch = appListSearchEnabled,
         appListSearchBottom = appListSearchBottom,
+        sectionTopPercent = sectionTopPercent,
+        closeFolderOnLaunch = closeFolderOnLaunch,
+        showListHeaders = showListHeaders,
+        showFavoriteIcons = showFavoriteIcons,
+        favoritesSource = favoritesSource,
         appListSearchHidden = appListSearchHidden,
         hideStatusBarAppList = hideStatusBarAppList,
         sortByUsage = sortByUsage,
@@ -591,6 +631,20 @@ fun VictoriaNavHost(
                 iconPacks = iconPacks,
                 iconPackPackage = iconPackPackage,
                 showAppIcons = showAppIcons,
+                showFavoriteIcons = showFavoriteIcons,
+                onSetShowFavoriteIcons = { scope.launch { app.prefs.setShowFavoriteIcons(it) } },
+                showListHeaders = showListHeaders,
+                onSetShowListHeaders = { scope.launch { app.prefs.setShowListHeaders(it) } },
+                notificationBadges = notificationBadges,
+                onSetNotificationBadges = { scope.launch { app.prefs.setNotificationBadges(it) } },
+                sectionTopPercent = sectionTopPercent,
+                onSetSectionTopPercent = { scope.launch { app.prefs.setSectionTopPercent(it) } },
+                closeFolderOnLaunch = closeFolderOnLaunch,
+                onSetCloseFolderOnLaunch = { scope.launch { app.prefs.setCloseFolderOnLaunch(it) } },
+                favoritesSource = favoritesSource,
+                onSetFavoritesSource = { scope.launch { app.prefs.setFavoritesSource(it) } },
+                frequentCount = frequentCount,
+                onSetFrequentCount = { scope.launch { app.prefs.setFrequentCount(it) } },
                 // The Settings app rather than whatever happens to sort first: a stable,
                 // recognizable icon to judge a size against on every device.
                 previewApp = remember(allApps) {

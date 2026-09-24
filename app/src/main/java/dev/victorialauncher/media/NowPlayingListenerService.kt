@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 package dev.victorialauncher.media
 
+import android.app.Notification
 import android.content.ComponentName
 import android.content.Context
 import android.provider.Settings
@@ -60,6 +61,7 @@ class NowPlayingListenerService : NotificationListenerService() {
 
     override fun onListenerConnected() {
         super.onListenerConnected()
+        publishCounts()
         sessionManager = getSystemService(MediaSessionManager::class.java)
         componentName = ComponentName(this, NowPlayingListenerService::class.java)
         try {
@@ -75,6 +77,7 @@ class NowPlayingListenerService : NotificationListenerService() {
         runCatching { sessionManager.removeOnActiveSessionsChangedListener(sessionsListener) }
         detach()
         NowPlayingBus.update(null)
+        NotificationCountBus.clear()
     }
 
     override fun onNotificationPosted(sbn: StatusBarNotification?) = refresh()
@@ -85,6 +88,34 @@ class NowPlayingListenerService : NotificationListenerService() {
         if (::sessionManager.isInitialized) {
             runCatching { attachTo(sessionManager.getActiveSessions(componentName)) }
         }
+        publishCounts()
+    }
+
+    /**
+     * What is on the shade right now, counted by the app that put it there.
+     *
+     * Recounted from scratch rather than added to and subtracted from: a posted notification
+     * can replace one already there without a removal ever arriving, and a count kept by
+     * arithmetic drifts upward until something clears it.
+     *
+     * Ongoing notifications are left out — a music player or a running download is a state,
+     * not something waiting to be read — and so are group summaries, which would count the
+     * same messages a second time.
+     */
+    private fun publishCounts() {
+        val active = runCatching { activeNotifications }.getOrNull()
+        if (active == null) {
+            NotificationCountBus.clear()
+            return
+        }
+        val counts = HashMap<String, Int>()
+        active.forEach { sbn ->
+            if (!sbn.isClearable) return@forEach
+            val notification = sbn.notification ?: return@forEach
+            if (notification.flags and Notification.FLAG_GROUP_SUMMARY != 0) return@forEach
+            counts[sbn.packageName] = (counts[sbn.packageName] ?: 0) + 1
+        }
+        NotificationCountBus.update(counts)
     }
 
     /** Follow whichever session is worth showing, and watch it for changes. */
