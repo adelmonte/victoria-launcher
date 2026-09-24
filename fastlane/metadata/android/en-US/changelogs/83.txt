@@ -1,0 +1,14 @@
+New:
+* Favorites can show your most-used apps instead of a list you keep.
+* Separate icon switches for favorites and the app list.
+* Notification counts on icons, off by default.
+* Letter headings in the app list can be turned off.
+* Set where a picked letter lands, for tall phones.
+* Folders can close themselves after you open something in them.
+* Enter in the search box launches the first result.
+* HOME returns the home screen to the top and the first widget.
+
+Fixed:
+* Tapping a switch in settings could toggle it and toggle it straight back.
+* Edit layout was unreadable over wallpapers that are light on one side.
+* The app list shifted sideways when the A-Z strip was set to both edges, and an always-on strip sat on top of the favorites.
