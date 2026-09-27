@@ -278,10 +278,10 @@ private fun WidgetPage(widgetId: Int, onPressAndHold: (x: Float, y: Float) -> Un
             // the way up would otherwise take the launcher down with it — leaving a home
             // screen that crashes on sight and no obvious way back. An empty slot is a poor
             // widget but it is still a home screen.
+            // createView already binds the id to the view; calling setAppWidget after it is
+            // not a second helping of the same thing — see the update block.
             val hostView = runCatching {
-                app.widgetHost.createView(ctx, widgetId, providerInfo).apply {
-                    setAppWidget(widgetId, providerInfo)
-                }
+                app.widgetHost.createView(ctx, widgetId, providerInfo)
             }.getOrNull()
             LongPressFrameLayout(ctx).apply {
                 hostView?.let { addView(it) }
@@ -290,7 +290,15 @@ private fun WidgetPage(widgetId: Int, onPressAndHold: (x: Float, y: Float) -> Un
         },
         update = { container ->
             val hostView = container.getChildAt(0) as? AppWidgetHostView
-            runCatching { hostView?.setAppWidget(widgetId, providerInfo) }
+            // Deliberately not calling setAppWidget here any more, and this is the whole of
+            // issue #80. It does not merely restate which widget this is: it resets the view
+            // to the provider's initial layout, throwing away whatever the widget has since
+            // drawn. A widget whose content arrives on its own schedule — a calendar agenda
+            // and anything else backed by a collection — was being wiped back to its loading
+            // state on every recomposition, and settled on "Can't show content" because it
+            // never got to finish. A widget that draws once from a plain RemoteViews survived
+            // it, which is why some worked and some did not.
+            //
             // Widgets lay themselves out for the size they were *told*, not the size of the
             // view; without this they render for some other size and get clipped.
             //
