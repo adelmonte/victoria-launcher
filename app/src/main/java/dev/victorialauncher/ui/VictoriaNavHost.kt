@@ -298,6 +298,7 @@ fun VictoriaNavHost(
     val showSettingsRow by app.prefs.showSettingsRow.collectAsState(initial = true)
     val cornerButtonKey by app.prefs.cornerButtonKey.collectAsState(initial = null)
     val autoKeyboard by app.prefs.autoKeyboard.collectAsState(initial = false)
+    val lastLetterToLine by app.prefs.lastLetterToLine.collectAsState(initial = false)
     val showFavoriteIcons by app.prefs.showFavoriteIcons.collectAsState(initial = true)
     val favoritesSource by app.prefs.favoritesSource.collectAsState(initial = FavoritesSource.MANUAL)
     val frequentCount by app.prefs.frequentCount.collectAsState(initial = 6)
@@ -581,6 +582,7 @@ fun VictoriaNavHost(
             HomeRoute(
                 cornerButtonApp = cornerButtonKey?.let { appsByKey[it] },
                 autoKeyboard = autoKeyboard,
+                lastLetterToLine = lastLetterToLine,
                 app = app,
                 homeIntentTick = homeIntentTick,
                 typedToSearch = typedToSearch,
@@ -767,6 +769,8 @@ fun VictoriaNavHost(
                 cornerButtonLabel = cornerButtonKey?.let { key -> appsByKey[key]?.let { nameOverrides[it.key] ?: it.label } },
                 onOpenCornerPicker = { navController.navigate("cornerpicker") },
                 autoKeyboard = autoKeyboard,
+                lastLetterToLine = lastLetterToLine,
+                onSetLastLetterToLine = { scope.launch { app.prefs.setLastLetterToLine(it) } },
                 onSetAutoKeyboard = { scope.launch { app.prefs.setAutoKeyboard(it) } },
                 onSetAlignment = { scope.launch { app.prefs.setAlignment(it) } },
                 onSetAppListAlignment = { scope.launch { app.prefs.setAppListAlignment(it) } },

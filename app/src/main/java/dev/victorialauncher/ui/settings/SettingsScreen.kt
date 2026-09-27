@@ -199,6 +199,8 @@ fun SettingsScreen(
     onOpenCornerPicker: () -> Unit,
     autoKeyboard: Boolean,
     onSetAutoKeyboard: (Boolean) -> Unit,
+    lastLetterToLine: Boolean,
+    onSetLastLetterToLine: (Boolean) -> Unit,
     onSetAlignment: (HomeAlignment) -> Unit,
     onSetAppListAlignment: (HomeAlignment) -> Unit,
     onSetIconSide: (IconSide) -> Unit,
@@ -464,6 +466,13 @@ fun SettingsScreen(
                 value = edgeZoneWidthDp.toFloat(), range = 32f..96f,
                 valueLabel = "${edgeZoneWidthDp}dp",
                 onValueChange = { edgePreviewTick++; onSetEdgeZoneWidth(it.roundToInt()) },
+            )
+        },
+        SettingsEntry(SettingsSection.APP_LIST, stringResource(R.string.settings_last_letter), "letter lands end z") {
+            SwitchRowWithDetail(
+                label = stringResource(R.string.settings_last_letter),
+                detail = stringResource(R.string.settings_last_letter_detail),
+                checked = lastLetterToLine, onCheckedChange = onSetLastLetterToLine,
             )
         },
         SettingsEntry(SettingsSection.APP_LIST, stringResource(R.string.settings_section_top), "letter lands scroll position") {

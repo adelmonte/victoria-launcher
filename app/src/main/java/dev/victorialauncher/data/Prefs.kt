@@ -160,6 +160,7 @@ class Prefs(private val context: Context) {
         val SHOW_SETTINGS_ROW = booleanPreferencesKey("show_settings_row")
         val CORNER_BUTTON_KEY = stringPreferencesKey("corner_button_key")
         val AUTO_KEYBOARD = booleanPreferencesKey("auto_keyboard")
+        val LAST_LETTER_TO_LINE = booleanPreferencesKey("last_letter_to_line")
         val ALIGNMENT = stringPreferencesKey("alignment")
         val APPLIST_ALIGNMENT = stringPreferencesKey("applist_alignment")
         val ICON_SIDE = stringPreferencesKey("icon_side")
@@ -564,6 +565,15 @@ class Prefs(private val context: Context) {
      */
     val autoKeyboard: Flow<Boolean> =
         data.map { it[Keys.AUTO_KEYBOARD] ?: false }.distinctUntilChanged()
+
+    /**
+     * Whether the letters at the end of the list reach the same line as the rest.
+     *
+     * Off by default because the room they need is real: a screen's worth of empty space under
+     * the last app, which is there whenever the list is open rather than only when it is used.
+     */
+    val lastLetterToLine: Flow<Boolean> =
+        data.map { it[Keys.LAST_LETTER_TO_LINE] ?: false }.distinctUntilChanged()
 
     val showSettingsRow: Flow<Boolean> =
         data.map { it[Keys.SHOW_SETTINGS_ROW] ?: true }.distinctUntilChanged()
@@ -1013,6 +1023,10 @@ class Prefs(private val context: Context) {
             if (componentKey.isNullOrBlank()) pref.remove(Keys.CORNER_BUTTON_KEY)
             else pref[Keys.CORNER_BUTTON_KEY] = componentKey
         }
+    }
+
+    suspend fun setLastLetterToLine(v: Boolean) {
+        context.dataStore.edit { it[Keys.LAST_LETTER_TO_LINE] = v }
     }
 
     suspend fun setAutoKeyboard(v: Boolean) {

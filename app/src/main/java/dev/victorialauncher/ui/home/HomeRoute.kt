@@ -125,6 +125,8 @@ fun HomeRoute(
     cornerButtonApp: AppInfo?,
     /** Whether opening the app list puts the cursor in its search box. */
     autoKeyboard: Boolean,
+    /** Whether the last letters reach the same line as the first. */
+    lastLetterToLine: Boolean,
     typedToSearch: List<TypedKey>,
     onTypedToSearchHandled: (List<TypedKey>) -> Unit,
     settings: HomeSettings,
@@ -727,6 +729,7 @@ fun HomeRoute(
                 favoritesEditable = settings.favoritesSource == FavoritesSource.MANUAL,
                 showSettingsRow = settings.showSettingsRow,
                 autoKeyboard = autoKeyboard,
+                lastLetterToLine = lastLetterToLine,
                 searchEnabled = settings.appListSearch,
                 searchAtBottom = settings.appListSearchBottom,
                 sectionTopPercent = settings.sectionTopPercent,

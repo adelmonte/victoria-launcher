@@ -71,6 +71,8 @@
     <string name="settings_preview">Preview</string>
     <string name="settings_search">Search settings</string>
     <string name="settings_corner_button">Button in the bottom corner</string>
+    <string name="settings_last_letter">Every letter on the same line</string>
+    <string name="settings_last_letter_detail">Letters at the end of the list reach the same line as the rest. Costs a screen of empty space under the last app</string>
     <string name="settings_auto_keyboard">Open the keyboard with the list</string>
     <string name="settings_auto_keyboard_detail">Start typing as soon as the app list opens. Off, the keyboard waits until you tap the search box</string>
     <string name="settings_settings_row">Settings row in the app list</string>

@@ -225,6 +225,8 @@ fun AppListScreen(
     showSettingsRow: Boolean,
     /** Whether opening the list puts the cursor in the search box. */
     autoKeyboard: Boolean,
+    /** Whether the last letters can reach the same line as the first. */
+    lastLetterToLine: Boolean,
     searchEnabled: Boolean,
     searchAtBottom: Boolean,
     sectionTopPercent: Int,
@@ -456,7 +458,33 @@ fun AppListScreen(
     // snap upward. Waiting until it has scrolled off the top makes the change invisible, and
     // once gone the idle gap is all that is left, so there is no scrolling back into it unless
     // A is picked again.
+    /**
+     * The most of the placement gap that may still be shown, which only ever falls.
+     *
+     * The gap a scrub opens above the letter is ordinary scrollable space, so having ridden the
+     * letter up from the line you could ride it straight back down to it. This is the ratchet
+     * asked for: once the letter has been carried up to a tenth of the screen, a tenth is as
+     * far back down as it goes, and the room it came from is not handed back until the letter
+     * is picked again.
+     *
+     * Enforced by refusing the scroll rather than by shrinking the padding. Shrinking it moves
+     * the content by the same amount the finger just did — the two add up and the list bolts to
+     * the top, which is what the first attempt at this did.
+     */
+    var gapCeilingPx by remember { mutableFloatStateOf(Float.MAX_VALUE) }
+
     var userDragged by remember { mutableStateOf(false) }
+
+    /**
+     * How much room is still held above the first row for the placed letter to sit on the line.
+     *
+     * A ratchet: it gives way as it scrolls off the top and never opens back up. Retiring it in
+     * one step instead meant the gap sat there at full size through the whole scroll and then
+     * vanished, and the scroll had to be compensated by exactly the amount it lost or the list
+     * jumped by the difference. Letting it out by however much has already gone past the top
+     * edge is the same arithmetic done continuously, and it cannot be seen for the same reason:
+     * what is taken away is only ever what is no longer on screen.
+     */
     LaunchedEffect(userDragged, scrubLetter) {
         if (!userDragged || scrubLetter != null || highlightRange.isEmpty()) {
             return@LaunchedEffect
@@ -465,8 +493,8 @@ fun AppListScreen(
         if (highlightRange.isEmpty()) return@LaunchedEffect
 
         // The top padding falls from the scrub line back to the idle gap, so that is exactly
-        // how far the content would rise — compensating by anything else (this used to use a
-        // bare 8dp) leaves the list jumping by the difference.
+        // how far the content would rise — compensating by anything else leaves the list
+        // jumping by the difference.
         //
         // Except against the bottom, where shrinking the padding shortens the scroll range by
         // the same amount and the clamp slides us back by whatever no longer fits, doing part
@@ -487,6 +515,8 @@ fun AppListScreen(
         // whole tail of the list on every one of the ~26 letter changes in a gesture.
         val end = displayModel.letterIndex.firstOrNull { it.second > scrubRowIndex }?.second ?: displayModel.rows.size
         highlightRange = scrubRowIndex until end
+        // A fresh placement opens the room again; from here the ratchet only closes it.
+        gapCeilingPx = Float.MAX_VALUE
         // This placement is fresh, so the next drag is the one that retires it.
         userDragged = false
     }
@@ -590,6 +620,10 @@ fun AppListScreen(
                     takeOverSettle()
                     // A finger on the list, as opposed to a programmatic scrub scroll.
                     userDragged = true
+                    // Scrolling means looking rather than typing, and the keyboard is covering
+                    // half of what is being looked at. It stays gone until the field is tapped
+                    // again, since coming back on its own is how it got in the way.
+                    focusManager.clearFocus()
                     // Collapsing has to be a deliberate pull from rest. Letting a scroll that
                     // merely *arrives* at an end turn into one is what made a fast flick
                     // shrink and fade the whole list halfway through the gesture.
@@ -599,6 +633,31 @@ fun AppListScreen(
                     scrolledInGesture = 0f
                 }
                 if (collapsing || stretchSettling) return Offset.Zero
+                // The placement gap closes and stays closed. Measured every time rather than
+                // tracked, so it follows the list wherever the finger has put it, and only
+                // clamped while the first row is the one on screen — past it the gap is gone
+                // and an untouched scroll is just the list moving.
+                // The placement gap closes and stays closed.
+                //
+                // Both the measurement and the test for whether there is anything to measure
+                // come off the same row. Asking listState.firstVisibleItemIndex instead was the
+                // bug: with a tall gap above it, row zero is still in visibleItemsInfo long
+                // after that index has moved on, so the clamp switched itself off one notch in
+                // and the room was handed straight back.
+                if (source == NestedScrollSource.Drag && !highlightRange.isEmpty()) {
+                    val info = listState.layoutInfo
+                    val first = info.visibleItemsInfo.firstOrNull()
+                    // Only while the row the gap sits above is on screen. Past it the gap is
+                    // not what a scroll is moving, and clamping would pin the whole list.
+                    if (first != null && first.index == 0) {
+                        val gap = (first.offset - info.viewportStartOffset).toFloat()
+                        if (gap < gapCeilingPx) gapCeilingPx = gap
+                        if (available.y > 0f) {
+                            val room = (gapCeilingPx - gap).coerceAtLeast(0f)
+                            if (available.y > room) return Offset(0f, available.y - room)
+                        }
+                    }
+                }
                 // Spend whatever is outstanding before the list is allowed to move again, so
                 // winding a gesture back never has the two running at once.
                 if (overPull > 0f && available.y < 0f) {
@@ -852,14 +911,11 @@ fun AppListScreen(
                         )
                     }
                 },
-            // Room above A and below Z so any letter can sit on the same line; without it
-            // the ends clamp and land somewhere else entirely.
-            // Room above A so it can sit on the scrub line like every other letter; without
-            // it the top clamps and A lands somewhere else entirely. There is deliberately no
-            // matching room below Z. Reaching the line from the bottom would take most of a
-            // screen of empty space past the settings row, which reads as the list being
-            // broken rather than as placement, so the last letter simply lands as high as its
-            // own content allows.
+            // Room above A and below Z, so every letter lands on the same line — including the
+            // last, which used to stop wherever its own content ran out because there was
+            // nothing underneath to scroll it up with (#71). The cost is a screen's worth of
+            // empty space past the settings row while a letter is placed, which is why it is
+            // only there while one is: at rest the list ends where its content does.
             contentPadding = with(density) {
                 val top = when {
                     searching -> SEARCH_EDGE_PADDING
@@ -876,7 +932,20 @@ fun AppListScreen(
                     start = if (showAlphabet && edgeSide != EdgeSide.RIGHT) STRIP_INSET else 0.dp,
                     end = if (showAlphabet && edgeSide != EdgeSide.LEFT) STRIP_INSET else 0.dp,
                     top = top,
-                    bottom = if (searching) SEARCH_EDGE_PADDING else restingBottomPadding,
+                    bottom = when {
+                        searching -> SEARCH_EDGE_PADDING
+                        // Whatever is left of the screen below the line, so the last letters
+                        // have something to be scrolled up into.
+                        //
+                        // Held for as long as the list is open rather than only while a letter
+                        // is placed. Added at the moment of placement it was a jump: the scroll
+                        // range grew and the rows moved under the scroll that was already
+                        // happening, so the end of the alphabet arrived with a lurch while the
+                        // start slid. Steady room costs a screen of empty space under the last
+                        // app, which is the whole of what this setting is agreeing to.
+                        lastLetterToLine -> (viewportHeightPx - sectionTopPx).coerceAtLeast(0).toDp()
+                        else -> restingBottomPadding
+                    },
                 )
             },
         ) {
