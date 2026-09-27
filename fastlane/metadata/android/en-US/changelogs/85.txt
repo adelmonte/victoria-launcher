@@ -1,0 +1,8 @@
+New:
+* Drag off either end of the A-Z strip to close the app list, without lifting your finger.
+* A picked letter stays where you scroll it to, rather than sliding back down.
+* Optional: let the letters at the end of the list reach the same line as the rest.
+* The keyboard steps aside when you scroll the app list.
+
+Fixed:
+* Some widgets showed "Can't show content" instead of drawing. Calendars and other list-backed widgets were being reset faster than they could finish.
