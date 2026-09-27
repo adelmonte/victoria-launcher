@@ -79,6 +79,7 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
@@ -123,6 +124,7 @@ import dev.victorialauncher.ui.common.recordTouchPosition
 import dev.victorialauncher.ui.common.EditAppDialog
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.dropWhile
 import kotlinx.coroutines.flow.first
 import kotlin.math.abs
 import kotlin.math.roundToInt
@@ -473,6 +475,34 @@ fun AppListScreen(
      */
     var gapCeilingPx by remember { mutableFloatStateOf(Float.MAX_VALUE) }
 
+    /**
+     * The most blank that may still be shown under the last row, which only ever falls.
+     *
+     * This is the mirror of [gapCeilingPx], and the mirroring works here where every previous
+     * attempt did not, because of which direction it refuses. The blank under the last row
+     * grows when you scroll forward, into nothing, and shrinks when you scroll back toward the
+     * apps. Refusing it to grow therefore stops the last letter travelling up past the line —
+     * and leaves scrolling back entirely free, which is the only way out of the end of a list
+     * and the thing the earlier clamps took away.
+     */
+    var blankCeilingPx by remember { mutableFloatStateOf(Float.MAX_VALUE) }
+
+    /**
+     * Whether the room under the last app is still being held for a placement.
+     *
+     * This is how the end of the list gets what the start gets from its ratchet. The room is
+     * what lets the last letters reach the line, and it is taken away as soon as the last row
+     * has been scrolled off — invisibly, because by then it is below the viewport. Coming back
+     * afterwards, the list ends at its last app and the letter sits where its own content puts
+     * it, which is the same "it cannot return to the line" the first letter has, reached
+     * without refusing a single scroll.
+     *
+     * Held apart from [highlightRange], which cannot answer this: that range is retired the
+     * moment the gap above has nothing left to give, and above the last letter it has nothing
+     * to give at the outset.
+     */
+    var bottomRoomLive by remember { mutableStateOf(false) }
+
     var userDragged by remember { mutableStateOf(false) }
 
     /**
@@ -485,8 +515,51 @@ fun AppListScreen(
      * edge is the same arithmetic done continuously, and it cannot be seen for the same reason:
      * what is taken away is only ever what is no longer on screen.
      */
-    LaunchedEffect(userDragged, scrubLetter) {
-        if (!userDragged || scrubLetter != null || highlightRange.isEmpty()) {
+    // Taken away the moment the last row leaves the screen, which is the whole of the ratchet
+    // at this end. Invisible when it happens: what is removed is below the viewport.
+    LaunchedEffect(bottomRoomLive) {
+        if (!bottomRoomLive) return@LaunchedEffect
+        // Once the last row's bottom has reached the bottom of the screen, every pixel of the
+        // room is below the fold and taking it away moves nothing.
+        //
+        // The condition was "the last row has left the viewport", which never came true: the
+        // room keeps that row inside the measured viewport for as long as it is held, so the
+        // list waited forever and the room was never given back. Asking where the row's bottom
+        // edge is asks the question that was meant all along.
+        snapshotFlow {
+            val info = listState.layoutInfo
+            val last = info.visibleItemsInfo.lastOrNull()
+            // Far enough past the fold to cover the gap above the first row as well, since
+            // that one is let go at the same moment and the list has to be able to absorb it.
+            // Waiting only for the room itself to clear the bottom edge left nothing spare, so
+            // the compensating scroll came up short by whatever it could not find — which is
+            // the shift felt as the last letter reached the edge.
+            val slack = (sectionTopPx - idleTopPaddingPx).coerceAtLeast(0)
+            last != null && (
+                // Scrolled back far enough that the final row is not even on screen.
+                last.index < info.totalItemsCount - 1 ||
+                    // Or it is, and there is room under it for both to go at once.
+                    last.offset + last.size >= info.viewportEndOffset + slack
+                )
+        }
+            // The layout has not caught up at the moment this starts: the scroll to the letter
+            // is still in flight, so the first reading describes where the list was a frame ago
+            // and says the room is already spent. Waiting for it to be false once means waiting
+            // for the letter to actually arrive.
+            .dropWhile { it }
+            .first { it }
+        bottomRoomLive = false
+    }
+
+    LaunchedEffect(userDragged, scrubLetter, bottomRoomLive) {
+        // Not while the room under the last row is still held. Down there the gap above the
+        // first row is doing nothing — row zero is a whole alphabet away — but retiring it
+        // still shortens the list by its height, and the compensation for that is capped by
+        // how much room is left below, which the held room has already spoken for. What is
+        // left uncovered is the jump felt on the first drag away from the last letter. Both
+        // are let go together instead, once the list is back among the apps and there is room
+        // to absorb it.
+        if (!userDragged || scrubLetter != null || highlightRange.isEmpty() || bottomRoomLive) {
             return@LaunchedEffect
         }
         snapshotFlow { placementSettled() }.first { it }
@@ -510,13 +583,40 @@ fun AppListScreen(
 
     LaunchedEffect(scrubRowIndex, scrubPlacement, displayModel) {
         if (scrubRowIndex < 0) return@LaunchedEffect
-        listState.scrollToItem(scrubRowIndex)
         // The next letter's header ends this section. Walking the rows to find it copied the
         // whole tail of the list on every one of the ~26 letter changes in a gesture.
         val end = displayModel.letterIndex.firstOrNull { it.second > scrubRowIndex }?.second ?: displayModel.rows.size
+
+        // Room before the scroll, and a frame for it to land in.
+        //
+        // Only the final section needs any: every other letter has apps of its own below to be
+        // pushed up by, and holding it for them buys a screen of scroll at the end of the list
+        // for nothing. But the scroll clamps against the range as it stands when it runs, so
+        // asking for the room afterwards leaves the last letter stopped short of the line with
+        // the room arriving behind it — which is the setting appearing not to work at all.
+        val wantsRoom = end >= displayModel.rows.size
+        if (wantsRoom != bottomRoomLive) {
+            bottomRoomLive = wantsRoom
+            if (wantsRoom) withFrameNanos { }
+        }
+
+        listState.scrollToItem(scrubRowIndex)
         highlightRange = scrubRowIndex until end
         // A fresh placement opens the room again; from here the ratchet only closes it.
         gapCeilingPx = Float.MAX_VALUE
+        blankCeilingPx = Float.MAX_VALUE
+        if (wantsRoom) {
+            // Measured once the scroll has landed, rather than left for the first drag to
+            // notice. That first reading arrives before the list has settled and describes
+            // more blank than the placement actually left, so the ceiling opened a little
+            // above the line and the list ran up into the difference before stopping.
+            withFrameNanos { }
+            val info = listState.layoutInfo
+            val last = info.visibleItemsInfo.lastOrNull()
+            if (last != null && last.index == info.totalItemsCount - 1) {
+                blankCeilingPx = (info.viewportEndOffset - (last.offset + last.size)).toFloat()
+            }
+        }
         // This placement is fresh, so the next drag is the one that retires it.
         userDragged = false
     }
@@ -633,28 +733,66 @@ fun AppListScreen(
                     scrolledInGesture = 0f
                 }
                 if (collapsing || stretchSettling) return Offset.Zero
-                // The placement gap closes and stays closed. Measured every time rather than
-                // tracked, so it follows the list wherever the finger has put it, and only
-                // clamped while the first row is the one on screen — past it the gap is gone
-                // and an untouched scroll is just the list moving.
-                // The placement gap closes and stays closed.
+                // The gap a placement opens above the first row closes and stays closed.
                 //
-                // Both the measurement and the test for whether there is anything to measure
-                // come off the same row. Asking listState.firstVisibleItemIndex instead was the
-                // bug: with a tall gap above it, row zero is still in visibleItemsInfo long
-                // after that index has moved on, so the clamp switched itself off one notch in
-                // and the room was handed straight back.
-                if (source == NestedScrollSource.Drag && !highlightRange.isEmpty()) {
+                // Only ever this gap, and only while row zero is on screen. There is no
+                // matching clamp at the other end: the first letter is left by its heading
+                // rising, so refusing the other direction costs nothing, while the last letter
+                // is left by its heading descending — refusing that leaves the end of the list
+                // with no way out but further in. What the end needs instead is for the room
+                // to be taken away once it is behind you, which is done in the layout rather
+                // than here.
+                //
+                // A fling counts as much as a finger. Gated on Drag alone, letting go mid-swipe
+                // handed the gap straight back, which is a ratchet that undoes itself.
+                // Each half gated on what actually outlives the placement it belongs to.
+                //
+                // Both used to sit behind highlightRange, which is cleared within a frame of
+                // placing anything but the first letter — placementSettled() calls a placement
+                // spent the moment row zero is not the one on screen, and above every other
+                // letter it never is. So every clamp written for the end of the list has been
+                // behind a condition that was already false, which is why none of them did
+                // anything at all.
+                if (source == NestedScrollSource.Drag || source == NestedScrollSource.Fling) {
                     val info = listState.layoutInfo
                     val first = info.visibleItemsInfo.firstOrNull()
-                    // Only while the row the gap sits above is on screen. Past it the gap is
-                    // not what a scroll is moving, and clamping would pin the whole list.
-                    if (first != null && first.index == 0) {
+                    if (first != null && first.index == 0 && !highlightRange.isEmpty()) {
                         val gap = (first.offset - info.viewportStartOffset).toFloat()
                         if (gap < gapCeilingPx) gapCeilingPx = gap
                         if (available.y > 0f) {
                             val room = (gapCeilingPx - gap).coerceAtLeast(0f)
-                            if (available.y > room) return Offset(0f, available.y - room)
+                            if (available.y > room) {
+                                // Handed to the elastic rather than swallowed, the same as at
+                                // the other end. Pulling on past a gap that will not open is
+                                // the list being pulled off the top of itself, and that should
+                                // mean here what it means down there.
+                                val excess = available.y - room
+                                val resistance = 1f - (abs(overPull) / maxPullPx).coerceIn(0f, 0.75f)
+                                overPull = (overPull + excess * resistance)
+                                    .coerceIn(-maxPullPx, maxPullPx)
+                                return available
+                            }
+                        }
+                    }
+                    val last = info.visibleItemsInfo.lastOrNull()
+                    if (bottomRoomLive && last != null && last.index == info.totalItemsCount - 1) {
+                        val blank = (info.viewportEndOffset - (last.offset + last.size)).toFloat()
+                        if (blank < blankCeilingPx) blankCeilingPx = blank
+                        if (available.y < 0f) {
+                            val room = (blankCeilingPx - blank).coerceAtLeast(0f)
+                            if (-available.y > room) {
+                                // Refused, but not swallowed. Consuming it outright left
+                                // nothing for the elastic to pick up, so pulling on past the
+                                // line stopped meaning anything and the list could no longer
+                                // be pulled off its end to go home. What the clamp will not
+                                // spend on scrolling goes where it would have gone had the
+                                // list simply run out, which is what it has done.
+                                val excess = available.y + room
+                                val resistance = 1f - (abs(overPull) / maxPullPx).coerceIn(0f, 0.75f)
+                                overPull = (overPull + excess * resistance)
+                                    .coerceIn(-maxPullPx, maxPullPx)
+                                return available
+                            }
                         }
                     }
                 }
@@ -943,7 +1081,8 @@ fun AppListScreen(
                         // happening, so the end of the alphabet arrived with a lurch while the
                         // start slid. Steady room costs a screen of empty space under the last
                         // app, which is the whole of what this setting is agreeing to.
-                        lastLetterToLine -> (viewportHeightPx - sectionTopPx).coerceAtLeast(0).toDp()
+                        lastLetterToLine && bottomRoomLive ->
+                            (viewportHeightPx - sectionTopPx).coerceAtLeast(0).toDp()
                         else -> restingBottomPadding
                     },
                 )
