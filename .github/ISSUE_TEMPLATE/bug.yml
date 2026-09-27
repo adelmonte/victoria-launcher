@@ -1,0 +1,46 @@
+name: Bug
+description: Something the launcher does that it should not
+labels: ["bug"]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happens
+      description: What you did, what you expected, and what happened instead.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: How to get there
+      description: |
+        The shortest path from a fresh home screen to the problem. Settings that matter are
+        part of this — most of what looks broken turns out to depend on one of them.
+      placeholder: |
+        1. Long press the home screen, Edit layout
+        2. Drag the second favorite up
+        3. The wrong row moves
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Victoria version
+      description: Settings, About, at the bottom.
+      placeholder: "0.72.0"
+    validations:
+      required: true
+  - type: input
+    id: device
+    attributes:
+      label: Phone and Android version
+      placeholder: "Pixel 8, Android 15"
+    validations:
+      required: true
+  - type: textarea
+    id: media
+    attributes:
+      label: Screenshot or recording
+      description: |
+        Optional, and worth more than any description for anything about how something looks or
+        moves. Drag the file into this box.

@@ -60,6 +60,20 @@ Per-release notes live in
 and are shown on each [GitHub release](../../releases) and on the app's F-Droid
 page.
 
+## Reporting something
+
+One thing per issue. A ticket with nine requests in it gets one reply covering nine
+things, and the eight you did not care about bury the one you did.
+
+For a bug, say what you did, what you expected, and what happened — and which version, on
+which phone. Most of what looks broken turns out to depend on a setting, so say if you
+have changed any. A screenshot or a recording is worth more than any description of how
+something looks or moves.
+
+For a request, say what you are trying to do and not only the feature you have in mind.
+There is often already a way, and where there is not, knowing the goal tends to change the
+shape of the answer.
+
 ## Build
 
 You need JDK 17 and an Android SDK with platform 35.

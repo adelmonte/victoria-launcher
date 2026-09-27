@@ -1,0 +1,20 @@
+name: Feature request
+description: Something the launcher does not do yet
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What you want
+      description: One thing, not a list. Separate requests get separate answers and separate releases.
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: What you are trying to do
+      description: |
+        The problem behind the request, not just the solution you have in mind. There is often a
+        way there already, and where there is not, knowing the goal usually changes the design.
+    validations:
+      required: true
