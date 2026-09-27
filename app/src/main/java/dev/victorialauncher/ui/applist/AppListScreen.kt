@@ -587,17 +587,18 @@ fun AppListScreen(
         // whole tail of the list on every one of the ~26 letter changes in a gesture.
         val end = displayModel.letterIndex.firstOrNull { it.second > scrubRowIndex }?.second ?: displayModel.rows.size
 
-        // Room before the scroll, and a frame for it to land in.
+        // Room before the scroll, and a frame for it to land in. The scroll clamps against the
+        // range as it stands when it runs, so asking for the room afterwards leaves the letter
+        // stopped short of the line with the room arriving behind it.
         //
-        // Only the final section needs any: every other letter has apps of its own below to be
-        // pushed up by, and holding it for them buys a screen of scroll at the end of the list
-        // for nothing. But the scroll clamps against the range as it stands when it runs, so
-        // asking for the room afterwards leaves the last letter stopped short of the line with
-        // the room arriving behind it — which is the setting appearing not to work at all.
-        val wantsRoom = end >= displayModel.rows.size
-        if (wantsRoom != bottomRoomLive) {
-            bottomRoomLive = wantsRoom
-            if (wantsRoom) withFrameNanos { }
+        // Offered to every placement rather than only to the last section. Whether a letter
+        // needs any is not a question about which letter it is: it is whether the apps below it
+        // are enough to push it up to the line, and the last several letters of an alphabet are
+        // never enough between them. Guessing by position put the final letter on the line and
+        // left the four or five before it short.
+        if (lastLetterToLine && !bottomRoomLive) {
+            bottomRoomLive = true
+            withFrameNanos { }
         }
 
         listState.scrollToItem(scrubRowIndex)
@@ -605,17 +606,24 @@ fun AppListScreen(
         // A fresh placement opens the room again; from here the ratchet only closes it.
         gapCeilingPx = Float.MAX_VALUE
         blankCeilingPx = Float.MAX_VALUE
-        if (wantsRoom) {
-            // Measured once the scroll has landed, rather than left for the first drag to
-            // notice. That first reading arrives before the list has settled and describes
-            // more blank than the placement actually left, so the ceiling opened a little
-            // above the line and the list ran up into the difference before stopping.
+        if (bottomRoomLive) {
+            // Now ask what the room was actually worth, once the scroll has landed. Blank left
+            // under the last row means this letter leant on it and the ratchet has something to
+            // hold; none means it reached the line on its own apps, and the room goes back
+            // before it can add a screen of empty scrolling to the end of the list.
+            //
+            // Measured here and not left to the first drag: that reading arrives before the
+            // list has settled and describes more blank than the placement left, so the ceiling
+            // opened above the line and the list ran up into the difference before stopping.
             withFrameNanos { }
             val info = listState.layoutInfo
             val last = info.visibleItemsInfo.lastOrNull()
-            if (last != null && last.index == info.totalItemsCount - 1) {
-                blankCeilingPx = (info.viewportEndOffset - (last.offset + last.size)).toFloat()
+            val blank = if (last != null && last.index == info.totalItemsCount - 1) {
+                (info.viewportEndOffset - (last.offset + last.size)).toFloat()
+            } else {
+                0f
             }
+            if (blank > 0f) blankCeilingPx = blank else bottomRoomLive = false
         }
         // This placement is fresh, so the next drag is the one that retires it.
         userDragged = false
