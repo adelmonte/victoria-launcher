@@ -1,0 +1,10 @@
+Fixed:
+* Reordering favorites moved the wrong row after the first drag.
+* With favorites set to "Most used", starring an app did nothing and said nothing.
+* Folder rows sat lighter and smaller than the apps beside them.
+* Settings dropped you back at the top menu after some changes.
+
+New:
+* Settings grouped by what they affect, with a search box over all of them.
+* Ranked search results, so "c" finds Chess rather than burying it.
+* An optional button in the bottom corner that opens one chosen app.
