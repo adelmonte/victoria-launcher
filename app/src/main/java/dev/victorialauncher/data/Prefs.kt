@@ -55,10 +55,11 @@ val FREQUENT_RANGE = 3..12
 /**
  * How far down the viewport a scrubbed letter may be parked.
  *
- * Stops short of the bottom: the letter is meant to head a section, and parked much lower
- * there is no room left under it for the section to be.
+ * Nearly the whole screen. The top is the top, and the only reason to stop short of the
+ * bottom is that past this the letter's own row is half off the screen and there is nothing
+ * under it to read — which is a broken state rather than a taste anyone holds.
  */
-val SECTION_TOP_RANGE = 10..60
+val SECTION_TOP_RANGE = 0..90
 enum class AppFont { SYSTEM, SANS_SERIF, SERIF, MONOSPACE, CUSTOM }
 
 /** AUTO picks light or dark text from the wallpaper's own colors. */

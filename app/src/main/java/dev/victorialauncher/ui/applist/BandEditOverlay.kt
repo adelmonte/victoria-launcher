@@ -24,6 +24,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DragHandle
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -64,7 +65,6 @@ fun BandEditOverlay(
     band: ScrubBand,
     side: EdgeSide,
     viewportHeightPx: Int,
-    contentColor: Color,
     onBandChange: (ScrubBand) -> Unit,
     onReset: () -> Unit,
     onDone: () -> Unit,
@@ -123,15 +123,18 @@ fun BandEditOverlay(
                 .offset { IntOffset(0, band.topPx.roundToInt()) }
                 .width(96.dp)
                 .height(with(density) { band.heightPx.toDp() })
-                .background(contentColor.copy(alpha = 0.15f), RoundedCornerShape(12.dp))
+                .background(
+                    MaterialTheme.colorScheme.surface.copy(alpha = 0.92f),
+                    RoundedCornerShape(12.dp),
+                )
                 .draggable(
                     orientation = Orientation.Vertical,
                     state = rememberDraggableState { moveWhole(it) },
                 ),
         )
 
-        BandHandle(alignment, band.topPx, contentColor, R.string.applist_band_top) { moveTop(it) }
-        BandHandle(alignment, band.bottomPx, contentColor, R.string.applist_band_bottom) { moveBottom(it) }
+        BandHandle(alignment, band.topPx, R.string.applist_band_top) { moveTop(it) }
+        BandHandle(alignment, band.bottomPx, R.string.applist_band_bottom) { moveBottom(it) }
 
         // Pinned to the bottom rather than the middle, where a handle can sit on top of them.
         Column(
@@ -144,7 +147,7 @@ fun BandEditOverlay(
         ) {
             Text(
                 stringResource(R.string.applist_band_hint),
-                color = contentColor.copy(alpha = 0.8f),
+                color = MaterialTheme.colorScheme.onSurface,
                 fontSize = 13.sp,
                 textAlign = TextAlign.Center,
             )
@@ -161,7 +164,6 @@ fun BandEditOverlay(
 private fun BoxScope.BandHandle(
     alignment: Alignment,
     y: Float,
-    contentColor: Color,
     descriptionRes: Int,
     onDrag: (Float) -> Unit,
 ) {
@@ -172,7 +174,10 @@ private fun BoxScope.BandHandle(
             .align(alignment)
             .offset { IntOffset(0, (y - half).roundToInt()) }
             .size(88.dp, 44.dp)
-            .background(contentColor.copy(alpha = 0.25f), RoundedCornerShape(22.dp))
+            .background(
+                MaterialTheme.colorScheme.surface.copy(alpha = 0.92f),
+                RoundedCornerShape(22.dp),
+            )
             .draggable(
                 orientation = Orientation.Vertical,
                 state = rememberDraggableState { onDrag(it) },
@@ -182,7 +187,7 @@ private fun BoxScope.BandHandle(
         Icon(
             Icons.Filled.DragHandle,
             contentDescription = stringResource(descriptionRes),
-            tint = contentColor,
+            tint = MaterialTheme.colorScheme.onSurface,
         )
     }
 }

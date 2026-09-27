@@ -39,6 +39,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.getValue
@@ -246,7 +247,10 @@ fun SettingsScreen(
     // One screen, shown a section at a time. Separate destinations would mean threading every
     // one of these settings through a route of its own, for a list that is only ever reached
     // from here — so the sections stay where they are and the screen shows one of them.
-    var openSection by remember { mutableStateOf<SettingsSection?>(null) }
+    // Saveable, not merely remembered. Settings that change the window — the rotation lock is
+    // the plain one — rebuild the Activity, and a plain remember goes with it, dropping whoever
+    // was three rows into a section back at the top menu.
+    var openSection by rememberSaveable { mutableStateOf<SettingsSection?>(null) }
     BackHandler(enabled = openSection != null) { openSection = null }
 
     Box(Modifier.fillMaxSize()) {

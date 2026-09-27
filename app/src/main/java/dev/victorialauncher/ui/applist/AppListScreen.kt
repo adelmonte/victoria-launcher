@@ -217,6 +217,8 @@ fun AppListScreen(
     searchModel: AppListModel,
     /** Whether a sideways swipe on a row offers its app's shortcuts. */
     shortcutSwipe: ShortcutSwipe,
+    /** False when the favorites are computed, so starring would write to a list nobody sees. */
+    favoritesEditable: Boolean,
     searchEnabled: Boolean,
     searchAtBottom: Boolean,
     sectionTopPercent: Int,
@@ -883,6 +885,7 @@ fun AppListScreen(
                     is AppListRow.Header -> SectionHeader(row.text, labelSizeSp, contentColor, alignment)
                     is AppListRow.Entry -> AppRow(
                         shortcutSwipe = shortcutSwipe,
+                        favoritesEditable = favoritesEditable,
                         contentColor = contentColor,
                         alignment = alignment,
                         iconSide = iconSide,
@@ -1050,6 +1053,8 @@ private fun SectionHeader(text: String, labelSizeSp: Int, contentColor: Color, a
 @Composable
 private fun AppRow(
     shortcutSwipe: ShortcutSwipe,
+    /** False when the favorites are computed, so starring would write to a list nobody sees. */
+    favoritesEditable: Boolean,
     contentColor: Color,
     alignment: HomeAlignment,
     iconSide: IconSide,
@@ -1163,16 +1168,21 @@ private fun AppRow(
         AppShortcutMenu(app, shortcutMenu, labelSizeSp) { shortcutMenu = false }
 
         DropdownMenu(expanded = menuExpanded, onDismissRequest = onDismissMenu, offset = menuOffset) {
-            DropdownMenuItem(
-                text = { Text(stringResource(if (isFavorite) R.string.applist_remove_favorite else R.string.applist_add_favorite)) },
-                leadingIcon = {
-                    Icon(
-                        if (isFavorite) Icons.Filled.StarBorder else Icons.Filled.Star,
-                        contentDescription = null,
-                    )
-                },
-                onClick = { onDismissMenu(); onSetFavorite(!isFavorite) },
-            )
+            // Not offered while the favorites keep themselves. Starring an app wrote to a list
+            // nothing was drawing, so the app never appeared and there was nothing on screen to
+            // say why — which is what #77 reported as favorites being broken.
+            if (favoritesEditable) {
+                DropdownMenuItem(
+                    text = { Text(stringResource(if (isFavorite) R.string.applist_remove_favorite else R.string.applist_add_favorite)) },
+                    leadingIcon = {
+                        Icon(
+                            if (isFavorite) Icons.Filled.StarBorder else Icons.Filled.Star,
+                            contentDescription = null,
+                        )
+                    },
+                    onClick = { onDismissMenu(); onSetFavorite(!isFavorite) },
+                )
+            }
             DropdownMenuItem(
                 text = { Text(stringResource(R.string.action_edit_icon_and_name)) },
                 leadingIcon = { Icon(Icons.Filled.Tune, contentDescription = null) },

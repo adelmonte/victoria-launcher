@@ -77,6 +77,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -311,6 +312,12 @@ fun HomeScreen(
         buildHomeItems(favorites, widgetPosition, showWidgetSlot)
     }
     val displayItems = dragOrder ?: homeItems
+    // Read by the drag handles rather than captured by them. A handle's pointerInput is keyed
+    // on its index and the list's size, so a reorder — same size, new order — never restarts
+    // it, and the block went on holding the list as it was when the handle was last built.
+    // Starting a second drag from that stale order moved a row other than the one under the
+    // finger and threw the rest around, which is exactly what #79 describes.
+    val currentItems = rememberUpdatedState(displayItems)
 
     // Folders sit alongside apps in the favorites block, so both bound its padding.
     val firstRowIndex = displayItems.indexOfFirst { it !is HomeItem.Widget }
@@ -743,7 +750,7 @@ fun HomeScreen(
                                 // finger does, so a tick is the only confirmation that the
                                 // grab took.
                                 HapticUtil.tick(view, hapticsEnabled)
-                                dragOrder = displayItems
+                                dragOrder = currentItems.value
                                 draggingIndex = index
                                 dragOffset = 0f
                             },
@@ -1270,11 +1277,6 @@ private fun FolderRow(
                         modifier = labelModifier,
                         textAlign = alignment.textAlign(),
                     )
-                    Text(
-                        "${members.size}",
-                        color = contentColor.copy(alpha = 0.5f),
-                        fontSize = (labelSizeSp - 3).coerceAtLeast(9).sp,
-                    )
                 }
             }
 
@@ -1541,7 +1543,9 @@ private fun FolderIcon(
     Box(
         modifier = Modifier
             .size(sizeDp.dp)
-            .background(contentColor.copy(alpha = 0.12f), RoundedCornerShape(sizeDp.dp / 4)),
+            // Enough of a container to read as one thing. At 12% it was barely there over a
+            // busy wallpaper, so the row looked like loose icons rather than a folder.
+            .background(contentColor.copy(alpha = 0.22f), RoundedCornerShape(sizeDp.dp / 4)),
         contentAlignment = Alignment.Center,
     ) {
         if (preview.isEmpty()) {
@@ -1552,7 +1556,10 @@ private fun FolderIcon(
                 modifier = Modifier.size((sizeDp * 0.55f).dp),
             )
         } else {
-            val cell = (sizeDp * 0.36f).toInt()
+            // Sized to fill the container rather than to sit politely inside it. At a third of
+            // the icon the preview read as a small smudge beside the solid icons it shares a
+            // column with, which is what a folder looked misaligned against.
+            val cell = (sizeDp * 0.44f).toInt()
             Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 preview.chunked(2).forEach { rowApps ->
                     Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {

@@ -712,6 +712,7 @@ fun HomeRoute(
                 statusBarHidden = settings.hideStatusBarAppList,
                 searchModel = searchModel,
                 shortcutSwipe = settings.shortcutSwipe,
+                favoritesEditable = settings.favoritesSource == FavoritesSource.MANUAL,
                 searchEnabled = settings.appListSearch,
                 searchAtBottom = settings.appListSearchBottom,
                 sectionTopPercent = settings.sectionTopPercent,
@@ -790,7 +791,6 @@ fun HomeRoute(
                 band = liveBand ?: band,
                 side = scrub.side,
                 viewportHeightPx = viewportHeightPx,
-                contentColor = settings.contentColor,
                 onBandChange = { liveBand = it },
                 // Stays open rather than exiting: dropping the stored range hands the
                 // strip back to the favorites, and the point of a reset is watching it land
