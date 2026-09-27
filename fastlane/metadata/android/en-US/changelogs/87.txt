@@ -1,0 +1,2 @@
+Fixed:
+* With "every letter on the same line" on, only the very last letter reached the line. The four or five before it stopped wherever their own apps ran out. Every letter that needs the room to get there now gets it.
