@@ -20,6 +20,21 @@ import dev.victorialauncher.service.HapticUtil
 import kotlinx.coroutines.launch
 
 /** How far the strip may be dragged inward before the pull stops growing. */
+/**
+ * How far past the letters counts as leaving rather than reaching for the first or last of
+ * them, counted in letters.
+ *
+ * Letters and not a share of the band: a fifth of the band sounds small and is about five
+ * letters, which puts the threshold nowhere near the end of the alphabet you just dragged off.
+ * A letter and a half is far enough that reaching for A from above still lands on A, and near
+ * enough that leaving feels like leaving.
+ */
+private const val OFF_STRIP_DISMISS_LETTERS = 1.5f
+
+/** Bounds, so a short alphabet does not make this a flick and a long one does not bury it. */
+private const val OFF_STRIP_DISMISS_MIN_DP = 24f
+private const val OFF_STRIP_DISMISS_MAX_DP = 72f
+
 private const val MAX_PULL_DP = 400f
 
 /** How close two taps on the strip have to be to count as one gesture. */
@@ -81,6 +96,13 @@ fun EdgeTouchZone(
                     // the finger has actually been on the letters. Once it has, clamping
                     // resumes, and A can be grabbed and dragged well above its own position.
                     var enteredBand = false
+                    // Dragged far enough off an end of the letters to mean "done with this".
+                    // Armed rather than acted on, so the list goes when the finger lifts and
+                    // not the instant it crosses — which would take the list away mid-drag.
+                    var armedToClose = false
+                    val letterHeight = if (letters.isEmpty()) 0f else band.heightPx / letters.size
+                    val overshoot = (letterHeight * OFF_STRIP_DISMISS_LETTERS)
+                        .coerceIn(OFF_STRIP_DISMISS_MIN_DP * density, OFF_STRIP_DISMISS_MAX_DP * density)
                     fun report(x: Float, y: Float) {
                         if (!enteredBand && ScrubberGeometry.isWithin(y, band.topPx, band.heightPx)) {
                             enteredBand = true
@@ -92,12 +114,27 @@ fun EdgeTouchZone(
                             lastIndex = index
                             HapticUtil.tick(view, hapticsEnabled)
                         }
+                        // Past either end of the letters by more than a thumb's width. The
+                        // overshoot matters: a short one still clamps to A or Z, which is what
+                        // lets the first and last letters be grabbed from outside their own
+                        // position, and only past that does leaving mean leaving.
+                        val off = enteredBand && (
+                            y < band.topPx - overshoot || y > band.bottomPx + overshoot
+                        )
+                        if (off != armedToClose) {
+                            armedToClose = off
+                            // Said out loud, or nothing tells you that letting go now does
+                            // something other than what it did a moment ago.
+                            HapticUtil.tick(view, hapticsEnabled)
+                        }
                         // How far the finger has pulled in toward the middle of the screen.
                         val inward = if (fromLeft) x - size.width else -x
                         state.update(
                             y,
                             inward.coerceIn(0f, MAX_PULL_DP * density),
-                            if (enteredBand) letters.getOrNull(index) else null,
+                            // No letter while the list is on its way out: placing it at A as
+                            // you leave is work nobody asked for and nobody sees.
+                            if (enteredBand && !armedToClose) letters.getOrNull(index) else null,
                         )
                     }
 
@@ -124,6 +161,13 @@ fun EdgeTouchZone(
                     }
 
                     scope.launch { state.release() }
+
+                    // Dragged off the end and let go: the whole gesture was open, look, leave,
+                    // without the finger coming up in between.
+                    if (armedToClose) {
+                        currentDismiss()
+                        return@awaitEachGesture
+                    }
 
                     if (!moved) {
                         val doubleTap = currentDoubleTap
