@@ -1,0 +1,4 @@
+Fixed:
+* With "every letter on the same line" on, the last letter now behaves like the first: it stays where you scroll it to, will not travel above the line, and leaves no dead space behind once you have scrolled away.
+* Pulling past either end of a placed letter stretches the list and returns you home, instead of doing nothing.
+* A hard swipe could undo the first letter's position. It cannot now.
