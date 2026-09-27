@@ -65,8 +65,6 @@
     <!-- Settings -->
     <string name="settings_title">Ajustes de Victoria</string>
     <string name="settings_section_appearance">Apariencia</string>
-    <string name="settings_section_behavior">Comportamiento</string>
-    <string name="settings_section_now_playing">Reproduciendo ahora</string>
     <string name="settings_section_apps">Aplicaciones</string>
     <string name="settings_section_about">Acerca de</string>
     <string name="settings_preview">Vista previa</string>

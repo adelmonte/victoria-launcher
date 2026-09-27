@@ -157,6 +157,9 @@ class Prefs(private val context: Context) {
         val NOTIFICATION_BADGES = booleanPreferencesKey("notification_badges")
         val SECTION_TOP_PERCENT = intPreferencesKey("section_top_percent")
         val CLOSE_FOLDER_ON_LAUNCH = booleanPreferencesKey("close_folder_on_launch")
+        val SHOW_SETTINGS_ROW = booleanPreferencesKey("show_settings_row")
+        val CORNER_BUTTON_KEY = stringPreferencesKey("corner_button_key")
+        val AUTO_KEYBOARD = booleanPreferencesKey("auto_keyboard")
         val ALIGNMENT = stringPreferencesKey("alignment")
         val APPLIST_ALIGNMENT = stringPreferencesKey("applist_alignment")
         val ICON_SIDE = stringPreferencesKey("icon_side")
@@ -545,6 +548,26 @@ class Prefs(private val context: Context) {
         data.map { (it[Keys.SECTION_TOP_PERCENT] ?: 26).coerceIn(SECTION_TOP_RANGE) }
             .distinctUntilChanged()
 
+    /**
+     * The app a button in the bottom corner opens, or null for no button at all.
+     *
+     * Null rather than a flag beside a key: there is nothing to draw without an app to draw it
+     * for, so the two cannot disagree.
+     */
+    val cornerButtonKey: Flow<String?> = data.map { it[Keys.CORNER_BUTTON_KEY] }.distinctUntilChanged()
+
+    /**
+     * Whether opening the app list puts the cursor in the search box and the keyboard up.
+     *
+     * Off by default: the keyboard covers half of what was just opened, and most openings are
+     * to look rather than to type.
+     */
+    val autoKeyboard: Flow<Boolean> =
+        data.map { it[Keys.AUTO_KEYBOARD] ?: false }.distinctUntilChanged()
+
+    val showSettingsRow: Flow<Boolean> =
+        data.map { it[Keys.SHOW_SETTINGS_ROW] ?: true }.distinctUntilChanged()
+
     val closeFolderOnLaunch: Flow<Boolean> =
         data.map { it[Keys.CLOSE_FOLDER_ON_LAUNCH] ?: false }.distinctUntilChanged()
 
@@ -658,6 +681,7 @@ class Prefs(private val context: Context) {
 
             // A quick-launch slot that still points at this key would otherwise swipe to
             // nothing once the row is gone for good.
+            if (pref[Keys.CORNER_BUTTON_KEY] == componentKey) pref.remove(Keys.CORNER_BUTTON_KEY)
             if (pref[Keys.QUICK_LAUNCH_LEFT] == componentKey) pref.remove(Keys.QUICK_LAUNCH_LEFT)
             if (pref[Keys.QUICK_LAUNCH_RIGHT] == componentKey) pref.remove(Keys.QUICK_LAUNCH_RIGHT)
         }
@@ -982,6 +1006,21 @@ class Prefs(private val context: Context) {
 
     suspend fun setSectionTopPercent(v: Int) {
         context.dataStore.edit { it[Keys.SECTION_TOP_PERCENT] = v.coerceIn(SECTION_TOP_RANGE) }
+    }
+
+    suspend fun setCornerButton(componentKey: String?) {
+        context.dataStore.edit { pref ->
+            if (componentKey.isNullOrBlank()) pref.remove(Keys.CORNER_BUTTON_KEY)
+            else pref[Keys.CORNER_BUTTON_KEY] = componentKey
+        }
+    }
+
+    suspend fun setAutoKeyboard(v: Boolean) {
+        context.dataStore.edit { it[Keys.AUTO_KEYBOARD] = v }
+    }
+
+    suspend fun setShowSettingsRow(v: Boolean) {
+        context.dataStore.edit { it[Keys.SHOW_SETTINGS_ROW] = v }
     }
 
     suspend fun setCloseFolderOnLaunch(v: Boolean) {

@@ -17,6 +17,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
@@ -141,6 +143,8 @@ fun SettingsScreen(
     onSetShowFavoriteIcons: (Boolean) -> Unit,
     showListHeaders: Boolean,
     onSetShowListHeaders: (Boolean) -> Unit,
+    showSettingsRow: Boolean,
+    onSetShowSettingsRow: (Boolean) -> Unit,
     notificationBadges: Boolean,
     onSetNotificationBadges: (Boolean) -> Unit,
     sectionTopPercent: Int,
@@ -191,6 +195,10 @@ fun SettingsScreen(
     quickLaunchLeftLabel: String?,
     quickLaunchRightLabel: String?,
     onOpenQuickLaunchPicker: (QuickLaunchSlot) -> Unit,
+    cornerButtonLabel: String?,
+    onOpenCornerPicker: () -> Unit,
+    autoKeyboard: Boolean,
+    onSetAutoKeyboard: (Boolean) -> Unit,
     onSetAlignment: (HomeAlignment) -> Unit,
     onSetAppListAlignment: (HomeAlignment) -> Unit,
     onSetIconSide: (IconSide) -> Unit,
@@ -251,7 +259,399 @@ fun SettingsScreen(
     // the plain one — rebuild the Activity, and a plain remember goes with it, dropping whoever
     // was three rows into a section back at the top menu.
     var openSection by rememberSaveable { mutableStateOf<SettingsSection?>(null) }
-    BackHandler(enabled = openSection != null) { openSection = null }
+    // Typed across every section at once, since the whole trouble with a settings screen is
+    // knowing which section the thing you want was filed under.
+    var query by rememberSaveable { mutableStateOf("") }
+    BackHandler(enabled = openSection != null || query.isNotBlank()) {
+        if (query.isNotBlank()) query = "" else openSection = null
+    }
+
+
+    // Every row of settings as one list: what it is called, what else it answers to, the
+    // section it belongs in, and the control itself. One list rather than a block per section
+    // because the rows have to serve two readers — someone walking a section, and someone
+    // typing at the search box — and a row written twice is a row that drifts.
+    val entries = listOf(
+        // ---- Appearance ----
+        SettingsEntry(SettingsSection.APPEARANCE, stringResource(R.string.settings_preview)) {
+            RowPreview(previewApp, iconSizeDp, labelSizeSp, font, fontFile, itemSpacingDp)
+        },
+        SettingsEntry(SettingsSection.APPEARANCE, stringResource(R.string.settings_icon_pack), "icons themed pack") {
+            IconPackRow(
+                iconPacks, iconPackPackage, showAppIcons, showFavoriteIcons, themedIcons,
+                onSetIconPack, onSetShowAppIcons, onSetShowFavoriteIcons, onSetThemedIcons,
+            )
+        },
+        SettingsEntry(SettingsSection.APPEARANCE, stringResource(R.string.settings_icons_favorites), "icons") {
+            SwitchRow(stringResource(R.string.settings_icons_favorites), showFavoriteIcons, onSetShowFavoriteIcons)
+        },
+        SettingsEntry(SettingsSection.APPEARANCE, stringResource(R.string.settings_icons_app_list), "icons") {
+            SwitchRow(stringResource(R.string.settings_icons_app_list), showAppIcons, onSetShowAppIcons)
+        },
+        SettingsEntry(SettingsSection.APPEARANCE, stringResource(R.string.settings_icon_size), "size") {
+            SliderRow(
+                label = stringResource(R.string.settings_icon_size),
+                value = iconSizeDp.toFloat(), range = 32f..96f,
+                valueLabel = "${iconSizeDp}dp",
+                onValueChange = { onSetIconSize(it.toInt()) },
+            )
+        },
+        SettingsEntry(SettingsSection.APPEARANCE, stringResource(R.string.settings_text_size), "font label size") {
+            SliderRow(
+                label = stringResource(R.string.settings_text_size),
+                value = labelSizeSp.toFloat(), range = 10f..28f,
+                valueLabel = "${labelSizeSp}sp",
+                onValueChange = { onSetLabelSize(it.toInt()) },
+            )
+        },
+        SettingsEntry(SettingsSection.APPEARANCE, stringResource(R.string.settings_favorite_spacing), "gap spacing") {
+            SliderRow(
+                label = stringResource(R.string.settings_favorite_spacing),
+                value = itemSpacingDp.toFloat(), range = 0f..40f,
+                valueLabel = "${itemSpacingDp}dp",
+                onValueChange = { onSetItemSpacing(it.toInt()) },
+            )
+        },
+        SettingsEntry(SettingsSection.APPEARANCE, stringResource(R.string.settings_font), "typeface") {
+            FontRow(font, fontFile, onSetFont, onPickFontFile)
+        },
+        SettingsEntry(SettingsSection.APPEARANCE, stringResource(R.string.settings_text_color), "colour") {
+            TextColorRow(textColorMode, textColorCustom, onSetTextColorMode, onSetTextColorCustom)
+        },
+        SettingsEntry(SettingsSection.APPEARANCE, stringResource(R.string.icon_shape), "shape") {
+            IconShapeRow(iconShape, onSetIconShape)
+        },
+        SettingsEntry(SettingsSection.APPEARANCE, stringResource(R.string.settings_alignment_favorites), "align left right center") {
+            AlignmentRow(stringResource(R.string.settings_alignment_favorites), alignment, onSetAlignment)
+        },
+        SettingsEntry(SettingsSection.APPEARANCE, stringResource(R.string.settings_alignment_applist), "align left right center") {
+            AlignmentRow(stringResource(R.string.settings_alignment_applist), appListAlignment, onSetAppListAlignment)
+        },
+        SettingsEntry(SettingsSection.APPEARANCE, stringResource(R.string.settings_icon_side), "left right") {
+            IconSideRow(iconSide, onSetIconSide)
+        },
+        SettingsEntry(SettingsSection.APPEARANCE, stringResource(R.string.settings_show_names), "labels") {
+            SwitchRow(stringResource(R.string.settings_show_names), showFavoriteLabels, onSetShowFavoriteLabels)
+        },
+        SettingsEntry(
+            SettingsSection.APPEARANCE, stringResource(R.string.settings_dim_color), "colour wallpaper",
+            // Only worth offering once something is actually dimmed.
+            visible = dimHomeAlpha > 0f || dimWallpaperAlpha > 0f,
+        ) { DimColorRow(dimColor, onSetDimColor) },
+
+        // ---- Home screen ----
+        SettingsEntry(SettingsSection.HOME, stringResource(R.string.settings_favorites_source), "frequent most used manual") {
+            FavoritesSourceRow(favoritesSource, frequentCount, onSetFavoritesSource, onSetFrequentCount)
+        },
+        SettingsEntry(SettingsSection.HOME, stringResource(R.string.settings_close_folder), "folder") {
+            SwitchRowWithDetail(
+                label = stringResource(R.string.settings_close_folder),
+                detail = stringResource(R.string.settings_close_folder_detail),
+                checked = closeFolderOnLaunch, onCheckedChange = onSetCloseFolderOnLaunch,
+            )
+        },
+        SettingsEntry(SettingsSection.HOME, stringResource(R.string.settings_hide_status_bar), "status bar") {
+            SwitchRow(stringResource(R.string.settings_hide_status_bar), hideStatusBar, onSetHideStatusBar)
+        },
+        SettingsEntry(
+            SettingsSection.HOME, stringResource(R.string.settings_status_bar_timeout), "status bar peek",
+            visible = hideStatusBar,
+        ) {
+            SliderRow(
+                label = stringResource(R.string.settings_status_bar_timeout),
+                value = statusBarPeekSeconds.toFloat(), range = 1f..30f,
+                valueLabel = "${statusBarPeekSeconds}s",
+                onValueChange = { onSetStatusBarPeekSeconds(it.roundToInt()) },
+            )
+        },
+        SettingsEntry(SettingsSection.HOME, stringResource(R.string.settings_dim_home), "dim wallpaper") {
+            SliderRow(
+                label = stringResource(R.string.settings_dim_home),
+                value = dimHomeAlpha, range = 0f..0.85f,
+                valueLabel = "${(dimHomeAlpha * 100).roundToInt()}%",
+                // Rounded to whole percent, so dragging lands where the buttons do.
+                onValueChange = { onSetDimHome((it * 100).roundToInt() / 100f) },
+                step = 0.01f,
+            )
+        },
+        SettingsEntry(SettingsSection.HOME, stringResource(R.string.settings_allow_rotation), "landscape rotate") {
+            SwitchRowWithDetail(
+                label = stringResource(R.string.settings_allow_rotation),
+                detail = stringResource(R.string.settings_allow_rotation_detail),
+                checked = allowRotation, onCheckedChange = onSetAllowRotation,
+            )
+        },
+
+        // ---- App list ----
+        SettingsEntry(SettingsSection.APP_LIST, stringResource(R.string.settings_search_bar), "search") {
+            SwitchRowWithDetail(
+                label = stringResource(R.string.settings_search_bar),
+                detail = stringResource(R.string.settings_search_bar_detail),
+                checked = appListSearch, onCheckedChange = onSetAppListSearch,
+            )
+        },
+        SettingsEntry(
+            SettingsSection.APP_LIST, stringResource(R.string.settings_auto_keyboard), "keyboard search",
+            visible = appListSearch,
+        ) {
+            SwitchRowWithDetail(
+                label = stringResource(R.string.settings_auto_keyboard),
+                detail = stringResource(R.string.settings_auto_keyboard_detail),
+                checked = autoKeyboard, onCheckedChange = onSetAutoKeyboard,
+            )
+        },
+        SettingsEntry(
+            SettingsSection.APP_LIST, stringResource(R.string.settings_search_bar_bottom), "search position",
+            visible = appListSearch,
+        ) {
+            SwitchRow(stringResource(R.string.settings_search_bar_bottom), appListSearchBottom, onSetAppListSearchBottom)
+        },
+        SettingsEntry(
+            SettingsSection.APP_LIST, stringResource(R.string.settings_search_hidden), "search hidden",
+            visible = appListSearch,
+        ) {
+            SwitchRowWithDetail(
+                label = stringResource(R.string.settings_search_hidden),
+                detail = stringResource(R.string.settings_search_hidden_detail),
+                checked = appListSearchHidden, onCheckedChange = onSetAppListSearchHidden,
+            )
+        },
+        SettingsEntry(SettingsSection.APP_LIST, stringResource(R.string.settings_list_headers), "letters headings") {
+            SwitchRowWithDetail(
+                label = stringResource(R.string.settings_list_headers),
+                detail = stringResource(R.string.settings_list_headers_detail),
+                checked = showListHeaders, onCheckedChange = onSetShowListHeaders,
+            )
+        },
+        SettingsEntry(SettingsSection.APP_LIST, stringResource(R.string.settings_settings_row), "settings shortcut row") {
+            SwitchRowWithDetail(
+                label = stringResource(R.string.settings_settings_row),
+                detail = stringResource(R.string.settings_settings_row_detail),
+                checked = showSettingsRow, onCheckedChange = onSetShowSettingsRow,
+            )
+        },
+        SettingsEntry(SettingsSection.APP_LIST, stringResource(R.string.settings_sort_by_usage), "frequent order") {
+            SwitchRowWithDetail(
+                label = stringResource(R.string.settings_sort_by_usage),
+                detail = stringResource(R.string.settings_sort_by_usage_detail),
+                checked = sortByUsage, onCheckedChange = onSetSortByUsage,
+            )
+        },
+        SettingsEntry(SettingsSection.APP_LIST, stringResource(R.string.settings_az_visibility), "alphabet strip a-z") {
+            Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)) {
+                Text(stringResource(R.string.settings_az_visibility), style = MaterialTheme.typography.bodyMedium)
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(top = 10.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    AzStripVisibility.entries.forEach { option ->
+                        FilledChip(stringResource(option.labelRes()), azStripVisibility == option) {
+                            onSetAzStripVisibility(option)
+                        }
+                    }
+                }
+            }
+        },
+        SettingsEntry(SettingsSection.APP_LIST, stringResource(R.string.settings_show_alphabet), "letters a-z strip") {
+            SwitchRow(stringResource(R.string.settings_show_alphabet), showAlphabet, onSetShowAlphabet)
+        },
+        SettingsEntry(SettingsSection.APP_LIST, stringResource(R.string.settings_edge_side), "a-z strip left right") {
+            EdgeSideRow(edgeSide) { edgePreviewTick++; onSetEdgeSide(it) }
+        },
+        SettingsEntry(SettingsSection.APP_LIST, stringResource(R.string.settings_edge_zone_width), "a-z strip width") {
+            SliderRow(
+                label = stringResource(R.string.settings_edge_zone_width),
+                value = edgeZoneWidthDp.toFloat(), range = 32f..96f,
+                valueLabel = "${edgeZoneWidthDp}dp",
+                onValueChange = { edgePreviewTick++; onSetEdgeZoneWidth(it.roundToInt()) },
+            )
+        },
+        SettingsEntry(SettingsSection.APP_LIST, stringResource(R.string.settings_section_top), "letter lands scroll position") {
+            SliderRow(
+                label = stringResource(R.string.settings_section_top),
+                value = sectionTopPercent.toFloat(),
+                range = SECTION_TOP_RANGE.first.toFloat()..SECTION_TOP_RANGE.last.toFloat(),
+                valueLabel = "$sectionTopPercent%",
+                onValueChange = { sectionPreviewTick++; onSetSectionTopPercent(it.toInt()) },
+            )
+        },
+        SettingsEntry(SettingsSection.APP_LIST, stringResource(R.string.settings_hide_status_bar_applist), "status bar") {
+            SwitchRow(
+                stringResource(R.string.settings_hide_status_bar_applist),
+                hideStatusBarAppList, onSetHideStatusBarAppList,
+            )
+        },
+        SettingsEntry(SettingsSection.APP_LIST, stringResource(R.string.settings_dim_applist), "dim wallpaper") {
+            SliderRow(
+                label = stringResource(R.string.settings_dim_applist),
+                value = dimWallpaperAlpha, range = 0f..0.85f,
+                valueLabel = "${(dimWallpaperAlpha * 100).roundToInt()}%",
+                onValueChange = { onSetDimWallpaper((it * 100).roundToInt() / 100f) },
+                step = 0.01f,
+            )
+        },
+
+        // ---- Gestures ----
+        SettingsEntry(SettingsSection.GESTURES, stringResource(R.string.settings_haptics), "vibrate") {
+            SwitchRowWithDetail(
+                label = stringResource(R.string.settings_haptics),
+                detail = stringResource(R.string.settings_haptics_detail),
+                checked = hapticsEnabled, onCheckedChange = onSetHaptics,
+            )
+        },
+        SettingsEntry(SettingsSection.GESTURES, stringResource(R.string.settings_swipe_up_list), "swipe up") {
+            SwitchRowWithDetail(
+                label = stringResource(R.string.settings_swipe_up_list),
+                detail = stringResource(R.string.settings_swipe_up_list_detail),
+                checked = swipeUpOpensList, onCheckedChange = onSetSwipeUpOpensList,
+            )
+        },
+        SettingsEntry(SettingsSection.GESTURES, stringResource(R.string.settings_swipe_shortcuts), "swipe shortcuts") {
+            ShortcutSwipeRow(shortcutSwipe, onSetShortcutSwipe)
+        },
+        SettingsEntry(SettingsSection.GESTURES, stringResource(R.string.settings_quick_launch_left), "swipe launch") {
+            QuickLaunchRow(
+                label = stringResource(R.string.settings_quick_launch_left),
+                value = quickLaunchLeftLabel,
+                onClick = { onOpenQuickLaunchPicker(QuickLaunchSlot.LEFT) },
+            )
+        },
+        SettingsEntry(SettingsSection.GESTURES, stringResource(R.string.settings_quick_launch_right), "swipe launch") {
+            QuickLaunchRow(
+                label = stringResource(R.string.settings_quick_launch_right),
+                value = quickLaunchRightLabel,
+                onClick = { onOpenQuickLaunchPicker(QuickLaunchSlot.RIGHT) },
+            )
+        },
+        SettingsEntry(SettingsSection.GESTURES, stringResource(R.string.settings_quick_launch_slide), "animation") {
+            SwitchRowWithDetail(
+                label = stringResource(R.string.settings_quick_launch_slide),
+                detail = stringResource(R.string.settings_quick_launch_slide_detail),
+                checked = quickLaunchSlide, onCheckedChange = onSetQuickLaunchSlide,
+            )
+        },
+        SettingsEntry(SettingsSection.HOME, stringResource(R.string.settings_corner_button), "button shortcut corner") {
+            QuickLaunchRow(
+                label = stringResource(R.string.settings_corner_button),
+                value = cornerButtonLabel,
+                onClick = onOpenCornerPicker,
+            )
+        },
+        SettingsEntry(SettingsSection.GESTURES, stringResource(R.string.settings_double_tap_lock), "lock screen") {
+            SwitchRowWithDetail(
+                label = stringResource(R.string.settings_double_tap_lock),
+                detail = stringResource(R.string.settings_double_tap_lock_detail),
+                checked = doubleTapToLock, onCheckedChange = onSetDoubleTapToLock,
+            )
+        },
+        SettingsEntry(
+            SettingsSection.GESTURES, stringResource(R.string.settings_lock_needs_accessibility), "lock accessibility",
+            // Switching it on does nothing at all without the permission, so the way to grant
+            // it belongs right here rather than buried in a toast later.
+            visible = doubleTapToLock && !lockGestureReady,
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, bottom = 12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    stringResource(R.string.settings_lock_needs_accessibility),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                    modifier = Modifier.weight(1f),
+                )
+                AccessibilityActions(onOpenAccessibilitySettings, onOpenAppInfo)
+            }
+        },
+        SettingsEntry(SettingsSection.GESTURES, stringResource(R.string.settings_shade_gesture), "notification shade pull") {
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Column(Modifier.weight(1f)) {
+                    Text(stringResource(R.string.settings_shade_gesture), style = MaterialTheme.typography.bodyMedium)
+                    Text(
+                        stringResource(
+                            if (shadeGestureReady) R.string.settings_shade_ready
+                            else R.string.settings_shade_not_ready
+                        ),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                    )
+                }
+                if (!shadeGestureReady) AccessibilityActions(onOpenAccessibilitySettings, onOpenAppInfo)
+            }
+        },
+
+        // ---- Notifications ----
+        SettingsEntry(SettingsSection.NOTIFICATIONS, stringResource(R.string.settings_notification_badges), "count badge icons") {
+            SwitchRowWithDetail(
+                label = stringResource(R.string.settings_notification_badges),
+                detail = stringResource(R.string.settings_notification_badges_detail),
+                checked = notificationBadges, onCheckedChange = onSetNotificationBadges,
+            )
+        },
+        SettingsEntry(SettingsSection.NOTIFICATIONS, stringResource(R.string.settings_now_playing_show), "media music") {
+            SwitchRow(stringResource(R.string.settings_now_playing_show), nowPlayingEnabled, onSetNowPlayingEnabled)
+        },
+        SettingsEntry(
+            SettingsSection.NOTIFICATIONS, stringResource(R.string.settings_notification_access_detail), "permission access",
+            visible = nowPlayingEnabled || notificationBadges,
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Column(Modifier.weight(1f)) {
+                    Text(
+                        stringResource(
+                            if (nowPlayingListenerEnabled) R.string.settings_notification_access_granted
+                            else R.string.settings_notification_access_missing
+                        ),
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                    Text(
+                        stringResource(R.string.settings_notification_access_detail),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                    )
+                }
+                FilledChip(
+                    stringResource(R.string.settings_open_settings),
+                    selected = false,
+                    onClick = onOpenNotificationSettings,
+                )
+            }
+        },
+
+        // ---- Apps ----
+        SettingsEntry(SettingsSection.APPS, stringResource(R.string.settings_favorites), "manage") {
+            BackupRow(
+                label = stringResource(R.string.settings_favorites),
+                detail = stringResource(R.string.settings_favorites_detail),
+                onClick = onOpenFavorites,
+            )
+        },
+        SettingsEntry(SettingsSection.APPS, stringResource(R.string.settings_hidden_apps), "hide") {
+            BackupRow(
+                label = stringResource(R.string.settings_hidden_apps),
+                detail = if (hiddenCount == 0) stringResource(R.string.settings_hidden_none)
+                    else stringResource(R.string.settings_hidden_count, hiddenCount),
+                onClick = onOpenHiddenApps,
+            )
+        },
+    ).filter { it.visible }
+
+    // What the list below actually draws: the matches while something is typed, the open
+    // section otherwise, and nothing at all on the top menu.
+    val entriesToShow = remember(entries, query, openSection) {
+        val matching = when {
+            query.isNotBlank() -> entries.filter { it.matches(query) }
+            openSection != null -> entries.filter { it.section == openSection }
+            else -> emptyList()
+        }
+        matching.groupBy { it.section }.toList()
+    }
 
     Box(Modifier.fillMaxSize()) {
     Scaffold(
@@ -278,7 +678,29 @@ fun SettingsScreen(
                 .background(surface)
                 .fillMaxWidth(),
         ) {
-            if (openSection == null) {
+            item {
+                OutlinedTextField(
+                    value = query,
+                    onValueChange = { query = it },
+                    singleLine = true,
+                    placeholder = { Text(stringResource(R.string.settings_search)) },
+                    leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
+                    trailingIcon = {
+                        if (query.isNotEmpty()) {
+                            IconButton(onClick = { query = "" }) {
+                                Icon(
+                                    Icons.Filled.Close,
+                                    contentDescription = stringResource(R.string.icon_picker_clear_search),
+                                )
+                            }
+                        }
+                    },
+                    shape = RoundedCornerShape(28.dp),
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
+
+            if (openSection == null && query.isBlank()) {
                 items(SettingsSection.entries) { section ->
                     Surface(
                         shape = RoundedCornerShape(20.dp),
@@ -308,404 +730,24 @@ fun SettingsScreen(
                 }
             }
 
-            if (openSection == SettingsSection.APPEARANCE) item {
-                Section(stringResource(R.string.settings_section_appearance)) {
-                    // Live preview of exactly how a home row will render.
-                    RowPreview(previewApp, iconSizeDp, labelSizeSp, font, fontFile, itemSpacingDp)
-                    RowDivider()
-                    IconPackRow(
-                        iconPacks,
-                        iconPackPackage,
-                        showAppIcons,
-                        showFavoriteIcons,
-                        themedIcons,
-                        onSetIconPack,
-                        onSetShowAppIcons,
-                        onSetShowFavoriteIcons,
-                        onSetThemedIcons,
-                    )
-                    RowDivider()
-                    // Asked twice rather than once: the favorites are a handful of apps you
-                    // already know by name, and the app list is hundreds you are looking for.
-                    SwitchRow(
-                        stringResource(R.string.settings_icons_favorites),
-                        showFavoriteIcons,
-                        onSetShowFavoriteIcons,
-                    )
-                    RowDivider()
-                    SwitchRow(
-                        stringResource(R.string.settings_icons_app_list),
-                        showAppIcons,
-                        onSetShowAppIcons,
-                    )
-                    RowDivider()
-                    SwitchRowWithDetail(
-                        label = stringResource(R.string.settings_list_headers),
-                        detail = stringResource(R.string.settings_list_headers_detail),
-                        checked = showListHeaders,
-                        onCheckedChange = onSetShowListHeaders,
-                    )
-                    RowDivider()
-                    SliderRow(
-                        label = stringResource(R.string.settings_icon_size),
-                        value = iconSizeDp.toFloat(),
-                        range = 32f..96f,
-                        valueLabel = "${iconSizeDp}dp",
-                        onValueChange = { onSetIconSize(it.toInt()) },
-                    )
-                    RowDivider()
-                    SliderRow(
-                        label = stringResource(R.string.settings_text_size),
-                        value = labelSizeSp.toFloat(),
-                        range = 10f..28f,
-                        valueLabel = "${labelSizeSp}sp",
-                        onValueChange = { onSetLabelSize(it.toInt()) },
-                    )
-                    RowDivider()
-                    SliderRow(
-                        label = stringResource(R.string.settings_favorite_spacing),
-                        value = itemSpacingDp.toFloat(),
-                        range = 0f..40f,
-                        valueLabel = "${itemSpacingDp}dp",
-                        onValueChange = { onSetItemSpacing(it.toInt()) },
-                    )
-                    RowDivider()
-                    FontRow(font, fontFile, onSetFont, onPickFontFile)
-                    RowDivider()
-                    TextColorRow(textColorMode, textColorCustom, onSetTextColorMode, onSetTextColorCustom)
-                    RowDivider()
-                    IconShapeRow(iconShape, onSetIconShape)
-                    RowDivider()
-                    AlignmentRow(
-                        stringResource(R.string.settings_alignment_favorites),
-                        alignment,
-                        onSetAlignment,
-                    )
-                    RowDivider()
-                    AlignmentRow(
-                        stringResource(R.string.settings_alignment_applist),
-                        appListAlignment,
-                        onSetAppListAlignment,
-                    )
-                    RowDivider()
-                    IconSideRow(iconSide, onSetIconSide)
-                    RowDivider()
-                    SwitchRow(stringResource(R.string.settings_show_names), showFavoriteLabels, onSetShowFavoriteLabels)
-                    RowDivider()
-                    SwitchRow(stringResource(R.string.settings_hide_status_bar), hideStatusBar, onSetHideStatusBar)
-                    RowDivider()
-                    SwitchRow(
-                        stringResource(R.string.settings_hide_status_bar_applist),
-                        hideStatusBarAppList,
-                        onSetHideStatusBarAppList,
-                    )
-                    if (hideStatusBar) {
-                        RowDivider()
-                        SliderRow(
-                            label = stringResource(R.string.settings_status_bar_timeout),
-                            value = statusBarPeekSeconds.toFloat(),
-                            range = 1f..30f,
-                            valueLabel = "${statusBarPeekSeconds}s",
-                            onValueChange = { onSetStatusBarPeekSeconds(it.roundToInt()) },
-                        )
-                    }
-                    RowDivider()
-                    SliderRow(
-                        label = stringResource(R.string.settings_dim_home),
-                        value = dimHomeAlpha,
-                        range = 0f..0.85f,
-                        valueLabel = "${(dimHomeAlpha * 100).roundToInt()}%",
-                        // Rounded to whole percent, so dragging lands where the buttons do.
-                        onValueChange = { onSetDimHome((it * 100).roundToInt() / 100f) },
-                        step = 0.01f,
-                    )
-                    RowDivider()
-                    SliderRow(
-                        label = stringResource(R.string.settings_dim_applist),
-                        value = dimWallpaperAlpha,
-                        range = 0f..0.85f,
-                        valueLabel = "${(dimWallpaperAlpha * 100).roundToInt()}%",
-                        onValueChange = { onSetDimWallpaper((it * 100).roundToInt() / 100f) },
-                        step = 0.01f,
-                    )
-                    // Only worth offering once something is actually dimmed.
-                    if (dimHomeAlpha > 0f || dimWallpaperAlpha > 0f) {
-                        RowDivider()
-                        DimColorRow(dimColor, onSetDimColor)
-                    }
-                }
-            }
-
-            if (openSection == SettingsSection.BEHAVIOR) item {
-                Section(stringResource(R.string.settings_section_behavior)) {
-                    SwitchRowWithDetail(
-                        label = stringResource(R.string.settings_haptics),
-                        detail = stringResource(R.string.settings_haptics_detail),
-                        checked = hapticsEnabled,
-                        onCheckedChange = onSetHaptics,
-                    )
-                    RowDivider()
-                    EdgeSideRow(edgeSide) { edgePreviewTick++; onSetEdgeSide(it) }
-                    RowDivider()
-                    SliderRow(
-                        label = stringResource(R.string.settings_edge_zone_width),
-                        value = edgeZoneWidthDp.toFloat(),
-                        range = 32f..96f,
-                        valueLabel = "${edgeZoneWidthDp}dp",
-                        onValueChange = { edgePreviewTick++; onSetEdgeZoneWidth(it.roundToInt()) },
-                    )
-                    RowDivider()
-                    SwitchRowWithDetail(
-                        label = stringResource(R.string.settings_double_tap_lock),
-                        detail = stringResource(R.string.settings_double_tap_lock_detail),
-                        checked = doubleTapToLock,
-                        onCheckedChange = onSetDoubleTapToLock,
-                    )
-                    // Switching it on does nothing at all without the permission, so the way
-                    // to grant it belongs right here rather than buried in a toast later.
-                    if (doubleTapToLock && !lockGestureReady) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(start = 16.dp, end = 16.dp, bottom = 12.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            Text(
-                                stringResource(R.string.settings_lock_needs_accessibility),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                                modifier = Modifier.weight(1f),
-                            )
-                            AccessibilityActions(onOpenAccessibilitySettings, onOpenAppInfo)
-                        }
-                    }
-                    RowDivider()
-                    Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)) {
-                        Text(
-                            stringResource(R.string.settings_az_visibility),
-                            style = MaterialTheme.typography.bodyMedium,
-                        )
-                        Row(
-                            modifier = Modifier.fillMaxWidth().padding(top = 10.dp),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        ) {
-                            AzStripVisibility.entries.forEach { option ->
-                                FilledChip(stringResource(option.labelRes()), azStripVisibility == option) {
-                                    onSetAzStripVisibility(option)
-                                }
-                            }
-                        }
-                    }
-                    RowDivider()
-                    SwitchRow(stringResource(R.string.settings_show_alphabet), showAlphabet, onSetShowAlphabet)
-                    RowDivider()
-                    QuickLaunchRow(
-                        label = stringResource(R.string.settings_quick_launch_left),
-                        value = quickLaunchLeftLabel,
-                        onClick = { onOpenQuickLaunchPicker(QuickLaunchSlot.LEFT) },
-                    )
-                    RowDivider()
-                    QuickLaunchRow(
-                        label = stringResource(R.string.settings_quick_launch_right),
-                        value = quickLaunchRightLabel,
-                        onClick = { onOpenQuickLaunchPicker(QuickLaunchSlot.RIGHT) },
-                    )
-                    RowDivider()
-                    SwitchRowWithDetail(
-                        label = stringResource(R.string.settings_quick_launch_slide),
-                        detail = stringResource(R.string.settings_quick_launch_slide_detail),
-                        checked = quickLaunchSlide,
-                        onCheckedChange = onSetQuickLaunchSlide,
-                    )
-                    RowDivider()
-                    SwitchRowWithDetail(
-                        label = stringResource(R.string.settings_swipe_up_list),
-                        detail = stringResource(R.string.settings_swipe_up_list_detail),
-                        checked = swipeUpOpensList,
-                        onCheckedChange = onSetSwipeUpOpensList,
-                    )
-                    RowDivider()
-                    SliderRow(
-                        label = stringResource(R.string.settings_section_top),
-                        value = sectionTopPercent.toFloat(),
-                        range = SECTION_TOP_RANGE.first.toFloat()..SECTION_TOP_RANGE.last.toFloat(),
-                        valueLabel = "$sectionTopPercent%",
-                        onValueChange = { sectionPreviewTick++; onSetSectionTopPercent(it.toInt()) },
-                    )
-                    RowDivider()
-                    SwitchRowWithDetail(
-                        label = stringResource(R.string.settings_close_folder),
-                        detail = stringResource(R.string.settings_close_folder_detail),
-                        checked = closeFolderOnLaunch,
-                        onCheckedChange = onSetCloseFolderOnLaunch,
-                    )
-                    RowDivider()
-                    ShortcutSwipeRow(shortcutSwipe, onSetShortcutSwipe)
-                    RowDivider()
-                    SwitchRowWithDetail(
-                        label = stringResource(R.string.settings_allow_rotation),
-                        detail = stringResource(R.string.settings_allow_rotation_detail),
-                        checked = allowRotation,
-                        onCheckedChange = onSetAllowRotation,
-                    )
-                    RowDivider()
-                    SwitchRowWithDetail(
-                        label = stringResource(R.string.settings_search_bar),
-                        detail = stringResource(R.string.settings_search_bar_detail),
-                        checked = appListSearch,
-                        onCheckedChange = onSetAppListSearch,
-                    )
-                    if (appListSearch) {
-                        RowDivider()
-                        SwitchRow(
-                            stringResource(R.string.settings_search_bar_bottom),
-                            appListSearchBottom,
-                            onSetAppListSearchBottom,
-                        )
-                        RowDivider()
-                        SwitchRowWithDetail(
-                            label = stringResource(R.string.settings_search_hidden),
-                            detail = stringResource(R.string.settings_search_hidden_detail),
-                            checked = appListSearchHidden,
-                            onCheckedChange = onSetAppListSearchHidden,
-                        )
-                    }
-                    RowDivider()
-                    FavoritesSourceRow(
-                        favoritesSource,
-                        frequentCount,
-                        onSetFavoritesSource,
-                        onSetFrequentCount,
-                    )
-                    RowDivider()
-                    SwitchRowWithDetail(
-                        label = stringResource(R.string.settings_sort_by_usage),
-                        detail = stringResource(R.string.settings_sort_by_usage_detail),
-                        checked = sortByUsage,
-                        onCheckedChange = onSetSortByUsage,
-                    )
-                    RowDivider()
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 12.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Column(Modifier.weight(1f)) {
-                            Text(stringResource(R.string.settings_shade_gesture), style = MaterialTheme.typography.bodyMedium)
-                            Text(
-                                stringResource(
-                                    if (shadeGestureReady) R.string.settings_shade_ready
-                                    else R.string.settings_shade_not_ready
-                                ),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                            )
-                        }
-                        if (!shadeGestureReady) {
-                            AccessibilityActions(onOpenAccessibilitySettings, onOpenAppInfo)
+            entriesToShow.forEach { (section, rows) ->
+                item {
+                    Section(stringResource(section.labelRes)) {
+                        rows.forEachIndexed { index, entry ->
+                            if (index > 0) RowDivider()
+                            entry.content()
                         }
                     }
                 }
             }
 
-            if (openSection == SettingsSection.NOW_PLAYING) item {
-                Section(stringResource(R.string.settings_section_now_playing)) {
-                    // Here because it reads the same notifications Now Playing does, and needs
-                    // the same permission — putting it under Appearance would ask for that
-                    // access from a screen that says nothing about notifications.
-                    SwitchRowWithDetail(
-                        label = stringResource(R.string.settings_notification_badges),
-                        detail = stringResource(R.string.settings_notification_badges_detail),
-                        checked = notificationBadges,
-                        onCheckedChange = onSetNotificationBadges,
-                    )
-                    RowDivider()
-                    SwitchRow(stringResource(R.string.settings_now_playing_show), nowPlayingEnabled, onSetNowPlayingEnabled)
-                    if (nowPlayingEnabled) {
-                        RowDivider()
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 16.dp, vertical = 12.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            Column(Modifier.weight(1f)) {
-                                Text(
-                                    stringResource(
-                                        if (nowPlayingListenerEnabled) R.string.settings_notification_access_granted
-                                        else R.string.settings_notification_access_missing
-                                    ),
-                                    style = MaterialTheme.typography.bodyMedium,
-                                )
-                                Text(
-                                    stringResource(R.string.settings_notification_access_detail),
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                                )
-                            }
-                            FilledChip(stringResource(R.string.settings_open_settings), selected = false, onClick = onOpenNotificationSettings)
-                        }
-                    }
-                }
-            }
-
-            if (openSection == SettingsSection.APPS) item { SectionLabel(stringResource(R.string.settings_section_apps)) }
-            if (openSection == SettingsSection.APPS) item {
-                Surface(
-                    shape = RoundedCornerShape(20.dp),
-                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                    modifier = Modifier.fillMaxWidth(),
-                ) {
-                  Column {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable(onClick = onOpenFavorites)
-                            .padding(horizontal = 16.dp, vertical = 14.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Column(Modifier.weight(1f)) {
-                            Text(stringResource(R.string.settings_favorites), style = MaterialTheme.typography.bodyMedium)
-                            Text(
-                                stringResource(R.string.settings_favorites_detail),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                            )
-                        }
-                        Icon(
-                            Icons.AutoMirrored.Filled.ArrowForwardIos,
-                            contentDescription = null,
-                            modifier = Modifier.padding(4.dp),
-                            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
-                        )
-                    }
-                    RowDivider()
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable(onClick = onOpenHiddenApps)
-                            .padding(horizontal = 16.dp, vertical = 14.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Column(Modifier.weight(1f)) {
-                            Text(stringResource(R.string.settings_hidden_apps), style = MaterialTheme.typography.bodyMedium)
-                            Text(
-                                if (hiddenCount == 0) stringResource(R.string.settings_hidden_none)
-                                else stringResource(R.string.settings_hidden_count, hiddenCount),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                            )
-                        }
-                        Icon(
-                            Icons.AutoMirrored.Filled.ArrowForwardIos,
-                            contentDescription = null,
-                            modifier = Modifier.padding(4.dp),
-                            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
-                        )
-                    }
-                  }
-                }
+            if (query.isNotBlank() && entriesToShow.isEmpty()) item {
+                Text(
+                    stringResource(R.string.settings_search_none),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 24.dp),
+                )
             }
 
             if (openSection == SettingsSection.BACKUP) item {
@@ -1152,14 +1194,41 @@ private fun TextColorRow(
     }
 }
 
-/** The settings screen shows one of these at a time; the first screen is the list of them. */
+/**
+ * The settings screen shows one of these at a time; the first screen is the list of them.
+ *
+ * Grouped by the surface each option acts on rather than by what kind of option it is. A-Z
+ * settings used to be spread through Behavior while the search options sat nowhere near the
+ * list they search, which meant knowing the implementation to find anything.
+ */
 private enum class SettingsSection(@StringRes val labelRes: Int) {
     APPEARANCE(R.string.settings_section_appearance),
-    BEHAVIOR(R.string.settings_section_behavior),
+    HOME(R.string.settings_section_home),
+    APP_LIST(R.string.settings_section_app_list),
+    GESTURES(R.string.settings_section_gestures),
+    NOTIFICATIONS(R.string.settings_section_notifications),
     APPS(R.string.settings_section_apps),
-    NOW_PLAYING(R.string.settings_section_now_playing),
     BACKUP(R.string.settings_section_backup),
     ABOUT(R.string.settings_section_about),
+}
+
+/**
+ * One row of settings, as data rather than as a call in a section body.
+ *
+ * [keywords] is what else the row answers to, for the search box: the words someone would
+ * reach for who does not already know what this screen calls the thing.
+ */
+private class SettingsEntry(
+    val section: SettingsSection,
+    val title: String,
+    val keywords: String = "",
+    val visible: Boolean = true,
+    val content: @Composable () -> Unit,
+) {
+    fun matches(query: String): Boolean {
+        val q = query.trim()
+        return title.contains(q, ignoreCase = true) || keywords.contains(q, ignoreCase = true)
+    }
 }
 
 @Composable

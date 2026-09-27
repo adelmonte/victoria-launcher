@@ -295,6 +295,9 @@ fun VictoriaNavHost(
     val sectionTopPercent by app.prefs.sectionTopPercent.collectAsState(initial = 26)
     val closeFolderOnLaunch by app.prefs.closeFolderOnLaunch.collectAsState(initial = false)
     val showListHeaders by app.prefs.showListHeaders.collectAsState(initial = true)
+    val showSettingsRow by app.prefs.showSettingsRow.collectAsState(initial = true)
+    val cornerButtonKey by app.prefs.cornerButtonKey.collectAsState(initial = null)
+    val autoKeyboard by app.prefs.autoKeyboard.collectAsState(initial = false)
     val showFavoriteIcons by app.prefs.showFavoriteIcons.collectAsState(initial = true)
     val favoritesSource by app.prefs.favoritesSource.collectAsState(initial = FavoritesSource.MANUAL)
     val frequentCount by app.prefs.frequentCount.collectAsState(initial = 6)
@@ -486,6 +489,7 @@ fun VictoriaNavHost(
         sectionTopPercent = sectionTopPercent,
         closeFolderOnLaunch = closeFolderOnLaunch,
         showListHeaders = showListHeaders,
+        showSettingsRow = showSettingsRow,
         showFavoriteIcons = showFavoriteIcons,
         favoritesSource = favoritesSource,
         appListSearchHidden = appListSearchHidden,
@@ -575,6 +579,8 @@ fun VictoriaNavHost(
     NavHost(navController = navController, startDestination = "home") {
         composable("home") {
             HomeRoute(
+                cornerButtonApp = cornerButtonKey?.let { appsByKey[it] },
+                autoKeyboard = autoKeyboard,
                 app = app,
                 homeIntentTick = homeIntentTick,
                 typedToSearch = typedToSearch,
@@ -634,6 +640,8 @@ fun VictoriaNavHost(
                 showFavoriteIcons = showFavoriteIcons,
                 onSetShowFavoriteIcons = { scope.launch { app.prefs.setShowFavoriteIcons(it) } },
                 showListHeaders = showListHeaders,
+                showSettingsRow = showSettingsRow,
+                onSetShowSettingsRow = { scope.launch { app.prefs.setShowSettingsRow(it) } },
                 onSetShowListHeaders = { scope.launch { app.prefs.setShowListHeaders(it) } },
                 notificationBadges = notificationBadges,
                 onSetNotificationBadges = { scope.launch { app.prefs.setNotificationBadges(it) } },
@@ -756,6 +764,10 @@ fun VictoriaNavHost(
                     appsByKey[key]?.let { nameOverrides[it.key] ?: it.label }
                 },
                 onOpenQuickLaunchPicker = { slot -> navController.navigate("apppicker/" + slot.name) },
+                cornerButtonLabel = cornerButtonKey?.let { key -> appsByKey[key]?.let { nameOverrides[it.key] ?: it.label } },
+                onOpenCornerPicker = { navController.navigate("cornerpicker") },
+                autoKeyboard = autoKeyboard,
+                onSetAutoKeyboard = { scope.launch { app.prefs.setAutoKeyboard(it) } },
                 onSetAlignment = { scope.launch { app.prefs.setAlignment(it) } },
                 onSetAppListAlignment = { scope.launch { app.prefs.setAppListAlignment(it) } },
                 onSetIconSide = { scope.launch { app.prefs.setIconSide(it) } },
@@ -848,6 +860,21 @@ fun VictoriaNavHost(
                 iconSizeDp = iconSizeDp,
                 onPick = { picked ->
                     scope.launch { app.prefs.setQuickLaunch(slot, picked?.key) }
+                    navController.popBackStack()
+                },
+                onBack = { navController.popBackStack() },
+            )
+        }
+
+        composable("cornerpicker") {
+            AppPickerScreen(
+                title = stringResource(R.string.settings_corner_button),
+                allApps = allApps,
+                selectedKey = cornerButtonKey,
+                nameOverrides = nameOverrides,
+                iconSizeDp = iconSizeDp,
+                onPick = { picked ->
+                    scope.launch { app.prefs.setCornerButton(picked?.key) }
                     navController.popBackStack()
                 },
                 onBack = { navController.popBackStack() },

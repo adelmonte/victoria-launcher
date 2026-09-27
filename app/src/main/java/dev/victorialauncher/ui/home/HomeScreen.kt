@@ -32,6 +32,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.draw.clip
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -238,6 +241,9 @@ fun HomeScreen(
     onAppInfo: (AppInfo) -> Unit,
     onUnpinShortcut: (AppInfo) -> Unit,
     onOpenSettings: () -> Unit,
+    /** The app a button in the bottom corner opens, or null when there is no button. */
+    cornerButtonApp: AppInfo?,
+    onOpenCornerApp: (AppInfo) -> Unit,
 ) {    fun displayName(app: AppInfo) = nameOverrides[app.key] ?: app.label
 
     var menuForKey by remember { mutableStateOf<String?>(null) }
@@ -966,6 +972,24 @@ fun HomeScreen(
                     Spacer(Modifier.height(itemSpacingDp.dp))
                 }
             }
+            }
+        }
+
+        // A button in the corner nearest the thumb, for the one app reached often enough to
+        // deserve a target rather than a gesture. Nothing is drawn without an app chosen for
+        // it, and it steps aside in edit mode, where that corner belongs to Done.
+        if (cornerButtonApp != null && !editMode) {
+            val corner = if (alignment == HomeAlignment.RIGHT) Alignment.BottomStart else Alignment.BottomEnd
+            Box(
+                modifier = Modifier
+                    .align(corner)
+                    .navigationBarsPadding()
+                    .padding(horizontal = 20.dp, vertical = 24.dp)
+                    .clip(CircleShape)
+                    .clickable { onOpenCornerApp(cornerButtonApp) }
+                    .padding(8.dp),
+            ) {
+                AppIcon(app = cornerButtonApp, sizeDp = iconSizeDp)
             }
         }
 

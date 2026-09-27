@@ -93,6 +93,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.graphicsLayer
@@ -219,6 +221,10 @@ fun AppListScreen(
     shortcutSwipe: ShortcutSwipe,
     /** False when the favorites are computed, so starring would write to a list nobody sees. */
     favoritesEditable: Boolean,
+    /** Whether the list ends with a row that opens the launcher's own settings. */
+    showSettingsRow: Boolean,
+    /** Whether opening the list puts the cursor in the search box. */
+    autoKeyboard: Boolean,
     searchEnabled: Boolean,
     searchAtBottom: Boolean,
     sectionTopPercent: Int,
@@ -252,14 +258,16 @@ fun AppListScreen(
             model
         } else {
             val term = query.trim()
-            searchModel.filtered { app ->
-                displayName(app).contains(term, ignoreCase = true) ||
-                    // An app names itself in the language of the device, so on a Japanese
-                    // phone Settings calls itself 設定 and no amount of typing "settings"
-                    // reaches it. Package names are ASCII almost without exception, so the
-                    // English word is usually sitting right there in com.android.settings.
-                    app.componentName.packageName.contains(term, ignoreCase = true)
-            }
+            searchModel
+                .filtered { app ->
+                    displayName(app).contains(term, ignoreCase = true) ||
+                        // An app names itself in the language of the device, so on a Japanese
+                        // phone Settings calls itself 設定 and no amount of typing "settings"
+                        // reaches it. Package names are ASCII almost without exception, so the
+                        // English word is usually sitting right there in com.android.settings.
+                        app.componentName.packageName.contains(term, ignoreCase = true)
+                }
+                .rankedBy { searchRank(displayName(it), it.componentName.packageName, term) }
         }
     }
     // Animated rather than switched, so an end does not snap from crisp to faded the moment
@@ -375,6 +383,14 @@ fun AppListScreen(
     // composed while hidden: the tail padding and the collapse transform from the last scrub
     // would otherwise still be there the next time it opens.
     val focusManager = LocalFocusManager.current
+    val searchFocus = remember { FocusRequester() }
+    // Asked for after the overlay is actually placed: a focus request against a field that has
+    // not been laid out yet throws, and the field arrives with the rest of the list.
+    LaunchedEffect(visible, autoKeyboard, searchEnabled) {
+        if (visible && autoKeyboard && searchEnabled) {
+            runCatching { searchFocus.requestFocus() }
+        }
+    }
     LaunchedEffect(visible) {
         if (!visible) {
             focusManager.clearFocus()
@@ -795,7 +811,9 @@ fun AppListScreen(
                         .firstOrNull()
                         ?.let { onLaunch(it.app) }
                 },
-                modifier = Modifier.onSizeChanged { searchHeightPx = it.height },
+                modifier = Modifier
+                    .onSizeChanged { searchHeightPx = it.height }
+                    .focusRequester(searchFocus),
             )
         }
         Box(modifier = Modifier.weight(1f)) {
@@ -912,8 +930,10 @@ fun AppListScreen(
                 }
             }
 
-            // Settings shortcut, pinned after Z.
-            item(key = "settings", contentType = "settings") {
+            // Settings shortcut, pinned after Z. Optional: it is the one row in a list of
+            // apps that is not an app, and someone who knows the long press is there has no
+            // use for it.
+            if (showSettingsRow) item(key = "settings", contentType = "settings") {
                 // Set apart from the apps above it: it is the one row here that is not one.
                 Spacer(Modifier.height(SETTINGS_ROW_GAP))
                 Row(
@@ -967,6 +987,7 @@ fun AppListScreen(
                         ?.let { onLaunch(it.app) }
                 },
                 atBottom = true,
+                modifier = Modifier.focusRequester(searchFocus),
             )
         }
         }
@@ -1300,8 +1321,11 @@ private fun SearchField(
             .padding(
                 // Lines up with the rows' own inset instead of hugging the screen edge, and
                 // clears the A-Z strip on whichever side it occupies.
-                start = (if (showAlphabet && edgeSide != EdgeSide.RIGHT) STRIP_INSET else 0.dp) + 20.dp,
-                end = (if (showAlphabet && edgeSide != EdgeSide.LEFT) STRIP_INSET else 0.dp) + 20.dp,
+                // Only what the strip actually occupies. The extra 20dp a side matched the
+                // rows, but a field is not a row: it left the box noticeably narrower than the
+                // names under it, which is what reads as the search bar being off to one side.
+                start = if (showAlphabet && edgeSide != EdgeSide.RIGHT) STRIP_INSET else 8.dp,
+                end = if (showAlphabet && edgeSide != EdgeSide.LEFT) STRIP_INSET else 8.dp,
                 top = if (atBottom) 8.dp else 12.dp,
                 bottom = if (atBottom) 12.dp else 8.dp,
             ),

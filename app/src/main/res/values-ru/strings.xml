@@ -65,8 +65,6 @@
     <!-- Настройки -->
     <string name="settings_title">Настройки Victoria</string>
     <string name="settings_section_appearance">Внешний вид</string>
-    <string name="settings_section_behavior">Поведение</string>
-    <string name="settings_section_now_playing">Виджет проигрывателя</string>
     <string name="settings_section_apps">Приложения</string>
     <string name="settings_section_about">О приложении</string>
     <string name="settings_preview">Предпросмотр</string>

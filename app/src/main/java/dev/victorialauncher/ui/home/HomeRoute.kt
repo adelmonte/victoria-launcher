@@ -115,6 +115,16 @@ private val SWIPE_OPEN_DISTANCE = 150.dp
 fun HomeRoute(
     app: VictoriaApp,
     homeIntentTick: Int,
+    /**
+     * The app a corner button opens, or null for no button.
+     *
+     * Passed beside [settings] rather than inside it: HomeSettings is at the size a data
+     * class constructor will still resolve — one more field and every argument to it fails
+     * to typecheck against itself — and this is a resolved row rather than a stored value.
+     */
+    cornerButtonApp: AppInfo?,
+    /** Whether opening the app list puts the cursor in its search box. */
+    autoKeyboard: Boolean,
     typedToSearch: List<TypedKey>,
     onTypedToSearchHandled: (List<TypedKey>) -> Unit,
     settings: HomeSettings,
@@ -505,6 +515,8 @@ fun HomeRoute(
                 homeIntentTick = homeIntentTick,
                 closeFolderOnLaunch = settings.closeFolderOnLaunch,
                 showFavoriteIcons = settings.showFavoriteIcons,
+                cornerButtonApp = cornerButtonApp,
+                onOpenCornerApp = { launchEntry(it) },
                 favoritesReorderable = settings.favoritesSource == FavoritesSource.MANUAL,
                 shortcutSwipe = settings.shortcutSwipe,
                 favorites = favorites,
@@ -713,6 +725,8 @@ fun HomeRoute(
                 searchModel = searchModel,
                 shortcutSwipe = settings.shortcutSwipe,
                 favoritesEditable = settings.favoritesSource == FavoritesSource.MANUAL,
+                showSettingsRow = settings.showSettingsRow,
+                autoKeyboard = autoKeyboard,
                 searchEnabled = settings.appListSearch,
                 searchAtBottom = settings.appListSearchBottom,
                 sectionTopPercent = settings.sectionTopPercent,
@@ -863,6 +877,7 @@ data class HomeSettings(
     val sectionTopPercent: Int,
     val closeFolderOnLaunch: Boolean,
     val showListHeaders: Boolean,
+    val showSettingsRow: Boolean,
     val showFavoriteIcons: Boolean,
     val favoritesSource: FavoritesSource,
     val appListSearchHidden: Boolean,

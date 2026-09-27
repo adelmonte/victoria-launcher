@@ -212,3 +212,38 @@ fun AppListModel.filtered(match: (AppInfo) -> Boolean): AppListModel {
     }
     return AppListModel(kept, newIndex)
 }
+
+/**
+ * How well a name answers a query, lower being better.
+ *
+ * A plain substring match says only that the letters are in there somewhere, so typing "c"
+ * matched every app with a c anywhere in it and Chess sat below Facebook and Microsoft Word.
+ * The letters you have typed are almost always the start of the name you mean, then the start
+ * of a word inside it, and only failing both is a match in the middle worth anything.
+ */
+fun searchRank(name: String, packageName: String, term: String): Int = when {
+    name.startsWith(term, ignoreCase = true) -> 0
+    name.split(' ', '-', '_', '.').any { it.startsWith(term, ignoreCase = true) } -> 1
+    name.contains(term, ignoreCase = true) -> 2
+    // Last, and deliberately so: a package name is not what anyone typed, it is only where
+    // the English word survives on a phone that renamed everything.
+    packageName.contains(term, ignoreCase = true) -> 3
+    else -> 4
+}
+
+/**
+ * The same list reordered by [rank], keeping the order it already had within each band and
+ * rebuilding the letter index, which is row positions and cannot survive a reorder.
+ */
+fun AppListModel.rankedBy(rank: (AppInfo) -> Int): AppListModel {
+    val entries = rows.filterIsInstance<AppListRow.Entry>()
+    val sorted = entries.sortedBy { rank(it.app) }
+    if (sorted == entries) return this
+    // Headings would be wrong the moment the rows stop being in letter order, and a search
+    // result is not a letter's worth of apps anyway.
+    val letterIndex = sorted.mapIndexedNotNull { index, row ->
+        indexLetter(row.app.label).takeIf { index == 0 || it != indexLetter(sorted[index - 1].app.label) }
+            ?.let { it to index }
+    }
+    return AppListModel(sorted, letterIndex)
+}

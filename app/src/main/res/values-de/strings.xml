@@ -63,8 +63,6 @@
     <!-- Settings -->
     <string name="settings_title">Victoria-Einstellungen</string>
     <string name="settings_section_appearance">Darstellung</string>
-    <string name="settings_section_behavior">Verhalten</string>
-    <string name="settings_section_now_playing">Now Playing</string>
     <string name="settings_section_apps">Apps</string>
     <string name="settings_section_about">Über</string>
     <string name="settings_preview">Vorschau</string>

@@ -64,12 +64,21 @@
 
     <!-- Settings -->
     <string name="settings_title">Victoria settings</string>
+    <string name="settings_section_home">Home screen</string>
+    <string name="settings_section_app_list">App list</string>
+    <string name="settings_section_gestures">Gestures</string>
+    <string name="settings_section_notifications">Notifications</string>
+    <string name="settings_preview">Preview</string>
+    <string name="settings_search">Search settings</string>
+    <string name="settings_corner_button">Button in the bottom corner</string>
+    <string name="settings_auto_keyboard">Open the keyboard with the list</string>
+    <string name="settings_auto_keyboard_detail">Start typing as soon as the app list opens. Off, the keyboard waits until you tap the search box</string>
+    <string name="settings_settings_row">Settings row in the app list</string>
+    <string name="settings_settings_row_detail">The row after Z that opens these settings. A long press on the wallpaper reaches them either way</string>
+    <string name="settings_search_none">Nothing matches that</string>
     <string name="settings_section_appearance">Appearance</string>
-    <string name="settings_section_behavior">Behavior</string>
-    <string name="settings_section_now_playing">Now Playing</string>
     <string name="settings_section_apps">Apps</string>
     <string name="settings_section_about">About</string>
-    <string name="settings_preview">Preview</string>
     <string name="settings_preview_sample">Sample app</string>
     <string name="settings_icon_pack">Icon pack</string>
     <string name="settings_icon_pack_default">Default</string>
