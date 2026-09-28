@@ -293,6 +293,7 @@
     <string name="shortcut_unpin_failed">Couldn\'t remove the shortcut</string>
 
     <!-- Now Playing -->
+    <string name="now_playing_placeholder">Now Playing</string>
     <string name="now_playing_enable_access">Enable Now Playing access</string>
     <string name="now_playing_open_failed">Can\'t open the app that\'s playing</string>
     <string name="now_playing_unknown_title">Unknown title</string>

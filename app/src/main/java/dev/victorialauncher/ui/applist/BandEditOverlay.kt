@@ -65,6 +65,8 @@ fun BandEditOverlay(
     band: ScrubBand,
     side: EdgeSide,
     viewportHeightPx: Int,
+    /** The alphabet as the list would draw it, so the band shows what it is sizing. */
+    letters: List<Char>,
     onBandChange: (ScrubBand) -> Unit,
     onReset: () -> Unit,
     onDone: () -> Unit,
@@ -72,6 +74,8 @@ fun BandEditOverlay(
 ) {
     val density = LocalDensity.current
     val minHeightPx = with(density) { MIN_BAND_HEIGHT.toPx() }
+    // Half a line, so a letter's middle lands on the position the strip would give it.
+    val lineHalfPx = with(density) { 8.dp.toPx() }
     val alignment = if (side == EdgeSide.LEFT) Alignment.TopStart else Alignment.TopEnd
 
     val viewportPx = viewportHeightPx.toFloat()
@@ -131,7 +135,28 @@ fun BandEditOverlay(
                     orientation = Orientation.Vertical,
                     state = rememberDraggableState { moveWhole(it) },
                 ),
-        )
+        ) {
+            // The letters themselves, spread the way the strip will spread them. A plain block
+            // says how tall the band is and nothing about what that height buys; laid out like
+            // this, a range too short to read is obvious while it is being set rather than
+            // afterwards.
+            letters.forEachIndexed { index, letter ->
+                val centerY = ScrubberGeometry.letterCenterY(
+                    index,
+                    0f,
+                    band.heightPx,
+                    letters.size,
+                )
+                Text(
+                    text = letter.toString(),
+                    fontSize = 13.sp,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier
+                        .align(Alignment.TopCenter)
+                        .offset { IntOffset(0, (centerY - lineHalfPx).roundToInt()) },
+                )
+            }
+        }
 
         BandHandle(alignment, band.topPx, R.string.applist_band_top) { moveTop(it) }
         BandHandle(alignment, band.bottomPx, R.string.applist_band_bottom) { moveBottom(it) }

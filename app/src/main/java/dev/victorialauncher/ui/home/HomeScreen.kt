@@ -695,9 +695,14 @@ fun HomeScreen(
 
             // With no widget on screen there is nothing above the favorites, so Now Playing
             // takes that slot instead.
-            if (!hasWidget && nowPlayingHasContent) {
+            //
+            // Kept in edit layout whether or not anything is playing: it has a height and
+            // paddings to set, and silence is no reason to be unable to set them. It is most
+            // often adjusted when it is in the way, which is exactly when the music has stopped.
+            if (!hasWidget && (nowPlayingHasContent || (editMode && nowPlayingEnabled))) {
                 NowPlayingBlock(
                     editMode = editMode,
+                    showPlaceholder = editMode,
                     heightDp = nowPlayingHeightDp,
                     contentColor = contentColor,
                     alignment = alignment,
@@ -938,10 +943,12 @@ fun HomeScreen(
                         onChange = { setPadding(PaddingSlot.WIDGET_BOTTOM, it) },
                         contentColor = contentColor,
                     )
-                    // Now Playing sits between the widget and the favorites.
-                    if (nowPlayingHasContent) {
+                    // Now Playing sits between the widget and the favorites, and stays there
+                    // while editing whether or not anything is playing — see the other branch.
+                    if (nowPlayingHasContent || (editMode && nowPlayingEnabled)) {
                         NowPlayingBlock(
                             editMode = editMode,
+                            showPlaceholder = editMode,
                             heightDp = nowPlayingHeightDp,
                             contentColor = contentColor,
                             alignment = alignment,
@@ -1459,6 +1466,7 @@ private fun FolderRow(
 @Composable
 private fun NowPlayingBlock(
     editMode: Boolean,
+    showPlaceholder: Boolean,
     heightDp: Int,
     contentColor: Color,
     alignment: HomeAlignment,
@@ -1491,6 +1499,7 @@ private fun NowPlayingBlock(
             heightDp = heightDp,
             contentColor = contentColor,
             alignment = alignment,
+            showPlaceholder = showPlaceholder,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = sidePaddingDp.dp)

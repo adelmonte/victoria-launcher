@@ -107,6 +107,14 @@ fun NowPlayingWidget(
     heightDp: Int = 64,
     contentColor: Color = Color.White,
     alignment: HomeAlignment = HomeAlignment.LEFT,
+    /**
+     * Draw an empty card when nothing is playing, rather than nothing at all.
+     *
+     * For edit layout, where the block has a height and paddings to set and silence is no
+     * reason to be unable to set them — the card is most often adjusted when it is in the way,
+     * which is exactly when music has stopped.
+     */
+    showPlaceholder: Boolean = false,
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
@@ -165,7 +173,33 @@ fun NowPlayingWidget(
     // Null unless something is actually playing, paused or buffering — see the listener
     // service. Nothing to show means nothing is drawn and no space is taken.
     val nowPlaying by NowPlayingBus.state.collectAsState()
-    val current = nowPlaying ?: return
+    val current = nowPlaying ?: run {
+        if (showPlaceholder) {
+            Surface(
+                modifier = modifier.fillMaxWidth().height(heightDp.dp),
+                color = contentColor.copy(alpha = 0.08f),
+                shape = RoundedCornerShape(16.dp),
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxHeight().padding(horizontal = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Icon(
+                        Icons.Filled.MusicNote,
+                        contentDescription = null,
+                        tint = contentColor.copy(alpha = 0.7f),
+                    )
+                    Spacer(Modifier.width(12.dp))
+                    Text(
+                        stringResource(R.string.now_playing_placeholder),
+                        color = contentColor.copy(alpha = 0.7f),
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                }
+            }
+        }
+        return
+    }
 
     val scope = rememberCoroutineScope()
     val dismissX = remember(current.controller.sessionToken) { Animatable(0f) }

@@ -808,6 +808,7 @@ fun HomeRoute(
                 band = liveBand ?: band,
                 side = scrub.side,
                 viewportHeightPx = viewportHeightPx,
+                letters = listModel.letters,
                 onBandChange = { liveBand = it },
                 // Stays open rather than exiting: dropping the stored range hands the
                 // strip back to the favorites, and the point of a reset is watching it land
