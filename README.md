@@ -19,39 +19,30 @@ Requires Android 8.0 (API 26) or newer.
 
 ## Getting started
 
-The home screen starts almost empty on purpose — everything is added by you.
+The home screen starts almost empty on purpose — everything on it is put there by
+you.
 
-- **Long-press the wallpaper** for the main menu: add favorites, add a widget,
-  edit the layout, or open settings.
-- **Swipe in from either edge** of the screen for the full A-Z app list, and
-  slide your thumb along the letters to jump straight to one. Tap the edge and
-  let go to just open the list.
-- **Long-press any app** — on the home screen or in the A-Z list — to rename it,
-  change its icon, hide it, or move it into a folder.
-- **Edit layout** turns on drag handles for reordering and steppers for every
-  gap, height and margin, including how far the A-Z strip reaches.
+- **Long-press the wallpaper** for the menu: favorites, widgets, edit layout,
+  settings.
+- **Swipe in from either edge** for the A-Z list, then slide along the letters to
+  jump to one. Tap the edge and let go to just open it.
+- **Long-press any app**, on either screen, to rename it, change its icon, hide
+  it, or file it in a folder.
+- **Edit layout** gives you drag handles for the order and steppers for every
+  gap, height and margin.
 
-Worth knowing about in **Settings**:
+Everything else lives in Settings, which has a search box over the whole of it.
 
-- Alignment and icon side, set separately for favorites and the A-Z list
-- A search box in the app list, at the top or the bottom
-- Sorting each letter by how often you open its apps
-- Swipe up from the home screen to open the app list
-- Swipe left or right below your favorites to launch a chosen app
-- Now Playing controls, which need notification access
-- Double-tap the A-Z strip to lock the screen, which needs an accessibility
-  service — if that toggle is greyed out, open App info and allow restricted
-  settings first (Android blocks it for apps installed outside a store)
+Two things are worth knowing before you go looking. Double-tapping the A-Z strip
+to lock the screen needs an accessibility service, and if that toggle is greyed
+out you have to allow restricted settings from App info first — Android blocks it
+for anything installed outside a store. And **Export settings** is how you keep
+your setup: Android's own backup deliberately skips this app, because the file
+names every app you have arranged and a backup that runs without the app cannot
+leave a private space out of it.
 
 Work profiles are picked up automatically. A private space needs Android 15 or
-later and this app set as your default home app; while it is unlocked its apps
-are listed like any others, and a "Private space" padlock entry locks and
-unlocks it.
-
-Use **Export settings** to save your setup. Android's own automatic backup
-deliberately skips it: everything is stored in one file that names every app you
-have arranged, private space included, and a backup that runs without the app
-cannot leave those out. Export can, and does.
+later and Victoria set as your default home app.
 
 ## Changelog
 
