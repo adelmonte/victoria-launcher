@@ -1,7 +1,11 @@
 Victoria Launcher is a minimal, list-based Android home screen, and an open source alternative to Niagara Launcher.
 
-The home screen keeps a short list of favorites under a clock and weather widget. Everything else lives in an alphabetical app list you reach by swiping the edge of the screen, with an A-Z scrubber for jumping straight to a letter.
+The home screen holds a short list of favorites and nothing you did not put there. Everything else lives in an alphabetical app list you reach by swiping in from the edge of the screen, with an A-Z strip for jumping straight to a letter.
 
-Layout, alignment, icon pack, icon and text size, spacing, font and colors are all adjustable. Widgets, an optional search box, an optional Now Playing block, and work profiles and private space are all supported.
+A clock and date widget is included and any other widget can be added. Favorites can be folders, or the apps you open most, kept for you.
 
-No ads, no tracking, no network access.
+Layout, alignment, icon pack, icon and text size, spacing, font and colors are all adjustable, and the settings screen has a search box over the whole of it. There is an optional search box in the app list, optional notification counts on icons, optional Now Playing controls, and per-app renaming, icons and hiding.
+
+Work profiles are picked up automatically, and Android 15's private space is supported.
+
+No ads, no tracking, and no network access — the app holds no internet permission at all.

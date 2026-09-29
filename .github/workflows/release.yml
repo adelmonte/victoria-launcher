@@ -60,7 +60,12 @@ jobs:
           version_code=$(grep -oP 'versionCode\s*=\s*\K\d+' app/build.gradle.kts)
           notes="fastlane/metadata/android/en-US/changelogs/${version_code}.txt"
 
-          if [ -f "$notes" ]; then
+          # Idempotent on purpose. GitHub has delivered the same tag push twice, and the
+          # second run then failed on "a release with the same tag name already exists" —
+          # a red cross against a release that had in fact gone out perfectly well.
+          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+            gh release upload "$GITHUB_REF_NAME" "$asset" --clobber
+          elif [ -f "$notes" ]; then
             gh release create "$GITHUB_REF_NAME" --title "$GITHUB_REF_NAME" \
               --notes-file "$notes" "$asset"
           else

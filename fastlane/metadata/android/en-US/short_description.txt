@@ -1,1 +1,1 @@
-A minimal, list-based home screen and open source Niagara Launcher alternative
+An open source Niagara Launcher alternative — a minimal, list-based home screen
