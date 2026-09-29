@@ -1,0 +1,6 @@
+Fixed:
+* With only one or two favorites, the A-Z strip shrank to their height and the whole alphabet had a row to share. It now keeps enough room for every letter to be worth aiming at.
+
+Changed:
+* Now Playing stays put in Edit layout whether or not anything is playing, so its height and spacing can still be set.
+* Setting the A-Z strip range draws the letters inside it, so you can see whether a range is too short before committing to it.
