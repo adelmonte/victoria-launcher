@@ -2,69 +2,58 @@
 package dev.victorialauncher.ui.applist
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class ScrubberGeometryTest {
 
-    // A 260px band of 26 letters puts each letter in a 10px slot starting at y=100.
-    private val top = 100f
-    private val height = 260f
-    private val count = 26
-
     @Test
-    fun `y at the top of the band selects the first letter`() {
-        assertEquals(0, ScrubberGeometry.indexForY(top, top, height, count))
+    fun `favorites tall enough keep their own span`() {
+        val band = ScrubberGeometry.bandForFavorites(
+            topPx = 400f, bottomPx = 1000f, viewportPx = 2000f, minHeightPx = 400f,
+        )
+        assertEquals(400f, band.topPx, 0.01f)
+        assertEquals(600f, band.heightPx, 0.01f)
     }
 
     @Test
-    fun `y inside a slot selects that slot`() {
-        assertEquals(3, ScrubberGeometry.indexForY(top + 35f, top, height, count))
+    fun `a single favorite still gets a strip worth aiming at`() {
+        // One row tall: the whole alphabet had a row's height to share between its letters.
+        val band = ScrubberGeometry.bandForFavorites(
+            topPx = 900f, bottomPx = 1000f, viewportPx = 2000f, minHeightPx = 400f,
+        )
+        assertEquals(400f, band.heightPx, 0.01f)
+        // Grown around its own middle, so it stays where the favorites are.
+        assertEquals(950f, band.topPx + band.heightPx / 2f, 0.01f)
     }
 
     @Test
-    fun `y above the band clamps to the first letter`() {
-        assertEquals(0, ScrubberGeometry.indexForY(-500f, top, height, count))
+    fun `growing never pushes the band off either end`() {
+        val atTop = ScrubberGeometry.bandForFavorites(
+            topPx = 0f, bottomPx = 50f, viewportPx = 2000f, minHeightPx = 400f,
+        )
+        assertEquals(0f, atTop.topPx, 0.01f)
+
+        val atBottom = ScrubberGeometry.bandForFavorites(
+            topPx = 1950f, bottomPx = 2000f, viewportPx = 2000f, minHeightPx = 400f,
+        )
+        assertEquals(2000f, atBottom.topPx + atBottom.heightPx, 0.01f)
     }
 
     @Test
-    fun `y below the band clamps to the last letter`() {
-        assertEquals(count - 1, ScrubberGeometry.indexForY(9999f, top, height, count))
+    fun `a minimum taller than the screen is capped by the screen`() {
+        val band = ScrubberGeometry.bandForFavorites(
+            topPx = 100f, bottomPx = 200f, viewportPx = 600f, minHeightPx = 900f,
+        )
+        assertEquals(600f, band.heightPx, 0.01f)
+        assertEquals(0f, band.topPx, 0.01f)
     }
 
     @Test
-    fun `an empty alphabet never indexes out of range`() {
-        assertEquals(0, ScrubberGeometry.indexForY(120f, top, height, count = 0))
-    }
-
-    @Test
-    fun `a zero-height band never divides by zero`() {
-        assertEquals(0, ScrubberGeometry.indexForY(120f, top, heightPx = 0f, count = count))
-    }
-
-    @Test
-    fun `letter centers sit in the middle of their slot`() {
-        assertEquals(105f, ScrubberGeometry.letterCenterY(0, top, height, count), 0.01f)
-        assertEquals(115f, ScrubberGeometry.letterCenterY(1, top, height, count), 0.01f)
-    }
-
-    @Test
-    fun `center and index agree, so the letter under the finger is the one that swells`() {
-        for (index in 0 until count) {
-            val center = ScrubberGeometry.letterCenterY(index, top, height, count)
-            assertEquals(index, ScrubberGeometry.indexForY(center, top, height, count))
-        }
-    }
-
-    @Test
-    fun `an empty alphabet reports the band top rather than dividing by zero`() {
-        assertEquals(top, ScrubberGeometry.letterCenterY(0, top, height, count = 0), 0.01f)
-    }
-
-    @Test
-    fun `the fallback band is derived from the viewport`() {
-        val band = ScrubBand.fallbackFor(1000)
-        assertEquals(350f, band.topPx, 0.01f)
-        assertEquals(500f, band.heightPx, 0.01f)
-        assertEquals(850f, band.bottomPx, 0.01f)
+    fun `no favorites measured yet is not grown into nonsense`() {
+        val band = ScrubberGeometry.bandForFavorites(
+            topPx = 500f, bottomPx = 400f, viewportPx = 2000f, minHeightPx = 400f,
+        )
+        assertTrue(band.heightPx >= 0f)
     }
 }

@@ -22,6 +22,29 @@ object ScrubberGeometry {
     fun isWithin(y: Float, topPx: Float, heightPx: Float): Boolean =
         heightPx > 0f && y >= topPx && y <= topPx + heightPx
 
+    /**
+     * The band the strip should take, given where the favorites are.
+     *
+     * Normally exactly their span — the strip sits beside what it belongs to. But the favorites
+     * are as tall as there are favorites, and one of them is one row: the whole alphabet then
+     * has a row's height to divide between its letters, which is a strip with nothing in it
+     * anyone could hit or read. Below a minimum it grows around its own middle instead, so it
+     * stays where the favorites are without being their size.
+     */
+    fun bandForFavorites(
+        topPx: Float,
+        bottomPx: Float,
+        viewportPx: Float,
+        minHeightPx: Float,
+    ): ScrubBand {
+        val height = (bottomPx - topPx).coerceAtLeast(0f)
+        if (viewportPx <= 0f || height >= minHeightPx) return ScrubBand(topPx, height)
+        val wanted = minHeightPx.coerceAtMost(viewportPx)
+        val center = (topPx + bottomPx) / 2f
+        val top = (center - wanted / 2f).coerceIn(0f, viewportPx - wanted)
+        return ScrubBand(top, wanted)
+    }
+
     /** Screen-space center of the letter at [index]. */
     fun letterCenterY(index: Int, topPx: Float, heightPx: Float, count: Int): Float {
         if (count <= 0) return topPx

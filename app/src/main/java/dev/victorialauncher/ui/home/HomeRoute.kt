@@ -73,6 +73,7 @@ import dev.victorialauncher.ui.applist.BandEditOverlay
 import dev.victorialauncher.ui.applist.EdgeScrubber
 import dev.victorialauncher.ui.applist.EdgeTouchZone
 import dev.victorialauncher.ui.applist.ScrubBand
+import dev.victorialauncher.ui.applist.ScrubberGeometry
 import dev.victorialauncher.ui.applist.ScrubState
 import dev.victorialauncher.ui.applist.buildAppListModel
 import dev.victorialauncher.ui.common.FolderPickerDialog
@@ -96,6 +97,9 @@ private const val GESTURE_EXCLUSION_CAP_DP = 200
 private const val LAUNCH_CLOSE_TIMEOUT_MS = 2000L
 
 /** Long enough to read as a settle, short enough not to stand between you and the icons. */
+/** Room each letter wants on the strip before it stops being something anyone can hit. */
+private val MIN_LETTER_HEIGHT = 15.dp
+
 private const val HOME_FADE_MS = 220
 
 /**
@@ -218,6 +222,11 @@ fun HomeRoute(
     val scrub = remember { ScrubState() }
     var viewportHeightPx by remember { mutableIntStateOf(0) }
     var favBand by remember { mutableStateOf<ScrubBand?>(null) }
+    // Enough height for every letter to be worth aiming at. Counted per letter rather than set
+    // as one number, since an alphabet with accents in it has more letters to find room for.
+    val minBandHeightPx = with(LocalDensity.current) {
+        (listModel.letters.size * MIN_LETTER_HEIGHT.toPx())
+    }
     var homeEditMode by remember { mutableStateOf(false) }
     var folderPickerFor by remember { mutableStateOf<AppInfo?>(null) }
 
@@ -580,7 +589,14 @@ fun HomeRoute(
                     // favorites out differently, and the strip should match where they
                     // actually sit rather than where they sit while being rearranged.
                     if (appListVisible || homeEditMode) return@HomeScreen
-                    favBand = ScrubBand(topPx = top, heightPx = bottom - top)
+                    // Not the favorites' own span when that is too short to divide between
+                    // the letters — see ScrubberGeometry.bandForFavorites.
+                    favBand = ScrubberGeometry.bandForFavorites(
+                        topPx = top,
+                        bottomPx = bottom,
+                        viewportPx = viewportHeightPx.toFloat(),
+                        minHeightPx = minBandHeightPx,
+                    )
                 },
                 nowPlayingHasContent = nowPlayingHasContent,
                 contentColor = settings.contentColor,
