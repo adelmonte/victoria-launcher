@@ -161,6 +161,8 @@ class Prefs(private val context: Context) {
         val CORNER_BUTTON_KEY = stringPreferencesKey("corner_button_key")
         val AUTO_KEYBOARD = booleanPreferencesKey("auto_keyboard")
         val LAST_LETTER_TO_LINE = booleanPreferencesKey("last_letter_to_line")
+        val FAVORITES_EVER_SET = booleanPreferencesKey("favorites_ever_set")
+        val EDGE_ZONE_BAND_ONLY = booleanPreferencesKey("edge_zone_band_only")
         val ALIGNMENT = stringPreferencesKey("alignment")
         val APPLIST_ALIGNMENT = stringPreferencesKey("applist_alignment")
         val ICON_SIDE = stringPreferencesKey("icon_side")
@@ -574,6 +576,26 @@ class Prefs(private val context: Context) {
      */
     val lastLetterToLine: Flow<Boolean> =
         data.map { it[Keys.LAST_LETTER_TO_LINE] ?: false }.distinctUntilChanged()
+
+    /**
+     * Whether there has ever been a favorite on the home screen.
+     *
+     * The empty-favorites prompt is for someone who does not yet know how, and it had no way of
+     * telling them from someone who knows exactly how and wants none — so a bare home screen by
+     * choice carried the hint for good.
+     */
+    val favoritesEverSet: Flow<Boolean> =
+        data.map { it[Keys.FAVORITES_EVER_SET] ?: false }.distinctUntilChanged()
+
+    /**
+     * Whether the edge that opens the app list is only as tall as the letters it shows.
+     *
+     * Off by default. The whole edge has always been live, and quietly taking that away is a
+     * louder complaint than the one it answers — but on a home screen with a widget in reach of
+     * the edge, a strip down the whole side is in the way of the widget.
+     */
+    val edgeZoneBandOnly: Flow<Boolean> =
+        data.map { it[Keys.EDGE_ZONE_BAND_ONLY] ?: false }.distinctUntilChanged()
 
     val showSettingsRow: Flow<Boolean> =
         data.map { it[Keys.SHOW_SETTINGS_ROW] ?: true }.distinctUntilChanged()
@@ -1031,6 +1053,16 @@ class Prefs(private val context: Context) {
 
     suspend fun setAutoKeyboard(v: Boolean) {
         context.dataStore.edit { it[Keys.AUTO_KEYBOARD] = v }
+    }
+
+    suspend fun setEdgeZoneBandOnly(v: Boolean) {
+        context.dataStore.edit { it[Keys.EDGE_ZONE_BAND_ONLY] = v }
+    }
+
+    suspend fun markFavoritesEverSet() {
+        context.dataStore.edit {
+            if (it[Keys.FAVORITES_EVER_SET] != true) it[Keys.FAVORITES_EVER_SET] = true
+        }
     }
 
     suspend fun setShowSettingsRow(v: Boolean) {

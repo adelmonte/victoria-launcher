@@ -4,6 +4,11 @@ package dev.victorialauncher.ui.applist
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
+import androidx.compose.ui.unit.IntOffset
+import kotlin.math.roundToInt
+import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
@@ -54,6 +59,8 @@ fun EdgeTouchZone(
     widthDp: Dp,
     letters: List<Char>,
     band: ScrubBand,
+    /** Whether the live part of the edge is only as tall as the band. */
+    bandOnly: Boolean,
     hapticsEnabled: Boolean,
     state: ScrubState,
     /** Whether the app list is already showing, so a tap on the strip knows which it is. */
@@ -78,7 +85,18 @@ fun EdgeTouchZone(
     Box(
         modifier = modifier
             .width(widthDp)
-            .fillMaxHeight()
+            // The whole side, or only as much of it as the letters occupy. Full height is the
+            // old behaviour and still the default; confined, the edge stops taking touches
+            // meant for whatever shares that side of the screen.
+            .then(
+                if (!bandOnly) {
+                    Modifier.fillMaxHeight()
+                } else {
+                    Modifier
+                        .offset { IntOffset(0, band.topPx.roundToInt()) }
+                        .height((band.heightPx / density).dp)
+                }
+            )
             .pointerInput(letters, band, hapticsEnabled, fromLeft) {
                 awaitEachGesture {
                     val down = awaitFirstDown(requireUnconsumed = false)

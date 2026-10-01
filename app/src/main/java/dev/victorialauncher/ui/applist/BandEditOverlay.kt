@@ -53,6 +53,14 @@ private const val SCRIM_ALPHA = 0.3f
 /** Small enough to be useless below this, so the two handles can never cross. */
 private val MIN_BAND_HEIGHT = 120.dp
 
+/** The band and its handles share a width, so the three read as one control. */
+private val BAND_WIDTH = 96.dp
+
+/** Generous to the finger; the bar it holds is not. */
+private val HANDLE_TOUCH_HEIGHT = 44.dp
+private val HANDLE_BAR_WIDTH = 56.dp
+private val HANDLE_BAR_HEIGHT = 20.dp
+
 /**
  * Sets how much of the screen the A-Z strip spans.
  *
@@ -125,7 +133,7 @@ fun BandEditOverlay(
             modifier = Modifier
                 .align(alignment)
                 .offset { IntOffset(0, band.topPx.roundToInt()) }
-                .width(96.dp)
+                .width(BAND_WIDTH)
                 .height(with(density) { band.heightPx.toDp() })
                 .background(
                     MaterialTheme.colorScheme.surface.copy(alpha = 0.92f),
@@ -158,8 +166,11 @@ fun BandEditOverlay(
             }
         }
 
-        BandHandle(alignment, band.topPx, R.string.applist_band_top) { moveTop(it) }
-        BandHandle(alignment, band.bottomPx, R.string.applist_band_bottom) { moveBottom(it) }
+        // Outside the band, not across it. Centred on the boundary they covered a thumb's
+        // width either side of it — which is exactly where the first and last letters are, so
+        // each handle sat on the letter whose position it was setting.
+        BandHandle(alignment, band.topPx, above = true, R.string.applist_band_top) { moveTop(it) }
+        BandHandle(alignment, band.bottomPx, above = false, R.string.applist_band_bottom) { moveBottom(it) }
 
         // Pinned to the bottom rather than the middle, where a handle can sit on top of them.
         Column(
@@ -189,30 +200,42 @@ fun BandEditOverlay(
 private fun BoxScope.BandHandle(
     alignment: Alignment,
     y: Float,
+    /** Whether this caps the band's top, and so sits above the line rather than below it. */
+    above: Boolean,
     descriptionRes: Int,
     onDrag: (Float) -> Unit,
 ) {
     val density = LocalDensity.current
-    val half = with(density) { 22.dp.toPx() }
+    val touchHeight = with(density) { HANDLE_TOUCH_HEIGHT.toPx() }
     Box(
         modifier = Modifier
             .align(alignment)
-            .offset { IntOffset(0, (y - half).roundToInt()) }
-            .size(88.dp, 44.dp)
-            .background(
-                MaterialTheme.colorScheme.surface.copy(alpha = 0.92f),
-                RoundedCornerShape(22.dp),
-            )
+            // The whole touch target is clear of the band: above the top line, below the bottom
+            // one. The painted bar inside is smaller — a handle has to be easy to catch without
+            // being the biggest thing on the screen.
+            .offset { IntOffset(0, (if (above) y - touchHeight else y).roundToInt()) }
+            .size(BAND_WIDTH, HANDLE_TOUCH_HEIGHT)
             .draggable(
                 orientation = Orientation.Vertical,
                 state = rememberDraggableState { onDrag(it) },
             ),
-        contentAlignment = Alignment.Center,
+        contentAlignment = if (above) Alignment.BottomCenter else Alignment.TopCenter,
     ) {
-        Icon(
-            Icons.Filled.DragHandle,
-            contentDescription = stringResource(descriptionRes),
-            tint = MaterialTheme.colorScheme.onSurface,
-        )
+        Box(
+            modifier = Modifier
+                .size(HANDLE_BAR_WIDTH, HANDLE_BAR_HEIGHT)
+                .background(
+                    MaterialTheme.colorScheme.surface.copy(alpha = 0.92f),
+                    RoundedCornerShape(HANDLE_BAR_HEIGHT / 2),
+                ),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(
+                Icons.Filled.DragHandle,
+                contentDescription = stringResource(descriptionRes),
+                tint = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.size(18.dp),
+            )
+        }
     }
 }

@@ -526,6 +526,9 @@ fun HomeRoute(
                 homeIntentTick = homeIntentTick,
                 closeFolderOnLaunch = settings.closeFolderOnLaunch,
                 showFavoriteIcons = settings.showFavoriteIcons,
+                // Only while it would still be telling someone something they do not know.
+                showEmptyHint = !settings.favoritesEverSet &&
+                    settings.favoritesSource == FavoritesSource.MANUAL,
                 cornerButtonApp = cornerButtonApp,
                 onOpenCornerApp = { launchEntry(it) },
                 favoritesReorderable = settings.favoritesSource == FavoritesSource.MANUAL,
@@ -851,6 +854,7 @@ fun HomeRoute(
                     widthDp = settings.edgeZoneWidthDp.dp,
                     letters = listModel.letters,
                     band = band,
+                    bandOnly = settings.edgeZoneBandOnly,
                     hapticsEnabled = settings.hapticsEnabled,
                     state = scrub,
                     listOpen = appListVisible,
@@ -861,8 +865,17 @@ fun HomeRoute(
                         scope.launch { openAnim.snapTo(openDistancePx) }
                     },
                     onDoubleTap = if (settings.doubleTapToLock) ({ lockOrExplain() }) else null,
+                    // Aligned to the top when it is confined, because the offset that puts it
+                    // against the band is measured from there. Centred, it would be placed by
+                    // half the leftover height and then pushed down again by the whole of the
+                    // band's top.
                     modifier = Modifier.align(
-                        if (side == EdgeSide.LEFT) Alignment.CenterStart else Alignment.CenterEnd
+                        when {
+                            settings.edgeZoneBandOnly && side == EdgeSide.LEFT -> Alignment.TopStart
+                            settings.edgeZoneBandOnly -> Alignment.TopEnd
+                            side == EdgeSide.LEFT -> Alignment.CenterStart
+                            else -> Alignment.CenterEnd
+                        }
                     ),
                 )
             }
@@ -899,6 +912,8 @@ data class HomeSettings(
     val showListHeaders: Boolean,
     val showSettingsRow: Boolean,
     val showFavoriteIcons: Boolean,
+    val favoritesEverSet: Boolean,
+    val edgeZoneBandOnly: Boolean,
     val favoritesSource: FavoritesSource,
     val appListSearchHidden: Boolean,
     val hideStatusBarAppList: Boolean,

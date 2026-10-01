@@ -145,6 +145,8 @@ fun SettingsScreen(
     onSetShowListHeaders: (Boolean) -> Unit,
     showSettingsRow: Boolean,
     onSetShowSettingsRow: (Boolean) -> Unit,
+    edgeZoneBandOnly: Boolean,
+    onSetEdgeZoneBandOnly: (Boolean) -> Unit,
     notificationBadges: Boolean,
     onSetNotificationBadges: (Boolean) -> Unit,
     sectionTopPercent: Int,
@@ -459,6 +461,13 @@ fun SettingsScreen(
         },
         SettingsEntry(SettingsSection.APP_LIST, stringResource(R.string.settings_edge_side), "a-z strip left right") {
             EdgeSideRow(edgeSide) { edgePreviewTick++; onSetEdgeSide(it) }
+        },
+        SettingsEntry(SettingsSection.APP_LIST, stringResource(R.string.settings_edge_band_only), "a-z strip height touch") {
+            SwitchRowWithDetail(
+                label = stringResource(R.string.settings_edge_band_only),
+                detail = stringResource(R.string.settings_edge_band_only_detail),
+                checked = edgeZoneBandOnly, onCheckedChange = onSetEdgeZoneBandOnly,
+            )
         },
         SettingsEntry(SettingsSection.APP_LIST, stringResource(R.string.settings_edge_zone_width), "a-z strip width") {
             SliderRow(

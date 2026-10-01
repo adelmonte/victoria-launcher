@@ -264,6 +264,13 @@ fun VictoriaNavHost(
 
     val hiddenApps by app.prefs.hiddenApps.collectAsState(initial = emptySet())
     val favoriteKeys by app.prefs.favorites.collectAsState(initial = emptyList())
+    val favoritesEverSet by app.prefs.favoritesEverSet.collectAsState(initial = true)
+    val edgeZoneBandOnly by app.prefs.edgeZoneBandOnly.collectAsState(initial = false)
+    // Noted the first time there is one, and never unset. Whether the hint is still wanted is a
+    // question about whether someone has done this before, not about the list being empty now.
+    LaunchedEffect(favoriteKeys.isNotEmpty()) {
+        if (favoriteKeys.isNotEmpty()) app.prefs.markFavoritesEverSet()
+    }
     val nameOverrides by app.prefs.nameOverrides.collectAsState(initial = emptyMap())
     val iconSizeDp by app.prefs.iconSizeDp.collectAsState(initial = 56)
     val labelSizeSp by app.prefs.labelSizeSp.collectAsState(initial = 16)
@@ -492,6 +499,8 @@ fun VictoriaNavHost(
         showListHeaders = showListHeaders,
         showSettingsRow = showSettingsRow,
         showFavoriteIcons = showFavoriteIcons,
+        favoritesEverSet = favoritesEverSet,
+        edgeZoneBandOnly = edgeZoneBandOnly,
         favoritesSource = favoritesSource,
         appListSearchHidden = appListSearchHidden,
         hideStatusBarAppList = hideStatusBarAppList,
@@ -643,6 +652,8 @@ fun VictoriaNavHost(
                 onSetShowFavoriteIcons = { scope.launch { app.prefs.setShowFavoriteIcons(it) } },
                 showListHeaders = showListHeaders,
                 showSettingsRow = showSettingsRow,
+                edgeZoneBandOnly = edgeZoneBandOnly,
+                onSetEdgeZoneBandOnly = { scope.launch { app.prefs.setEdgeZoneBandOnly(it) } },
                 onSetShowSettingsRow = { scope.launch { app.prefs.setShowSettingsRow(it) } },
                 onSetShowListHeaders = { scope.launch { app.prefs.setShowListHeaders(it) } },
                 notificationBadges = notificationBadges,

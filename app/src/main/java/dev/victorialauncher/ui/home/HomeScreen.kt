@@ -180,6 +180,8 @@ fun HomeScreen(
     closeFolderOnLaunch: Boolean,
     /** Whether the favorites draw icons, which is asked separately from the app list. */
     showFavoriteIcons: Boolean,
+    /** Whether the empty home screen should still explain itself. */
+    showEmptyHint: Boolean,
     /** False when the favorites are computed from usage, so there is no order to drag. */
     favoritesReorderable: Boolean,
     /** Whether a sideways swipe on a row offers its app's shortcuts. */
@@ -722,7 +724,7 @@ fun HomeScreen(
                 )
             }
 
-            if (displayItems.isEmpty()) {
+            if (displayItems.isEmpty() && showEmptyHint) {
                 Column(
                     modifier = Modifier.fillMaxWidth().padding(32.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
