@@ -9,6 +9,7 @@ import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.LocalOverscrollConfiguration
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -232,6 +233,9 @@ fun AppListScreen(
     searchFocusTick: Int,
     /** Rows a second to walk while a finger rests on a letter. */
     holdScrollSpeed: Int,
+    /** Whether a query matching nothing offers the words to the browser. */
+    webSearchFallback: Boolean,
+    onWebSearch: (String) -> Unit,
     /** Whether the last letters can reach the same line as the first. */
     lastLetterToLine: Boolean,
     searchEnabled: Boolean,
@@ -1121,6 +1125,31 @@ fun AppListScreen(
                 )
             },
         ) {
+            if (searching && webSearchFallback && displayModel.rows.isEmpty()) {
+                item(key = "websearch") {
+                    val term = query.trim()
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { onWebSearch(term) }
+                            .padding(horizontal = 24.dp, vertical = 16.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Icon(
+                            Icons.Filled.Search,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSurface,
+                        )
+                        Spacer(Modifier.width(16.dp))
+                        Text(
+                            stringResource(R.string.applist_search_web, term),
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurface,
+                        )
+                    }
+                }
+            }
+
             itemsIndexed(
                 items = displayModel.rows,
                 key = { _, row ->

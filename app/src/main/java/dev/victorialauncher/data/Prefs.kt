@@ -167,6 +167,8 @@ class Prefs(private val context: Context) {
         val FAVORITES_EVER_SET = booleanPreferencesKey("favorites_ever_set")
         val EDGE_ZONE_BAND_ONLY = booleanPreferencesKey("edge_zone_band_only")
         val HOLD_SCROLL = booleanPreferencesKey("hold_scroll")
+        val WEB_SEARCH_FALLBACK = booleanPreferencesKey("web_search_fallback")
+        val SWIPE_UP_OPENS_SEARCH = booleanPreferencesKey("swipe_up_opens_search")
         val HOLD_SCROLL_SPEED = intPreferencesKey("hold_scroll_speed")
         val ALIGNMENT = stringPreferencesKey("alignment")
         val APPLIST_ALIGNMENT = stringPreferencesKey("applist_alignment")
@@ -601,6 +603,19 @@ class Prefs(private val context: Context) {
      */
     val edgeZoneBandOnly: Flow<Boolean> =
         data.map { it[Keys.EDGE_ZONE_BAND_ONLY] ?: false }.distinctUntilChanged()
+
+    /**
+     * Whether a search that matches no app offers to hand the words to the browser.
+     *
+     * Off by default, and it is a row to tap rather than something that happens: typing in the
+     * launcher does not reach a search engine because you stopped typing.
+     */
+    val webSearchFallback: Flow<Boolean> =
+        data.map { it[Keys.WEB_SEARCH_FALLBACK] ?: false }.distinctUntilChanged()
+
+    /** Whether swiping up puts the cursor in the search box rather than only opening the list. */
+    val swipeUpOpensSearch: Flow<Boolean> =
+        data.map { it[Keys.SWIPE_UP_OPENS_SEARCH] ?: false }.distinctUntilChanged()
 
     /** Whether resting a finger on a letter walks the list on through that letter's apps. */
     val holdScroll: Flow<Boolean> =
@@ -1067,6 +1082,14 @@ class Prefs(private val context: Context) {
 
     suspend fun setAutoKeyboard(v: Boolean) {
         context.dataStore.edit { it[Keys.AUTO_KEYBOARD] = v }
+    }
+
+    suspend fun setWebSearchFallback(v: Boolean) {
+        context.dataStore.edit { it[Keys.WEB_SEARCH_FALLBACK] = v }
+    }
+
+    suspend fun setSwipeUpOpensSearch(v: Boolean) {
+        context.dataStore.edit { it[Keys.SWIPE_UP_OPENS_SEARCH] = v }
     }
 
     suspend fun setHoldScroll(v: Boolean) {

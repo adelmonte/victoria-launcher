@@ -268,6 +268,8 @@ fun VictoriaNavHost(
     val favoritesEverSet by app.prefs.favoritesEverSet.collectAsState(initial = true)
     val edgeZoneBandOnly by app.prefs.edgeZoneBandOnly.collectAsState(initial = false)
     val holdScroll by app.prefs.holdScroll.collectAsState(initial = false)
+    val webSearchFallback by app.prefs.webSearchFallback.collectAsState(initial = false)
+    val swipeUpOpensSearch by app.prefs.swipeUpOpensSearch.collectAsState(initial = false)
     val holdScrollSpeed by app.prefs.holdScrollSpeed.collectAsState(initial = 4)
     // Noted the first time there is one, and never unset. Whether the hint is still wanted is a
     // question about whether someone has done this before, not about the list being empty now.
@@ -505,6 +507,8 @@ fun VictoriaNavHost(
         favoritesEverSet = favoritesEverSet,
         edgeZoneBandOnly = edgeZoneBandOnly,
         holdScroll = holdScroll,
+        webSearchFallback = webSearchFallback,
+        swipeUpOpensSearch = swipeUpOpensSearch,
         holdScrollSpeed = holdScrollSpeed,
         favoritesSource = favoritesSource,
         appListSearchHidden = appListSearchHidden,
@@ -660,6 +664,10 @@ fun VictoriaNavHost(
                 showSettingsRow = showSettingsRow,
                 edgeZoneBandOnly = edgeZoneBandOnly,
                 holdScroll = holdScroll,
+                webSearchFallback = webSearchFallback,
+                onSetWebSearchFallback = { scope.launch { app.prefs.setWebSearchFallback(it) } },
+                swipeUpOpensSearch = swipeUpOpensSearch,
+                onSetSwipeUpOpensSearch = { scope.launch { app.prefs.setSwipeUpOpensSearch(it) } },
                 onSetHoldScroll = { scope.launch { app.prefs.setHoldScroll(it) } },
                 holdScrollSpeed = holdScrollSpeed,
                 onSetHoldScrollSpeed = { scope.launch { app.prefs.setHoldScrollSpeed(it) } },

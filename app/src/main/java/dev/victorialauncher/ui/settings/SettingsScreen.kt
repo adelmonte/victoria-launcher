@@ -150,6 +150,10 @@ fun SettingsScreen(
     onSetEdgeZoneBandOnly: (Boolean) -> Unit,
     holdScroll: Boolean,
     onSetHoldScroll: (Boolean) -> Unit,
+    webSearchFallback: Boolean,
+    onSetWebSearchFallback: (Boolean) -> Unit,
+    swipeUpOpensSearch: Boolean,
+    onSetSwipeUpOpensSearch: (Boolean) -> Unit,
     holdScrollSpeed: Int,
     onSetHoldScrollSpeed: (Int) -> Unit,
     notificationBadges: Boolean,
@@ -466,6 +470,23 @@ fun SettingsScreen(
         },
         SettingsEntry(SettingsSection.APP_LIST, stringResource(R.string.settings_edge_side), "a-z strip left right") {
             EdgeSideRow(edgeSide) { edgePreviewTick++; onSetEdgeSide(it) }
+        },
+        SettingsEntry(SettingsSection.APP_LIST, stringResource(R.string.settings_web_search), "search web browser") {
+            SwitchRowWithDetail(
+                label = stringResource(R.string.settings_web_search),
+                detail = stringResource(R.string.settings_web_search_detail),
+                checked = webSearchFallback, onCheckedChange = onSetWebSearchFallback,
+            )
+        },
+        SettingsEntry(
+            SettingsSection.APP_LIST, stringResource(R.string.settings_swipe_up_search), "swipe up search keyboard",
+            visible = swipeUpOpensList,
+        ) {
+            SwitchRowWithDetail(
+                label = stringResource(R.string.settings_swipe_up_search),
+                detail = stringResource(R.string.settings_swipe_up_search_detail),
+                checked = swipeUpOpensSearch, onCheckedChange = onSetSwipeUpOpensSearch,
+            )
         },
         SettingsEntry(SettingsSection.APP_LIST, stringResource(R.string.settings_hold_scroll), "a-z hold scroll") {
             SwitchRowWithDetail(

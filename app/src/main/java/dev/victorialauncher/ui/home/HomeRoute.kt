@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 package dev.victorialauncher.ui.home
 
+import android.app.SearchManager
+import android.content.Intent
 import android.graphics.Rect
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
@@ -160,6 +162,12 @@ fun HomeRoute(
     onNavigate: (String) -> Unit,
 ) {
     val context = LocalContext.current
+    // Asked once: whether anything on this phone handles a web search at all.
+    val webSearchAvailable = remember(context) {
+        runCatching {
+            context.packageManager.resolveActivity(Intent(Intent.ACTION_WEB_SEARCH), 0) != null
+        }.getOrDefault(false)
+    }
     val view = LocalView.current
     val scope = rememberCoroutineScope()
 
@@ -643,6 +651,11 @@ fun HomeRoute(
                                     stiffness = Spring.StiffnessMediumLow,
                                 ),
                             )
+                            // Asked for once it has settled, not on the way: a keyboard
+                            // arriving mid-animation fights the list for the same space.
+                            if (settings.swipeUpOpensSearch && !swipeScrolledList) {
+                                searchFocusTick++
+                            }
                         } else {
                             openAnim.animateTo(0f, tween(160, easing = FastOutLinearInEasing))
                             closeAppList()
@@ -761,6 +774,15 @@ fun HomeRoute(
                 autoKeyboard = autoKeyboard,
                 searchFocusTick = searchFocusTick,
                 holdScrollSpeed = settings.holdScrollSpeed,
+                // Offered only where something can take it, or the row is a dead end.
+                webSearchFallback = settings.webSearchFallback && webSearchAvailable,
+                onWebSearch = { term ->
+                    val intent = Intent(Intent.ACTION_WEB_SEARCH)
+                        .putExtra(SearchManager.QUERY, term)
+                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    runCatching { context.startActivity(intent) }
+                    closeAppList()
+                },
                 lastLetterToLine = lastLetterToLine,
                 searchEnabled = settings.appListSearch,
                 searchAtBottom = settings.appListSearchBottom,
@@ -930,6 +952,8 @@ data class HomeSettings(
     val edgeZoneBandOnly: Boolean,
     val holdScroll: Boolean,
     val holdScrollSpeed: Int,
+    val webSearchFallback: Boolean,
+    val swipeUpOpensSearch: Boolean,
     val favoritesSource: FavoritesSource,
     val appListSearchHidden: Boolean,
     val hideStatusBarAppList: Boolean,
