@@ -109,7 +109,7 @@ fun EdgeTouchZone(
                         .height((band.heightPx / density).dp)
                 }
             )
-            .pointerInput(letters, band, hapticsEnabled, fromLeft) {
+            .pointerInput(letters, band, hapticsEnabled, fromLeft, bandOnly) {
                 awaitEachGesture {
                     val down = awaitFirstDown(requireUnconsumed = false)
                     down.consume()
@@ -130,10 +130,18 @@ fun EdgeTouchZone(
                     // Armed rather than acted on, so the list goes when the finger lifts and
                     // not the instant it crosses — which would take the list away mid-drag.
                     var armedToClose = false
+                    val zoneTopPx = if (bandOnly) band.topPx else 0f
                     val letterHeight = if (letters.isEmpty()) 0f else band.heightPx / letters.size
                     val overshoot = (letterHeight * OFF_STRIP_DISMISS_LETTERS)
                         .coerceIn(OFF_STRIP_DISMISS_MIN_DP * density, OFF_STRIP_DISMISS_MAX_DP * density)
-                    fun report(x: Float, y: Float) {
+                    fun report(x: Float, localY: Float) {
+                        // A touch arrives in the zone's own coordinates while the band is
+                        // measured against the whole screen. Those were the same thing while
+                        // the zone ran the full height; confined to the band it starts at the
+                        // band's top, so local y has to be put back into the space the geometry
+                        // is written in — otherwise every y reads as above the band, no letter
+                        // is ever picked, and the strip looks dead.
+                        val y = localY + zoneTopPx
                         if (!enteredBand && ScrubberGeometry.isWithin(y, band.topPx, band.heightPx)) {
                             enteredBand = true
                         }
