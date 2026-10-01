@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.Dp
 import dev.victorialauncher.data.EdgeSide
 import dev.victorialauncher.service.HapticUtil
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
 
 /** How far the strip may be dragged inward before the pull stops growing. */
 /**
@@ -34,6 +35,15 @@ import kotlinx.coroutines.launch
  * A letter and a half is far enough that reaching for A from above still lands on A, and near
  * enough that leaving feels like leaving.
  */
+/** How long a finger has to sit still on a letter before the list starts moving on its own. */
+private const val HOLD_START_MS = 450L
+
+/** How often the wait is checked, which is also the step the dwell is counted in. */
+private const val HOLD_POLL_MS = 50L
+
+/** Further than this and it was a scrub, not a rest. */
+private const val HOLD_SLOP_DP = 6f
+
 private const val OFF_STRIP_DISMISS_LETTERS = 1.5f
 
 /** Bounds, so a short alphabet does not make this a flick and a long one does not bury it. */
@@ -61,6 +71,8 @@ fun EdgeTouchZone(
     band: ScrubBand,
     /** Whether the live part of the edge is only as tall as the band. */
     bandOnly: Boolean,
+    /** Whether resting on a letter walks the list on through it. */
+    holdScroll: Boolean,
     hapticsEnabled: Boolean,
     state: ScrubState,
     /** Whether the app list is already showing, so a tap on the strip knows which it is. */
@@ -162,10 +174,34 @@ fun EdgeTouchZone(
                     // travelling is a scrub, letting go without it is a tap that a second tap
                     // turns into a lock. Opening the list on the down is untouched by either.
                     var moved = false
+                    // Where the finger last actually went somewhere, and when. Resting on a
+                    // letter still delivers events — a fingertip is never quite still — so the
+                    // hold is judged by distance travelled rather than by events arriving.
+                    var restAt = down.position
+                    var restSince = 0L
                     while (true) {
-                        val event = awaitPointerEvent()
+                        val event = withTimeoutOrNull(HOLD_POLL_MS) { awaitPointerEvent() }
+                        if (event == null) {
+                            // Nothing at all for a while, which is as still as a finger gets.
+                            restSince += HOLD_POLL_MS
+                            if (holdScroll && enteredBand && !armedToClose && restSince >= HOLD_START_MS) {
+                                state.holdScroll(true)
+                            }
+                            continue
+                        }
                         val change = event.changes.firstOrNull { it.id == down.id } ?: break
                         if (!change.pressed) break
+                        if ((change.position - restAt).getDistance() > HOLD_SLOP_DP * density) {
+                            // Moved on: this is a scrub again, not a hold.
+                            restAt = change.position
+                            restSince = 0L
+                            state.holdScroll(false)
+                        } else {
+                            restSince += HOLD_POLL_MS
+                            if (holdScroll && enteredBand && !armedToClose && restSince >= HOLD_START_MS) {
+                                state.holdScroll(true)
+                            }
+                        }
                         // A tap places the list without ever counting as a scrub, so the
                         // overlay does not spend the tap fading itself out and back in.
                         if (!moved &&
@@ -178,6 +214,7 @@ fun EdgeTouchZone(
                         change.consume()
                     }
 
+                    state.holdScroll(false)
                     scope.launch { state.release() }
 
                     // Dragged off the end and let go: the whole gesture was open, look, leave,

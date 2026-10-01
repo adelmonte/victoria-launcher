@@ -102,6 +102,19 @@ class ScrubState {
         placement = null
     }
 
+    /**
+     * True while a finger has been resting on a letter long enough to mean "keep going".
+     *
+     * A letter places the list at its first app and stops there, which is no help when a letter
+     * holds a hundred of them. Holding still asks for the rest of them to come past.
+     */
+    var holdScrolling by mutableStateOf(false)
+        private set
+
+    fun holdScroll(value: Boolean) {
+        if (holdScrolling != value) holdScrolling = value
+    }
+
     /** Called once the gesture passes touch slop, never for a tap. */
     fun markScrubbing() {
         scrubbing = true
@@ -123,6 +136,7 @@ class ScrubState {
 
     /** Releases the elastic pull back to the strip. Suspends until the spring settles. */
     suspend fun release() {
+        holdScrolling = false
         active = false
         scrubbing = false
         letter = null
@@ -141,6 +155,7 @@ class ScrubState {
 
     /** Cancels a scrub without the spring, for dismissals that snap (the HOME key). */
     fun cancel() {
+        holdScrolling = false
         active = false
         scrubbing = false
         letter = null

@@ -267,6 +267,8 @@ fun VictoriaNavHost(
     val favoriteKeys by app.prefs.favorites.collectAsState(initial = emptyList())
     val favoritesEverSet by app.prefs.favoritesEverSet.collectAsState(initial = true)
     val edgeZoneBandOnly by app.prefs.edgeZoneBandOnly.collectAsState(initial = false)
+    val holdScroll by app.prefs.holdScroll.collectAsState(initial = false)
+    val holdScrollSpeed by app.prefs.holdScrollSpeed.collectAsState(initial = 4)
     // Noted the first time there is one, and never unset. Whether the hint is still wanted is a
     // question about whether someone has done this before, not about the list being empty now.
     LaunchedEffect(favoriteKeys.isNotEmpty()) {
@@ -502,6 +504,8 @@ fun VictoriaNavHost(
         showFavoriteIcons = showFavoriteIcons,
         favoritesEverSet = favoritesEverSet,
         edgeZoneBandOnly = edgeZoneBandOnly,
+        holdScroll = holdScroll,
+        holdScrollSpeed = holdScrollSpeed,
         favoritesSource = favoritesSource,
         appListSearchHidden = appListSearchHidden,
         hideStatusBarAppList = hideStatusBarAppList,
@@ -655,6 +659,10 @@ fun VictoriaNavHost(
                 showListHeaders = showListHeaders,
                 showSettingsRow = showSettingsRow,
                 edgeZoneBandOnly = edgeZoneBandOnly,
+                holdScroll = holdScroll,
+                onSetHoldScroll = { scope.launch { app.prefs.setHoldScroll(it) } },
+                holdScrollSpeed = holdScrollSpeed,
+                onSetHoldScrollSpeed = { scope.launch { app.prefs.setHoldScrollSpeed(it) } },
                 onSetEdgeZoneBandOnly = { scope.launch { app.prefs.setEdgeZoneBandOnly(it) } },
                 onSetShowSettingsRow = { scope.launch { app.prefs.setShowSettingsRow(it) } },
                 onSetShowListHeaders = { scope.launch { app.prefs.setShowListHeaders(it) } },

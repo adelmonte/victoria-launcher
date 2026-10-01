@@ -85,6 +85,7 @@ import dev.victorialauncher.data.AppInfo
 import dev.victorialauncher.data.AzStripVisibility
 import dev.victorialauncher.data.IconShape
 import dev.victorialauncher.data.EdgeSide
+import dev.victorialauncher.data.HOLD_SCROLL_RANGE
 import dev.victorialauncher.data.SECTION_TOP_RANGE
 import dev.victorialauncher.data.FREQUENT_RANGE
 import dev.victorialauncher.data.FavoritesSource
@@ -147,6 +148,10 @@ fun SettingsScreen(
     onSetShowSettingsRow: (Boolean) -> Unit,
     edgeZoneBandOnly: Boolean,
     onSetEdgeZoneBandOnly: (Boolean) -> Unit,
+    holdScroll: Boolean,
+    onSetHoldScroll: (Boolean) -> Unit,
+    holdScrollSpeed: Int,
+    onSetHoldScrollSpeed: (Int) -> Unit,
     notificationBadges: Boolean,
     onSetNotificationBadges: (Boolean) -> Unit,
     sectionTopPercent: Int,
@@ -461,6 +466,25 @@ fun SettingsScreen(
         },
         SettingsEntry(SettingsSection.APP_LIST, stringResource(R.string.settings_edge_side), "a-z strip left right") {
             EdgeSideRow(edgeSide) { edgePreviewTick++; onSetEdgeSide(it) }
+        },
+        SettingsEntry(SettingsSection.APP_LIST, stringResource(R.string.settings_hold_scroll), "a-z hold scroll") {
+            SwitchRowWithDetail(
+                label = stringResource(R.string.settings_hold_scroll),
+                detail = stringResource(R.string.settings_hold_scroll_detail),
+                checked = holdScroll, onCheckedChange = onSetHoldScroll,
+            )
+        },
+        SettingsEntry(
+            SettingsSection.APP_LIST, stringResource(R.string.settings_hold_scroll_speed), "a-z hold scroll",
+            visible = holdScroll,
+        ) {
+            SliderRow(
+                label = stringResource(R.string.settings_hold_scroll_speed),
+                value = holdScrollSpeed.toFloat(),
+                range = HOLD_SCROLL_RANGE.first.toFloat()..HOLD_SCROLL_RANGE.last.toFloat(),
+                valueLabel = holdScrollSpeed.toString(),
+                onValueChange = { onSetHoldScrollSpeed(it.toInt()) },
+            )
         },
         SettingsEntry(SettingsSection.APP_LIST, stringResource(R.string.settings_edge_band_only), "a-z strip height touch") {
             SwitchRowWithDetail(

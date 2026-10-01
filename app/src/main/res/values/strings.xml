@@ -124,6 +124,9 @@
     <string name="az_visibility_always">Always</string>
     <string name="settings_always_show_az">Always show A-Z</string>
     <string name="settings_show_alphabet">Show A-Z in app list</string>
+    <string name="settings_hold_scroll">Hold a letter to keep scrolling</string>
+    <string name="settings_hold_scroll_detail">Rest your finger on a letter and the list walks on through its apps, for letters with a lot of them</string>
+    <string name="settings_hold_scroll_speed">Scroll speed</string>
     <string name="settings_edge_band_only">Edge only beside the letters</string>
     <string name="settings_edge_band_only_detail">The side of the screen opens the app list only where the A-Z strip is, instead of all the way down. Keeps it out of the way of a widget</string>
     <string name="settings_edge_zone_width">Edge swipe width</string>

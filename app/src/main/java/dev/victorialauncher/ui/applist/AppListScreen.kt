@@ -9,6 +9,7 @@ import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.LocalOverscrollConfiguration
+import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
@@ -229,6 +230,8 @@ fun AppListScreen(
     autoKeyboard: Boolean,
     /** Bumped when something has asked for the cursor to be in the search box. */
     searchFocusTick: Int,
+    /** Rows a second to walk while a finger rests on a letter. */
+    holdScrollSpeed: Int,
     /** Whether the last letters can reach the same line as the first. */
     lastLetterToLine: Boolean,
     searchEnabled: Boolean,
@@ -632,6 +635,23 @@ fun AppListScreen(
         }
         // This placement is fresh, so the next drag is the one that retires it.
         userDragged = false
+    }
+
+    // Walking on through a letter while the finger rests on it. A row at a time rather than a
+    // fling, because the point is to read what goes past.
+    val holdScrolling = scrub.holdScrolling
+    LaunchedEffect(holdScrolling, holdScrollSpeed) {
+        if (!holdScrolling) return@LaunchedEffect
+        val rowPx = listState.layoutInfo.visibleItemsInfo
+            .firstOrNull { it.index > 0 }?.size?.toFloat() ?: return@LaunchedEffect
+        var last = withFrameNanos { it }
+        while (true) {
+            val now = withFrameNanos { it }
+            val seconds = (now - last) / 1_000_000_000f
+            last = now
+            val delta = rowPx * holdScrollSpeed * seconds
+            if (delta > 0f) listState.scrollBy(delta)
+        }
     }
 
     val scope = rememberCoroutineScope()

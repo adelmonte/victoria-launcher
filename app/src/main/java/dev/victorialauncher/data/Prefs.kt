@@ -60,6 +60,9 @@ val FREQUENT_RANGE = 3..12
  * under it to read — which is a broken state rather than a taste anyone holds.
  */
 val SECTION_TOP_RANGE = 0..90
+
+/** Rows a second a held letter walks the list at. */
+val HOLD_SCROLL_RANGE = 1..12
 enum class AppFont { SYSTEM, SANS_SERIF, SERIF, MONOSPACE, CUSTOM }
 
 /** AUTO picks light or dark text from the wallpaper's own colors. */
@@ -163,6 +166,8 @@ class Prefs(private val context: Context) {
         val LAST_LETTER_TO_LINE = booleanPreferencesKey("last_letter_to_line")
         val FAVORITES_EVER_SET = booleanPreferencesKey("favorites_ever_set")
         val EDGE_ZONE_BAND_ONLY = booleanPreferencesKey("edge_zone_band_only")
+        val HOLD_SCROLL = booleanPreferencesKey("hold_scroll")
+        val HOLD_SCROLL_SPEED = intPreferencesKey("hold_scroll_speed")
         val ALIGNMENT = stringPreferencesKey("alignment")
         val APPLIST_ALIGNMENT = stringPreferencesKey("applist_alignment")
         val ICON_SIDE = stringPreferencesKey("icon_side")
@@ -596,6 +601,15 @@ class Prefs(private val context: Context) {
      */
     val edgeZoneBandOnly: Flow<Boolean> =
         data.map { it[Keys.EDGE_ZONE_BAND_ONLY] ?: false }.distinctUntilChanged()
+
+    /** Whether resting a finger on a letter walks the list on through that letter's apps. */
+    val holdScroll: Flow<Boolean> =
+        data.map { it[Keys.HOLD_SCROLL] ?: false }.distinctUntilChanged()
+
+    /** Rows a second while it does. */
+    val holdScrollSpeed: Flow<Int> =
+        data.map { (it[Keys.HOLD_SCROLL_SPEED] ?: 4).coerceIn(HOLD_SCROLL_RANGE) }
+            .distinctUntilChanged()
 
     val showSettingsRow: Flow<Boolean> =
         data.map { it[Keys.SHOW_SETTINGS_ROW] ?: true }.distinctUntilChanged()
@@ -1053,6 +1067,14 @@ class Prefs(private val context: Context) {
 
     suspend fun setAutoKeyboard(v: Boolean) {
         context.dataStore.edit { it[Keys.AUTO_KEYBOARD] = v }
+    }
+
+    suspend fun setHoldScroll(v: Boolean) {
+        context.dataStore.edit { it[Keys.HOLD_SCROLL] = v }
+    }
+
+    suspend fun setHoldScrollSpeed(v: Int) {
+        context.dataStore.edit { it[Keys.HOLD_SCROLL_SPEED] = v.coerceIn(HOLD_SCROLL_RANGE) }
     }
 
     suspend fun setEdgeZoneBandOnly(v: Boolean) {
