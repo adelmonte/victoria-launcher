@@ -1,0 +1,2 @@
+Fixed:
+* "Edge only beside the letters" opened the app list but then picked no letter at all. The option shipped broken in 0.75.0.
