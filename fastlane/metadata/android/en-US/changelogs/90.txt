@@ -1,0 +1,5 @@
+New:
+* The corner button can open the search instead of launching an app.
+* Swiping up can open the app list with the cursor already in the search box.
+* A search matching no app can offer the words to your browser. Off by default, and only ever as a row you tap.
+* Hold a letter on the A-Z strip and the list keeps scrolling through its apps, at a speed you set. Off by default.
