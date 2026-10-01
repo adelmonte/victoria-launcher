@@ -43,6 +43,14 @@ fun AppPickerScreen(
     nameOverrides: Map<String, String>,
     iconSizeDp: Int,
     onPick: (AppInfo?) -> Unit,
+    /**
+     * An entry offered above the apps that is not one, with the key it stores.
+     *
+     * Null for the pickers that only ever bind an app. The corner button also takes "open the
+     * search", which is a thing to do rather than a thing to launch and so has no app to pick.
+     */
+    extraChoice: Pair<String, String>? = null,
+    onPickExtra: (String) -> Unit = {},
     onBack: () -> Unit,
 ) {
     Scaffold(
@@ -81,6 +89,27 @@ fun AppPickerScreen(
                     RadioButton(selected = selectedKey == null, onClick = { onPick(null) })
                 }
                 HorizontalDivider()
+            }
+
+            if (extraChoice != null) {
+                val (key, label) = extraChoice
+                item {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { onPickExtra(key) }
+                            .padding(horizontal = 16.dp, vertical = 12.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text(
+                            label,
+                            style = MaterialTheme.typography.bodyLarge,
+                            modifier = Modifier.weight(1f),
+                        )
+                        RadioButton(selected = selectedKey == key, onClick = { onPickExtra(key) })
+                    }
+                    HorizontalDivider()
+                }
             }
 
             items(allApps, key = { it.key }) { app ->

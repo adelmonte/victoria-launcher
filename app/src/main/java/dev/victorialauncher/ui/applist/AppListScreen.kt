@@ -227,6 +227,8 @@ fun AppListScreen(
     showSettingsRow: Boolean,
     /** Whether opening the list puts the cursor in the search box. */
     autoKeyboard: Boolean,
+    /** Bumped when something has asked for the cursor to be in the search box. */
+    searchFocusTick: Int,
     /** Whether the last letters can reach the same line as the first. */
     lastLetterToLine: Boolean,
     searchEnabled: Boolean,
@@ -390,6 +392,9 @@ fun AppListScreen(
     val searchFocus = remember { FocusRequester() }
     // Asked for after the overlay is actually placed: a focus request against a field that has
     // not been laid out yet throws, and the field arrives with the rest of the list.
+    LaunchedEffect(searchFocusTick) {
+        if (searchFocusTick > 0 && searchEnabled) runCatching { searchFocus.requestFocus() }
+    }
     LaunchedEffect(visible, autoKeyboard, searchEnabled) {
         if (visible && autoKeyboard && searchEnabled) {
             runCatching { searchFocus.requestFocus() }

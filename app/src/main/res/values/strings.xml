@@ -70,6 +70,7 @@
     <string name="settings_section_notifications">Notifications</string>
     <string name="settings_preview">Preview</string>
     <string name="settings_search">Search settings</string>
+    <string name="settings_corner_search">Open the search</string>
     <string name="settings_corner_button">Button in the bottom corner</string>
     <string name="settings_last_letter">Every letter on the same line</string>
     <string name="settings_last_letter_detail">Letters at the end of the list reach the same line as the rest. Costs a screen of empty space under the last app</string>

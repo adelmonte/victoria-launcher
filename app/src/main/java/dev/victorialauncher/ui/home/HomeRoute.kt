@@ -127,6 +127,8 @@ fun HomeRoute(
      * to typecheck against itself — and this is a resolved row rather than a stored value.
      */
     cornerButtonApp: AppInfo?,
+    /** True when the corner opens the search instead of launching an app. */
+    cornerButtonIsSearch: Boolean,
     /** Whether opening the app list puts the cursor in its search box. */
     autoKeyboard: Boolean,
     /** Whether the last letters reach the same line as the first. */
@@ -293,6 +295,9 @@ fun HomeRoute(
     // Hoisted so closing the list clears it; the overlay stays composed while hidden, so a
     // query left behind would still be filtering the next time it opened.
     var appListQuery by remember { mutableStateOf("") }
+    // Bumped to ask the list for the cursor, for the openings that are a search rather than
+    // a look — the corner button set to it. A count because the same request can come twice.
+    var searchFocusTick by remember { mutableIntStateOf(0) }
 
     // A keystroke on the home screen opens the list already searching for it. Only when there
     // is a search field to type into: without one the query filters a list showing no sign of
@@ -531,6 +536,12 @@ fun HomeRoute(
                     settings.favoritesSource == FavoritesSource.MANUAL,
                 cornerButtonApp = cornerButtonApp,
                 onOpenCornerApp = { launchEntry(it) },
+                cornerButtonIsSearch = cornerButtonIsSearch,
+                onOpenCornerSearch = {
+                    appListVisible = true
+                    appListQuery = ""
+                    searchFocusTick++
+                },
                 favoritesReorderable = settings.favoritesSource == FavoritesSource.MANUAL,
                 shortcutSwipe = settings.shortcutSwipe,
                 favorites = favorites,
@@ -748,6 +759,7 @@ fun HomeRoute(
                 favoritesEditable = settings.favoritesSource == FavoritesSource.MANUAL,
                 showSettingsRow = settings.showSettingsRow,
                 autoKeyboard = autoKeyboard,
+                searchFocusTick = searchFocusTick,
                 lastLetterToLine = lastLetterToLine,
                 searchEnabled = settings.appListSearch,
                 searchAtBottom = settings.appListSearchBottom,

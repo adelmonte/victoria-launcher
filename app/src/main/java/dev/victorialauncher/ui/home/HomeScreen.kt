@@ -55,6 +55,7 @@ import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Folder
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.LinkOff
 import androidx.compose.material.icons.filled.Settings
@@ -246,6 +247,9 @@ fun HomeScreen(
     /** The app a button in the bottom corner opens, or null when there is no button. */
     cornerButtonApp: AppInfo?,
     onOpenCornerApp: (AppInfo) -> Unit,
+    /** True when the corner opens the app list's search rather than launching anything. */
+    cornerButtonIsSearch: Boolean,
+    onOpenCornerSearch: () -> Unit,
 ) {    fun displayName(app: AppInfo) = nameOverrides[app.key] ?: app.label
 
     var menuForKey by remember { mutableStateOf<String?>(null) }
@@ -987,7 +991,7 @@ fun HomeScreen(
         // A button in the corner nearest the thumb, for the one app reached often enough to
         // deserve a target rather than a gesture. Nothing is drawn without an app chosen for
         // it, and it steps aside in edit mode, where that corner belongs to Done.
-        if (cornerButtonApp != null && !editMode) {
+        if ((cornerButtonApp != null || cornerButtonIsSearch) && !editMode) {
             val corner = if (alignment == HomeAlignment.RIGHT) Alignment.BottomStart else Alignment.BottomEnd
             Box(
                 modifier = Modifier
@@ -995,10 +999,22 @@ fun HomeScreen(
                     .navigationBarsPadding()
                     .padding(horizontal = 20.dp, vertical = 24.dp)
                     .clip(CircleShape)
-                    .clickable { onOpenCornerApp(cornerButtonApp) }
+                    .clickable {
+                        if (cornerButtonIsSearch) onOpenCornerSearch()
+                        else cornerButtonApp?.let { onOpenCornerApp(it) }
+                    }
                     .padding(8.dp),
             ) {
-                AppIcon(app = cornerButtonApp, sizeDp = iconSizeDp)
+                if (cornerButtonIsSearch) {
+                    Icon(
+                        Icons.Filled.Search,
+                        contentDescription = stringResource(R.string.applist_search),
+                        tint = contentColor,
+                        modifier = Modifier.size(iconSizeDp.dp),
+                    )
+                } else {
+                    cornerButtonApp?.let { AppIcon(app = it, sizeDp = iconSizeDp) }
+                }
             }
         }
 
