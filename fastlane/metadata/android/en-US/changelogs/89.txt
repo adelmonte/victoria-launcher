@@ -1,0 +1,6 @@
+New:
+* The side of the screen can open the app list only beside the A-Z letters instead of all the way down, so it stays out of the way of a widget. Off by default, under App list.
+
+Fixed:
+* "No favorites yet" stayed on a home screen deliberately kept empty. It now goes once you have had a favorite.
+* The handles for setting the A-Z strip range sat on top of the first and last letters.
