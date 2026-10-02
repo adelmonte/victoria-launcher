@@ -160,6 +160,13 @@ class ClockWidgetProvider : AppWidgetProvider() {
                 setOnClickPendingIntent(R.id.widget_time, open(context, clockIntent(context), widgetId * 3))
                 setOnClickPendingIntent(R.id.widget_date, open(context, calendarIntent(), widgetId * 3 + 1))
                 setOnClickPendingIntent(R.id.widget_battery, open(context, batteryIntent(context), widgetId * 3 + 2))
+                // Only where there is somewhere to go. A row that looks tappable and does
+                // nothing is worse than one that plainly is not.
+                val weatherTarget = config.weatherPackage?.let { launchIntentFor(context, it) }
+                setOnClickPendingIntent(
+                    R.id.widget_weather,
+                    weatherTarget?.let { open(context, it, widgetId * 4 + 3) },
+                )
             }
             manager.updateAppWidget(widgetId, views)
         }
@@ -173,6 +180,11 @@ class ClockWidgetProvider : AppWidgetProvider() {
                     PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
                 )
             }.getOrNull()
+
+        private fun launchIntentFor(context: Context, pkg: String): Intent? = runCatching {
+            context.packageManager.getLaunchIntentForPackage(pkg)
+                ?.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        }.getOrNull()
 
         private fun clockIntent(context: Context): Intent {
             val showAlarms = Intent(AlarmClock.ACTION_SHOW_ALARMS)

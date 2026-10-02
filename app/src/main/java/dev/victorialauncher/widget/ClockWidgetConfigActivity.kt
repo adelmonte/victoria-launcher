@@ -45,6 +45,16 @@ import dev.victorialauncher.R
 import androidx.compose.foundation.shape.CircleShape
 import dev.victorialauncher.ui.settings.ColorPickerDialog
 import dev.victorialauncher.ui.settings.FilledChip
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.RadioButton
+import androidx.compose.foundation.layout.Row as LayoutRow
+import dev.victorialauncher.VictoriaApp
+import dev.victorialauncher.data.AppInfo
+import dev.victorialauncher.data.EntryKind
 import dev.victorialauncher.ui.settings.SliderRow
 import dev.victorialauncher.ui.theme.VictoriaTheme
 import java.util.Date
@@ -76,6 +86,7 @@ class ClockWidgetConfigActivity : ComponentActivity() {
         setContent {
             VictoriaTheme {
                 var config by remember { mutableStateOf(ClockWidgetConfig.read(this, widgetId)) }
+                var pickingWeatherApp by remember { mutableStateOf(false) }
                 Surface(modifier = Modifier.fillMaxSize()) {
                     Scaffold(
                         containerColor = MaterialTheme.colorScheme.surface,
@@ -102,6 +113,7 @@ class ClockWidgetConfigActivity : ComponentActivity() {
                                 config,
                                 onShow = { config = config.copy(showWeather = it) },
                                 onFahrenheit = { config = config.copy(weatherFahrenheit = it) },
+                                onPickApp = { pickingWeatherApp = true },
                             )
                             NotificationsSection(config) {
                                 config = config.copy(showNotifications = it)
@@ -183,6 +195,18 @@ class ClockWidgetConfigActivity : ComponentActivity() {
                                 )
                             }
 
+                            if (pickingWeatherApp) {
+                                WeatherAppDialog(
+                                    apps = remember { launchableApps() },
+                                    selected = config.weatherPackage,
+                                    onPick = {
+                                        config = config.copy(weatherPackage = it)
+                                        pickingWeatherApp = false
+                                    },
+                                    onDismiss = { pickingWeatherApp = false },
+                                )
+                            }
+
                             Row {
                                 TextButton(onClick = { finish() }) {
                                     Text(stringResource(R.string.action_cancel))
@@ -197,6 +221,18 @@ class ClockWidgetConfigActivity : ComponentActivity() {
             }
         }
     }
+
+    /**
+     * Apps to choose from, read once when the dialog opens.
+     *
+     * Read on the spot rather than observed: this is a settings screen that is opened, used and
+     * dismissed, and an app installed while it is up is not worth a subscription.
+     */
+    private fun launchableApps(): List<AppInfo> = runCatching {
+        (application as VictoriaApp).appRepository.queryAllApps()
+            .filter { it.kind == EntryKind.APP }
+            .sortedBy { it.label.lowercase() }
+    }.getOrDefault(emptyList())
 
     private fun save(config: ClockWidgetConfig) {
         ClockWidgetConfig.write(this, widgetId, config)
@@ -338,6 +374,7 @@ private fun WeatherSection(
     config: ClockWidgetConfig,
     onShow: (Boolean) -> Unit,
     onFahrenheit: (Boolean) -> Unit,
+    onPickApp: () -> Unit,
 ) {
     Column {
         Text(stringResource(R.string.widget_clock_weather), style = MaterialTheme.typography.bodyMedium)
@@ -360,12 +397,72 @@ private fun WeatherSection(
                     config.weatherFahrenheit,
                 ) { onFahrenheit(true) }
             }
+            TextButton(onClick = onPickApp) {
+                Text(stringResource(R.string.widget_clock_weather_opens))
+            }
             Text(
                 stringResource(R.string.widget_clock_weather_hint),
                 style = MaterialTheme.typography.bodySmall,
             )
         }
     }
+}
+
+/**
+ * Which app the weather row opens.
+ *
+ * A list of every app rather than a guess at the weather ones: there is no category the system
+ * recognises for weather the way there is for the calendar, and the broadcast that brings the
+ * forecast does not say which app sent it.
+ */
+@Composable
+private fun WeatherAppDialog(
+    apps: List<AppInfo>,
+    selected: String?,
+    onPick: (String?) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.widget_clock_weather_opens)) },
+        text = {
+            LazyColumn(modifier = Modifier.heightIn(max = 400.dp)) {
+                item {
+                    LayoutRow(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { onPick(null) }
+                            .padding(vertical = 12.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text(
+                            stringResource(R.string.settings_quick_launch_none),
+                            modifier = Modifier.weight(1f),
+                        )
+                        RadioButton(selected = selected == null, onClick = { onPick(null) })
+                    }
+                }
+                items(apps, key = { it.key }) { app ->
+                    LayoutRow(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { onPick(app.componentName.packageName) }
+                            .padding(vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text(app.label, modifier = Modifier.weight(1f))
+                        RadioButton(
+                            selected = selected == app.componentName.packageName,
+                            onClick = { onPick(app.componentName.packageName) },
+                        )
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_done)) }
+        },
+    )
 }
 
 @Composable
