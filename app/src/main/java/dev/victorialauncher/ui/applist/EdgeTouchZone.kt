@@ -22,8 +22,9 @@ import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.Dp
 import dev.victorialauncher.data.EdgeSide
 import dev.victorialauncher.service.HapticUtil
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withTimeoutOrNull
 
 /** How far the strip may be dragged inward before the pull stops growing. */
 /**
@@ -37,9 +38,6 @@ import kotlinx.coroutines.withTimeoutOrNull
  */
 /** How long a finger has to sit still on a letter before the list starts moving on its own. */
 private const val HOLD_START_MS = 450L
-
-/** How often the wait is checked, which is also the step the dwell is counted in. */
-private const val HOLD_POLL_MS = 50L
 
 /** Further than this and it was a scrub, not a rest. */
 private const val HOLD_SLOP_DP = 6f
@@ -186,29 +184,38 @@ fun EdgeTouchZone(
                     // letter still delivers events — a fingertip is never quite still — so the
                     // hold is judged by distance travelled rather than by events arriving.
                     var restAt = down.position
-                    var restSince = 0L
-                    while (true) {
-                        val event = withTimeoutOrNull(HOLD_POLL_MS) { awaitPointerEvent() }
-                        if (event == null) {
-                            // Nothing at all for a while, which is as still as a finger gets.
-                            restSince += HOLD_POLL_MS
-                            if (holdScroll && enteredBand && !armedToClose && restSince >= HOLD_START_MS) {
-                                state.holdScroll(true)
-                            }
-                            continue
+                    // The dwell is timed beside the gesture rather than inside it. Waiting for
+                    // the wait with a timeout around awaitPointerEvent meant abandoning and
+                    // restarting the await every few frames, and an event arriving in one of
+                    // those gaps was simply lost — which showed up as the strip lagging and its
+                    // letters jumping, for everyone, whether this option was on or not.
+                    var holdJob: Job? = null
+                    fun armHold() {
+                        holdJob?.cancel()
+                        if (!holdScroll) return
+                        holdJob = scope.launch {
+                            delay(HOLD_START_MS)
+                            // Read when it fires, not when it was armed: by now the finger may
+                            // have left the letters or crossed the line that means leaving.
+                            if (enteredBand && !armedToClose) state.holdScroll(true)
                         }
+                    }
+                    fun cancelHold() {
+                        holdJob?.cancel()
+                        holdJob = null
+                        state.holdScroll(false)
+                    }
+                    armHold()
+                    while (true) {
+                        val event = awaitPointerEvent()
                         val change = event.changes.firstOrNull { it.id == down.id } ?: break
                         if (!change.pressed) break
                         if ((change.position - restAt).getDistance() > HOLD_SLOP_DP * density) {
-                            // Moved on: this is a scrub again, not a hold.
+                            // Moved on: this is a scrub again, not a rest. The clock restarts
+                            // from here rather than from where the finger first landed.
                             restAt = change.position
-                            restSince = 0L
-                            state.holdScroll(false)
-                        } else {
-                            restSince += HOLD_POLL_MS
-                            if (holdScroll && enteredBand && !armedToClose && restSince >= HOLD_START_MS) {
-                                state.holdScroll(true)
-                            }
+                            cancelHold()
+                            armHold()
                         }
                         // A tap places the list without ever counting as a scrub, so the
                         // overlay does not spend the tap fading itself out and back in.
@@ -222,7 +229,7 @@ fun EdgeTouchZone(
                         change.consume()
                     }
 
-                    state.holdScroll(false)
+                    cancelHold()
                     scope.launch { state.release() }
 
                     // Dragged off the end and let go: the whole gesture was open, look, leave,
