@@ -1,0 +1,7 @@
+New:
+* The clock widget can show weather, from a weather app that already has it — Victoria still has no network access and never asks where you are. Turn on data sharing in Breezy Weather, then Weather in the widget's own settings. Off by default.
+* The clock widget can show how many notifications are waiting. A count only, never what they say. Off by default.
+
+Fixed:
+* The A-Z strip lagged behind your finger and its letters jumped. Introduced in 0.76.0 and affected everyone, whichever settings were on.
+* Holding a letter walked a few apps and then stopped for good instead of carrying on through the list.
