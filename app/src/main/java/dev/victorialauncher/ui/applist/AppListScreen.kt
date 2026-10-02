@@ -10,7 +10,6 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.LocalOverscrollConfiguration
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
@@ -654,7 +653,12 @@ fun AppListScreen(
             val seconds = (now - last) / 1_000_000_000f
             last = now
             val delta = rowPx * holdScrollSpeed * seconds
-            if (delta > 0f) listState.scrollBy(delta)
+            // dispatchRawDelta for the reason given where the gap is compensated: a scrollBy
+            // takes the scroll mutex, and anything else that wants it — the placement scroll,
+            // an overscroll settling — cancels this one. That cancellation propagates out of
+            // the loop and the walk stops for good, a letter or two in, which is exactly how
+            // it behaved.
+            if (delta > 0f) listState.dispatchRawDelta(delta)
         }
     }
 
