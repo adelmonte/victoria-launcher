@@ -11,6 +11,7 @@ import android.media.session.MediaSessionManager
 import android.media.session.PlaybackState
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
+import dev.victorialauncher.widget.ClockWidgetProvider
 
 class NowPlayingListenerService : NotificationListenerService() {
 
@@ -106,6 +107,7 @@ class NowPlayingListenerService : NotificationListenerService() {
         val active = runCatching { activeNotifications }.getOrNull()
         if (active == null) {
             NotificationCountBus.clear()
+            ClockWidgetProvider.renderAll(this)
             return
         }
         val counts = HashMap<String, Int>()
@@ -115,7 +117,11 @@ class NowPlayingListenerService : NotificationListenerService() {
             if (notification.flags and Notification.FLAG_GROUP_SUMMARY != 0) return@forEach
             counts[sbn.packageName] = (counts[sbn.packageName] ?: 0) + 1
         }
+        val before = NotificationCountBus.counts.value.values.sum()
         NotificationCountBus.update(counts)
+        // A widget is drawn only when something asks. The home screen follows the bus on its
+        // own; a RemoteViews cannot, so the total changing is what has to ask for it.
+        if (counts.values.sum() != before) ClockWidgetProvider.renderAll(this)
     }
 
     /** Follow whichever session is worth showing, and watch it for changes. */

@@ -14,6 +14,7 @@ import android.util.TypedValue
 import android.view.View
 import android.widget.RemoteViews
 import dev.victorialauncher.R
+import dev.victorialauncher.media.NotificationCountBus
 
 /**
  * A clock and date, so a fresh launcher has something on it without hunting for a widget that
@@ -32,11 +33,37 @@ class ClockWidgetProvider : AppWidgetProvider() {
     /** Settings belong to one widget, so each is drawn from its own. */
     override fun onDeleted(context: Context, ids: IntArray) {
         ids.forEach { ClockWidgetConfig.forget(context, it) }
+        syncWeatherReceiver(context)
     }
 
     companion object {
         fun componentName(context: Context) =
             ComponentName(context, ClockWidgetProvider::class.java)
+
+        /**
+         * Leaves the weather receiver enabled only while some widget still shows weather.
+         *
+         * Asked after anything that can change the answer, rather than tracked: the widgets are
+         * the only record of what is wanted, and reading all of them is cheaper than keeping a
+         * count correct across a process that gets killed.
+         */
+        /** Redraws every clock widget, for the things that change without being asked about. */
+        fun renderAll(context: Context) {
+            runCatching {
+                val manager = AppWidgetManager.getInstance(context)
+                manager.getAppWidgetIds(componentName(context))
+                    ?.forEach { render(context, manager, it) }
+            }
+        }
+
+        fun syncWeatherReceiver(context: Context) {
+            val manager = AppWidgetManager.getInstance(context)
+            val wanted = runCatching {
+                manager.getAppWidgetIds(componentName(context))
+                    ?.any { ClockWidgetConfig.read(context, it).showWeather } == true
+            }.getOrDefault(false)
+            ClockWidgetWeather.setReceiverEnabled(context, wanted)
+        }
 
         /**
          * Draws one widget as its own settings ask.
@@ -91,6 +118,43 @@ class ClockWidgetProvider : AppWidgetProvider() {
                     setTextViewText(R.id.widget_battery, context.getString(R.string.widget_clock_battery_percent, battery))
                     setTextViewTextSize(R.id.widget_battery, TypedValue.COMPLEX_UNIT_SP, config.batterySizeSp.toFloat())
                     setTextColor(R.id.widget_battery, config.colorAt(config.batteryOpacity))
+                }
+
+                // Whatever another app last told us, if it is recent enough to still be true.
+                val weather = if (config.showWeather) ClockWidgetWeather.current(context) else null
+                if (weather == null) {
+                    setViewVisibility(R.id.widget_weather, View.GONE)
+                } else {
+                    setViewVisibility(R.id.widget_weather, View.VISIBLE)
+                    setTextViewText(
+                        R.id.widget_weather,
+                        ClockWidgetWeather.formatted(weather, config.weatherFahrenheit),
+                    )
+                    setTextViewTextSize(R.id.widget_weather, TypedValue.COMPLEX_UNIT_SP, config.weatherSizeSp.toFloat())
+                    setTextColor(R.id.widget_weather, config.colorAt(config.weatherOpacity))
+                }
+
+                // A count and nothing else, for the same reason the badges carry no text: what
+                // a notification says is its own business and not the home screen's.
+                val notifications = if (config.showNotifications) {
+                    NotificationCountBus.counts.value.values.sum().takeIf { it > 0 }
+                } else {
+                    null
+                }
+                if (notifications == null) {
+                    setViewVisibility(R.id.widget_notifications, View.GONE)
+                } else {
+                    setViewVisibility(R.id.widget_notifications, View.VISIBLE)
+                    setTextViewText(
+                        R.id.widget_notifications,
+                        context.resources.getQuantityString(
+                            R.plurals.widget_clock_notification_count,
+                            notifications,
+                            notifications,
+                        ),
+                    )
+                    setTextViewTextSize(R.id.widget_notifications, TypedValue.COMPLEX_UNIT_SP, config.notificationsSizeSp.toFloat())
+                    setTextColor(R.id.widget_notifications, config.colorAt(config.notificationsOpacity))
                 }
 
                 setOnClickPendingIntent(R.id.widget_time, open(context, clockIntent(context), widgetId * 3))

@@ -115,6 +115,18 @@
                 android:resource="@xml/widget_clock_info" />
         </receiver>
 
+        <!-- Weather from whichever app already fetches it. Exported because the sender has to
+             be able to reach it, and disabled until a widget is actually set to show weather:
+             a receiver a stranger can reach should not exist while the feature is off. -->
+        <receiver
+            android:name=".widget.ClockWidgetWeatherReceiver"
+            android:enabled="false"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="nodomain.freeyourgadget.gadgetbridge.ACTION_GENERIC_WEATHER" />
+            </intent-filter>
+        </receiver>
+
         <service
             android:name=".media.NowPlayingListenerService"
             android:exported="true"

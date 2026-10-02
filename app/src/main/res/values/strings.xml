@@ -281,6 +281,20 @@
     <string name="widget_clock_color">Color</string>
     <string name="widget_clock_color_pick">Choose</string>
     <string name="widget_clock_size_preview">12:34</string>
+    <string name="widget_clock_weather">Weather</string>
+    <string name="widget_clock_notifications">Notifications</string>
+    <string name="widget_clock_weather_show">Weather</string>
+    <string name="widget_clock_weather_hide">No weather</string>
+    <string name="widget_clock_weather_celsius">°C</string>
+    <string name="widget_clock_weather_fahrenheit">°F</string>
+    <string name="widget_clock_weather_size">Weather size</string>
+    <string name="widget_clock_weather_opacity">Weather opacity</string>
+    <string name="widget_clock_weather_waiting">Waiting for a weather app</string>
+    <string name="widget_clock_weather_hint">Weather comes from a weather app that already has it, so Victoria needs no network access and never asks where you are. In Breezy Weather, turn on Settings → Widgets &amp; Live Wallpaper → Data sharing.</string>
+    <string name="widget_clock_notifications_show">Notification count</string>
+    <string name="widget_clock_notifications_hide">No count</string>
+    <string name="widget_clock_notifications_size">Count size</string>
+    <string name="widget_clock_notifications_opacity">Count opacity</string>
     <string name="widget_clock_battery">Battery</string>
     <string name="widget_clock_battery_show">Show</string>
     <string name="widget_clock_battery_hide">Hide</string>
@@ -311,4 +325,8 @@
     <string name="now_playing_previous">Previous</string>
     <string name="now_playing_play_pause">Play/pause</string>
     <string name="now_playing_next">Next</string>
+    <plurals name="widget_clock_notification_count">
+        <item quantity="one">%1$d notification</item>
+        <item quantity="other">%1$d notifications</item>
+    </plurals>
 </resources>

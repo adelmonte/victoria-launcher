@@ -36,6 +36,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -97,6 +98,14 @@ class ClockWidgetConfigActivity : ComponentActivity() {
                             HourSection(config) { config = config.copy(hourFormat = it) }
                             DateSection(config) { config = config.copy(datePattern = it) }
                             BatterySection(config) { config = config.copy(showBattery = it) }
+                            WeatherSection(
+                                config,
+                                onShow = { config = config.copy(showWeather = it) },
+                                onFahrenheit = { config = config.copy(weatherFahrenheit = it) },
+                            )
+                            NotificationsSection(config) {
+                                config = config.copy(showNotifications = it)
+                            }
                             ColorSection(config) { config = config.copy(textColor = it) }
 
                             TextSection(
@@ -142,6 +151,38 @@ class ClockWidgetConfigActivity : ComponentActivity() {
                                 )
                             }
 
+                            if (config.showWeather) {
+                                TextSection(
+                                    sizeLabel = stringResource(R.string.widget_clock_weather_size),
+                                    opacityLabel = stringResource(R.string.widget_clock_weather_opacity),
+                                    preview = ClockWidgetWeather
+                                        .current(this@ClockWidgetConfigActivity)
+                                        ?.let { ClockWidgetWeather.formatted(it, config.weatherFahrenheit) }
+                                        ?: stringResource(R.string.widget_clock_weather_waiting),
+                                    size = config.weatherSizeSp,
+                                    sizeRange = ClockWidgetConfig.DATE_SIZE_RANGE,
+                                    opacity = config.weatherOpacity,
+                                    color = config.textColor,
+                                    onSize = { config = config.copy(weatherSizeSp = it) },
+                                    onOpacity = { config = config.copy(weatherOpacity = it) },
+                                )
+                            }
+                            if (config.showNotifications) {
+                                TextSection(
+                                    sizeLabel = stringResource(R.string.widget_clock_notifications_size),
+                                    opacityLabel = stringResource(R.string.widget_clock_notifications_opacity),
+                                    preview = pluralStringResource(
+                                        R.plurals.widget_clock_notification_count, 3, 3,
+                                    ),
+                                    size = config.notificationsSizeSp,
+                                    sizeRange = ClockWidgetConfig.DATE_SIZE_RANGE,
+                                    opacity = config.notificationsOpacity,
+                                    color = config.textColor,
+                                    onSize = { config = config.copy(notificationsSizeSp = it) },
+                                    onOpacity = { config = config.copy(notificationsOpacity = it) },
+                                )
+                            }
+
                             Row {
                                 TextButton(onClick = { finish() }) {
                                     Text(stringResource(R.string.action_cancel))
@@ -162,6 +203,9 @@ class ClockWidgetConfigActivity : ComponentActivity() {
         // Redrawn here rather than waiting for the system to ask: nothing else would, since
         // this widget has no update interval of its own.
         ClockWidgetProvider.render(this, AppWidgetManager.getInstance(this), widgetId)
+        // Weather arrives by broadcast, and the receiver for it exists only while something
+        // wants it. This is the moment that can have changed.
+        ClockWidgetProvider.syncWeatherReceiver(this)
         setResult(Activity.RESULT_OK, resultIntent())
         finish()
     }
@@ -279,6 +323,67 @@ private fun TextSection(
                 color = Color(ClockWidgetConfig.opacityOf(color, opacity)),
                 modifier = Modifier.padding(start = 16.dp),
             )
+        }
+    }
+}
+
+/**
+ * Weather, and the unit it is said in.
+ *
+ * The hint is the whole setup: nothing appears here until another app is actually sending, and
+ * without being told that, an empty row reads as broken rather than as waiting.
+ */
+@Composable
+private fun WeatherSection(
+    config: ClockWidgetConfig,
+    onShow: (Boolean) -> Unit,
+    onFahrenheit: (Boolean) -> Unit,
+) {
+    Column {
+        Text(stringResource(R.string.widget_clock_weather), style = MaterialTheme.typography.bodyMedium)
+        Chips {
+            FilledChip(stringResource(R.string.widget_clock_weather_show), config.showWeather) {
+                onShow(true)
+            }
+            FilledChip(stringResource(R.string.widget_clock_weather_hide), !config.showWeather) {
+                onShow(false)
+            }
+        }
+        if (config.showWeather) {
+            Chips {
+                FilledChip(
+                    stringResource(R.string.widget_clock_weather_celsius),
+                    !config.weatherFahrenheit,
+                ) { onFahrenheit(false) }
+                FilledChip(
+                    stringResource(R.string.widget_clock_weather_fahrenheit),
+                    config.weatherFahrenheit,
+                ) { onFahrenheit(true) }
+            }
+            Text(
+                stringResource(R.string.widget_clock_weather_hint),
+                style = MaterialTheme.typography.bodySmall,
+            )
+        }
+    }
+}
+
+@Composable
+private fun NotificationsSection(config: ClockWidgetConfig, onSelect: (Boolean) -> Unit) {
+    Column {
+        Text(
+            stringResource(R.string.widget_clock_notifications),
+            style = MaterialTheme.typography.bodyMedium,
+        )
+        Chips {
+            FilledChip(
+                stringResource(R.string.widget_clock_notifications_show),
+                config.showNotifications,
+            ) { onSelect(true) }
+            FilledChip(
+                stringResource(R.string.widget_clock_notifications_hide),
+                !config.showNotifications,
+            ) { onSelect(false) }
         }
     }
 }

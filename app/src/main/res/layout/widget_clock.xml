@@ -55,6 +55,36 @@
         android:contentDescription="@string/widget_clock_date" />
 
     <TextView
+        android:id="@+id/widget_weather"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="@color/widget_clock_text"
+        android:textSize="14sp"
+        android:maxLines="1"
+        android:visibility="gone"
+        android:gravity="start"
+        android:shadowColor="#80000000"
+        android:shadowDx="0"
+        android:shadowDy="1"
+        android:shadowRadius="4"
+        android:contentDescription="@string/widget_clock_weather" />
+
+    <TextView
+        android:id="@+id/widget_notifications"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="@color/widget_clock_text"
+        android:textSize="14sp"
+        android:maxLines="1"
+        android:visibility="gone"
+        android:gravity="start"
+        android:shadowColor="#80000000"
+        android:shadowDx="0"
+        android:shadowDy="1"
+        android:shadowRadius="4"
+        android:contentDescription="@string/widget_clock_notifications" />
+
+    <TextView
         android:id="@+id/widget_battery"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

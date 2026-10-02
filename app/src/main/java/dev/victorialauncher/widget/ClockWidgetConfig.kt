@@ -20,10 +20,17 @@ data class ClockWidgetConfig(
     val dateSizeSp: Int,
     val showBattery: Boolean,
     val batterySizeSp: Int,
+    val showWeather: Boolean,
+    val weatherSizeSp: Int,
+    val weatherFahrenheit: Boolean,
+    val showNotifications: Boolean,
+    val notificationsSizeSp: Int,
     val textColor: Int,
     val timeOpacity: Int,
     val dateOpacity: Int,
     val batteryOpacity: Int,
+    val weatherOpacity: Int,
+    val notificationsOpacity: Int,
 ) {
     enum class HourFormat { SYSTEM, TWELVE, TWENTY_FOUR }
 
@@ -35,6 +42,7 @@ data class ClockWidgetConfig(
         private const val DEFAULT_SIZE_SP = 44
         private const val DEFAULT_DATE_SIZE_SP = 16
         private const val DEFAULT_BATTERY_SIZE_SP = 14
+        private const val DEFAULT_ROW_SIZE_SP = 14
         private const val DEFAULT_COLOR = 0xFFFFFFFF.toInt()
         private const val DEFAULT_OPACITY = 100
 
@@ -77,11 +85,23 @@ data class ClockWidgetConfig(
                 timeSizeSp = prefs.getInt(key("size", widgetId), DEFAULT_SIZE_SP),
                 dateSizeSp = prefs.getInt(key("dateSize", widgetId), DEFAULT_DATE_SIZE_SP),
                 showBattery = prefs.getBoolean(key("battery", widgetId), false),
+                showWeather = prefs.getBoolean(key("weather", widgetId), false),
+                weatherSizeSp = prefs.getInt(key("weatherSize", widgetId), DEFAULT_ROW_SIZE_SP),
+                // Asked of the locale only the first time, so changing it later does not
+                // silently undo a choice made by hand.
+                weatherFahrenheit = prefs.getBoolean(
+                    key("weatherF", widgetId),
+                    ClockWidgetWeather.fahrenheitByDefault(),
+                ),
+                showNotifications = prefs.getBoolean(key("notifications", widgetId), false),
+                notificationsSizeSp = prefs.getInt(key("notificationsSize", widgetId), DEFAULT_ROW_SIZE_SP),
                 batterySizeSp = prefs.getInt(key("batterySize", widgetId), DEFAULT_BATTERY_SIZE_SP),
                 textColor = prefs.getInt(key("color", widgetId), DEFAULT_COLOR),
                 timeOpacity = prefs.getInt(key("timeOpacity", widgetId), DEFAULT_OPACITY),
                 dateOpacity = prefs.getInt(key("dateOpacity", widgetId), DEFAULT_OPACITY),
                 batteryOpacity = prefs.getInt(key("batteryOpacity", widgetId), DEFAULT_OPACITY),
+                weatherOpacity = prefs.getInt(key("weatherOpacity", widgetId), DEFAULT_OPACITY),
+                notificationsOpacity = prefs.getInt(key("notificationsOpacity", widgetId), DEFAULT_OPACITY),
             )
         }
 
@@ -92,11 +112,18 @@ data class ClockWidgetConfig(
                 .putInt(key("size", widgetId), config.timeSizeSp)
                 .putInt(key("dateSize", widgetId), config.dateSizeSp)
                 .putBoolean(key("battery", widgetId), config.showBattery)
+                .putBoolean(key("weather", widgetId), config.showWeather)
+                .putInt(key("weatherSize", widgetId), config.weatherSizeSp)
+                .putBoolean(key("weatherF", widgetId), config.weatherFahrenheit)
+                .putBoolean(key("notifications", widgetId), config.showNotifications)
+                .putInt(key("notificationsSize", widgetId), config.notificationsSizeSp)
                 .putInt(key("batterySize", widgetId), config.batterySizeSp)
                 .putInt(key("color", widgetId), config.textColor)
                 .putInt(key("timeOpacity", widgetId), config.timeOpacity)
                 .putInt(key("dateOpacity", widgetId), config.dateOpacity)
                 .putInt(key("batteryOpacity", widgetId), config.batteryOpacity)
+                .putInt(key("weatherOpacity", widgetId), config.weatherOpacity)
+                .putInt(key("notificationsOpacity", widgetId), config.notificationsOpacity)
                 .apply()
         }
 
@@ -113,6 +140,13 @@ data class ClockWidgetConfig(
                 .remove(key("timeOpacity", widgetId))
                 .remove(key("dateOpacity", widgetId))
                 .remove(key("batteryOpacity", widgetId))
+                .remove(key("weather", widgetId))
+                .remove(key("weatherSize", widgetId))
+                .remove(key("weatherF", widgetId))
+                .remove(key("weatherOpacity", widgetId))
+                .remove(key("notifications", widgetId))
+                .remove(key("notificationsSize", widgetId))
+                .remove(key("notificationsOpacity", widgetId))
                 .apply()
         }
 
