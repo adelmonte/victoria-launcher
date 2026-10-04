@@ -152,6 +152,7 @@ class Prefs(private val context: Context) {
         val QUICK_LAUNCH_RIGHT = stringPreferencesKey(PREF_QUICK_LAUNCH_RIGHT)
         val LAYOUT_DEFAULTS_VERSION = intPreferencesKey("layout_defaults_version")
         val WELCOME_SEEN = booleanPreferencesKey("welcome_seen")
+        val DIM_OTHERS_SCRUBBING = booleanPreferencesKey("dim_others_scrubbing")
         val SHOW_APP_ICONS = booleanPreferencesKey("show_app_icons")
         val SHOW_FAVORITE_ICONS = booleanPreferencesKey("show_favorite_icons")
         val FAVORITES_SOURCE = stringPreferencesKey("favorites_source")
@@ -582,7 +583,7 @@ class Prefs(private val context: Context) {
      * the last app, which is there whenever the list is open rather than only when it is used.
      */
     val lastLetterToLine: Flow<Boolean> =
-        data.map { it[Keys.LAST_LETTER_TO_LINE] ?: false }.distinctUntilChanged()
+        data.map { it[Keys.LAST_LETTER_TO_LINE] ?: true }.distinctUntilChanged()
 
     /**
      * Whether there has ever been a favorite on the home screen.
@@ -616,6 +617,15 @@ class Prefs(private val context: Context) {
     /** Whether swiping up puts the cursor in the search box rather than only opening the list. */
     val swipeUpOpensSearch: Flow<Boolean> =
         data.map { it[Keys.SWIPE_UP_OPENS_SEARCH] ?: false }.distinctUntilChanged()
+
+    /**
+     * Whether the rest of the list fades while a finger travels the alphabet.
+     *
+     * On, as it has always been — the fade is what makes the letter you are on findable. Off
+     * for anyone who would rather keep sight of what is around it.
+     */
+    val dimOthersScrubbing: Flow<Boolean> =
+        data.map { it[Keys.DIM_OTHERS_SCRUBBING] ?: true }.distinctUntilChanged()
 
     /** Whether resting a finger on a letter walks the list on through that letter's apps. */
     val holdScroll: Flow<Boolean> =
@@ -1090,6 +1100,25 @@ class Prefs(private val context: Context) {
 
     suspend fun setSwipeUpOpensSearch(v: Boolean) {
         context.dataStore.edit { it[Keys.SWIPE_UP_OPENS_SEARCH] = v }
+    }
+
+    /**
+     * Settings a fresh install should start with, which an existing one must not be given.
+     *
+     * Some defaults are only right for someone who has not used this before. Confining the live
+     * edge to the letters is the better first experience; changing it under someone who has
+     * been swiping the whole side for months is not an improvement, it is their launcher
+     * behaving differently one morning. So it is written once, when the welcome is dismissed —
+     * a screen only a new install ever sees — and only where nothing has been chosen already.
+     */
+    suspend fun applyNewInstallDefaults() {
+        context.dataStore.edit {
+            if (it[Keys.EDGE_ZONE_BAND_ONLY] == null) it[Keys.EDGE_ZONE_BAND_ONLY] = true
+        }
+    }
+
+    suspend fun setDimOthersScrubbing(v: Boolean) {
+        context.dataStore.edit { it[Keys.DIM_OTHERS_SCRUBBING] = v }
     }
 
     suspend fun setHoldScroll(v: Boolean) {

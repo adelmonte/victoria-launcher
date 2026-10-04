@@ -150,6 +150,8 @@ fun SettingsScreen(
     onSetEdgeZoneBandOnly: (Boolean) -> Unit,
     holdScroll: Boolean,
     onSetHoldScroll: (Boolean) -> Unit,
+    dimOthersScrubbing: Boolean,
+    onSetDimOthersScrubbing: (Boolean) -> Unit,
     webSearchFallback: Boolean,
     onSetWebSearchFallback: (Boolean) -> Unit,
     swipeUpOpensSearch: Boolean,
@@ -486,6 +488,13 @@ fun SettingsScreen(
                 label = stringResource(R.string.settings_swipe_up_search),
                 detail = stringResource(R.string.settings_swipe_up_search_detail),
                 checked = swipeUpOpensSearch, onCheckedChange = onSetSwipeUpOpensSearch,
+            )
+        },
+        SettingsEntry(SettingsSection.APP_LIST, stringResource(R.string.settings_dim_others), "dim fade a-z scrub") {
+            SwitchRowWithDetail(
+                label = stringResource(R.string.settings_dim_others),
+                detail = stringResource(R.string.settings_dim_others_detail),
+                checked = dimOthersScrubbing, onCheckedChange = onSetDimOthersScrubbing,
             )
         },
         SettingsEntry(SettingsSection.APP_LIST, stringResource(R.string.settings_hold_scroll), "a-z hold scroll") {

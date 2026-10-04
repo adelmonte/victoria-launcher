@@ -548,6 +548,10 @@ fun HomeRoute(
                 onOpenCornerSearch = {
                     appListVisible = true
                     appListQuery = ""
+                    // Opened the whole way, as tapping the edge does. Marking it visible is
+                    // not opening it: the list is drawn against this, so without it the
+                    // button produced the half-faded list of a swipe abandoned part way.
+                    scope.launch { openAnim.snapTo(openDistancePx) }
                     searchFocusTick++
                 },
                 favoritesReorderable = settings.favoritesSource == FavoritesSource.MANUAL,
@@ -774,6 +778,7 @@ fun HomeRoute(
                 autoKeyboard = autoKeyboard,
                 searchFocusTick = searchFocusTick,
                 holdScrollSpeed = settings.holdScrollSpeed,
+                dimOthers = settings.dimOthersScrubbing,
                 // Offered only where something can take it, or the row is a dead end.
                 webSearchFallback = settings.webSearchFallback && webSearchAvailable,
                 onWebSearch = { term ->
@@ -952,6 +957,7 @@ data class HomeSettings(
     val edgeZoneBandOnly: Boolean,
     val holdScroll: Boolean,
     val holdScrollSpeed: Int,
+    val dimOthersScrubbing: Boolean,
     val webSearchFallback: Boolean,
     val swipeUpOpensSearch: Boolean,
     val favoritesSource: FavoritesSource,

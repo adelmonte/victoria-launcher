@@ -268,6 +268,7 @@ fun VictoriaNavHost(
     val favoritesEverSet by app.prefs.favoritesEverSet.collectAsState(initial = true)
     val edgeZoneBandOnly by app.prefs.edgeZoneBandOnly.collectAsState(initial = false)
     val holdScroll by app.prefs.holdScroll.collectAsState(initial = false)
+    val dimOthersScrubbing by app.prefs.dimOthersScrubbing.collectAsState(initial = true)
     val webSearchFallback by app.prefs.webSearchFallback.collectAsState(initial = false)
     val swipeUpOpensSearch by app.prefs.swipeUpOpensSearch.collectAsState(initial = false)
     val holdScrollSpeed by app.prefs.holdScrollSpeed.collectAsState(initial = 4)
@@ -507,6 +508,7 @@ fun VictoriaNavHost(
         favoritesEverSet = favoritesEverSet,
         edgeZoneBandOnly = edgeZoneBandOnly,
         holdScroll = holdScroll,
+        dimOthersScrubbing = dimOthersScrubbing,
         webSearchFallback = webSearchFallback,
         swipeUpOpensSearch = swipeUpOpensSearch,
         holdScrollSpeed = holdScrollSpeed,
@@ -623,7 +625,12 @@ fun VictoriaNavHost(
                 // before the stored answer arrives. A legacy install is stamped 0 and never
                 // qualifies.
                 showWelcome = layoutDefaultsVersion == 1 && !welcomeSeen,
-                onWelcomeDismissed = { scope.launch { app.prefs.setWelcomeSeen(true) } },
+                onWelcomeDismissed = {
+                    scope.launch {
+                        app.prefs.applyNewInstallDefaults()
+                        app.prefs.setWelcomeSeen(true)
+                    }
+                },
                 scrubBandFractions = scrubBand,
                 onSetScrubBand = { top, height -> scope.launch { app.prefs.setScrubBand(top, height) } },
                 onClearScrubBand = { scope.launch { app.prefs.clearScrubBand() } },
@@ -664,6 +671,8 @@ fun VictoriaNavHost(
                 showSettingsRow = showSettingsRow,
                 edgeZoneBandOnly = edgeZoneBandOnly,
                 holdScroll = holdScroll,
+                dimOthersScrubbing = dimOthersScrubbing,
+                onSetDimOthersScrubbing = { scope.launch { app.prefs.setDimOthersScrubbing(it) } },
                 webSearchFallback = webSearchFallback,
                 onSetWebSearchFallback = { scope.launch { app.prefs.setWebSearchFallback(it) } },
                 swipeUpOpensSearch = swipeUpOpensSearch,

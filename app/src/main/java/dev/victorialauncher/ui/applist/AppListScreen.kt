@@ -232,6 +232,8 @@ fun AppListScreen(
     searchFocusTick: Int,
     /** Rows a second to walk while a finger rests on a letter. */
     holdScrollSpeed: Int,
+    /** Whether the rest of the list fades away while a letter is being scrubbed. */
+    dimOthers: Boolean,
     /** Whether a query matching nothing offers the words to the browser. */
     webSearchFallback: Boolean,
     onWebSearch: (String) -> Unit,
@@ -310,7 +312,14 @@ fun AppListScreen(
         // Only while a finger is travelling through the alphabet: a tap on the edge sets a
         // letter too, and fading out for it cost a quarter of a second of ghosted list on
         // every open.
-        targetValue = if (scrubLetter != null && scrubbing) 0f else 1f,
+        // Not while a held letter is walking the list: the whole point of that is to read what
+        // goes past, and everything that went past was faded out. That is what made it look as
+        // though only the held letter's own apps ever scrolled.
+        targetValue = if (scrubLetter != null && scrubbing && dimOthers && !scrub.holdScrolling) {
+            0f
+        } else {
+            1f
+        },
         animationSpec = tween(durationMillis = 180),
         label = "othersAlpha",
     )
