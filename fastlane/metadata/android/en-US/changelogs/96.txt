@@ -1,0 +1,5 @@
+New:
+* Adjusting either wallpaper dim now shows it: the settings screen fades out for a moment and paints the dim over your real wallpaper.
+
+Removed:
+* The sideways animation when a quick-launch swipe opened an app. Android is free to ignore a custom opening animation and often does, so it could not be relied on.
