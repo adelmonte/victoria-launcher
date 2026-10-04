@@ -63,7 +63,6 @@ import dev.victorialauncher.data.IconSide
 import dev.victorialauncher.data.Folder
 import dev.victorialauncher.data.HomePaddings
 import dev.victorialauncher.data.QuickLaunchSlot
-import dev.victorialauncher.data.SlideFrom
 import dev.victorialauncher.data.PaddingSlot
 import dev.victorialauncher.data.folderToken
 import dev.victorialauncher.media.NowPlayingBus
@@ -352,7 +351,7 @@ fun HomeRoute(
     // The one place a row press is turned into something happening. Every row in the launcher
     // arrives here, so a row that is not an app is recognised once, here, rather than in each
     // of the four places a press is wired up.
-    fun launchEntry(entry: AppInfo, slideFrom: SlideFrom? = null): Boolean = when (entry.kind) {
+    fun launchEntry(entry: AppInfo): Boolean = when (entry.kind) {
         // Handed off rather than done here: locking or unlocking is several binder calls and
         // possibly the system's own authentication screen, which is not a press's work to do
         // on the main thread. True because the press was acted on — there is simply nothing
@@ -361,7 +360,7 @@ fun HomeRoute(
             onTogglePrivateSpace()
             true
         }
-        else -> app.appRepository.launch(entry, slideFrom)
+        else -> app.appRepository.launch(entry)
     }
 
     LaunchedEffect(settings.edgeSide) { scrub.syncRestingSide(settings.edgeSide) }
@@ -690,13 +689,7 @@ fun HomeRoute(
                         QuickLaunchSlot.LEFT -> settings.quickLaunchLeft
                         QuickLaunchSlot.RIGHT -> settings.quickLaunchRight
                     }
-                    // A swipe that carried the screen left brings what it fetched in from the
-                    // right, the way any two things side by side would move.
-                    val slide = if (!settings.quickLaunchSlide) null else when (slot) {
-                        QuickLaunchSlot.LEFT -> SlideFrom.RIGHT
-                        QuickLaunchSlot.RIGHT -> SlideFrom.LEFT
-                    }
-                    target?.let { launchEntry(it, slide) }
+                    target?.let { launchEntry(it) }
                 },
                 onPeekStatusBar = onPeekStatusBar,
                 onExpandShade = {
@@ -969,7 +962,6 @@ data class HomeSettings(
     val appListSearchHidden: Boolean,
     val hideStatusBarAppList: Boolean,
     val sortByUsage: Boolean,
-    val quickLaunchSlide: Boolean,
     val quickLaunchLeft: AppInfo?,
     val quickLaunchRight: AppInfo?,
     /** Place the favorites by measurement, until the user sets a padding of their own. */

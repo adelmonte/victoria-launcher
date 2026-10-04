@@ -208,8 +208,6 @@ fun SettingsScreen(
     onSetAppListSearch: (Boolean) -> Unit,
     onSetAppListSearchBottom: (Boolean) -> Unit,
     onSetAppListSearchHidden: (Boolean) -> Unit,
-    quickLaunchSlide: Boolean,
-    onSetQuickLaunchSlide: (Boolean) -> Unit,
     quickLaunchLeftLabel: String?,
     quickLaunchRightLabel: String?,
     onOpenQuickLaunchPicker: (QuickLaunchSlot) -> Unit,
@@ -614,13 +612,6 @@ fun SettingsScreen(
                 label = stringResource(R.string.settings_quick_launch_right),
                 value = quickLaunchRightLabel,
                 onClick = { onOpenQuickLaunchPicker(QuickLaunchSlot.RIGHT) },
-            )
-        },
-        SettingsEntry(SettingsSection.GESTURES, stringResource(R.string.settings_quick_launch_slide), "animation") {
-            SwitchRowWithDetail(
-                label = stringResource(R.string.settings_quick_launch_slide),
-                detail = stringResource(R.string.settings_quick_launch_slide_detail),
-                checked = quickLaunchSlide, onCheckedChange = onSetQuickLaunchSlide,
             )
         },
         SettingsEntry(SettingsSection.HOME, stringResource(R.string.settings_corner_button), "button shortcut corner") {

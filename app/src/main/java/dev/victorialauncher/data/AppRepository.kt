@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 package dev.victorialauncher.data
 
-import android.app.ActivityOptions
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -12,7 +11,6 @@ import android.content.res.Configuration
 import android.content.res.Resources
 import java.util.Locale
 import android.os.Build
-import android.os.Bundle
 import android.os.Process
 import android.os.UserHandle
 import android.os.UserManager
@@ -575,23 +573,18 @@ class AppRepository(
 
     /**
      * Returns false if the app could not be started, so callers can undo whatever they hid.
-     *
-     * [slideFrom] replaces the system's own opening animation with one that carries the app in
-     * from an edge. Only a gesture that moved sideways has any business asking for it, and only
-     * then because the app arriving the same way the finger went is the whole point.
      */
-    fun launch(app: AppInfo, slideFrom: SlideFrom? = null): Boolean {
-        if (app.kind == EntryKind.SHORTCUT) return launchShortcut(app, slideFrom)
+    fun launch(app: AppInfo): Boolean {
+        if (app.kind == EntryKind.SHORTCUT) return launchShortcut(app)
         // Only an app has an activity to start. The private space row is opened by the screen
         // that knows what it is, and arriving here means it was routed wrongly — which must not
         // launch anything and must not be counted as a launch.
         if (app.kind != EntryKind.APP) return false
         if (app.componentName.packageName == context.packageName) return false
-        val options = slideOptions(slideFrom)
         val started = runCatching {
             // Through LauncherApps so an app in another profile starts as that profile; a
             // plain startActivity would look for it in ours and find nothing.
-            launcherApps.startMainActivity(app.componentName, app.user ?: Process.myUserHandle(), null, options)
+            launcherApps.startMainActivity(app.componentName, app.user ?: Process.myUserHandle(), null, null)
             true
         }.getOrElse {
             runCatching {
@@ -600,7 +593,6 @@ class AppRepository(
                         .addCategory(Intent.CATEGORY_LAUNCHER)
                         .setComponent(app.componentName)
                         .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
-                    options,
                 )
                 true
             }.getOrDefault(false)
@@ -613,19 +605,7 @@ class AppRepository(
         return started
     }
 
-    /**
-     * The animation as a bundle, or null to leave the system's alone.
-     *
-     * A ROM is free to ignore it, and one that has animations turned off will. Nothing here
-     * depends on it being honored — it is the opening of the app that matters.
-     */
-    private fun slideOptions(slideFrom: SlideFrom?): Bundle? = slideFrom?.let { side ->
-        val enter = if (side == SlideFrom.RIGHT) R.anim.app_open_enter_right else R.anim.app_open_enter_left
-        val exit = if (side == SlideFrom.RIGHT) R.anim.app_open_exit_left else R.anim.app_open_exit_right
-        runCatching { ActivityOptions.makeCustomAnimation(context, enter, exit).toBundle() }.getOrNull()
-    }
-
-    private fun launchShortcut(app: AppInfo, slideFrom: SlideFrom? = null): Boolean {
+    private fun launchShortcut(app: AppInfo): Boolean {
         val id = app.shortcutId ?: return false
         if (app.disabled) {
             // The publisher's own wording wherever there is any: it is the only thing that
@@ -643,7 +623,7 @@ class AppRepository(
                 app.packageName,
                 id,
                 null,
-                slideOptions(slideFrom),
+                null,
                 app.user ?: Process.myUserHandle(),
             )
             true
