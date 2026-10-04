@@ -27,12 +27,22 @@ data class ClockWidgetConfig(
     val weatherPackage: String?,
     val showNotifications: Boolean,
     val notificationsSizeSp: Int,
+    val showAgenda: Boolean,
+    val agendaSizeSp: Int,
+    /** How many upcoming events to show, at most. */
+    val agendaCount: Int,
+    /** How far ahead to look, in hours. */
+    val agendaLookaheadHours: Int,
+    /** "in 20 minutes" rather than a clock time. Reads better, goes stale. */
+    val agendaRelative: Boolean,
+    val showAlarm: Boolean,
     val textColor: Int,
     val timeOpacity: Int,
     val dateOpacity: Int,
     val batteryOpacity: Int,
     val weatherOpacity: Int,
     val notificationsOpacity: Int,
+    val agendaOpacity: Int,
 ) {
     enum class HourFormat { SYSTEM, TWELVE, TWENTY_FOUR }
 
@@ -66,6 +76,12 @@ data class ClockWidgetConfig(
 
         /** Stops short of nothing at all: an invisible row looks like a broken widget. */
         val OPACITY_RANGE = 10..100
+
+        /** More than three and the widget is an agenda rather than a clock. */
+        val AGENDA_COUNT_RANGE = 1..3
+
+        /** An hour out to a week; past that it is not what is coming up. */
+        val AGENDA_HOURS_RANGE = 1..168
 
         /** Shared with the settings preview, so what is shown there is what is drawn. */
         fun opacityOf(color: Int, opacity: Int): Int {
@@ -101,6 +117,13 @@ data class ClockWidgetConfig(
                 // for whoever is not on it.
                 weatherPackage = prefs.getString(key("weatherPkg", widgetId), null),
                 showNotifications = prefs.getBoolean(key("notifications", widgetId), false),
+                showAgenda = prefs.getBoolean(key("agenda", widgetId), false),
+                agendaSizeSp = prefs.getInt(key("agendaSize", widgetId), DEFAULT_ROW_SIZE_SP),
+                agendaCount = prefs.getInt(key("agendaCount", widgetId), 1).coerceIn(AGENDA_COUNT_RANGE),
+                agendaLookaheadHours = prefs.getInt(key("agendaHours", widgetId), 24)
+                    .coerceIn(AGENDA_HOURS_RANGE),
+                agendaRelative = prefs.getBoolean(key("agendaRelative", widgetId), true),
+                showAlarm = prefs.getBoolean(key("alarm", widgetId), false),
                 notificationsSizeSp = prefs.getInt(key("notificationsSize", widgetId), DEFAULT_ROW_SIZE_SP),
                 batterySizeSp = prefs.getInt(key("batterySize", widgetId), DEFAULT_BATTERY_SIZE_SP),
                 textColor = prefs.getInt(key("color", widgetId), DEFAULT_COLOR),
@@ -109,6 +132,7 @@ data class ClockWidgetConfig(
                 batteryOpacity = prefs.getInt(key("batteryOpacity", widgetId), DEFAULT_OPACITY),
                 weatherOpacity = prefs.getInt(key("weatherOpacity", widgetId), DEFAULT_OPACITY),
                 notificationsOpacity = prefs.getInt(key("notificationsOpacity", widgetId), DEFAULT_OPACITY),
+                agendaOpacity = prefs.getInt(key("agendaOpacity", widgetId), DEFAULT_OPACITY),
             )
         }
 
@@ -124,6 +148,12 @@ data class ClockWidgetConfig(
                 .putBoolean(key("weatherF", widgetId), config.weatherFahrenheit)
                 .putString(key("weatherPkg", widgetId), config.weatherPackage)
                 .putBoolean(key("notifications", widgetId), config.showNotifications)
+                .putBoolean(key("agenda", widgetId), config.showAgenda)
+                .putInt(key("agendaSize", widgetId), config.agendaSizeSp)
+                .putInt(key("agendaCount", widgetId), config.agendaCount)
+                .putInt(key("agendaHours", widgetId), config.agendaLookaheadHours)
+                .putBoolean(key("agendaRelative", widgetId), config.agendaRelative)
+                .putBoolean(key("alarm", widgetId), config.showAlarm)
                 .putInt(key("notificationsSize", widgetId), config.notificationsSizeSp)
                 .putInt(key("batterySize", widgetId), config.batterySizeSp)
                 .putInt(key("color", widgetId), config.textColor)
@@ -132,6 +162,7 @@ data class ClockWidgetConfig(
                 .putInt(key("batteryOpacity", widgetId), config.batteryOpacity)
                 .putInt(key("weatherOpacity", widgetId), config.weatherOpacity)
                 .putInt(key("notificationsOpacity", widgetId), config.notificationsOpacity)
+                .putInt(key("agendaOpacity", widgetId), config.agendaOpacity)
                 .apply()
         }
 
@@ -156,6 +187,13 @@ data class ClockWidgetConfig(
                 .remove(key("notifications", widgetId))
                 .remove(key("notificationsSize", widgetId))
                 .remove(key("notificationsOpacity", widgetId))
+                .remove(key("agenda", widgetId))
+                .remove(key("agendaSize", widgetId))
+                .remove(key("agendaCount", widgetId))
+                .remove(key("agendaHours", widgetId))
+                .remove(key("agendaRelative", widgetId))
+                .remove(key("agendaOpacity", widgetId))
+                .remove(key("alarm", widgetId))
                 .apply()
         }
 

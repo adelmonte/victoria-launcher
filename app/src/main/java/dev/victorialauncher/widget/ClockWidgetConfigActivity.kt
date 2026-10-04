@@ -45,6 +45,9 @@ import dev.victorialauncher.R
 import androidx.compose.foundation.shape.CircleShape
 import dev.victorialauncher.ui.settings.ColorPickerDialog
 import dev.victorialauncher.ui.settings.FilledChip
+import android.Manifest
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.lazy.LazyColumn
@@ -87,6 +90,19 @@ class ClockWidgetConfigActivity : ComponentActivity() {
             VictoriaTheme {
                 var config by remember { mutableStateOf(ClockWidgetConfig.read(this, widgetId)) }
                 var pickingWeatherApp by remember { mutableStateOf(false) }
+                // Asked for here rather than at install, and re-read on the way back so the
+                // section stops offering what has just been granted.
+                var calendarGranted by remember {
+                    mutableStateOf(ClockWidgetAgenda.hasCalendarPermission(this))
+                }
+                val askCalendar = rememberLauncherForActivityResult(
+                    ActivityResultContracts.RequestPermission(),
+                ) { granted ->
+                    calendarGranted = granted
+                    // Refused, so nothing would ever appear; better to leave the row off than
+                    // to show a widget that silently has nothing in it.
+                    if (!granted) config = config.copy(showAgenda = false)
+                }
                 Surface(modifier = Modifier.fillMaxSize()) {
                     Scaffold(
                         containerColor = MaterialTheme.colorScheme.surface,
@@ -118,6 +134,18 @@ class ClockWidgetConfigActivity : ComponentActivity() {
                             NotificationsSection(config) {
                                 config = config.copy(showNotifications = it)
                             }
+                            AgendaSection(
+                                config = config,
+                                hasPermission = calendarGranted,
+                                onShow = { config = config.copy(showAgenda = it) },
+                                onRelative = { config = config.copy(agendaRelative = it) },
+                                onCount = { config = config.copy(agendaCount = it) },
+                                onHours = { config = config.copy(agendaLookaheadHours = it) },
+                                onAlarm = { config = config.copy(showAlarm = it) },
+                                onAskPermission = {
+                                    askCalendar.launch(Manifest.permission.READ_CALENDAR)
+                                },
+                            )
                             ColorSection(config) { config = config.copy(textColor = it) }
 
                             TextSection(
@@ -177,6 +205,22 @@ class ClockWidgetConfigActivity : ComponentActivity() {
                                     color = config.textColor,
                                     onSize = { config = config.copy(weatherSizeSp = it) },
                                     onOpacity = { config = config.copy(weatherOpacity = it) },
+                                )
+                            }
+                            if (config.showAgenda || config.showAlarm) {
+                                TextSection(
+                                    sizeLabel = stringResource(R.string.widget_clock_agenda_size),
+                                    opacityLabel = stringResource(R.string.widget_clock_agenda_opacity),
+                                    preview = ClockWidgetAgenda
+                                        .events(this@ClockWidgetConfigActivity, 1, config.agendaLookaheadHours, config.agendaRelative)
+                                        .firstOrNull()?.text
+                                        ?: stringResource(R.string.widget_clock_agenda_empty),
+                                    size = config.agendaSizeSp,
+                                    sizeRange = ClockWidgetConfig.DATE_SIZE_RANGE,
+                                    opacity = config.agendaOpacity,
+                                    color = config.textColor,
+                                    onSize = { config = config.copy(agendaSizeSp = it) },
+                                    onOpacity = { config = config.copy(agendaOpacity = it) },
                                 )
                             }
                             if (config.showNotifications) {
@@ -463,6 +507,79 @@ private fun WeatherAppDialog(
             TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_done)) }
         },
     )
+}
+
+/**
+ * What is coming up, and how much of it.
+ *
+ * The permission is asked for from here, at the moment it is turned on, so nothing is demanded
+ * of someone who only wanted a clock.
+ */
+@Composable
+private fun AgendaSection(
+    config: ClockWidgetConfig,
+    hasPermission: Boolean,
+    onShow: (Boolean) -> Unit,
+    onRelative: (Boolean) -> Unit,
+    onCount: (Int) -> Unit,
+    onHours: (Int) -> Unit,
+    onAlarm: (Boolean) -> Unit,
+    onAskPermission: () -> Unit,
+) {
+    Column {
+        Text(stringResource(R.string.widget_clock_agenda), style = MaterialTheme.typography.bodyMedium)
+        Chips {
+            FilledChip(stringResource(R.string.widget_clock_agenda_show), config.showAgenda) {
+                if (hasPermission) onShow(true) else onAskPermission()
+            }
+            FilledChip(stringResource(R.string.widget_clock_agenda_hide), !config.showAgenda) {
+                onShow(false)
+            }
+        }
+        if (config.showAgenda && !hasPermission) {
+            TextButton(onClick = onAskPermission) {
+                Text(stringResource(R.string.widget_clock_agenda_permission))
+            }
+        }
+        if (config.showAgenda) {
+            Chips {
+                FilledChip(stringResource(R.string.widget_clock_agenda_relative), config.agendaRelative) {
+                    onRelative(true)
+                }
+                FilledChip(stringResource(R.string.widget_clock_agenda_absolute), !config.agendaRelative) {
+                    onRelative(false)
+                }
+            }
+            SliderRow(
+                label = stringResource(R.string.widget_clock_agenda_count),
+                value = config.agendaCount.toFloat(),
+                range = ClockWidgetConfig.AGENDA_COUNT_RANGE.first.toFloat()..
+                    ClockWidgetConfig.AGENDA_COUNT_RANGE.last.toFloat(),
+                valueLabel = config.agendaCount.toString(),
+                onValueChange = { onCount(it.toInt()) },
+            )
+            SliderRow(
+                label = stringResource(R.string.widget_clock_agenda_hours),
+                value = config.agendaLookaheadHours.toFloat(),
+                range = ClockWidgetConfig.AGENDA_HOURS_RANGE.first.toFloat()..
+                    ClockWidgetConfig.AGENDA_HOURS_RANGE.last.toFloat(),
+                valueLabel = config.agendaLookaheadHours.toString(),
+                onValueChange = { onHours(it.toInt()) },
+            )
+            Text(
+                stringResource(R.string.widget_clock_agenda_hint),
+                style = MaterialTheme.typography.bodySmall,
+            )
+        }
+        Chips {
+            FilledChip(stringResource(R.string.widget_clock_alarm_show), config.showAlarm) {
+                onAlarm(true)
+            }
+            FilledChip(stringResource(R.string.widget_clock_alarm_hide), !config.showAlarm) {
+                onAlarm(false)
+            }
+        }
+    }
 }
 
 @Composable

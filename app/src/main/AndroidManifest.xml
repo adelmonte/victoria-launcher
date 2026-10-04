@@ -18,6 +18,11 @@
          and it only takes effect while this launcher holds the home role. -->
     <uses-permission android:name="android.permission.ACCESS_HIDDEN_PROFILES" />
 
+    <!-- Asked for at the moment the clock widget is set to show what is coming up, never at
+         install. Read only, and nothing read here leaves the phone: there is no network
+         permission to send it with. -->
+    <uses-permission android:name="android.permission.READ_CALENDAR" />
+
     <application
         android:name=".VictoriaApp"
         android:allowBackup="true"

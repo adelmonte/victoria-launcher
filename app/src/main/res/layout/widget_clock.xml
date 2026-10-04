@@ -86,6 +86,70 @@
         android:contentDescription="@string/widget_clock_notifications" />
 
     <TextView
+        android:id="@+id/widget_event_1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="@color/widget_clock_text"
+        android:textSize="14sp"
+        android:maxLines="1"
+        android:ellipsize="end"
+        android:visibility="gone"
+        android:gravity="start"
+        android:shadowColor="#80000000"
+        android:shadowDx="0"
+        android:shadowDy="1"
+        android:shadowRadius="4"
+        android:contentDescription="@string/widget_clock_agenda" />
+
+    <TextView
+        android:id="@+id/widget_event_2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="@color/widget_clock_text"
+        android:textSize="14sp"
+        android:maxLines="1"
+        android:ellipsize="end"
+        android:visibility="gone"
+        android:gravity="start"
+        android:shadowColor="#80000000"
+        android:shadowDx="0"
+        android:shadowDy="1"
+        android:shadowRadius="4"
+        android:contentDescription="@string/widget_clock_agenda" />
+
+    <TextView
+        android:id="@+id/widget_event_3"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="@color/widget_clock_text"
+        android:textSize="14sp"
+        android:maxLines="1"
+        android:ellipsize="end"
+        android:visibility="gone"
+        android:gravity="start"
+        android:shadowColor="#80000000"
+        android:shadowDx="0"
+        android:shadowDy="1"
+        android:shadowRadius="4"
+        android:contentDescription="@string/widget_clock_agenda" />
+
+    <TextView
+        android:id="@+id/widget_alarm"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="@color/widget_clock_text"
+        android:textSize="14sp"
+        android:maxLines="1"
+        android:ellipsize="end"
+        android:visibility="gone"
+        android:gravity="start"
+        android:shadowColor="#80000000"
+        android:shadowDx="0"
+        android:shadowDy="1"
+        android:shadowRadius="4"
+        android:contentDescription="@string/widget_clock_agenda" />
+
+    <TextView
         android:id="@+id/widget_battery"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

@@ -295,6 +295,25 @@
     <string name="widget_clock_weather_fahrenheit">°F</string>
     <string name="widget_clock_weather_size">Weather size</string>
     <string name="widget_clock_weather_opacity">Weather opacity</string>
+    <string name="widget_clock_agenda">Coming up</string>
+    <string name="widget_clock_event_untitled">(No title)</string>
+    <string name="widget_clock_event_at">%1$s  %2$s</string>
+    <string name="widget_clock_event_all_day">%1$s  today</string>
+    <string name="widget_clock_event_now">%1$s  now</string>
+    <string name="widget_clock_alarm_at">Alarm %1$s</string>
+    <string name="widget_clock_agenda_show">Coming up</string>
+    <string name="widget_clock_agenda_hide">Nothing</string>
+    <string name="widget_clock_agenda_size">Coming up size</string>
+    <string name="widget_clock_agenda_opacity">Coming up opacity</string>
+    <string name="widget_clock_agenda_count">How many events</string>
+    <string name="widget_clock_agenda_hours">Hours to look ahead</string>
+    <string name="widget_clock_agenda_relative">In 20 minutes</string>
+    <string name="widget_clock_agenda_absolute">At 12:30</string>
+    <string name="widget_clock_alarm_show">Next alarm</string>
+    <string name="widget_clock_alarm_hide">No alarm</string>
+    <string name="widget_clock_agenda_permission">Allow access to your calendar</string>
+    <string name="widget_clock_agenda_empty">Nothing coming up</string>
+    <string name="widget_clock_agenda_hint">Reading your calendar needs permission. Nothing leaves the phone: Victoria has no network access.</string>
     <string name="widget_clock_weather_opens">What tapping the weather opens</string>
     <string name="widget_clock_weather_waiting">Waiting for a weather app</string>
     <string name="widget_clock_weather_hint">Weather comes from a weather app that already has it, so Victoria needs no network access and never asks where you are. In Breezy Weather, turn on Settings → Widgets &amp; Live Wallpaper → Data sharing.</string>
@@ -335,5 +354,13 @@
     <plurals name="widget_clock_notification_count">
         <item quantity="one">%1$d notification</item>
         <item quantity="other">%1$d notifications</item>
+    </plurals>
+    <plurals name="widget_clock_event_in_minutes">
+        <item quantity="one">%1$s  in %2$d minute</item>
+        <item quantity="other">%1$s  in %2$d minutes</item>
+    </plurals>
+    <plurals name="widget_clock_event_in_hours">
+        <item quantity="one">%1$s  in %2$d hour</item>
+        <item quantity="other">%1$s  in %2$d hours</item>
     </plurals>
 </resources>

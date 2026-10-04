@@ -23,6 +23,7 @@ import dev.victorialauncher.data.AppFont
 import dev.victorialauncher.data.IconShape
 import dev.victorialauncher.media.NowPlayingListenerService
 import dev.victorialauncher.service.StatusBarFader
+import dev.victorialauncher.widget.ClockWidgetProvider
 import dev.victorialauncher.ui.VictoriaNavHost
 import dev.victorialauncher.ui.common.IconConfig
 import dev.victorialauncher.ui.common.LocalIconConfig
@@ -223,6 +224,12 @@ class MainActivity : ComponentActivity() {
         super.onStart()
         (application as VictoriaApp).widgetHost.startListening()
         NowPlayingListenerService.rebindIfPermitted(this)
+        // The clock widget's own rows go stale on their own — an event passes, an alarm is
+        // set, "in 20 minutes" stops being true. Half an hour is the shortest the system will
+        // wake a widget on a schedule, so the other half of keeping it honest is redrawing it
+        // whenever the home screen is actually being looked at, which costs nothing when it
+        // has not changed.
+        ClockWidgetProvider.renderAll(this)
     }
 
     override fun onStop() {

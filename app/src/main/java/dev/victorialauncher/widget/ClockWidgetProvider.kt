@@ -157,6 +157,49 @@ class ClockWidgetProvider : AppWidgetProvider() {
                     setTextColor(R.id.widget_notifications, config.colorAt(config.notificationsOpacity))
                 }
 
+                // What is coming up. The event rows are a fixed three in the layout rather
+                // than a list, because a RemoteViews cannot be given children it was not
+                // written with — so the unused ones are simply hidden.
+                val events = if (config.showAgenda) {
+                    ClockWidgetAgenda.events(
+                        context,
+                        limit = config.agendaCount,
+                        lookaheadHours = config.agendaLookaheadHours,
+                        relative = config.agendaRelative,
+                    )
+                } else {
+                    emptyList()
+                }
+                EVENT_ROWS.forEachIndexed { index, viewId ->
+                    val entry = events.getOrNull(index)
+                    if (entry == null) {
+                        setViewVisibility(viewId, View.GONE)
+                    } else {
+                        setViewVisibility(viewId, View.VISIBLE)
+                        setTextViewText(viewId, entry.text)
+                        setTextViewTextSize(viewId, TypedValue.COMPLEX_UNIT_SP, config.agendaSizeSp.toFloat())
+                        setTextColor(viewId, config.colorAt(config.agendaOpacity))
+                        setOnClickPendingIntent(
+                            viewId,
+                            open(context, calendarIntent(), widgetId * 8 + 4 + index),
+                        )
+                    }
+                }
+
+                val alarm = if (config.showAlarm) ClockWidgetAgenda.nextAlarm(context) else null
+                if (alarm == null) {
+                    setViewVisibility(R.id.widget_alarm, View.GONE)
+                } else {
+                    setViewVisibility(R.id.widget_alarm, View.VISIBLE)
+                    setTextViewText(R.id.widget_alarm, alarm.text)
+                    setTextViewTextSize(R.id.widget_alarm, TypedValue.COMPLEX_UNIT_SP, config.agendaSizeSp.toFloat())
+                    setTextColor(R.id.widget_alarm, config.colorAt(config.agendaOpacity))
+                    setOnClickPendingIntent(
+                        R.id.widget_alarm,
+                        open(context, clockIntent(context), widgetId * 8 + 7),
+                    )
+                }
+
                 setOnClickPendingIntent(R.id.widget_time, open(context, clockIntent(context), widgetId * 3))
                 setOnClickPendingIntent(R.id.widget_date, open(context, calendarIntent(), widgetId * 3 + 1))
                 setOnClickPendingIntent(R.id.widget_battery, open(context, batteryIntent(context), widgetId * 3 + 2))
@@ -180,6 +223,8 @@ class ClockWidgetProvider : AppWidgetProvider() {
                     PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
                 )
             }.getOrNull()
+
+        private val EVENT_ROWS = intArrayOf(R.id.widget_event_1, R.id.widget_event_2, R.id.widget_event_3)
 
         private fun launchIntentFor(context: Context, pkg: String): Intent? = runCatching {
             context.packageManager.getLaunchIntentForPackage(pkg)
