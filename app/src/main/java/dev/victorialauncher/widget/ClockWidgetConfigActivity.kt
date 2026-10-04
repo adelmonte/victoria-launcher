@@ -52,6 +52,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.RadioButton
 import androidx.compose.foundation.layout.Row as LayoutRow
@@ -90,6 +92,7 @@ class ClockWidgetConfigActivity : ComponentActivity() {
             VictoriaTheme {
                 var config by remember { mutableStateOf(ClockWidgetConfig.read(this, widgetId)) }
                 var pickingWeatherApp by remember { mutableStateOf(false) }
+                var editingDateFormat by remember { mutableStateOf(false) }
                 // Asked for here rather than at install, and re-read on the way back so the
                 // section stops offering what has just been granted.
                 var calendarGranted by remember {
@@ -123,7 +126,11 @@ class ClockWidgetConfigActivity : ComponentActivity() {
                             verticalArrangement = Arrangement.spacedBy(20.dp),
                         ) {
                             HourSection(config) { config = config.copy(hourFormat = it) }
-                            DateSection(config) { config = config.copy(datePattern = it) }
+                            DateSection(
+                                config,
+                                onSelect = { config = config.copy(datePattern = it) },
+                                onCustom = { editingDateFormat = true },
+                            )
                             BatterySection(config) { config = config.copy(showBattery = it) }
                             WeatherSection(
                                 config,
@@ -239,6 +246,17 @@ class ClockWidgetConfigActivity : ComponentActivity() {
                                 )
                             }
 
+                            if (editingDateFormat) {
+                                CustomDateDialog(
+                                    initial = config.datePattern ?: ClockWidgetConfig.DEFAULT_DATE,
+                                    onConfirm = {
+                                        config = config.copy(datePattern = it)
+                                        editingDateFormat = false
+                                    },
+                                    onDismiss = { editingDateFormat = false },
+                                )
+                            }
+
                             if (pickingWeatherApp) {
                                 WeatherAppDialog(
                                     apps = remember { launchableApps() },
@@ -331,8 +349,63 @@ private fun HourSection(config: ClockWidgetConfig, onSelect: (ClockWidgetConfig.
     }
 }
 
+/**
+ * A pattern typed by hand, so the formats nobody here thought of are reachable.
+ *
+ * Refuses what TextClock cannot draw, since the widget lives in another process and a bad
+ * pattern there is a widget that silently will not render.
+ */
 @Composable
-private fun DateSection(config: ClockWidgetConfig, onSelect: (String?) -> Unit) {
+private fun CustomDateDialog(
+    initial: String,
+    onConfirm: (String) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    var text by remember { mutableStateOf(initial) }
+    val valid = ClockWidgetConfig.isValidDatePattern(text)
+    val preview = if (valid) {
+        runCatching { DateFormat.format(text, Date()).toString() }.getOrDefault("")
+    } else {
+        stringResource(R.string.widget_clock_date_custom_invalid)
+    }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.widget_clock_date_custom)) },
+        text = {
+            Column {
+                OutlinedTextField(
+                    value = text,
+                    onValueChange = { if (it.length <= ClockWidgetConfig.MAX_DATE_PATTERN) text = it },
+                    singleLine = true,
+                    isError = !valid,
+                    label = { Text(stringResource(R.string.widget_clock_date_custom_label)) },
+                )
+                Spacer(Modifier.height(8.dp))
+                Text(preview, style = MaterialTheme.typography.bodyMedium)
+                Spacer(Modifier.height(8.dp))
+                Text(
+                    stringResource(R.string.widget_clock_date_custom_hint),
+                    style = MaterialTheme.typography.bodySmall,
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = { onConfirm(text) }, enabled = valid) {
+                Text(stringResource(R.string.action_save))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_cancel)) }
+        },
+    )
+}
+
+@Composable
+private fun DateSection(
+    config: ClockWidgetConfig,
+    onSelect: (String?) -> Unit,
+    onCustom: () -> Unit,
+) {
     Column {
         Text(stringResource(R.string.widget_clock_date_format), style = MaterialTheme.typography.bodyMedium)
         Chips {
@@ -342,6 +415,11 @@ private fun DateSection(config: ClockWidgetConfig, onSelect: (String?) -> Unit) 
             ClockWidgetConfig.DATE_CHOICES.forEach { pattern ->
                 val label = runCatching { DateFormat.format(pattern, now).toString() }.getOrDefault(pattern)
                 FilledChip(label, config.datePattern == pattern) { onSelect(pattern) }
+            }
+            val custom = config.datePattern != null &&
+                config.datePattern !in ClockWidgetConfig.DATE_CHOICES
+            FilledChip(stringResource(R.string.widget_clock_date_custom_chip), custom) {
+                onCustom()
             }
             FilledChip(stringResource(R.string.widget_clock_date_none), config.datePattern == null) {
                 onSelect(null)

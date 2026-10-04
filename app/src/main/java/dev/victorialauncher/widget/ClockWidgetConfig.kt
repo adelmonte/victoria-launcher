@@ -61,6 +61,23 @@ data class ClockWidgetConfig(
         /** Weekday, day, month — short enough for a narrow widget and clear in any language. */
         const val DEFAULT_DATE = "EEE, d MMM"
 
+        /**
+         * Whether a pattern is one TextClock can be handed.
+         *
+         * Checked before it is ever stored. A widget is drawn inside another app's process, so
+         * a pattern that throws does not fail here where someone could see why — it fails over
+         * there, as a widget that will not draw, with nothing to say which setting did it.
+         */
+        fun isValidDatePattern(pattern: String): Boolean {
+            if (pattern.isBlank() || pattern.length > MAX_DATE_PATTERN) return false
+            return runCatching {
+                android.text.format.DateFormat.format(pattern, java.util.Date()).toString()
+            }.getOrNull()?.isNotEmpty() == true
+        }
+
+        /** Long enough for any real format and short enough not to be a essay. */
+        const val MAX_DATE_PATTERN = 40
+
         /** Offered in the widget's own settings; the pattern is what TextClock is given. */
         val DATE_CHOICES = listOf(
             "EEE, d MMM",

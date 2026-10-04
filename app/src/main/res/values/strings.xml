@@ -295,6 +295,11 @@
     <string name="widget_clock_weather_fahrenheit">°F</string>
     <string name="widget_clock_weather_size">Weather size</string>
     <string name="widget_clock_weather_opacity">Weather opacity</string>
+    <string name="widget_clock_date_custom_chip">Custom</string>
+    <string name="widget_clock_date_custom">Custom date format</string>
+    <string name="widget_clock_date_custom_label">Pattern</string>
+    <string name="widget_clock_date_custom_invalid">That is not a pattern this can draw</string>
+    <string name="widget_clock_date_custom_hint">d day, M month, y year, E weekday. Repeat a letter for a longer form: d, dd, EEE, EEEE.</string>
     <string name="widget_clock_agenda">Coming up</string>
     <string name="widget_clock_event_untitled">(No title)</string>
     <string name="widget_clock_event_at">%1$s  %2$s</string>
