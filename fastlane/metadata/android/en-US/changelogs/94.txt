@@ -1,0 +1,8 @@
+New:
+* Whether the rest of the list dims while you slide along A-Z is now a setting. On, as before.
+* Letters at the end of the list reach the same line as the rest by default.
+* A fresh install starts with the screen edge opening the app list only beside the A-Z letters.
+
+Fixed:
+* The corner button set to open the search left the app list half open and faded.
+* Holding a letter to keep scrolling faded out all the apps it was scrolling past.
