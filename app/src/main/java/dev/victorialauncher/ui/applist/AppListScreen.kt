@@ -234,6 +234,8 @@ fun AppListScreen(
     holdScrollSpeed: Int,
     /** Whether the rest of the list fades away while a letter is being scrubbed. */
     dimOthers: Boolean,
+    /** Whether a work profile's apps say so after their name. */
+    markWorkApps: Boolean,
     /** Whether a query matching nothing offers the words to the browser. */
     webSearchFallback: Boolean,
     onWebSearch: (String) -> Unit,
@@ -247,7 +249,13 @@ fun AppListScreen(
     alignment: HomeAlignment,
     iconSide: IconSide,
 ) {
-    fun displayName(app: AppInfo) = nameOverrides[app.key] ?: app.label
+    // Appended at the point of showing rather than stored in the label, so a rename still
+    // wins and turning this off needs no re-reading of every app.
+    val workSuffix = stringResource(R.string.app_work_suffix)
+    fun displayName(app: AppInfo): String {
+        val base = nameOverrides[app.key] ?: app.label
+        return if (markWorkApps && app.work) base + workSuffix else base
+    }
 
     // The gesture handlers below outlive the composition that created them, so they must not
     // capture this frame's callbacks — a dismiss half a minute old still has to close the

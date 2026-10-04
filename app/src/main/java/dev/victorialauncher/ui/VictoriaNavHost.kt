@@ -269,6 +269,8 @@ fun VictoriaNavHost(
     val edgeZoneBandOnly by app.prefs.edgeZoneBandOnly.collectAsState(initial = false)
     val holdScroll by app.prefs.holdScroll.collectAsState(initial = false)
     val dimOthersScrubbing by app.prefs.dimOthersScrubbing.collectAsState(initial = true)
+    val markWorkApps by app.prefs.markWorkApps.collectAsState(initial = true)
+    val edgeZoneInsetDp by app.prefs.edgeZoneInsetDp.collectAsState(initial = 0)
     val webSearchFallback by app.prefs.webSearchFallback.collectAsState(initial = false)
     val swipeUpOpensSearch by app.prefs.swipeUpOpensSearch.collectAsState(initial = false)
     val holdScrollSpeed by app.prefs.holdScrollSpeed.collectAsState(initial = 4)
@@ -509,6 +511,8 @@ fun VictoriaNavHost(
         edgeZoneBandOnly = edgeZoneBandOnly,
         holdScroll = holdScroll,
         dimOthersScrubbing = dimOthersScrubbing,
+        markWorkApps = markWorkApps,
+        edgeZoneInsetDp = edgeZoneInsetDp,
         webSearchFallback = webSearchFallback,
         swipeUpOpensSearch = swipeUpOpensSearch,
         holdScrollSpeed = holdScrollSpeed,
@@ -672,6 +676,10 @@ fun VictoriaNavHost(
                 edgeZoneBandOnly = edgeZoneBandOnly,
                 holdScroll = holdScroll,
                 dimOthersScrubbing = dimOthersScrubbing,
+                markWorkApps = markWorkApps,
+                edgeZoneInsetDp = edgeZoneInsetDp,
+                onSetEdgeZoneInsetDp = { scope.launch { app.prefs.setEdgeZoneInsetDp(it) } },
+                onSetMarkWorkApps = { scope.launch { app.prefs.setMarkWorkApps(it) } },
                 onSetDimOthersScrubbing = { scope.launch { app.prefs.setDimOthersScrubbing(it) } },
                 webSearchFallback = webSearchFallback,
                 onSetWebSearchFallback = { scope.launch { app.prefs.setWebSearchFallback(it) } },

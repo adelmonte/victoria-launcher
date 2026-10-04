@@ -104,6 +104,7 @@ class AppRepository(
         return profiles
             .flatMap { user ->
                 val serial = listableSerial(user, mainUser) ?: return@flatMap emptyList()
+                val work = isWorkProfile(user, mainUser)
                 // Asking about a profile we are not the launcher for throws rather than
                 // returning nothing, and one inaccessible profile must not lose the rest.
                 runCatching { launcherApps.getActivityList(null, user) }
@@ -115,6 +116,7 @@ class AppRepository(
                             label = info.label?.toString() ?: info.componentName.packageName,
                             user = user,
                             userSerial = serial,
+                            work = work,
                         )
                     }
             }
@@ -148,6 +150,19 @@ class AppRepository(
     private fun userType(user: UserHandle): String? =
         if (Build.VERSION.SDK_INT < PRIVATE_SPACE_SDK) null
         else runCatching { launcherApps.getLauncherUserInfo(user)?.userType }.getOrNull()
+
+    /**
+     * Whether a profile is a work one.
+     *
+     * Exact from API 35, where the platform will name a profile's type. Below that it will not,
+     * and any profile other than the main one is a work profile in practice — the private space
+     * arrived with that same API, so there was nothing else a second profile could be.
+     */
+    private fun isWorkProfile(user: UserHandle, mainUser: UserHandle): Boolean {
+        if (user == mainUser) return false
+        val type = userType(user) ?: return true
+        return type == UserManager.USER_TYPE_PROFILE_MANAGED
+    }
 
     /** Whether the profile is switched off, or null when the platform will not say. */
     private fun quietMode(user: UserHandle): Boolean? =

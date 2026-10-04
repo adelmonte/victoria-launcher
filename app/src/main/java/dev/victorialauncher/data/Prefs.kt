@@ -63,6 +63,9 @@ val SECTION_TOP_RANGE = 0..90
 
 /** Rows a second a held letter walks the list at. */
 val HOLD_SCROLL_RANGE = 1..12
+
+/** Past about this the strip is being pushed off the edge it belongs to. */
+val EDGE_ZONE_INSET_RANGE = 0..32
 enum class AppFont { SYSTEM, SANS_SERIF, SERIF, MONOSPACE, CUSTOM }
 
 /** AUTO picks light or dark text from the wallpaper's own colors. */
@@ -148,11 +151,13 @@ class Prefs(private val context: Context) {
         val SORT_BY_USAGE = booleanPreferencesKey("sort_by_usage")
         val LAUNCH_COUNTS = stringPreferencesKey(PREF_LAUNCH_COUNTS)
         val EDGE_ZONE_WIDTH_DP = intPreferencesKey("edge_zone_width_dp")
+        val EDGE_ZONE_INSET_DP = intPreferencesKey("edge_zone_inset_dp")
         val QUICK_LAUNCH_LEFT = stringPreferencesKey(PREF_QUICK_LAUNCH_LEFT)
         val QUICK_LAUNCH_RIGHT = stringPreferencesKey(PREF_QUICK_LAUNCH_RIGHT)
         val LAYOUT_DEFAULTS_VERSION = intPreferencesKey("layout_defaults_version")
         val WELCOME_SEEN = booleanPreferencesKey("welcome_seen")
         val DIM_OTHERS_SCRUBBING = booleanPreferencesKey("dim_others_scrubbing")
+        val MARK_WORK_APPS = booleanPreferencesKey("mark_work_apps")
         val SHOW_APP_ICONS = booleanPreferencesKey("show_app_icons")
         val SHOW_FAVORITE_ICONS = booleanPreferencesKey("show_favorite_icons")
         val FAVORITES_SOURCE = stringPreferencesKey("favorites_source")
@@ -522,6 +527,21 @@ class Prefs(private val context: Context) {
     /** Width of the invisible strip at each screen edge that opens the app list. */
     val edgeZoneWidthDp: Flow<Int> = data.map { it[Keys.EDGE_ZONE_WIDTH_DP] ?: 56 }.distinctUntilChanged()
 
+    /**
+     * How much of the very edge is left to the system rather than taken by the strip.
+     *
+     * Android's back gesture starts at the screen edge and so does this strip, so on a phone
+     * with gesture navigation the two are reaching for the same pixels. Giving the outermost
+     * few back means a swipe that starts right at the edge goes back and one that starts just
+     * inside it scrubs.
+     *
+     * Zero by default: on a phone with buttons there is nothing to share with, and anyone the
+     * conflict bothers can say so.
+     */
+    val edgeZoneInsetDp: Flow<Int> =
+        data.map { (it[Keys.EDGE_ZONE_INSET_DP] ?: 0).coerceIn(EDGE_ZONE_INSET_RANGE) }
+            .distinctUntilChanged()
+
     val quickLaunchLeft: Flow<String?> = data.map { it[Keys.QUICK_LAUNCH_LEFT] }.distinctUntilChanged()
 
     val quickLaunchRight: Flow<String?> = data.map { it[Keys.QUICK_LAUNCH_RIGHT] }.distinctUntilChanged()
@@ -617,6 +637,15 @@ class Prefs(private val context: Context) {
     /** Whether swiping up puts the cursor in the search box rather than only opening the list. */
     val swipeUpOpensSearch: Flow<Boolean> =
         data.map { it[Keys.SWIPE_UP_OPENS_SEARCH] ?: false }.distinctUntilChanged()
+
+    /**
+     * Whether a work profile's apps say so after their name.
+     *
+     * On, since anyone with a work profile has two of several apps and no way to tell them
+     * apart in a list of names. Nothing to see for anyone who has no second profile.
+     */
+    val markWorkApps: Flow<Boolean> =
+        data.map { it[Keys.MARK_WORK_APPS] ?: true }.distinctUntilChanged()
 
     /**
      * Whether the rest of the list fades while a finger travels the alphabet.
@@ -1115,6 +1144,14 @@ class Prefs(private val context: Context) {
         context.dataStore.edit {
             if (it[Keys.EDGE_ZONE_BAND_ONLY] == null) it[Keys.EDGE_ZONE_BAND_ONLY] = true
         }
+    }
+
+    suspend fun setEdgeZoneInsetDp(v: Int) {
+        context.dataStore.edit { it[Keys.EDGE_ZONE_INSET_DP] = v.coerceIn(EDGE_ZONE_INSET_RANGE) }
+    }
+
+    suspend fun setMarkWorkApps(v: Boolean) {
+        context.dataStore.edit { it[Keys.MARK_WORK_APPS] = v }
     }
 
     suspend fun setDimOthersScrubbing(v: Boolean) {

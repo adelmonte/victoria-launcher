@@ -183,6 +183,8 @@ fun HomeScreen(
     showFavoriteIcons: Boolean,
     /** Whether the empty home screen should still explain itself. */
     showEmptyHint: Boolean,
+    /** Whether a work profile's apps say so after their name. */
+    markWorkApps: Boolean,
     /** False when the favorites are computed from usage, so there is no order to drag. */
     favoritesReorderable: Boolean,
     /** Whether a sideways swipe on a row offers its app's shortcuts. */
@@ -250,7 +252,13 @@ fun HomeScreen(
     /** True when the corner opens the app list's search rather than launching anything. */
     cornerButtonIsSearch: Boolean,
     onOpenCornerSearch: () -> Unit,
-) {    fun displayName(app: AppInfo) = nameOverrides[app.key] ?: app.label
+) {    // Appended at the point of showing rather than stored in the label, so a rename still
+    // wins and turning this off needs no re-reading of every app.
+    val workSuffix = stringResource(R.string.app_work_suffix)
+    fun displayName(app: AppInfo): String {
+        val base = nameOverrides[app.key] ?: app.label
+        return if (markWorkApps && app.work) base + workSuffix else base
+    }
 
     var menuForKey by remember { mutableStateOf<String?>(null) }
     var menuOffset by remember { mutableStateOf(DpOffset.Zero) }

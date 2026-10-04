@@ -85,6 +85,7 @@ import dev.victorialauncher.data.AppInfo
 import dev.victorialauncher.data.AzStripVisibility
 import dev.victorialauncher.data.IconShape
 import dev.victorialauncher.data.EdgeSide
+import dev.victorialauncher.data.EDGE_ZONE_INSET_RANGE
 import dev.victorialauncher.data.HOLD_SCROLL_RANGE
 import dev.victorialauncher.data.SECTION_TOP_RANGE
 import dev.victorialauncher.data.FREQUENT_RANGE
@@ -152,6 +153,10 @@ fun SettingsScreen(
     onSetHoldScroll: (Boolean) -> Unit,
     dimOthersScrubbing: Boolean,
     onSetDimOthersScrubbing: (Boolean) -> Unit,
+    markWorkApps: Boolean,
+    onSetMarkWorkApps: (Boolean) -> Unit,
+    edgeZoneInsetDp: Int,
+    onSetEdgeZoneInsetDp: (Int) -> Unit,
     webSearchFallback: Boolean,
     onSetWebSearchFallback: (Boolean) -> Unit,
     swipeUpOpensSearch: Boolean,
@@ -490,6 +495,13 @@ fun SettingsScreen(
                 checked = swipeUpOpensSearch, onCheckedChange = onSetSwipeUpOpensSearch,
             )
         },
+        SettingsEntry(SettingsSection.APP_LIST, stringResource(R.string.settings_mark_work_apps), "work profile duplicate apps") {
+            SwitchRowWithDetail(
+                label = stringResource(R.string.settings_mark_work_apps),
+                detail = stringResource(R.string.settings_mark_work_apps_detail),
+                checked = markWorkApps, onCheckedChange = onSetMarkWorkApps,
+            )
+        },
         SettingsEntry(SettingsSection.APP_LIST, stringResource(R.string.settings_dim_others), "dim fade a-z scrub") {
             SwitchRowWithDetail(
                 label = stringResource(R.string.settings_dim_others),
@@ -521,6 +533,15 @@ fun SettingsScreen(
                 label = stringResource(R.string.settings_edge_band_only),
                 detail = stringResource(R.string.settings_edge_band_only_detail),
                 checked = edgeZoneBandOnly, onCheckedChange = onSetEdgeZoneBandOnly,
+            )
+        },
+        SettingsEntry(SettingsSection.APP_LIST, stringResource(R.string.settings_edge_inset), "back gesture edge conflict") {
+            SliderRow(
+                label = stringResource(R.string.settings_edge_inset),
+                value = edgeZoneInsetDp.toFloat(),
+                range = EDGE_ZONE_INSET_RANGE.first.toFloat()..EDGE_ZONE_INSET_RANGE.last.toFloat(),
+                valueLabel = edgeZoneInsetDp.toString(),
+                onValueChange = { onSetEdgeZoneInsetDp(it.toInt()) },
             )
         },
         SettingsEntry(SettingsSection.APP_LIST, stringResource(R.string.settings_edge_zone_width), "a-z strip width") {

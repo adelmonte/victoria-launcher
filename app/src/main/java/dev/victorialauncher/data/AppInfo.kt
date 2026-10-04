@@ -41,6 +41,14 @@ data class AppInfo(
     val shortcutId: String? = null,
     /** A shortcut its publisher has switched off: still listed, shown dimmed, never started. */
     val disabled: Boolean = false,
+    /**
+     * From a work profile, so it can say so.
+     *
+     * The system badges the icon already, but this is a list of names where an icon is small
+     * and can be switched off entirely — and a work profile's whole problem is two rows both
+     * called Teams.
+     */
+    val work: Boolean = false,
 ) {
     // Held rather than derived: this is the map key for overrides, favorites and list item
     // keys, so it is asked for several times per visible row per frame while scrubbing, and

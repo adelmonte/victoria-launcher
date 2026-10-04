@@ -542,6 +542,7 @@ fun HomeRoute(
                 // Only while it would still be telling someone something they do not know.
                 showEmptyHint = !settings.favoritesEverSet &&
                     settings.favoritesSource == FavoritesSource.MANUAL,
+                markWorkApps = settings.markWorkApps,
                 cornerButtonApp = cornerButtonApp,
                 onOpenCornerApp = { launchEntry(it) },
                 cornerButtonIsSearch = cornerButtonIsSearch,
@@ -779,6 +780,7 @@ fun HomeRoute(
                 searchFocusTick = searchFocusTick,
                 holdScrollSpeed = settings.holdScrollSpeed,
                 dimOthers = settings.dimOthersScrubbing,
+                markWorkApps = settings.markWorkApps,
                 // Offered only where something can take it, or the row is a dead end.
                 webSearchFallback = settings.webSearchFallback && webSearchAvailable,
                 onWebSearch = { term ->
@@ -892,6 +894,7 @@ fun HomeRoute(
                 EdgeTouchZone(
                     side = side,
                     widthDp = settings.edgeZoneWidthDp.dp,
+                    insetDp = settings.edgeZoneInsetDp.dp,
                     letters = listModel.letters,
                     band = band,
                     bandOnly = settings.edgeZoneBandOnly,
@@ -958,6 +961,8 @@ data class HomeSettings(
     val holdScroll: Boolean,
     val holdScrollSpeed: Int,
     val dimOthersScrubbing: Boolean,
+    val markWorkApps: Boolean,
+    val edgeZoneInsetDp: Int,
     val webSearchFallback: Boolean,
     val swipeUpOpensSearch: Boolean,
     val favoritesSource: FavoritesSource,

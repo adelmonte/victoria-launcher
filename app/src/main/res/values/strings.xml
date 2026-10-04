@@ -129,6 +129,10 @@
     <string name="settings_web_search_detail">When nothing in the list matches what you typed, a row offers the words to your browser. Nothing is sent anywhere unless you tap it</string>
     <string name="settings_swipe_up_search">Swipe up opens the search</string>
     <string name="settings_swipe_up_search_detail">Swiping up opens the app list with the cursor already in the search box</string>
+    <string name="app_work_suffix"> (Work)</string>
+    <string name="settings_edge_inset">Leave room for the back gesture</string>
+    <string name="settings_mark_work_apps">Mark work apps</string>
+    <string name="settings_mark_work_apps_detail">Apps from a work profile say so after their name, so two copies of the same app can be told apart</string>
     <string name="settings_dim_others">Dim the rest while sliding A-Z</string>
     <string name="settings_dim_others_detail">The apps outside the letter you are on fade away, which is what makes it stand out. Off keeps the whole list visible</string>
     <string name="settings_hold_scroll">Hold a letter to keep scrolling</string>

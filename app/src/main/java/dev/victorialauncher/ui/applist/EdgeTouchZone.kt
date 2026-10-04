@@ -10,6 +10,7 @@ import androidx.compose.ui.unit.IntOffset
 import kotlin.math.roundToInt
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -71,6 +72,8 @@ fun EdgeTouchZone(
     bandOnly: Boolean,
     /** Whether resting on a letter walks the list on through it. */
     holdScroll: Boolean,
+    /** How much of the very edge is left to the system's own gestures. */
+    insetDp: Dp,
     hapticsEnabled: Boolean,
     state: ScrubState,
     /** Whether the app list is already showing, so a tap on the strip knows which it is. */
@@ -94,6 +97,9 @@ fun EdgeTouchZone(
 
     Box(
         modifier = modifier
+            // Held off the edge rather than made narrower: the point is to leave the outermost
+            // pixels to the system, so the strip has to start inside them.
+            .padding(start = if (fromLeft) insetDp else 0.dp, end = if (fromLeft) 0.dp else insetDp)
             .width(widthDp)
             // The whole side, or only as much of it as the letters occupy. Full height is the
             // old behaviour and still the default; confined, the edge stops taking touches
