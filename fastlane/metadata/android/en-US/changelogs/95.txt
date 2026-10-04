@@ -1,0 +1,7 @@
+New:
+* The clock widget can show what is coming up: the next calendar events and the next alarm, each off by default, each opening what it is about. Up to three events, as far ahead as you like, said as a clock time or as how long until.
+* A custom date format for the clock widget, typed in yourself.
+* Work profile apps say so after their name, so two copies of the same app can be told apart.
+* The A-Z strip can leave the outermost edge of the screen to the system back gesture.
+
+Reading your calendar asks permission the moment you switch it on, never at install, and nothing read can leave the phone: Victoria still has no network access.
