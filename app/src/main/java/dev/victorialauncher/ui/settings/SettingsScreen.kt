@@ -42,6 +42,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.getValue
@@ -255,6 +256,26 @@ fun SettingsScreen(
         label = "edgePreviewAlpha",
     )
 
+    // A dim percentage means nothing against a settings screen that is painted over the
+    // wallpaper it is dimming. Adjusting one fades this screen out for a moment and paints the
+    // scrim it would actually paint, over the real wallpaper — the window has always shown it,
+    // so there is nothing to fetch or fake.
+    var dimPreviewShown by remember { mutableStateOf(false) }
+    var dimPreviewTick by remember { mutableIntStateOf(0) }
+    // Which of the two dims is being adjusted, since they are set separately and each is the
+    // honest answer only for its own screen.
+    var dimPreviewValue by remember { mutableFloatStateOf(0f) }
+    LaunchedEffect(dimPreviewTick) {
+        if (dimPreviewTick == 0) return@LaunchedEffect
+        dimPreviewShown = true
+        delay(1400)
+        dimPreviewShown = false
+    }
+    val dimPreviewReveal by animateFloatAsState(
+        if (dimPreviewShown) 1f else 0f,
+        label = "dimPreviewReveal",
+    )
+
     // The same idea for the scrub line: a percentage means nothing until you see where on this
     // screen it falls, so setting it draws the line it describes.
     var sectionPreviewShown by remember { mutableStateOf(false) }
@@ -388,7 +409,12 @@ fun SettingsScreen(
                 value = dimHomeAlpha, range = 0f..0.85f,
                 valueLabel = "${(dimHomeAlpha * 100).roundToInt()}%",
                 // Rounded to whole percent, so dragging lands where the buttons do.
-                onValueChange = { onSetDimHome((it * 100).roundToInt() / 100f) },
+                onValueChange = {
+                    val next = (it * 100).roundToInt() / 100f
+                    dimPreviewValue = next
+                    dimPreviewTick++
+                    onSetDimHome(next)
+                },
                 step = 0.01f,
             )
         },
@@ -577,7 +603,12 @@ fun SettingsScreen(
                 label = stringResource(R.string.settings_dim_applist),
                 value = dimWallpaperAlpha, range = 0f..0.85f,
                 valueLabel = "${(dimWallpaperAlpha * 100).roundToInt()}%",
-                onValueChange = { onSetDimWallpaper((it * 100).roundToInt() / 100f) },
+                onValueChange = {
+                    val next = (it * 100).roundToInt() / 100f
+                    dimPreviewValue = next
+                    dimPreviewTick++
+                    onSetDimWallpaper(next)
+                },
                 step = 0.01f,
             )
         },
@@ -738,8 +769,15 @@ fun SettingsScreen(
     }
 
     Box(Modifier.fillMaxSize()) {
+    if (dimPreviewReveal > 0f) {
+        Box(
+            Modifier
+                .fillMaxSize()
+                .background(Color(dimColor).copy(alpha = dimPreviewValue * dimPreviewReveal)),
+        )
+    }
     Scaffold(
-        containerColor = surface,
+        containerColor = surface.copy(alpha = 1f - dimPreviewReveal),
         topBar = {
             TopAppBar(
                 title = {
@@ -750,7 +788,9 @@ fun SettingsScreen(
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.action_back))
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = surface),
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = surface.copy(alpha = 1f - dimPreviewReveal),
+                ),
             )
         },
     ) { padding ->
