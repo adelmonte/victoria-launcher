@@ -1,0 +1,2 @@
+New:
+* Upcoming events say which day they are on — Tomorrow, the weekday, or the date — and once an event is on another day it gives the time it starts rather than how long until.
