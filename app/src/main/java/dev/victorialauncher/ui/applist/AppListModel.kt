@@ -151,13 +151,28 @@ fun buildAppListModel(
      * where to send the list.
      */
     showHeaders: Boolean = true,
+    /**
+     * Whether this app's name was chosen rather than read from the app.
+     *
+     * Only consulted for a name that has no letter to file under, where it decides between
+     * respecting the choice and falling back to [englishName].
+     */
+    renamed: (AppInfo) -> Boolean = { false },
 ): AppListModel {
     val visible = apps.filter { it.key !in hidden }
     val rows = mutableListOf<AppListRow>()
 
     val byLetter = visible.groupBy { app ->
         val own = indexLetter(displayName(app))
-        if (own != '#') own else englishName(app)?.let { indexLetter(it) } ?: '#'
+        when {
+            own != '#' -> own
+            // A name somebody chose is the answer, even when it files under '#'. Renaming an
+            // app to 4PDA and finding it still under F is the English fallback below second-
+            // guessing a deliberate choice: it exists for an app whose own name has no letter,
+            // not for one whose owner gave it a name that starts with a digit.
+            renamed(app) -> '#'
+            else -> englishName(app)?.let { indexLetter(it) } ?: '#'
+        }
     }
 
     val letterIndex = mutableListOf<Pair<Char, Int>>()

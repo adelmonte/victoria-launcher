@@ -196,6 +196,7 @@ fun HomeRoute(
                 counts,
                 englishName = { app.appRepository.englishLabel(it) },
                 showHeaders = settings.showListHeaders,
+                renamed = { it.key in nameOverrides },
             )
         }
     }
@@ -221,6 +222,7 @@ fun HomeRoute(
                     counts,
                     englishName = { app.appRepository.englishLabel(it) },
                     showHeaders = settings.showListHeaders,
+                    renamed = { it.key in nameOverrides },
                 )
             }
         }
@@ -417,10 +419,11 @@ fun HomeRoute(
         if (homeIntentTick > 0) closeAppList(snap = true)
     }
 
-    LaunchedEffect(settings.edgeSide, settings.edgeZoneWidthDp, view, band) {
+    LaunchedEffect(settings.edgeSide, settings.edgeZoneWidthDp, settings.edgeZoneInsetDp, view, band) {
         view.post {
             val density = view.resources.displayMetrics.density
             val widthPx = (settings.edgeZoneWidthDp * density).toInt()
+            val insetPx = (settings.edgeZoneInsetDp * density).toInt()
             val h = view.height
             val w = view.width
             if (h > 0 && w > 0) {
@@ -438,9 +441,17 @@ fun HomeRoute(
                 val height = bottom - top
                 val exTop = if (height > capPx) top + (height - capPx) / 2 else top
                 val exBottom = if (height > capPx) exTop + capPx else bottom
+                // Starting where the strip now starts. Excluding from the very edge while the
+                // strip itself has been held inward is what made the setting do nothing: the
+                // touch area moved, and the system was still being told to keep its back
+                // gesture out of the pixels the setting had just handed back to it.
                 val rects = buildList {
-                    if (settings.edgeSide != EdgeSide.RIGHT) add(Rect(0, exTop, widthPx, exBottom))
-                    if (settings.edgeSide != EdgeSide.LEFT) add(Rect(w - widthPx, exTop, w, exBottom))
+                    if (settings.edgeSide != EdgeSide.RIGHT) {
+                        add(Rect(insetPx, exTop, insetPx + widthPx, exBottom))
+                    }
+                    if (settings.edgeSide != EdgeSide.LEFT) {
+                        add(Rect(w - widthPx - insetPx, exTop, w - insetPx, exBottom))
+                    }
                 }
                 ViewCompat.setSystemGestureExclusionRects(view, rects)
             }
