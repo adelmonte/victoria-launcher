@@ -1,0 +1,3 @@
+Fixed:
+* "Leave room for the back gesture" did nothing at any setting. The strip moved inward but Android was still told to keep its back gesture out of the edge.
+* Renaming an app to something starting with a number left it filed under its old letter instead of moving to "#".
