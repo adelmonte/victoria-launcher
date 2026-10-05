@@ -301,6 +301,9 @@
     <string name="widget_clock_agenda">Coming up</string>
     <string name="widget_clock_event_untitled">(No title)</string>
     <string name="widget_clock_event_at">%1$s  %2$s</string>
+    <string name="widget_clock_event_tomorrow">Tomorrow</string>
+    <string name="widget_clock_event_day_at">%1$s %2$s</string>
+    <string name="widget_clock_event_day_only">%1$s  %2$s</string>
     <string name="widget_clock_event_all_day">%1$s  today</string>
     <string name="widget_clock_event_now">%1$s  now</string>
     <string name="widget_clock_alarm_at">Alarm %1$s</string>

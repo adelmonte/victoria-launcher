@@ -44,6 +44,22 @@ data class AppListModel(
  * than falling to '#' with the scripts that have no place on an A-Z strip. '#' sorts above A,
  * being the lower codepoint.
  */
+/**
+ * The letter an app files under, given the name being shown for it.
+ *
+ * Separate from [indexLetter] because the interesting part is not which letter a string starts
+ * with but what to do when it starts with none. [english] is asked for only then, and only for
+ * a name that came from the app: a name somebody typed is the answer even when it files under
+ * '#'. Renaming an app to 4PDA and finding it still under F was this fallback handing back the
+ * very name that had just been replaced.
+ */
+internal fun filingLetter(shown: String, renamed: Boolean, english: () -> String?): Char {
+    val own = indexLetter(shown)
+    if (own != '#') return own
+    if (renamed) return '#'
+    return english()?.let { indexLetter(it) } ?: '#'
+}
+
 internal fun indexLetter(name: String): Char {
     val first = name.firstOrNull() ?: return '#'
     val folded = Normalizer.normalize(first.toString(), Normalizer.Form.NFKD)
@@ -163,16 +179,7 @@ fun buildAppListModel(
     val rows = mutableListOf<AppListRow>()
 
     val byLetter = visible.groupBy { app ->
-        val own = indexLetter(displayName(app))
-        when {
-            own != '#' -> own
-            // A name somebody chose is the answer, even when it files under '#'. Renaming an
-            // app to 4PDA and finding it still under F is the English fallback below second-
-            // guessing a deliberate choice: it exists for an app whose own name has no letter,
-            // not for one whose owner gave it a name that starts with a digit.
-            renamed(app) -> '#'
-            else -> englishName(app)?.let { indexLetter(it) } ?: '#'
-        }
+        filingLetter(displayName(app), renamed(app)) { englishName(app) }
     }
 
     val letterIndex = mutableListOf<Pair<Char, Int>>()

@@ -9,6 +9,7 @@ import android.provider.CalendarContract
 import android.text.format.DateFormat
 import androidx.core.content.ContextCompat
 import dev.victorialauncher.R
+import java.util.Calendar
 import java.util.Date
 import java.util.concurrent.TimeUnit
 
@@ -103,9 +104,33 @@ object ClockWidgetAgenda {
         relative: Boolean,
         now: Long,
     ): String {
-        if (allDay) return context.getString(R.string.widget_clock_event_all_day, title)
-        if (!relative) return context.getString(R.string.widget_clock_event_at, formatClock(context, begin), title)
+        // Which day, where it is not today. Looking two days ahead gave two lines that read
+        // alike and meant different days, and a clock time on its own says nothing about
+        // which one it belongs to.
+        val day = dayPrefix(context, begin, now)
+        if (allDay) {
+            return if (day == null) {
+                context.getString(R.string.widget_clock_event_all_day, title)
+            } else {
+                context.getString(R.string.widget_clock_event_day_only, day, title)
+            }
+        }
+        if (!relative) {
+            val clock = formatClock(context, begin)
+            val whenText = if (day == null) clock else context.getString(R.string.widget_clock_event_day_at, day, clock)
+            return context.getString(R.string.widget_clock_event_at, whenText, title)
+        }
         val minutes = TimeUnit.MILLISECONDS.toMinutes((begin - now).coerceAtLeast(0))
+        // Past a day, how long until stops being the useful thing to say: "in 29 hours" is
+        // harder to place than the day and the time it actually starts.
+        if (day != null) {
+            val clock = formatClock(context, begin)
+            return context.getString(
+                R.string.widget_clock_event_at,
+                context.getString(R.string.widget_clock_event_day_at, day, clock),
+                title,
+            )
+        }
         return when {
             minutes < 1 -> context.getString(R.string.widget_clock_event_now, title)
             minutes < 60 -> context.resources.getQuantityString(
@@ -119,6 +144,34 @@ object ClockWidgetAgenda {
             }
         }
     }
+
+    /**
+     * "Tomorrow", a weekday, or null when it is today and needs no saying.
+     *
+     * Counted in calendar days rather than hours: an event at 01:00 is tomorrow even when it
+     * is four hours away, and one at 23:00 is today even when it is twenty.
+     */
+    private fun dayPrefix(context: Context, begin: Long, now: Long): String? {
+        val today = midnightOf(now)
+        val eventDay = midnightOf(begin)
+        val daysAway = TimeUnit.MILLISECONDS.toDays(eventDay - today).toInt()
+        return when {
+            daysAway <= 0 -> null
+            daysAway == 1 -> context.getString(R.string.widget_clock_event_tomorrow)
+            // Within the week a weekday names itself; past that it would be ambiguous, so the
+            // date is what distinguishes it.
+            daysAway < 7 -> DateFormat.format("EEEE", Date(begin)).toString()
+            else -> DateFormat.getDateFormat(context).format(Date(begin))
+        }
+    }
+
+    private fun midnightOf(at: Long): Long = Calendar.getInstance().apply {
+        timeInMillis = at
+        set(Calendar.HOUR_OF_DAY, 0)
+        set(Calendar.MINUTE, 0)
+        set(Calendar.SECOND, 0)
+        set(Calendar.MILLISECOND, 0)
+    }.timeInMillis
 
     private fun formatClock(context: Context, at: Long): String =
         DateFormat.getTimeFormat(context).format(Date(at))
