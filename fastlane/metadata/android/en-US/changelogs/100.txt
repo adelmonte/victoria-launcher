@@ -1,0 +1,5 @@
+New:
+* Apps can be kept out of the Most used favorites without hiding them from the A-Z list. Remove on a favorite now does this, and Settings > Apps lists what is kept out so you can let one back in.
+
+Fixed:
+* Remove on a favorite did nothing while Favorites was set to Most used.
