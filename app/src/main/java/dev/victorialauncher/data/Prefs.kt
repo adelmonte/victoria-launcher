@@ -65,6 +65,9 @@ val HOLD_SCROLL_RANGE = 1..12
 
 /** Past about this the strip is being pushed off the edge it belongs to. */
 val EDGE_ZONE_INSET_RANGE = 0..32
+
+/** Enough to be a list of what is new, short of being a second app list. */
+val RECENT_SECTION_RANGE = 3..15
 enum class AppFont { SYSTEM, SANS_SERIF, SERIF, MONOSPACE, CUSTOM }
 
 /** AUTO picks light or dark text from the wallpaper's own colors. */
@@ -158,6 +161,9 @@ class Prefs(private val context: Context) {
         val DIM_OTHERS_SCRUBBING = booleanPreferencesKey("dim_others_scrubbing")
         val MARK_WORK_APPS = booleanPreferencesKey("mark_work_apps")
         val TEXT_SHADOW = booleanPreferencesKey("text_shadow")
+        val PRIVATE_SPACE_SECTION = booleanPreferencesKey("private_space_section")
+        val RECENT_SECTION = booleanPreferencesKey("recent_section")
+        val RECENT_SECTION_COUNT = intPreferencesKey("recent_section_count")
         val SHOW_APP_ICONS = booleanPreferencesKey("show_app_icons")
         val SHOW_FAVORITE_ICONS = booleanPreferencesKey("show_favorite_icons")
         val FAVORITES_SOURCE = stringPreferencesKey("favorites_source")
@@ -639,6 +645,24 @@ class Prefs(private val context: Context) {
     /** Whether swiping up puts the cursor in the search box rather than only opening the list. */
     val swipeUpOpensSearch: Flow<Boolean> =
         data.map { it[Keys.SWIPE_UP_OPENS_SEARCH] ?: false }.distinctUntilChanged()
+
+    /**
+     * Whether the private space's apps get a section of their own below the alphabet.
+     *
+     * Off by default. An app installed in both profiles has the same name in both, and only
+     * someone who keeps a private space has any idea which of the two they are looking at.
+     */
+    val privateSpaceSection: Flow<Boolean> =
+        data.map { it[Keys.PRIVATE_SPACE_SECTION] ?: false }.distinctUntilChanged()
+
+    /** Whether the list ends with what was installed most recently. */
+    val recentSection: Flow<Boolean> =
+        data.map { it[Keys.RECENT_SECTION] ?: false }.distinctUntilChanged()
+
+    /** How many of them. */
+    val recentSectionCount: Flow<Int> =
+        data.map { (it[Keys.RECENT_SECTION_COUNT] ?: 5).coerceIn(RECENT_SECTION_RANGE) }
+            .distinctUntilChanged()
 
     /**
      * Whether launcher text carries a shadow, for reading it over a busy wallpaper.
@@ -1175,6 +1199,18 @@ class Prefs(private val context: Context) {
             prefs[Keys.FREQUENT_EXCLUDED] =
                 if (excluded) current + key else current - key
         }
+    }
+
+    suspend fun setPrivateSpaceSection(v: Boolean) {
+        context.dataStore.edit { it[Keys.PRIVATE_SPACE_SECTION] = v }
+    }
+
+    suspend fun setRecentSection(v: Boolean) {
+        context.dataStore.edit { it[Keys.RECENT_SECTION] = v }
+    }
+
+    suspend fun setRecentSectionCount(v: Int) {
+        context.dataStore.edit { it[Keys.RECENT_SECTION_COUNT] = v.coerceIn(RECENT_SECTION_RANGE) }
     }
 
     suspend fun setTextShadow(v: Boolean) {

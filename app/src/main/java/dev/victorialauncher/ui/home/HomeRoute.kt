@@ -43,6 +43,7 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.dp
@@ -161,6 +162,15 @@ fun HomeRoute(
     onNavigate: (String) -> Unit,
 ) {
     val context = LocalContext.current
+    // Read here because the models are built off the main thread, where a string resource
+    // cannot be asked for.
+    val privateSectionLabel = stringResource(R.string.applist_private_space_section)
+        .takeIf { settings.privateSpaceSection }
+    val recentSectionArg = if (settings.recentSection) {
+        stringResource(R.string.applist_recent_section) to settings.recentSectionCount
+    } else {
+        null
+    }
     // Asked once: whether anything on this phone handles a web search at all.
     val webSearchAvailable = remember(context) {
         runCatching {
@@ -197,6 +207,8 @@ fun HomeRoute(
                 englishName = { app.appRepository.englishLabel(it) },
                 showHeaders = settings.showListHeaders,
                 renamed = { it.key in nameOverrides },
+                privateSectionLabel = privateSectionLabel,
+                recentSection = recentSectionArg,
             )
         }
     }
@@ -223,6 +235,8 @@ fun HomeRoute(
                     englishName = { app.appRepository.englishLabel(it) },
                     showHeaders = settings.showListHeaders,
                     renamed = { it.key in nameOverrides },
+                    privateSectionLabel = privateSectionLabel,
+                    recentSection = recentSectionArg,
                 )
             }
         }
@@ -982,6 +996,9 @@ data class HomeSettings(
     val dimOthersScrubbing: Boolean,
     val markWorkApps: Boolean,
     val textShadow: Boolean,
+    val privateSpaceSection: Boolean,
+    val recentSection: Boolean,
+    val recentSectionCount: Int,
     val edgeZoneInsetDp: Int,
     val webSearchFallback: Boolean,
     val swipeUpOpensSearch: Boolean,

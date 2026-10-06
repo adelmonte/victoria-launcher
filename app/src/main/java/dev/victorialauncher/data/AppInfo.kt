@@ -49,6 +49,15 @@ data class AppInfo(
      * called Teams.
      */
     val work: Boolean = false,
+    /**
+     * From the private space, as opposed to a work profile or the main one.
+     *
+     * Distinct from [EntryKind.PRIVATE_SPACE], which is the single row that locks and unlocks
+     * the space rather than an app living inside it.
+     */
+    val privateProfile: Boolean = false,
+    /** When the package was first installed, for listing what arrived recently. Zero if unknown. */
+    val installedAt: Long = 0L,
 ) {
     // Held rather than derived: this is the map key for overrides, favorites and list item
     // keys, so it is asked for several times per visible row per frame while scrubbing, and

@@ -174,8 +174,15 @@ fun buildAppListModel(
      * respecting the choice and falling back to [englishName].
      */
     renamed: (AppInfo) -> Boolean = { false },
+    /** Heading for a section of the private space's own apps, or null to leave them in the A-Z. */
+    privateSectionLabel: String? = null,
+    /** Heading and how many, for a section of what was installed most recently. */
+    recentSection: Pair<String, Int>? = null,
 ): AppListModel {
-    val visible = apps.filter { it.key !in hidden }
+    val all = apps.filter { it.key !in hidden }
+    // Lifted out of the alphabet entirely rather than listed twice. A private app and its main
+    // profile twin have the same name, which is the whole reason for asking.
+    val visible = if (privateSectionLabel == null) all else all.filterNot { it.privateProfile }
     val rows = mutableListOf<AppListRow>()
 
     val byLetter = visible.groupBy { app ->
@@ -190,6 +197,28 @@ fun buildAppListModel(
             compareByDescending<AppInfo> { launchCounts[it.key] ?: 0 }
                 .thenBy { displayName(it).lowercase() }
         ).forEach { rows += AppListRow.Entry(it) }
+    }
+
+    // Appended after the alphabet, each under its own heading. Not given a letter of their
+    // own: the strip is the alphabet, and a section that is not a letter has no business
+    // claiming a place in it.
+    privateSectionLabel?.let { label ->
+        val privateApps = all.filter { it.privateProfile }
+        if (privateApps.isNotEmpty()) {
+            rows += AppListRow.Header(label)
+            privateApps.sortedBy { displayName(it).lowercase() }
+                .forEach { rows += AppListRow.Entry(it) }
+        }
+    }
+
+    recentSection?.let { (label, limit) ->
+        val recent = visible.filter { it.installedAt > 0L }
+            .sortedByDescending { it.installedAt }
+            .take(limit)
+        if (recent.isNotEmpty()) {
+            rows += AppListRow.Header(label)
+            recent.forEach { rows += AppListRow.Entry(it) }
+        }
     }
 
     return AppListModel(rows, letterIndex)

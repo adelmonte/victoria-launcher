@@ -168,6 +168,13 @@
     <string name="settings_open_settings">Open settings</string>
     <string name="settings_favorites">Favorites</string>
     <string name="settings_favorites_detail">Choose which apps sit on the home screen</string>
+    <string name="applist_private_space_section">Private Space</string>
+    <string name="applist_recent_section">Recently installed</string>
+    <string name="settings_private_space_section">Private Space section</string>
+    <string name="settings_private_space_section_detail">Groups the private space apps below the alphabet instead of mixing them in, so the two copies of an app can be told apart</string>
+    <string name="settings_recent_section">Recently installed section</string>
+    <string name="settings_recent_section_detail">Ends the app list with whatever arrived most recently</string>
+    <string name="settings_recent_section_count">How many recent apps</string>
     <string name="settings_text_shadow">Shadow behind text</string>
     <string name="settings_text_shadow_detail">Helps app names stand out over a busy wallpaper. Applied only behind light text, where it adds contrast rather than muddying it</string>
     <string name="settings_default_launcher">Default launcher</string>

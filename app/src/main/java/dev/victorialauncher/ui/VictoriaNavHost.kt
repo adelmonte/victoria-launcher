@@ -274,6 +274,9 @@ fun VictoriaNavHost(
     val dimOthersScrubbing by app.prefs.dimOthersScrubbing.collectAsState(initial = true)
     val markWorkApps by app.prefs.markWorkApps.collectAsState(initial = true)
     val textShadow by app.prefs.textShadow.collectAsState(initial = false)
+    val privateSpaceSection by app.prefs.privateSpaceSection.collectAsState(initial = false)
+    val recentSection by app.prefs.recentSection.collectAsState(initial = false)
+    val recentSectionCount by app.prefs.recentSectionCount.collectAsState(initial = 5)
     val edgeZoneInsetDp by app.prefs.edgeZoneInsetDp.collectAsState(initial = 0)
     val webSearchFallback by app.prefs.webSearchFallback.collectAsState(initial = false)
     val swipeUpOpensSearch by app.prefs.swipeUpOpensSearch.collectAsState(initial = false)
@@ -522,6 +525,9 @@ fun VictoriaNavHost(
         dimOthersScrubbing = dimOthersScrubbing,
         markWorkApps = markWorkApps,
         textShadow = textShadow,
+        privateSpaceSection = privateSpaceSection,
+        recentSection = recentSection,
+        recentSectionCount = recentSectionCount,
         edgeZoneInsetDp = edgeZoneInsetDp,
         webSearchFallback = webSearchFallback,
         swipeUpOpensSearch = swipeUpOpensSearch,
@@ -687,6 +693,12 @@ fun VictoriaNavHost(
                 dimOthersScrubbing = dimOthersScrubbing,
                 markWorkApps = markWorkApps,
                 textShadow = textShadow,
+                privateSpaceSection = privateSpaceSection,
+                onSetPrivateSpaceSection = { scope.launch { app.prefs.setPrivateSpaceSection(it) } },
+                recentSection = recentSection,
+                onSetRecentSection = { scope.launch { app.prefs.setRecentSection(it) } },
+                recentSectionCount = recentSectionCount,
+                onSetRecentSectionCount = { scope.launch { app.prefs.setRecentSectionCount(it) } },
                 onSetTextShadow = { scope.launch { app.prefs.setTextShadow(it) } },
                 edgeZoneInsetDp = edgeZoneInsetDp,
                 onSetEdgeZoneInsetDp = { scope.launch { app.prefs.setEdgeZoneInsetDp(it) } },

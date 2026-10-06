@@ -88,6 +88,7 @@ import dev.victorialauncher.data.IconShape
 import dev.victorialauncher.data.EdgeSide
 import dev.victorialauncher.data.EDGE_ZONE_INSET_RANGE
 import dev.victorialauncher.data.HOLD_SCROLL_RANGE
+import dev.victorialauncher.data.RECENT_SECTION_RANGE
 import dev.victorialauncher.data.SECTION_TOP_RANGE
 import dev.victorialauncher.data.FREQUENT_RANGE
 import dev.victorialauncher.data.FavoritesSource
@@ -159,6 +160,12 @@ fun SettingsScreen(
     onSetMarkWorkApps: (Boolean) -> Unit,
     textShadow: Boolean,
     onSetTextShadow: (Boolean) -> Unit,
+    privateSpaceSection: Boolean,
+    onSetPrivateSpaceSection: (Boolean) -> Unit,
+    recentSection: Boolean,
+    onSetRecentSection: (Boolean) -> Unit,
+    recentSectionCount: Int,
+    onSetRecentSectionCount: (Int) -> Unit,
     edgeZoneInsetDp: Int,
     onSetEdgeZoneInsetDp: (Int) -> Unit,
     webSearchFallback: Boolean,
@@ -527,6 +534,32 @@ fun SettingsScreen(
                 label = stringResource(R.string.settings_swipe_up_search),
                 detail = stringResource(R.string.settings_swipe_up_search_detail),
                 checked = swipeUpOpensSearch, onCheckedChange = onSetSwipeUpOpensSearch,
+            )
+        },
+        SettingsEntry(SettingsSection.APP_LIST, stringResource(R.string.settings_private_space_section), "private space profile section") {
+            SwitchRowWithDetail(
+                label = stringResource(R.string.settings_private_space_section),
+                detail = stringResource(R.string.settings_private_space_section_detail),
+                checked = privateSpaceSection, onCheckedChange = onSetPrivateSpaceSection,
+            )
+        },
+        SettingsEntry(SettingsSection.APP_LIST, stringResource(R.string.settings_recent_section), "recently installed new apps") {
+            SwitchRowWithDetail(
+                label = stringResource(R.string.settings_recent_section),
+                detail = stringResource(R.string.settings_recent_section_detail),
+                checked = recentSection, onCheckedChange = onSetRecentSection,
+            )
+        },
+        SettingsEntry(
+            SettingsSection.APP_LIST, stringResource(R.string.settings_recent_section_count),
+            "recently installed new apps", visible = recentSection,
+        ) {
+            SliderRow(
+                label = stringResource(R.string.settings_recent_section_count),
+                value = recentSectionCount.toFloat(),
+                range = RECENT_SECTION_RANGE.first.toFloat()..RECENT_SECTION_RANGE.last.toFloat(),
+                valueLabel = recentSectionCount.toString(),
+                onValueChange = { onSetRecentSectionCount(it.toInt()) },
             )
         },
         SettingsEntry(SettingsSection.APP_LIST, stringResource(R.string.settings_mark_work_apps), "work profile duplicate apps") {

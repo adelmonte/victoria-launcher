@@ -103,6 +103,10 @@ class AppRepository(
             .flatMap { user ->
                 val serial = listableSerial(user, mainUser) ?: return@flatMap emptyList()
                 val work = isWorkProfile(user, mainUser)
+                val privateProfile = userType(user) == USER_TYPE_PROFILE_PRIVATE
+                // One call for the lot: asking per package turns a list build into
+                // hundreds of round trips to the package manager.
+                val installTimes = installTimes()
                 // Asking about a profile we are not the launcher for throws rather than
                 // returning nothing, and one inaccessible profile must not lose the rest.
                 runCatching { launcherApps.getActivityList(null, user) }
@@ -115,6 +119,8 @@ class AppRepository(
                             user = user,
                             userSerial = serial,
                             work = work,
+                            privateProfile = privateProfile,
+                            installedAt = installTimes[info.componentName.packageName] ?: 0L,
                         )
                     }
             }
@@ -148,6 +154,19 @@ class AppRepository(
     private fun userType(user: UserHandle): String? =
         if (Build.VERSION.SDK_INT < PRIVATE_SPACE_SDK) null
         else runCatching { launcherApps.getLauncherUserInfo(user)?.userType }.getOrNull()
+
+    /**
+     * The platform's name for the private space profile.
+     *
+     * Spelled out rather than referenced: the constant is API 35 and this builds against
+     * it, but the string is what getLauncherUserInfo actually answers with.
+     */
+    private val USER_TYPE_PROFILE_PRIVATE = "android.os.usertype.profile.PRIVATE"
+
+    /** First-install time per package, read in one pass. */
+    private fun installTimes(): Map<String, Long> = runCatching {
+        pm.getInstalledPackages(0).associate { it.packageName to it.firstInstallTime }
+    }.getOrDefault(emptyMap())
 
     /**
      * Whether a profile is a work one.
