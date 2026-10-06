@@ -7,6 +7,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.pm.PackageManager
 import android.content.pm.LauncherApps
 import android.content.pm.ShortcutInfo
 import android.os.UserHandle
@@ -22,6 +23,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -271,6 +273,7 @@ fun VictoriaNavHost(
     val holdScroll by app.prefs.holdScroll.collectAsState(initial = false)
     val dimOthersScrubbing by app.prefs.dimOthersScrubbing.collectAsState(initial = true)
     val markWorkApps by app.prefs.markWorkApps.collectAsState(initial = true)
+    val textShadow by app.prefs.textShadow.collectAsState(initial = false)
     val edgeZoneInsetDp by app.prefs.edgeZoneInsetDp.collectAsState(initial = 0)
     val webSearchFallback by app.prefs.webSearchFallback.collectAsState(initial = false)
     val swipeUpOpensSearch by app.prefs.swipeUpOpensSearch.collectAsState(initial = false)
@@ -365,6 +368,7 @@ fun VictoriaNavHost(
     val welcomeSeen by app.prefs.welcomeSeen.collectAsState(initial = true)
     val hasCustomLayout by app.prefs.hasCustomLayout.collectAsState(initial = true)
     val hasCustomFavoritesTop by app.prefs.hasCustomFavoritesTop.collectAsState(initial = true)
+    var settingsTick by remember { mutableIntStateOf(0) }
     val contentColor = rememberContentColor(textColorMode, textColorCustom)
 
     val appsByKey = remember(allApps) { allApps.associateBy { it.key } }
@@ -517,6 +521,7 @@ fun VictoriaNavHost(
         holdScroll = holdScroll,
         dimOthersScrubbing = dimOthersScrubbing,
         markWorkApps = markWorkApps,
+        textShadow = textShadow,
         edgeZoneInsetDp = edgeZoneInsetDp,
         webSearchFallback = webSearchFallback,
         swipeUpOpensSearch = swipeUpOpensSearch,
@@ -681,6 +686,8 @@ fun VictoriaNavHost(
                 holdScroll = holdScroll,
                 dimOthersScrubbing = dimOthersScrubbing,
                 markWorkApps = markWorkApps,
+                textShadow = textShadow,
+                onSetTextShadow = { scope.launch { app.prefs.setTextShadow(it) } },
                 edgeZoneInsetDp = edgeZoneInsetDp,
                 onSetEdgeZoneInsetDp = { scope.launch { app.prefs.setEdgeZoneInsetDp(it) } },
                 onSetMarkWorkApps = { scope.launch { app.prefs.setMarkWorkApps(it) } },
@@ -843,6 +850,28 @@ fun VictoriaNavHost(
                     )
                 },
                 onOpenHiddenApps = { navController.navigate("settings/hidden") },
+                // Asked again whenever the launcher is returned to, since changing it is the
+                // whole point of the row and the answer changes outside this app.
+                isDefaultLauncher = remember(homeIntentTick, settingsTick) {
+                    runCatching {
+                        val home = Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME)
+                        context.packageManager
+                            .resolveActivity(home, PackageManager.MATCH_DEFAULT_ONLY)
+                            ?.activityInfo?.packageName == context.packageName
+                    }.getOrDefault(false)
+                },
+                onOpenHomeSettings = {
+                    settingsTick++
+                    // The system screen, never a silent switch: which launcher runs is the
+                    // user's to say and Android asks them properly.
+                    val opened = runCatching {
+                        context.startActivity(Intent(Settings.ACTION_HOME_SETTINGS))
+                        true
+                    }.getOrDefault(false)
+                    if (!opened) {
+                        runCatching { context.startActivity(Intent(Settings.ACTION_SETTINGS)) }
+                    }
+                },
                 frequentExcludedCount = frequentExcluded.size,
                 frequentExcludedVisible = favoritesSource == FavoritesSource.FREQUENT,
                 onOpenFrequentExcluded = { navController.navigate("settings/frequentexcluded") },

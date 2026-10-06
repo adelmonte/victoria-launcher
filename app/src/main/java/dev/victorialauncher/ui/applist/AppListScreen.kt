@@ -71,6 +71,8 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.LocalTextStyle
+import dev.victorialauncher.ui.theme.launcherTextShadow
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -247,6 +249,8 @@ fun AppListScreen(
     markWorkApps: Boolean,
     /** Width of the live edge zone, which rows have to clear whether or not letters show. */
     edgeZoneWidthDp: Int,
+    /** Whether the launcher's own text carries a shadow for legibility. */
+    textShadow: Boolean,
     /** Whether a query matching nothing offers the words to the browser. */
     webSearchFallback: Boolean,
     onWebSearch: (String) -> Unit,
@@ -993,6 +997,13 @@ fun AppListScreen(
             y < last.offset + last.size - info.viewportStartOffset
     }
 
+    // Same reason as the home screen: the rows inherit the ambient style, so one provider
+    // puts the shadow behind every name rather than each call naming it.
+    CompositionLocalProvider(
+        LocalTextStyle provides LocalTextStyle.current.copy(
+            shadow = launcherTextShadow(textShadow, contentColor),
+        ),
+    ) {
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -1355,6 +1366,7 @@ fun AppListScreen(
             }
         }
       }
+    }
     }
 }
 

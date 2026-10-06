@@ -72,6 +72,8 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material.icons.filled.Height
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.LocalTextStyle
+import dev.victorialauncher.ui.theme.launcherTextShadow
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
@@ -185,6 +187,8 @@ fun HomeScreen(
     showEmptyHint: Boolean,
     /** Whether a work profile's apps say so after their name. */
     markWorkApps: Boolean,
+    /** Whether the launcher's own text carries a shadow for legibility. */
+    textShadow: Boolean,
     /** False when the favorites are computed from usage, so there is no order to drag. */
     favoritesReorderable: Boolean,
     /** Whether a sideways swipe on a row offers its app's shortcuts. */
@@ -489,6 +493,13 @@ fun HomeScreen(
         if (abs(desiredDp - centeredFavTopDp) > 1) centeredFavTopDp = desiredDp
     }
 
+    // The rows take their style from the ambient one rather than naming it, so the shadow can
+    // be put behind all of them at once instead of at every call that draws a name.
+    CompositionLocalProvider(
+        LocalTextStyle provides LocalTextStyle.current.copy(
+            shadow = launcherTextShadow(textShadow, contentColor),
+        ),
+    ) {
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -1082,6 +1093,7 @@ fun HomeScreen(
             },
             onDismiss = { renameDialogFor = null },
         )
+    }
     }
 }
 

@@ -553,6 +553,7 @@ fun HomeRoute(
                 showEmptyHint = !settings.favoritesEverSet &&
                     settings.favoritesSource == FavoritesSource.MANUAL,
                 markWorkApps = settings.markWorkApps,
+                textShadow = settings.textShadow,
                 cornerButtonApp = cornerButtonApp,
                 onOpenCornerApp = { launchEntry(it) },
                 cornerButtonIsSearch = cornerButtonIsSearch,
@@ -797,6 +798,7 @@ fun HomeRoute(
                 holdScrollSpeed = settings.holdScrollSpeed,
                 dimOthers = settings.dimOthersScrubbing,
                 markWorkApps = settings.markWorkApps,
+                textShadow = settings.textShadow,
                 edgeZoneWidthDp = settings.edgeZoneWidthDp,
                 // Offered only where something can take it, or the row is a dead end.
                 webSearchFallback = settings.webSearchFallback && webSearchAvailable,
@@ -979,6 +981,7 @@ data class HomeSettings(
     val holdScrollSpeed: Int,
     val dimOthersScrubbing: Boolean,
     val markWorkApps: Boolean,
+    val textShadow: Boolean,
     val edgeZoneInsetDp: Int,
     val webSearchFallback: Boolean,
     val swipeUpOpensSearch: Boolean,

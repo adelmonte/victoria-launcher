@@ -157,6 +157,8 @@ fun SettingsScreen(
     onSetDimOthersScrubbing: (Boolean) -> Unit,
     markWorkApps: Boolean,
     onSetMarkWorkApps: (Boolean) -> Unit,
+    textShadow: Boolean,
+    onSetTextShadow: (Boolean) -> Unit,
     edgeZoneInsetDp: Int,
     onSetEdgeZoneInsetDp: (Int) -> Unit,
     webSearchFallback: Boolean,
@@ -228,6 +230,9 @@ fun SettingsScreen(
     onOpenAccessibilitySettings: () -> Unit,
     onOpenAppInfo: () -> Unit,
     onOpenHiddenApps: () -> Unit,
+    /** Whether this launcher is the one the system opens on HOME. */
+    isDefaultLauncher: Boolean,
+    onOpenHomeSettings: () -> Unit,
     frequentExcludedCount: Int,
     /** Only meaningful while the favorites are the computed ones. */
     frequentExcludedVisible: Boolean,
@@ -750,6 +755,24 @@ fun SettingsScreen(
                 label = stringResource(R.string.settings_favorites),
                 detail = stringResource(R.string.settings_favorites_detail),
                 onClick = onOpenFavorites,
+            )
+        },
+        SettingsEntry(SettingsSection.APPEARANCE, stringResource(R.string.settings_text_shadow), "contrast readability wallpaper") {
+            SwitchRowWithDetail(
+                label = stringResource(R.string.settings_text_shadow),
+                detail = stringResource(R.string.settings_text_shadow_detail),
+                checked = textShadow, onCheckedChange = onSetTextShadow,
+            )
+        },
+        SettingsEntry(SettingsSection.APPS, stringResource(R.string.settings_default_launcher), "home default launcher set") {
+            BackupRow(
+                label = stringResource(R.string.settings_default_launcher),
+                detail = if (isDefaultLauncher) {
+                    stringResource(R.string.settings_default_launcher_yes)
+                } else {
+                    stringResource(R.string.settings_default_launcher_no)
+                },
+                onClick = onOpenHomeSettings,
             )
         },
         SettingsEntry(

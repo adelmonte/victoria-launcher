@@ -168,6 +168,11 @@
     <string name="settings_open_settings">Open settings</string>
     <string name="settings_favorites">Favorites</string>
     <string name="settings_favorites_detail">Choose which apps sit on the home screen</string>
+    <string name="settings_text_shadow">Shadow behind text</string>
+    <string name="settings_text_shadow_detail">Helps app names stand out over a busy wallpaper. Applied only behind light text, where it adds contrast rather than muddying it</string>
+    <string name="settings_default_launcher">Default launcher</string>
+    <string name="settings_default_launcher_yes">Victoria Launcher</string>
+    <string name="settings_default_launcher_no">Not set — tap to choose</string>
     <string name="settings_frequent_excluded">Kept out of Most used</string>
     <string name="settings_frequent_excluded_none">No apps kept out</string>
     <string name="frequent_excluded_count">Kept out (%1$d)</string>

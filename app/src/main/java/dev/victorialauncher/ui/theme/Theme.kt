@@ -11,6 +11,9 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -108,4 +111,18 @@ fun VictoriaTheme(
         shapes = VictoriaShapes,
         content = content,
     )
+}
+
+/**
+ * The shadow to put behind the launcher's own text, or null for none.
+ *
+ * Only behind light text: a shadow under dark text on a pale wallpaper muddies the letters
+ * instead of separating them. The setting asks for contrast, and this is where it is decided
+ * whether a shadow would actually gain any.
+ */
+@Composable
+internal fun launcherTextShadow(enabled: Boolean, textColor: Color): Shadow? {
+    if (!enabled) return null
+    if (textColor.luminance() < 0.5f) return null
+    return Shadow(color = Color.Black.copy(alpha = 0.55f), offset = Offset(0f, 1f), blurRadius = 4f)
 }

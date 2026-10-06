@@ -157,6 +157,7 @@ class Prefs(private val context: Context) {
         val WELCOME_SEEN = booleanPreferencesKey("welcome_seen")
         val DIM_OTHERS_SCRUBBING = booleanPreferencesKey("dim_others_scrubbing")
         val MARK_WORK_APPS = booleanPreferencesKey("mark_work_apps")
+        val TEXT_SHADOW = booleanPreferencesKey("text_shadow")
         val SHOW_APP_ICONS = booleanPreferencesKey("show_app_icons")
         val SHOW_FAVORITE_ICONS = booleanPreferencesKey("show_favorite_icons")
         val FAVORITES_SOURCE = stringPreferencesKey("favorites_source")
@@ -638,6 +639,16 @@ class Prefs(private val context: Context) {
     /** Whether swiping up puts the cursor in the search box rather than only opening the list. */
     val swipeUpOpensSearch: Flow<Boolean> =
         data.map { it[Keys.SWIPE_UP_OPENS_SEARCH] ?: false }.distinctUntilChanged()
+
+    /**
+     * Whether launcher text carries a shadow, for reading it over a busy wallpaper.
+     *
+     * Only ever behind light text. A shadow under dark text on a light wallpaper muddies it
+     * rather than separating it, so the setting asks for contrast and this decides where
+     * contrast is actually gained.
+     */
+    val textShadow: Flow<Boolean> =
+        data.map { it[Keys.TEXT_SHADOW] ?: false }.distinctUntilChanged()
 
     /**
      * Whether a work profile's apps say so after their name.
@@ -1164,6 +1175,10 @@ class Prefs(private val context: Context) {
             prefs[Keys.FREQUENT_EXCLUDED] =
                 if (excluded) current + key else current - key
         }
+    }
+
+    suspend fun setTextShadow(v: Boolean) {
+        context.dataStore.edit { it[Keys.TEXT_SHADOW] = v }
     }
 
     suspend fun setMarkWorkApps(v: Boolean) {
