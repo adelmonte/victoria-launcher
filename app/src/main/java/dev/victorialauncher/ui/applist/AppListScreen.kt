@@ -109,6 +109,7 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import dev.victorialauncher.data.AppInfo
@@ -146,6 +147,14 @@ private val IDLE_BOTTOM_PADDING = 32.dp
 private val MIN_ROW_HEIGHT = 48.dp
 
 /** How far rows are held back from the edge the A-Z strip occupies. */
+/**
+ * How far rows are held off an edge the strip can appear on.
+ *
+ * A floor rather than the whole answer: what actually has to be cleared is the live touch
+ * zone, which is as wide as its own setting and is there whether or not the letters are drawn.
+ * Clearing only the letters left every row's left end under an invisible strip for anyone who
+ * had turned them off, so tapping an icon opened the list instead of the app.
+ */
 private val STRIP_INSET = 56.dp
 
 /** Sets the settings shortcut apart from the last app above it. */
@@ -236,6 +245,8 @@ fun AppListScreen(
     dimOthers: Boolean,
     /** Whether a work profile's apps say so after their name. */
     markWorkApps: Boolean,
+    /** Width of the live edge zone, which rows have to clear whether or not letters show. */
+    edgeZoneWidthDp: Int,
     /** Whether a query matching nothing offers the words to the browser. */
     webSearchFallback: Boolean,
     onWebSearch: (String) -> Unit,
@@ -275,6 +286,9 @@ fun AppListScreen(
     // Searching is a different mode from scrubbing: the letters shrink to whatever matched,
     // so the strip is hidden and placement stays out of it until the query is cleared.
     val searching = searchEnabled && query.isNotBlank()
+    // The touch zone is there with the letters hidden, so what has to be cleared is its
+    // width, never mind whether anything is drawn in it.
+    val stripInset = maxOf(STRIP_INSET, edgeZoneWidthDp.dp)
     val displayModel = remember(model, searchModel, query, searchEnabled) {
         if (!searching) {
             model
@@ -1060,6 +1074,7 @@ fun AppListScreen(
                 contentColor = contentColor,
                 edgeSide = edgeSide,
                 showAlphabet = showAlphabet,
+                stripInset = stripInset,
                 onGo = {
                     displayModel.rows
                         .filterIsInstance<AppListRow.Entry>()
@@ -1125,8 +1140,8 @@ fun AppListScreen(
                 // opened from the other one. A margin against an edge the strip can appear on
                 // is worth more than a list that will not stay still.
                 PaddingValues(
-                    start = if (showAlphabet && edgeSide != EdgeSide.RIGHT) STRIP_INSET else 0.dp,
-                    end = if (showAlphabet && edgeSide != EdgeSide.LEFT) STRIP_INSET else 0.dp,
+                    start = if (edgeSide != EdgeSide.RIGHT) stripInset else 0.dp,
+                    end = if (edgeSide != EdgeSide.LEFT) stripInset else 0.dp,
                     top = top,
                     bottom = when {
                         searching -> SEARCH_EDGE_PADDING
@@ -1271,6 +1286,7 @@ fun AppListScreen(
                 contentColor = contentColor,
                 edgeSide = edgeSide,
                 showAlphabet = showAlphabet,
+                stripInset = stripInset,
                 onGo = {
                     displayModel.rows
                         .filterIsInstance<AppListRow.Entry>()
@@ -1553,6 +1569,7 @@ private fun SearchField(
     /** The edges the strip may occupy, so the field keeps clear of the same ones the list does. */
     edgeSide: EdgeSide,
     showAlphabet: Boolean,
+    stripInset: Dp,
     onGo: () -> Unit,
     atBottom: Boolean = false,
     modifier: Modifier = Modifier,
@@ -1615,8 +1632,8 @@ private fun SearchField(
                 // Only what the strip actually occupies. The extra 20dp a side matched the
                 // rows, but a field is not a row: it left the box noticeably narrower than the
                 // names under it, which is what reads as the search bar being off to one side.
-                start = if (showAlphabet && edgeSide != EdgeSide.RIGHT) STRIP_INSET else 8.dp,
-                end = if (showAlphabet && edgeSide != EdgeSide.LEFT) STRIP_INSET else 8.dp,
+                start = if (edgeSide != EdgeSide.RIGHT) stripInset else 8.dp,
+                end = if (edgeSide != EdgeSide.LEFT) stripInset else 8.dp,
                 top = if (atBottom) 8.dp else 12.dp,
                 bottom = if (atBottom) 12.dp else 8.dp,
             ),

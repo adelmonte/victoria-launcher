@@ -364,6 +364,7 @@ fun VictoriaNavHost(
     }
     val welcomeSeen by app.prefs.welcomeSeen.collectAsState(initial = true)
     val hasCustomLayout by app.prefs.hasCustomLayout.collectAsState(initial = true)
+    val hasCustomFavoritesTop by app.prefs.hasCustomFavoritesTop.collectAsState(initial = true)
     val contentColor = rememberContentColor(textColorMode, textColorCustom)
 
     val appsByKey = remember(allApps) { allApps.associateBy { it.key } }
@@ -528,7 +529,7 @@ fun VictoriaNavHost(
         quickLaunchRight = quickLaunchRightKey?.let { appsByKey[it] },
         // Both flows start null/true so nothing is centered or offered before the stored
         // answer arrives; a legacy install is stamped 0 and never enters either path.
-        centerFavorites = layoutDefaultsVersion == 1 && !hasCustomLayout,
+        centerFavorites = layoutDefaultsVersion == 1 && !hasCustomFavoritesTop,
         dimWallpaperAlpha = dimWallpaperAlpha,
         dimHomeAlpha = dimHomeAlpha,
         dimColor = dimColor,

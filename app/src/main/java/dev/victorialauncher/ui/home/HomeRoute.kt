@@ -797,6 +797,7 @@ fun HomeRoute(
                 holdScrollSpeed = settings.holdScrollSpeed,
                 dimOthers = settings.dimOthersScrubbing,
                 markWorkApps = settings.markWorkApps,
+                edgeZoneWidthDp = settings.edgeZoneWidthDp,
                 // Offered only where something can take it, or the row is a dead end.
                 webSearchFallback = settings.webSearchFallback && webSearchAvailable,
                 onWebSearch = { term ->

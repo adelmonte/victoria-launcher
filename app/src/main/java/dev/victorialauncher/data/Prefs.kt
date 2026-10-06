@@ -720,6 +720,17 @@ class Prefs(private val context: Context) {
     val hasCustomLayout: Flow<Boolean> =
         data.map { pref -> padKeys.any { pref.contains(it) } }.distinctUntilChanged()
 
+    /**
+     * Whether the favorites' own top gap has been set by hand.
+     *
+     * What retires the computed centred placement, rather than any layout padding at all.
+     * Adjusting the gap *below* the favorites used to retire it too, which meant the centred
+     * top had to be written out first to keep them where they were — and getting that wrong
+     * sent them to the top of the screen with no obvious way back.
+     */
+    val hasCustomFavoritesTop: Flow<Boolean> =
+        data.map { pref -> pref.contains(Keys.FAVORITES_PAD_TOP) }.distinctUntilChanged()
+
     suspend fun setHidden(componentKey: String, hidden: Boolean) {
         context.dataStore.edit { pref ->
             val current = pref[Keys.HIDDEN_APPS] ?: emptySet()

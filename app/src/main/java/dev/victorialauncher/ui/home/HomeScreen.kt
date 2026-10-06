@@ -296,11 +296,10 @@ fun HomeScreen(
     }
 
     fun setPadding(slot: PaddingSlot, value: Int) {
-        // The centered placement is computed, not stored. Touching any other padding retires
-        // it, so write out what is on screen first or the favorites snap to the stock gap.
-        if (centerFavorites && slot != PaddingSlot.FAVORITES_TOP && centeredFavTopDp > 0) {
-            onCommitPadding(PaddingSlot.FAVORITES_TOP, centeredFavTopDp)
-        }
+        // Nothing to write out first. Only setting the favorites' own top gap retires the
+        // computed centre now, so adjusting anything else leaves the centre to recompute
+        // around it — which is what "centered" should have meant all along. Writing the
+        // computed top out on every other slider is what used to send them up the screen.
         liveSlot = slot
         liveValue = value
         onCommitPadding(slot, value)
