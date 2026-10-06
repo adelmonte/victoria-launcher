@@ -588,7 +588,19 @@ fun HomeRoute(
                 onResizeNowPlaying = { scope.launch { app.prefs.setNowPlayingHeightDp(it) } },
                 widgetActions = widgetActions,
                 onLaunch = { launchEntry(it) },
-                onRemoveFavorite = { scope.launch { app.prefs.removeFavorite(it.key) } },
+                // Remove means the same thing to whoever taps it either way: take this off my
+                // home screen. Which list it writes to depends on which list is being shown —
+                // against the computed favorites it used to edit the manual list nobody could
+                // see, so the row stayed put and the menu item did nothing at all.
+                onRemoveFavorite = {
+                    scope.launch {
+                        if (settings.favoritesSource == FavoritesSource.FREQUENT) {
+                            app.prefs.setFrequentExcluded(it.key, excluded = true)
+                        } else {
+                            app.prefs.removeFavorite(it.key)
+                        }
+                    }
+                },
                 onOpenFolderApp = { launchEntry(it) },
                 onRenameFolder = { folder, name ->
                     scope.launch { app.prefs.upsertFolder(folder.copy(name = name)) }

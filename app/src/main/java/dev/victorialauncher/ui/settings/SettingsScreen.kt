@@ -100,6 +100,7 @@ import dev.victorialauncher.data.TextColorMode
 import dev.victorialauncher.ui.common.AppIcon
 import dev.victorialauncher.ui.theme.toFontFamily
 import dev.victorialauncher.R
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -227,6 +228,10 @@ fun SettingsScreen(
     onOpenAccessibilitySettings: () -> Unit,
     onOpenAppInfo: () -> Unit,
     onOpenHiddenApps: () -> Unit,
+    frequentExcludedCount: Int,
+    /** Only meaningful while the favorites are the computed ones. */
+    frequentExcludedVisible: Boolean,
+    onOpenFrequentExcluded: () -> Unit,
     onOpenFavorites: () -> Unit,
     onOpenNotificationSettings: () -> Unit,
     onBack: () -> Unit,
@@ -745,6 +750,25 @@ fun SettingsScreen(
                 label = stringResource(R.string.settings_favorites),
                 detail = stringResource(R.string.settings_favorites_detail),
                 onClick = onOpenFavorites,
+            )
+        },
+        SettingsEntry(
+            SettingsSection.APPS, stringResource(R.string.settings_frequent_excluded),
+            "most used favorites exclude block",
+            visible = frequentExcludedVisible,
+        ) {
+            BackupRow(
+                label = stringResource(R.string.settings_frequent_excluded),
+                detail = if (frequentExcludedCount == 0) {
+                    stringResource(R.string.settings_frequent_excluded_none)
+                } else {
+                    pluralStringResource(
+                        R.plurals.settings_frequent_excluded_count,
+                        frequentExcludedCount,
+                        frequentExcludedCount,
+                    )
+                },
+                onClick = onOpenFrequentExcluded,
             )
         },
         SettingsEntry(SettingsSection.APPS, stringResource(R.string.settings_hidden_apps), "hide") {

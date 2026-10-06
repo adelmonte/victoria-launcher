@@ -265,6 +265,7 @@ fun VictoriaNavHost(
 
     val hiddenApps by app.prefs.hiddenApps.collectAsState(initial = emptySet())
     val favoriteKeys by app.prefs.favorites.collectAsState(initial = emptyList())
+    val frequentExcluded by app.prefs.frequentExcluded.collectAsState(initial = emptySet())
     val favoritesEverSet by app.prefs.favoritesEverSet.collectAsState(initial = true)
     val edgeZoneBandOnly by app.prefs.edgeZoneBandOnly.collectAsState(initial = false)
     val holdScroll by app.prefs.holdScroll.collectAsState(initial = false)
@@ -387,10 +388,14 @@ fun VictoriaNavHost(
         foldersById,
         if (favoritesSource == FavoritesSource.FREQUENT) launchCounts else emptyMap(),
         frequentCount,
+        frequentExcluded,
     ) {
         if (favoritesSource == FavoritesSource.FREQUENT) {
             launchCounts.asSequence()
                 .filter { it.value > 0 }
+                // Before take, so the next most-used app moves up into the slot rather than
+                // the row simply going missing.
+                .filter { it.key !in frequentExcluded }
                 .mapNotNull { (key, count) -> appsByKey[key]?.let { it to count } }
                 .sortedWith(
                     compareByDescending<Pair<AppInfo, Int>> { it.second }
@@ -837,6 +842,9 @@ fun VictoriaNavHost(
                     )
                 },
                 onOpenHiddenApps = { navController.navigate("settings/hidden") },
+                frequentExcludedCount = frequentExcluded.size,
+                frequentExcludedVisible = favoritesSource == FavoritesSource.FREQUENT,
+                onOpenFrequentExcluded = { navController.navigate("settings/frequentexcluded") },
                 onOpenFavorites = { navController.navigate("favorites") },
                 onOpenNotificationSettings = {
                     context.startActivity(
@@ -946,6 +954,22 @@ fun VictoriaNavHost(
                     scope.launch { app.prefs.setHidden(appInfo.key, hidden) }
                 },
                 onBack = { navController.popBackStack() },
+            )
+        }
+
+        composable("settings/frequentexcluded") {
+            HiddenAppsScreen(
+                allApps = allApps,
+                hiddenApps = frequentExcluded,
+                nameOverrides = nameOverrides,
+                iconSizeDp = iconSizeDp,
+                onToggleHidden = { appInfo, excluded ->
+                    scope.launch { app.prefs.setFrequentExcluded(appInfo.key, excluded) }
+                },
+                onBack = { navController.popBackStack() },
+                titleRes = R.string.settings_frequent_excluded,
+                countRes = R.string.frequent_excluded_count,
+                addRes = R.string.frequent_excluded_add,
             )
         }
 

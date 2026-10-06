@@ -97,6 +97,7 @@ class Prefs(private val context: Context) {
     // name spelled out in both places is a name that can be changed in one of them.
     private object Keys {
         val HIDDEN_APPS = stringSetPreferencesKey(PREF_HIDDEN_APPS)
+        val FREQUENT_EXCLUDED = stringSetPreferencesKey(PREF_FREQUENT_EXCLUDED)
         val FAVORITES = stringPreferencesKey(PREF_FAVORITES)
         val FOLDERS = stringPreferencesKey(PREF_FOLDERS)
         val NAME_OVERRIDES = stringPreferencesKey(PREF_NAME_OVERRIDES)
@@ -546,6 +547,16 @@ class Prefs(private val context: Context) {
     val showFavoriteIcons: Flow<Boolean> =
         data.map { it[Keys.SHOW_FAVORITE_ICONS] ?: it[Keys.SHOW_APP_ICONS] ?: true }
             .distinctUntilChanged()
+
+    /**
+     * Apps kept out of the computed favorites, while still in the A-Z list.
+     *
+     * Hiding an app takes it out of everywhere, which is the wrong tool for an app you open
+     * often and would rather not have a tap away. Only consulted while the favorites are the
+     * computed ones; a manual list already says what is on it.
+     */
+    val frequentExcluded: Flow<Set<String>> =
+        data.map { it[Keys.FREQUENT_EXCLUDED] ?: emptySet() }.distinctUntilChanged()
 
     val favoritesSource: Flow<FavoritesSource> =
         data.map { prefs ->
@@ -1134,6 +1145,14 @@ class Prefs(private val context: Context) {
 
     suspend fun setEdgeZoneInsetDp(v: Int) {
         context.dataStore.edit { it[Keys.EDGE_ZONE_INSET_DP] = v.coerceIn(EDGE_ZONE_INSET_RANGE) }
+    }
+
+    suspend fun setFrequentExcluded(key: String, excluded: Boolean) {
+        context.dataStore.edit { prefs ->
+            val current = prefs[Keys.FREQUENT_EXCLUDED] ?: emptySet()
+            prefs[Keys.FREQUENT_EXCLUDED] =
+                if (excluded) current + key else current - key
+        }
     }
 
     suspend fun setMarkWorkApps(v: Boolean) {

@@ -25,6 +25,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.annotation.StringRes
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import dev.victorialauncher.R
@@ -46,6 +47,16 @@ fun HiddenAppsScreen(
     iconSizeDp: Int,
     onToggleHidden: (AppInfo, Boolean) -> Unit,
     onBack: () -> Unit,
+    /**
+     * Wording, so the one screen can serve the two lists that have this exact shape.
+     *
+     * Keeping apps out of the computed favorites is the same job as hiding them — a set of
+     * apps, a switch each, the chosen ones first — and the only thing that differs is what the
+     * list is called and what being on it means.
+     */
+    @StringRes titleRes: Int = R.string.settings_hidden_apps,
+    @StringRes countRes: Int = R.string.hidden_count,
+    @StringRes addRes: Int = R.string.hidden_add_apps,
 ) {
     val surface = MaterialTheme.colorScheme.surface
     val name = { app: AppInfo -> nameOverrides[app.key] ?: app.label }
@@ -56,7 +67,7 @@ fun HiddenAppsScreen(
         containerColor = surface,
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.settings_hidden_apps)) },
+                title = { Text(stringResource(titleRes)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.action_back))
@@ -68,7 +79,7 @@ fun HiddenAppsScreen(
     ) { padding ->
         LazyColumn(contentPadding = PaddingValues(vertical = 8.dp), modifier = Modifier.padding(padding)) {
             item {
-                ListSectionLabel(stringResource(R.string.hidden_count, hidden.size))
+                ListSectionLabel(stringResource(countRes, hidden.size))
             }
 
             items(hidden, key = { "hidden:" + it.key }) { app ->
@@ -76,7 +87,7 @@ fun HiddenAppsScreen(
             }
 
             item {
-                ListSectionLabel(stringResource(R.string.hidden_add_apps))
+                ListSectionLabel(stringResource(addRes))
             }
 
             items(rest, key = { it.key }) { app ->

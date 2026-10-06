@@ -21,6 +21,7 @@ import org.json.JSONObject
 internal const val PREF_FAVORITES = "favorites_order"
 internal const val PREF_FOLDERS = "folders_json"
 internal const val PREF_HIDDEN_APPS = "hidden_apps"
+internal const val PREF_FREQUENT_EXCLUDED = "frequent_excluded"
 internal const val PREF_NAME_OVERRIDES = "name_overrides_json"
 internal const val PREF_ICON_OVERRIDES = "icon_overrides_json"
 internal const val PREF_LAUNCH_COUNTS = "launch_counts_json"
@@ -62,7 +63,8 @@ fun stripPrivateSpaceFromExport(name: String, value: Any, stripOtherProfiles: Bo
 
     return when (name) {
         PREF_FAVORITES -> (value as? String)?.let { stripNewlineList(it, isPrivate) } ?: value
-        PREF_HIDDEN_APPS -> (value as? Set<*>)?.let { stripStringSet(it, isPrivate) } ?: value
+        PREF_HIDDEN_APPS, PREF_FREQUENT_EXCLUDED ->
+            (value as? Set<*>)?.let { stripStringSet(it, isPrivate) } ?: value
         PREF_FOLDERS -> (value as? String)?.let { stripFoldersJson(it, isPrivate) } ?: value
         PREF_NAME_OVERRIDES, PREF_ICON_OVERRIDES, PREF_LAUNCH_COUNTS ->
             (value as? String)?.let { stripJsonMap(it, isPrivate) } ?: value

@@ -168,6 +168,10 @@
     <string name="settings_open_settings">Open settings</string>
     <string name="settings_favorites">Favorites</string>
     <string name="settings_favorites_detail">Choose which apps sit on the home screen</string>
+    <string name="settings_frequent_excluded">Kept out of Most used</string>
+    <string name="settings_frequent_excluded_none">No apps kept out</string>
+    <string name="frequent_excluded_count">Kept out (%1$d)</string>
+    <string name="frequent_excluded_add">Keep an app out</string>
     <string name="settings_hidden_apps">Hidden apps</string>
     <string name="hidden_count">%1$d hidden from the app list</string>
     <string name="hidden_add_apps">Everything else</string>
@@ -368,5 +372,9 @@
     <plurals name="widget_clock_event_in_hours">
         <item quantity="one">%1$s  in %2$d hour</item>
         <item quantity="other">%1$s  in %2$d hours</item>
+    </plurals>
+    <plurals name="settings_frequent_excluded_count">
+        <item quantity="one">%1$d app kept out</item>
+        <item quantity="other">%1$d apps kept out</item>
     </plurals>
 </resources>
