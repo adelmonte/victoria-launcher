@@ -9,8 +9,14 @@ import android.provider.CalendarContract
 import android.text.format.DateFormat
 import androidx.core.content.ContextCompat
 import dev.victorialauncher.R
-import java.util.Calendar
+import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneId
+import java.time.ZoneOffset
+import java.time.format.TextStyle
+import java.time.temporal.ChronoUnit
 import java.util.Date
+import java.util.Locale
 import java.util.concurrent.TimeUnit
 
 /**
@@ -107,7 +113,7 @@ object ClockWidgetAgenda {
         // Which day, where it is not today. Looking two days ahead gave two lines that read
         // alike and meant different days, and a clock time on its own says nothing about
         // which one it belongs to.
-        val day = dayPrefix(context, begin, now)
+        val day = dayPrefix(context, begin, allDay, now)
         if (allDay) {
             return if (day == null) {
                 context.getString(R.string.widget_clock_event_all_day, title)
@@ -148,30 +154,48 @@ object ClockWidgetAgenda {
     /**
      * "Tomorrow", a weekday, or null when it is today and needs no saying.
      *
-     * Counted in calendar days rather than hours: an event at 01:00 is tomorrow even when it
-     * is four hours away, and one at 23:00 is today even when it is twenty.
+     * Counted in whole dates rather than hours, so an event at 01:00 is tomorrow even when it
+     * is four hours away and one at 23:00 is today even when it is twenty.
+     *
+     * An all-day event is read in UTC, because that is how the provider stores one: its BEGIN
+     * is midnight UTC of the date it falls on, not midnight where the phone is. Read as a local
+     * instant, an all-day event anywhere west of UTC lands on the evening before and is named
+     * as the wrong day — which is a day the owner has nothing on.
      */
-    private fun dayPrefix(context: Context, begin: Long, now: Long): String? {
-        val today = midnightOf(now)
-        val eventDay = midnightOf(begin)
-        val daysAway = TimeUnit.MILLISECONDS.toDays(eventDay - today).toInt()
+    private fun dayPrefix(context: Context, begin: Long, allDay: Boolean, now: Long): String? {
+        val eventDate = eventDate(begin, allDay, ZoneId.systemDefault())
+        val daysAway = daysAway(begin, allDay, now, ZoneId.systemDefault())
         return when {
-            daysAway <= 0 -> null
-            daysAway == 1 -> context.getString(R.string.widget_clock_event_tomorrow)
+            daysAway <= 0L -> null
+            daysAway == 1L -> context.getString(R.string.widget_clock_event_tomorrow)
             // Within the week a weekday names itself; past that it would be ambiguous, so the
             // date is what distinguishes it.
-            daysAway < 7 -> DateFormat.format("EEEE", Date(begin)).toString()
-            else -> DateFormat.getDateFormat(context).format(Date(begin))
+            daysAway < 7L ->
+                eventDate.dayOfWeek.getDisplayName(TextStyle.FULL, Locale.getDefault())
+            else -> DateFormat.getDateFormat(context).format(
+                Date.from(eventDate.atStartOfDay(ZoneId.systemDefault()).toInstant()),
+            )
         }
     }
 
-    private fun midnightOf(at: Long): Long = Calendar.getInstance().apply {
-        timeInMillis = at
-        set(Calendar.HOUR_OF_DAY, 0)
-        set(Calendar.MINUTE, 0)
-        set(Calendar.SECOND, 0)
-        set(Calendar.MILLISECOND, 0)
-    }.timeInMillis
+    /**
+     * The date an event falls on.
+     *
+     * [local] for anything with a time of day, UTC for an all-day event: the provider stores
+     * one as midnight UTC of its date, so reading it as a local instant puts it on the evening
+     * before anywhere west of UTC.
+     */
+    internal fun eventDate(begin: Long, allDay: Boolean, local: ZoneId): LocalDate =
+        Instant.ofEpochMilli(begin)
+            .atZone(if (allDay) ZoneOffset.UTC else local)
+            .toLocalDate()
+
+    /** Whole dates between today and the event: 0 today, 1 tomorrow, negative for the past. */
+    internal fun daysAway(begin: Long, allDay: Boolean, now: Long, local: ZoneId): Long =
+        ChronoUnit.DAYS.between(
+            Instant.ofEpochMilli(now).atZone(local).toLocalDate(),
+            eventDate(begin, allDay, local),
+        )
 
     private fun formatClock(context: Context, at: Long): String =
         DateFormat.getTimeFormat(context).format(Date(at))
