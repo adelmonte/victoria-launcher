@@ -1,0 +1,2 @@
+Fixed:
+* An all-day event in the clock widget was named as the day before it, in any timezone west of UTC.
