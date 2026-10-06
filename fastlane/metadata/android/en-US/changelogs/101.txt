@@ -1,0 +1,9 @@
+New:
+* A shadow behind launcher text, for reading names over a busy wallpaper. Off by default, and only behind light text.
+* Private Space apps can have a section of their own below the alphabet, so two copies of an app can be told apart. Off by default.
+* The app list can end with what was installed most recently. Off by default.
+* Settings says whether Victoria is your default launcher, and taps through to Android's own screen for changing it.
+
+Fixed:
+* Adjusting the gap below the favorites sent them to the top of the screen.
+* With the A-Z letters hidden, the invisible strip still sat over the start of every row, so tapping an app opened the list instead.
