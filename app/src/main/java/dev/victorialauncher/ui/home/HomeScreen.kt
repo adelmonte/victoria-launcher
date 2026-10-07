@@ -77,6 +77,7 @@ import dev.victorialauncher.ui.theme.launcherTextShadow
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
@@ -786,6 +787,14 @@ fun HomeScreen(
             // under it on every frame.
             CompositionLocalProvider(LocalIconConfig provides favoriteIconConfig) {
             displayItems.forEachIndexed { index, item ->
+                // Identified by which row it is, not by where it sits. Without this, rows in a
+                // loop are matched up by position from one composition to the next: reordering
+                // feeds different data into the same node rather than moving the node. Two apps
+                // swapping is invisible that way, since their rows are interchangeable — a
+                // folder and an app swapping reuses each other's node, and the row keeps the
+                // size its previous occupant had, which draws the icon clear of the slot its
+                // own handle is still sitting in.
+                key(measureKey(item)) {
                 // Reordering hangs off a visible grab handle now. It used to be a long press
                 // anywhere on the row, which nothing on screen advertised and which fought
                 // every other thing a long press could mean.
@@ -1016,6 +1025,7 @@ fun HomeScreen(
                     )
                 } else {
                     Spacer(Modifier.height(itemSpacingDp.dp))
+                }
                 }
             }
             }
