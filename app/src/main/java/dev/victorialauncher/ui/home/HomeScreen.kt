@@ -328,8 +328,13 @@ fun HomeScreen(
     // pass; as snapshot state, read back during composition, each of those writes asked for a
     // recomposition that laid the rows out again and wrote again — which never settles, and
     // showed up as the favorites shivering in place.
-    val itemHeights = remember { HashMap<Int, Int>() }
-    val itemTops = remember { HashMap<Int, Float>() }
+    // Keyed by which row, not by where it sits. Positions are what a reorder changes, so a
+    // height stored against one was read back for whichever row had since moved into it — and
+    // the drag arithmetic below is all neighbour heights. Among rows of one kind every height
+    // is the same and the mix-up is invisible; a folder and an app are different heights, which
+    // is why reordering the two together threw them about and reordering either alone did not.
+    val itemHeights = remember { HashMap<String, Int>() }
+    val itemTops = remember { HashMap<String, Float>() }
 
     val homeItems = remember(favorites, widgetPosition, showWidgetSlot) {
         buildHomeItems(favorites, widgetPosition, showWidgetSlot)
@@ -345,6 +350,13 @@ fun HomeScreen(
     // Folders sit alongside apps in the favorites block, so both bound its padding.
     val firstRowIndex = displayItems.indexOfFirst { it !is HomeItem.Widget }
     val lastRowIndex = displayItems.indexOfLast { it !is HomeItem.Widget }
+
+    /** What a row is called in the measurement maps, the widget slot included. */
+    fun measureKey(item: HomeItem): String = when (item) {
+        is HomeItem.Favorite -> item.app.key
+        is HomeItem.FolderItem -> folderToken(item.folder.id)
+        HomeItem.Widget -> "widget"
+    }
 
     fun tokensOf(items: List<HomeItem>) = items.mapNotNull {
         when (it) {
@@ -372,14 +384,14 @@ fun HomeScreen(
         val from = draggingIndex ?: return
         dragOffset += amount
 
-        val below = itemHeights[from + 1]
+        val below = order.getOrNull(from + 1)?.let { itemHeights[measureKey(it)] }
         if (below != null && from + 1 <= order.lastIndex && dragOffset > below / 2f) {
             dragOrder = order.toMutableList().apply { add(from + 1, removeAt(from)) }
             draggingIndex = from + 1
             dragOffset -= below
             return
         }
-        val above = itemHeights[from - 1]
+        val above = order.getOrNull(from - 1)?.let { itemHeights[measureKey(it)] }
         if (above != null && from - 1 >= 0 && dragOffset < -above / 2f) {
             dragOrder = order.toMutableList().apply { add(from - 1, removeAt(from)) }
             draggingIndex = from - 1
@@ -390,9 +402,10 @@ fun HomeScreen(
     // Both maps are keyed by position in the list, so an entry for a position that no longer
     // exists is a lie about a row that is gone. Removing a widget is exactly that: every row
     // below it shifts up a place and the list ends one place shorter.
-    LaunchedEffect(displayItems.size) {
-        itemHeights.keys.retainAll { it in displayItems.indices }
-        itemTops.keys.retainAll { it in displayItems.indices }
+    LaunchedEffect(displayItems) {
+        val present = displayItems.map { measureKey(it) }.toSet()
+        itemHeights.keys.retainAll { it in present }
+        itemTops.keys.retainAll { it in present }
     }
 
     // Measured span of the favorites, handed up so the A-Z strip can match it.
@@ -404,10 +417,11 @@ fun HomeScreen(
 
     /** Recomputed after each row reports, against the list as it is now rather than as it was. */
     fun refreshFavBounds() {
-        val first = displayItems.indexOfFirst { it !is HomeItem.Widget }
-        val last = displayItems.indexOfLast { it !is HomeItem.Widget }
-        val top = itemTops[first] ?: return
-        val bottom = (itemTops[last] ?: return) + (itemHeights[last] ?: return)
+        val first = displayItems.firstOrNull { it !is HomeItem.Widget } ?: return
+        val last = displayItems.lastOrNull { it !is HomeItem.Widget } ?: return
+        val top = itemTops[measureKey(first)] ?: return
+        val bottom = (itemTops[measureKey(last)] ?: return) +
+            (itemHeights[measureKey(last)] ?: return)
         if (bottom <= top) return
         val current = favBounds
         if (current == null || abs(current.first - top) > 0.5f || abs(current.second - bottom) > 0.5f) {
@@ -828,8 +842,9 @@ fun HomeScreen(
                         // about the favorites by shifting something else.
                         .then(if (item is HomeItem.Widget) Modifier else stripInset)
                         .onGloballyPositioned { coords ->
-                            itemHeights[index] = coords.size.height
-                            itemTops[index] = coords.positionInWindow().y
+                            val measured = measureKey(item)
+                            itemHeights[measured] = coords.size.height
+                            itemTops[measured] = coords.positionInWindow().y
                             refreshFavBounds()
                         }
                         .zIndex(if (draggingIndex == index) 1f else 0f)
