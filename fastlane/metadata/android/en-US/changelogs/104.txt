@@ -1,0 +1,2 @@
+Fixed:
+* Dragging a folder among apps in Edit layout left it drawn across its neighbour, with its handle behind in the slot it belonged to.
