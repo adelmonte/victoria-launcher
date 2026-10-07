@@ -163,10 +163,30 @@ class AppRepository(
      */
     private val USER_TYPE_PROFILE_PRIVATE = "android.os.usertype.profile.PRIVATE"
 
+    /** LauncherUserInfo.PRIVATE_SPACE_ENTRYPOINT_HIDDEN, by its documented value. */
+    private val PRIVATE_SPACE_ENTRYPOINT_HIDDEN = "private_space_entrypoint_hidden"
+
     /** First-install time per package, read in one pass. */
     private fun installTimes(): Map<String, Long> = runCatching {
         pm.getInstalledPackages(0).associate { it.packageName to it.firstInstallTime }
     }.getOrDefault(emptyMap())
+
+    /**
+     * Whether the owner has asked for the private space's entry to be hidden while locked.
+     *
+     * Android 16 says so through LauncherUserInfo's user config, under a key it documents as a
+     * plain string. Reached by reflection because the method arrived in API 36 and this builds
+     * against 35; below 36 there is no such setting to honour, and anything that fails reads as
+     * not hidden, which is how this has always behaved.
+     */
+    private fun entrypointHidden(user: UserHandle): Boolean {
+        if (Build.VERSION.SDK_INT < 36) return false
+        return runCatching {
+            val info = launcherApps.getLauncherUserInfo(user) ?: return false
+            val config = info.javaClass.getMethod("getUserConfig").invoke(info) as? android.os.Bundle
+            config?.getBoolean(PRIVATE_SPACE_ENTRYPOINT_HIDDEN, false) == true
+        }.getOrDefault(false)
+    }
 
     /**
      * Whether a profile is a work one.
@@ -292,6 +312,11 @@ class AppRepository(
         // for a space that named itself earlier in this session and will not now, where there
         // is no profile left to point at — see PrivateSpace.offersPadlockRow.
         if (!state.offersPadlockRow) return emptyList()
+        // Hidden, if that is what its owner told Android. Holding ACCESS_HIDDEN_PROFILES is
+        // what lets a launcher see a private space at all — including one its owner has asked
+        // to be kept out of sight while locked, which this showed regardless. Only while it is
+        // locked: once open it is in use, and the row is also the way to lock it again.
+        if (state is PrivateSpace.Locked && entrypointHidden(state.user)) return emptyList()
         // Unlocked is the only state with an open padlock, and it always names its profile,
         // so a row offered without one is always the closed padlock.
         val className =
