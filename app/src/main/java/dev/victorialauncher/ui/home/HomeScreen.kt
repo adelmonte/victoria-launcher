@@ -325,6 +325,19 @@ fun HomeScreen(
     var dragOrder by remember { mutableStateOf<List<HomeItem>?>(null) }
     var draggingIndex by remember { mutableStateOf<Int?>(null) }
     var dragOffset by remember { mutableFloatStateOf(0f) }
+    // A drag only ever ends through its own release, and a gesture can be taken away before
+    // that — when the row holding it is disposed, nothing is told, and the moved order, the
+    // held row and its offset are all left behind. None of it belongs to edit mode, so it
+    // stayed on the home screen as a row drawn across its neighbour, and only another
+    // finished drag would clear it. Leaving edit mode drops anything a drag left standing,
+    // back to the order that was actually saved.
+    LaunchedEffect(editMode) {
+        if (!editMode) {
+            dragOrder = null
+            draggingIndex = null
+            dragOffset = 0f
+        }
+    }
     // Plain maps, deliberately. Every row writes its size and position here on every layout
     // pass; as snapshot state, read back during composition, each of those writes asked for a
     // recomposition that laid the rows out again and wrote again — which never settles, and
@@ -809,6 +822,7 @@ fun HomeScreen(
                     // left shown but never committed, and the row keeps the offset it had
                     // when the finger was taken away from it.
                     Modifier.pointerInput(itemKey) {
+                        try {
                         detectDragGestures(
                             onDragStart = {
                                 // Where this row is now, rather than where it was when the
@@ -830,6 +844,20 @@ fun HomeScreen(
                         ) { change, amount ->
                             change.consume()
                             onDragBy(amount.y)
+                        }
+                        } finally {
+                            // detectDragGestures never returns, so this runs only when the
+                            // gesture is taken away — and when that happens it says nothing:
+                            // unlike its long-press sibling it does not catch cancellation,
+                            // so neither end callback fires. Left alone, the held row's order
+                            // and offset outlive the drag that set them. Put back to what was
+                            // saved rather than kept, since nobody let go of it there.
+                            val held = draggingIndex?.let { dragOrder?.getOrNull(it) }
+                            if (held != null && measureKey(held) == itemKey) {
+                                dragOrder = null
+                                draggingIndex = null
+                                dragOffset = 0f
+                            }
                         }
                     }
                 } else {
