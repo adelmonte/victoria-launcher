@@ -800,17 +800,30 @@ fun HomeScreen(
                 // every other thing a long press could mean.
                 // No handle on a computed list: its order is the count of openings, and a row
                 // dragged somewhere would be back where it was the next time anything launched.
+                val itemKey = measureKey(item)
                 val dragHandle = if (editMode && favoritesReorderable) {
-                    Modifier.pointerInput(index, displayItems.size) {
+                    // Keyed by which row this is, never by where it sits. Now that the rows
+                    // are identified, a row that moves takes its node with it — so a key of
+                    // the position restarts this the moment the held row swaps with its
+                    // neighbour, which tears down the gesture half way through: the order is
+                    // left shown but never committed, and the row keeps the offset it had
+                    // when the finger was taken away from it.
+                    Modifier.pointerInput(itemKey) {
                         detectDragGestures(
                             onDragStart = {
-                                // The handle is small and the row does not move until the
-                                // finger does, so a tick is the only confirmation that the
-                                // grab took.
-                                HapticUtil.tick(view, hapticsEnabled)
-                                dragOrder = currentItems.value
-                                draggingIndex = index
-                                dragOffset = 0f
+                                // Where this row is now, rather than where it was when the
+                                // handle was built, for the same reason.
+                                val items = currentItems.value
+                                val at = items.indexOfFirst { measureKey(it) == itemKey }
+                                if (at >= 0) {
+                                    // The handle is small and the row does not move until the
+                                    // finger does, so a tick is the only confirmation that the
+                                    // grab took.
+                                    HapticUtil.tick(view, hapticsEnabled)
+                                    dragOrder = items
+                                    draggingIndex = at
+                                    dragOffset = 0f
+                                }
                             },
                             onDragEnd = { commitDragOrder() },
                             onDragCancel = { commitDragOrder() },

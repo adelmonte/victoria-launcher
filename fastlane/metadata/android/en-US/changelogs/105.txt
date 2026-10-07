@@ -1,0 +1,2 @@
+Fixed:
+* Dragging a folder past an app in Edit layout left the row out of place and the new order was not kept.
