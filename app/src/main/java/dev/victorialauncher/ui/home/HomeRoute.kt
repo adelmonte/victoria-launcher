@@ -42,6 +42,10 @@ import androidx.compose.ui.layout.layout
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.systemGestures
+import androidx.compose.ui.platform.LocalLayoutDirection
+import kotlin.math.roundToInt
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.platform.LocalLifecycleOwner
@@ -419,12 +423,26 @@ fun HomeRoute(
 
     BackHandler(enabled = bandEditMode) { commitBand() }
 
+    // Set for the length of a private space unlock that was asked to keep the list open.
+    var keepListThroughPause by remember { mutableStateOf(false) }
+
     // Leaving the launcher (screen off, another app) should always drop us back to the home
     // screen rather than reopening onto the overlay.
     val lifecycleOwner = LocalLifecycleOwner.current
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_PAUSE) closeAppList(snap = true)
+            when (event) {
+                // The one pause we caused ourselves is let through: unlocking the private
+                // space puts the system's own lock screen in front, and that is not leaving
+                // the launcher. Spent as soon as we are back, so it can never excuse the next
+                // real departure.
+                // Used up by the pause it was set for, so it excuses that one and never a
+                // later departure.
+                Lifecycle.Event.ON_PAUSE ->
+                    if (keepListThroughPause) keepListThroughPause = false else closeAppList(snap = true)
+                Lifecycle.Event.ON_RESUME -> keepListThroughPause = false
+                else -> Unit
+            }
         }
         lifecycleOwner.lifecycle.addObserver(observer)
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
@@ -433,11 +451,35 @@ fun HomeRoute(
         if (homeIntentTick > 0) closeAppList(snap = true)
     }
 
-    LaunchedEffect(settings.edgeSide, settings.edgeZoneWidthDp, settings.edgeZoneInsetDp, view, band) {
+    // The gap left for the back gesture, per side. Followed from the system when automatic,
+    // since it reports how far its gesture reaches on each edge and reports nothing with
+    // button navigation; the set number otherwise.
+    val gestureInsets = WindowInsets.systemGestures
+    val layoutDirection = LocalLayoutDirection.current
+    val densityNow = LocalDensity.current
+    val insetLeftDp = if (settings.edgeZoneInsetAuto) {
+        with(densityNow) { gestureInsets.getLeft(this, layoutDirection).toDp().value.roundToInt() }
+    } else {
+        settings.edgeZoneInsetDp
+    }
+    val insetRightDp = if (settings.edgeZoneInsetAuto) {
+        with(densityNow) { gestureInsets.getRight(this, layoutDirection).toDp().value.roundToInt() }
+    } else {
+        settings.edgeZoneInsetDp
+    }
+    // The widest of the live sides, for the content that has to clear whichever it is near.
+    val insetLiveDp = when (settings.edgeSide) {
+        EdgeSide.LEFT -> insetLeftDp
+        EdgeSide.RIGHT -> insetRightDp
+        EdgeSide.BOTH -> maxOf(insetLeftDp, insetRightDp)
+    }
+
+    LaunchedEffect(settings.edgeSide, settings.edgeZoneWidthDp, insetLeftDp, insetRightDp, view, band) {
         view.post {
             val density = view.resources.displayMetrics.density
             val widthPx = (settings.edgeZoneWidthDp * density).toInt()
-            val insetPx = (settings.edgeZoneInsetDp * density).toInt()
+            val insetLeftPx = (insetLeftDp * density).toInt()
+            val insetRightPx = (insetRightDp * density).toInt()
             val h = view.height
             val w = view.width
             if (h > 0 && w > 0) {
@@ -461,10 +503,10 @@ fun HomeRoute(
                 // gesture out of the pixels the setting had just handed back to it.
                 val rects = buildList {
                     if (settings.edgeSide != EdgeSide.RIGHT) {
-                        add(Rect(insetPx, exTop, insetPx + widthPx, exBottom))
+                        add(Rect(insetLeftPx, exTop, insetLeftPx + widthPx, exBottom))
                     }
                     if (settings.edgeSide != EdgeSide.LEFT) {
-                        add(Rect(w - widthPx - insetPx, exTop, w - insetPx, exBottom))
+                        add(Rect(w - widthPx - insetRightPx, exTop, w - insetRightPx, exBottom))
                     }
                 }
                 ViewCompat.setSystemGestureExclusionRects(view, rects)
@@ -560,6 +602,8 @@ fun HomeRoute(
         ) {
             HomeScreen(
                 stripInsetSide = if (!stripAlwaysVisible) null else settings.edgeSide,
+                edgeZoneSide = settings.edgeSide,
+                edgeZoneExtentDp = settings.edgeZoneWidthDp + insetLiveDp,
                 homeIntentTick = homeIntentTick,
                 closeFolderOnLaunch = settings.closeFolderOnLaunch,
                 showFavoriteIcons = settings.showFavoriteIcons,
@@ -568,6 +612,8 @@ fun HomeRoute(
                     settings.favoritesSource == FavoritesSource.MANUAL,
                 markWorkApps = settings.markWorkApps,
                 textShadow = settings.textShadow,
+                textShadowStrength = settings.textShadowStrength,
+                compactTapArea = settings.compactTapArea,
                 cornerButtonApp = cornerButtonApp,
                 onOpenCornerApp = { launchEntry(it) },
                 cornerButtonIsSearch = cornerButtonIsSearch,
@@ -779,8 +825,26 @@ fun HomeRoute(
                     // A launch that never got off the ground leaves nothing to wait for, and
                     // the private-space row has nothing coming to the foreground either — it
                     // changes what this very list holds, so it wants the list out of the way.
+                    // Unless asked to stay, in which case the list is where the space's apps
+                    // are about to appear, and closing it means opening it again to see them.
+                    val stay = appInfo.kind == EntryKind.PRIVATE_SPACE && settings.stayAfterPrivateUnlock
+                    if (stay) {
+                        keepListThroughPause = true
+                        // A phone with no screen lock unlocks without showing anything, so no
+                        // pause comes to use this up. Left standing it would let the next real
+                        // departure keep the list open, so it lapses if the lock screen has not
+                        // appeared by now — which it does at once when there is one.
+                        scope.launch {
+                            delay(PRIVATE_UNLOCK_PROMPT_MS)
+                            keepListThroughPause = false
+                        }
+                    }
                     val acted = launchEntry(appInfo)
-                    if (acted && appInfo.kind == EntryKind.APP) closeAfterLaunch() else closeAppList()
+                    when {
+                        stay -> Unit
+                        acted && appInfo.kind == EntryKind.APP -> closeAfterLaunch()
+                        else -> closeAppList()
+                    }
                 },
                 onSetFavorite = { appInfo, add ->
                     scope.launch {
@@ -813,7 +877,8 @@ fun HomeRoute(
                 dimOthers = settings.dimOthersScrubbing,
                 markWorkApps = settings.markWorkApps,
                 textShadow = settings.textShadow,
-                edgeZoneWidthDp = settings.edgeZoneWidthDp,
+                textShadowStrength = settings.textShadowStrength,
+                edgeZoneWidthDp = settings.edgeZoneWidthDp + insetLiveDp,
                 // Offered only where something can take it, or the row is a dead end.
                 webSearchFallback = settings.webSearchFallback && webSearchAvailable,
                 onWebSearch = { term ->
@@ -927,7 +992,7 @@ fun HomeRoute(
                 EdgeTouchZone(
                     side = side,
                     widthDp = settings.edgeZoneWidthDp.dp,
-                    insetDp = settings.edgeZoneInsetDp.dp,
+                    insetDp = (if (side == EdgeSide.LEFT) insetLeftDp else insetRightDp).dp,
                     letters = listModel.letters,
                     band = band,
                     bandOnly = settings.edgeZoneBandOnly,
@@ -996,10 +1061,14 @@ data class HomeSettings(
     val dimOthersScrubbing: Boolean,
     val markWorkApps: Boolean,
     val textShadow: Boolean,
+    val textShadowStrength: Int,
+    val compactTapArea: Boolean,
     val privateSpaceSection: Boolean,
     val recentSection: Boolean,
     val recentSectionCount: Int,
     val edgeZoneInsetDp: Int,
+    val edgeZoneInsetAuto: Boolean,
+    val stayAfterPrivateUnlock: Boolean,
     val webSearchFallback: Boolean,
     val swipeUpOpensSearch: Boolean,
     val favoritesSource: FavoritesSource,
@@ -1018,3 +1087,6 @@ data class HomeSettings(
     val doubleTapToLock: Boolean,
     val contentColor: Color,
 )
+
+/** How long a private space unlock has to put the system's lock screen up before giving up. */
+private const val PRIVATE_UNLOCK_PROMPT_MS = 1500L

@@ -11,6 +11,8 @@ import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import dev.victorialauncher.ui.theme.DEFAULT_SHADOW_STRENGTH
+import dev.victorialauncher.ui.theme.SHADOW_STRENGTH_RANGE
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
@@ -154,6 +156,7 @@ class Prefs(private val context: Context) {
         val LAUNCH_COUNTS = stringPreferencesKey(PREF_LAUNCH_COUNTS)
         val EDGE_ZONE_WIDTH_DP = intPreferencesKey("edge_zone_width_dp")
         val EDGE_ZONE_INSET_DP = intPreferencesKey("edge_zone_inset_dp")
+        val EDGE_ZONE_INSET_AUTO = booleanPreferencesKey("edge_zone_inset_auto")
         val QUICK_LAUNCH_LEFT = stringPreferencesKey(PREF_QUICK_LAUNCH_LEFT)
         val QUICK_LAUNCH_RIGHT = stringPreferencesKey(PREF_QUICK_LAUNCH_RIGHT)
         val LAYOUT_DEFAULTS_VERSION = intPreferencesKey("layout_defaults_version")
@@ -161,6 +164,9 @@ class Prefs(private val context: Context) {
         val DIM_OTHERS_SCRUBBING = booleanPreferencesKey("dim_others_scrubbing")
         val MARK_WORK_APPS = booleanPreferencesKey("mark_work_apps")
         val TEXT_SHADOW = booleanPreferencesKey("text_shadow")
+        val TEXT_SHADOW_STRENGTH = intPreferencesKey("text_shadow_strength")
+        val COMPACT_TAP_AREA = booleanPreferencesKey("compact_tap_area")
+        val STAY_AFTER_PRIVATE_UNLOCK = booleanPreferencesKey("stay_after_private_unlock")
         val PRIVATE_SPACE_SECTION = booleanPreferencesKey("private_space_section")
         val RECENT_SECTION = booleanPreferencesKey("recent_section")
         val RECENT_SECTION_COUNT = intPreferencesKey("recent_section_count")
@@ -536,6 +542,18 @@ class Prefs(private val context: Context) {
      * Zero by default: on a phone with buttons there is nothing to share with, and anyone the
      * conflict bothers can say so.
      */
+    /**
+     * Whether the room left for the back gesture follows the system's own gesture area.
+     *
+     * Android says exactly how far in from each edge its back gesture reaches, and says zero
+     * when navigation is by buttons — so following it gives a phone with gesture navigation
+     * the room it needs and changes nothing for one without. On unless someone has already
+     * set the gap by hand, in which case their number stands.
+     */
+    val edgeZoneInsetAuto: Flow<Boolean> =
+        data.map { it[Keys.EDGE_ZONE_INSET_AUTO] ?: (it[Keys.EDGE_ZONE_INSET_DP] == null) }
+            .distinctUntilChanged()
+
     val edgeZoneInsetDp: Flow<Int> =
         data.map { (it[Keys.EDGE_ZONE_INSET_DP] ?: 0).coerceIn(EDGE_ZONE_INSET_RANGE) }
             .distinctUntilChanged()
@@ -665,6 +683,25 @@ class Prefs(private val context: Context) {
             .distinctUntilChanged()
 
     /**
+     * Whether unlocking the private space leaves the app list open.
+     *
+     * Off by default, as it always behaved: the list closes and the home screen comes back.
+     * On, the list stays where the space's apps are about to appear.
+     */
+    val stayAfterPrivateUnlock: Flow<Boolean> =
+        data.map { it[Keys.STAY_AFTER_PRIVATE_UNLOCK] ?: false }.distinctUntilChanged()
+
+    /**
+     * Whether a favorite answers a tap only on its icon and name.
+     *
+     * Off by default, which is how it always behaved: the whole line is the button. On, the
+     * rest of the line is home screen again, for anyone opening apps they never meant to by
+     * tapping beside a name.
+     */
+    val compactTapArea: Flow<Boolean> =
+        data.map { it[Keys.COMPACT_TAP_AREA] ?: false }.distinctUntilChanged()
+
+    /**
      * Whether launcher text carries a shadow, for reading it over a busy wallpaper.
      *
      * Only ever behind light text. A shadow under dark text on a light wallpaper muddies it
@@ -673,6 +710,11 @@ class Prefs(private val context: Context) {
      */
     val textShadow: Flow<Boolean> =
         data.map { it[Keys.TEXT_SHADOW] ?: false }.distinctUntilChanged()
+
+    /** How strong that shadow is; the default is the look it shipped with. */
+    val textShadowStrength: Flow<Int> =
+        data.map { (it[Keys.TEXT_SHADOW_STRENGTH] ?: DEFAULT_SHADOW_STRENGTH).coerceIn(SHADOW_STRENGTH_RANGE) }
+            .distinctUntilChanged()
 
     /**
      * Whether a work profile's apps say so after their name.
@@ -1189,6 +1231,10 @@ class Prefs(private val context: Context) {
         }
     }
 
+    suspend fun setEdgeZoneInsetAuto(v: Boolean) {
+        context.dataStore.edit { it[Keys.EDGE_ZONE_INSET_AUTO] = v }
+    }
+
     suspend fun setEdgeZoneInsetDp(v: Int) {
         context.dataStore.edit { it[Keys.EDGE_ZONE_INSET_DP] = v.coerceIn(EDGE_ZONE_INSET_RANGE) }
     }
@@ -1211,6 +1257,18 @@ class Prefs(private val context: Context) {
 
     suspend fun setRecentSectionCount(v: Int) {
         context.dataStore.edit { it[Keys.RECENT_SECTION_COUNT] = v.coerceIn(RECENT_SECTION_RANGE) }
+    }
+
+    suspend fun setStayAfterPrivateUnlock(v: Boolean) {
+        context.dataStore.edit { it[Keys.STAY_AFTER_PRIVATE_UNLOCK] = v }
+    }
+
+    suspend fun setCompactTapArea(v: Boolean) {
+        context.dataStore.edit { it[Keys.COMPACT_TAP_AREA] = v }
+    }
+
+    suspend fun setTextShadowStrength(v: Int) {
+        context.dataStore.edit { it[Keys.TEXT_SHADOW_STRENGTH] = v.coerceIn(SHADOW_STRENGTH_RANGE) }
     }
 
     suspend fun setTextShadow(v: Boolean) {

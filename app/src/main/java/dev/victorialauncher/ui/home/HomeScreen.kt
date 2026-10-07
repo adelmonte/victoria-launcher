@@ -178,6 +178,10 @@ private fun buildHomeItems(
 fun HomeScreen(
     /** The side an always-present A-Z strip occupies, so content can keep out from under it. */
     stripInsetSide: EdgeSide?,
+    /** The side or sides the invisible edge zone is live on, drawn or not. */
+    edgeZoneSide: EdgeSide,
+    /** How far in from the screen edge that zone reaches, its own gap included. */
+    edgeZoneExtentDp: Int,
     /** Bumped when HOME is pressed on a home screen already showing. */
     homeIntentTick: Int,
     /** Whether opening an app from inside a folder closes the folder behind it. */
@@ -190,6 +194,10 @@ fun HomeScreen(
     markWorkApps: Boolean,
     /** Whether the launcher's own text carries a shadow for legibility. */
     textShadow: Boolean,
+    /** Whether a favorite answers a tap only on its icon and name. */
+    compactTapArea: Boolean,
+    /** How strong that shadow is. */
+    textShadowStrength: Int,
     /** False when the favorites are computed from usage, so there is no order to drag. */
     favoritesReorderable: Boolean,
     /** Whether a sideways swipe on a row offers its app's shortcuts. */
@@ -465,13 +473,39 @@ fun HomeScreen(
     // An always-on A-Z strip is drawn over this screen rather than beside it, so the side or
     // sides it can occupy have to be held clear — otherwise it sits on top of the favorites,
     // which is what it did while this was passed in and never read.
-    val stripInset = remember(stripInsetSide) {
-        when (stripInsetSide) {
-            null -> Modifier
-            EdgeSide.LEFT -> Modifier.padding(start = STRIP_INSET)
-            EdgeSide.RIGHT -> Modifier.padding(end = STRIP_INSET)
-            EdgeSide.BOTH -> Modifier.padding(horizontal = STRIP_INSET)
+    //
+    // And the invisible edge zone has to be cleared too, drawn or not: it is live on its side
+    // the whole time the home screen is up, so a favorite under it gives its taps to the zone
+    // and opens the app list instead of the app. Clearing only a visible strip left every
+    // favorite on the swipe side under it, for anyone who had moved the swipe to their
+    // favorites' side of the screen.
+    //
+    // Only on the side the favorites lean towards, though. That is the only place the zone can
+    // be sitting over an icon; on the far side it covers the empty end of the row, and holding
+    // that clear would cost every default setup — swipe on the right, favorites on the left —
+    // shorter names and moved handles for a problem it does not have. Centered favorites are
+    // held clear on both sides, or clearing one would pull them off center.
+    val stripInset = remember(stripInsetSide, edgeZoneSide, edgeZoneExtentDp, alignment) {
+        fun covers(side: EdgeSide?, which: EdgeSide) = side == which || side == EdgeSide.BOTH
+        val zone = edgeZoneExtentDp.dp
+        val leansLeft = alignment != HomeAlignment.RIGHT
+        val leansRight = alignment != HomeAlignment.LEFT
+        val zoneLeft = if (covers(edgeZoneSide, EdgeSide.LEFT)) zone else 0.dp
+        val zoneRight = if (covers(edgeZoneSide, EdgeSide.RIGHT)) zone else 0.dp
+        val centered = alignment == HomeAlignment.CENTER
+        val zoneStart = when {
+            centered -> maxOf(zoneLeft, zoneRight)
+            leansLeft -> zoneLeft
+            else -> 0.dp
         }
+        val zoneEnd = when {
+            centered -> maxOf(zoneLeft, zoneRight)
+            leansRight -> zoneRight
+            else -> 0.dp
+        }
+        val start = maxOf(if (covers(stripInsetSide, EdgeSide.LEFT)) STRIP_INSET else 0.dp, zoneStart)
+        val end = maxOf(if (covers(stripInsetSide, EdgeSide.RIGHT)) STRIP_INSET else 0.dp, zoneEnd)
+        if (start == 0.dp && end == 0.dp) Modifier else Modifier.padding(start = start, end = end)
     }
 
     // Free vertical drag with spring bounce at both ends, outside edit mode.
@@ -525,7 +559,7 @@ fun HomeScreen(
     // be put behind all of them at once instead of at every call that draws a name.
     CompositionLocalProvider(
         LocalTextStyle provides LocalTextStyle.current.copy(
-            shadow = launcherTextShadow(textShadow, contentColor),
+            shadow = launcherTextShadow(textShadow, contentColor, textShadowStrength),
         ),
     ) {
     Box(
@@ -937,6 +971,7 @@ fun HomeScreen(
                         }
 
                         is HomeItem.FolderItem -> FolderRow(
+                            compactTapArea = compactTapArea,
                             shortcutSwipe = shortcutSwipe,
                             folder = item.folder,
                             members = item.folder.apps.mapNotNull { appsByKey[it] },
@@ -984,6 +1019,7 @@ fun HomeScreen(
                         )
 
                         is HomeItem.Favorite -> FavoriteRow(
+                            compactTapArea = compactTapArea,
                             shortcutSwipe = shortcutSwipe,
                             app = item.app,
                             label = displayName(item.app),
@@ -1166,6 +1202,8 @@ fun HomeScreen(
 /** One favorite: icon, optional name, press highlight and its context menu. */
 @Composable
 private fun FavoriteRow(
+    /** Whether only the icon and name answer a tap, rather than the whole line. */
+    compactTapArea: Boolean,
     shortcutSwipe: ShortcutSwipe,
     app: AppInfo,
     label: String,
@@ -1198,10 +1236,12 @@ private fun FavoriteRow(
     val density = LocalDensity.current
     var shortcutMenu by remember { mutableStateOf(false) }
 
-    Box {
+    Box(Modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier
-                .fillMaxWidth()
+                // Only the icon and name answer a tap when the row is narrowed to them; the
+                // rest of the line is the home screen again, not a button nobody can see.
+                .then(if (compactTapArea) Modifier.align(alignment.boxAlignment()) else Modifier.fillMaxWidth())
                 .padding(horizontal = (sidePaddingDp - 8).coerceAtLeast(0).dp)
                 .background(
                     color = if (pressed) contentColor.copy(alpha = 0.15f) else Color.Transparent,
@@ -1322,6 +1362,8 @@ private fun FavoriteRow(
 /** A folder row, which expands in place to show its apps. */
 @Composable
 private fun FolderRow(
+    /** Whether only the icon and name answer a tap, rather than the whole line. */
+    compactTapArea: Boolean,
     shortcutSwipe: ShortcutSwipe,
     folder: Folder,
     members: List<AppInfo>,
@@ -1364,10 +1406,10 @@ private fun FolderRow(
     var memberShortcutFor by remember { mutableStateOf<String?>(null) }
 
     Column {
-        Box {
+        Box(Modifier.fillMaxWidth()) {
             Row(
                 modifier = Modifier
-                    .fillMaxWidth()
+                    .then(if (compactTapArea) Modifier.align(alignment.boxAlignment()) else Modifier.fillMaxWidth())
                     .padding(horizontal = (sidePaddingDp - 8).coerceAtLeast(0).dp)
                     .background(
                         color = if (pressed) contentColor.copy(alpha = 0.15f) else Color.Transparent,
@@ -1799,6 +1841,12 @@ private fun RowScope.AlignedIconLabel(
         }
         balance()
     }
+}
+
+private fun HomeAlignment.boxAlignment() = when (this) {
+    HomeAlignment.LEFT -> Alignment.CenterStart
+    HomeAlignment.CENTER -> Alignment.Center
+    HomeAlignment.RIGHT -> Alignment.CenterEnd
 }
 
 private fun HomeAlignment.textAlign() = when (this) {

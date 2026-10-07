@@ -121,8 +121,19 @@ fun VictoriaTheme(
  * whether a shadow would actually gain any.
  */
 @Composable
-internal fun launcherTextShadow(enabled: Boolean, textColor: Color): Shadow? {
+internal fun launcherTextShadow(enabled: Boolean, textColor: Color, strength: Int = DEFAULT_SHADOW_STRENGTH): Shadow? {
     if (!enabled) return null
     if (textColor.luminance() < 0.5f) return null
-    return Shadow(color = Color.Black.copy(alpha = 0.55f), offset = Offset(0f, 1f), blurRadius = 4f)
+    // One number moving darkness and spread together. Five is what it always was, so the
+    // default reads exactly as before; either side of it is darker and wider, or lighter and
+    // tighter, which is the one thing anyone adjusting it is after.
+    val k = strength.coerceIn(SHADOW_STRENGTH_RANGE) / DEFAULT_SHADOW_STRENGTH.toFloat()
+    return Shadow(
+        color = Color.Black.copy(alpha = (0.55f * k).coerceIn(0.1f, 0.95f)),
+        offset = Offset(0f, 1f),
+        blurRadius = 4f * k,
+    )
 }
+
+const val DEFAULT_SHADOW_STRENGTH = 5
+val SHADOW_STRENGTH_RANGE = 1..10

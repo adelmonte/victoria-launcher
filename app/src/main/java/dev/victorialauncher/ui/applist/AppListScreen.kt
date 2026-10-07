@@ -251,6 +251,8 @@ fun AppListScreen(
     edgeZoneWidthDp: Int,
     /** Whether the launcher's own text carries a shadow for legibility. */
     textShadow: Boolean,
+    /** How strong that shadow is. */
+    textShadowStrength: Int,
     /** Whether a query matching nothing offers the words to the browser. */
     webSearchFallback: Boolean,
     onWebSearch: (String) -> Unit,
@@ -1001,7 +1003,7 @@ fun AppListScreen(
     // puts the shadow behind every name rather than each call naming it.
     CompositionLocalProvider(
         LocalTextStyle provides LocalTextStyle.current.copy(
-            shadow = launcherTextShadow(textShadow, contentColor),
+            shadow = launcherTextShadow(textShadow, contentColor, textShadowStrength),
         ),
     ) {
     Box(

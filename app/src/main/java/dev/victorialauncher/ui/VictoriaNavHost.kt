@@ -74,6 +74,7 @@ import dev.victorialauncher.ui.home.HomeSettings
 import dev.victorialauncher.ui.settings.AppPickerScreen
 import dev.victorialauncher.ui.settings.FolderAppsScreen
 import dev.victorialauncher.ui.settings.HiddenAppsScreen
+import dev.victorialauncher.ui.theme.DEFAULT_SHADOW_STRENGTH
 import dev.victorialauncher.ui.settings.ManageFavoritesScreen
 import dev.victorialauncher.ui.settings.SettingsScreen
 import dev.victorialauncher.ui.theme.rememberContentColor
@@ -274,10 +275,14 @@ fun VictoriaNavHost(
     val dimOthersScrubbing by app.prefs.dimOthersScrubbing.collectAsState(initial = true)
     val markWorkApps by app.prefs.markWorkApps.collectAsState(initial = true)
     val textShadow by app.prefs.textShadow.collectAsState(initial = false)
+    val textShadowStrength by app.prefs.textShadowStrength.collectAsState(initial = DEFAULT_SHADOW_STRENGTH)
+    val compactTapArea by app.prefs.compactTapArea.collectAsState(initial = false)
+    val stayAfterPrivateUnlock by app.prefs.stayAfterPrivateUnlock.collectAsState(initial = false)
     val privateSpaceSection by app.prefs.privateSpaceSection.collectAsState(initial = false)
     val recentSection by app.prefs.recentSection.collectAsState(initial = false)
     val recentSectionCount by app.prefs.recentSectionCount.collectAsState(initial = 5)
     val edgeZoneInsetDp by app.prefs.edgeZoneInsetDp.collectAsState(initial = 0)
+    val edgeZoneInsetAuto by app.prefs.edgeZoneInsetAuto.collectAsState(initial = true)
     val webSearchFallback by app.prefs.webSearchFallback.collectAsState(initial = false)
     val swipeUpOpensSearch by app.prefs.swipeUpOpensSearch.collectAsState(initial = false)
     val holdScrollSpeed by app.prefs.holdScrollSpeed.collectAsState(initial = 4)
@@ -525,10 +530,14 @@ fun VictoriaNavHost(
         dimOthersScrubbing = dimOthersScrubbing,
         markWorkApps = markWorkApps,
         textShadow = textShadow,
+        textShadowStrength = textShadowStrength,
+        compactTapArea = compactTapArea,
+        stayAfterPrivateUnlock = stayAfterPrivateUnlock,
         privateSpaceSection = privateSpaceSection,
         recentSection = recentSection,
         recentSectionCount = recentSectionCount,
         edgeZoneInsetDp = edgeZoneInsetDp,
+        edgeZoneInsetAuto = edgeZoneInsetAuto,
         webSearchFallback = webSearchFallback,
         swipeUpOpensSearch = swipeUpOpensSearch,
         holdScrollSpeed = holdScrollSpeed,
@@ -693,6 +702,12 @@ fun VictoriaNavHost(
                 dimOthersScrubbing = dimOthersScrubbing,
                 markWorkApps = markWorkApps,
                 textShadow = textShadow,
+                textShadowStrength = textShadowStrength,
+                onSetTextShadowStrength = { scope.launch { app.prefs.setTextShadowStrength(it) } },
+                compactTapArea = compactTapArea,
+                stayAfterPrivateUnlock = stayAfterPrivateUnlock,
+                onSetStayAfterPrivateUnlock = { scope.launch { app.prefs.setStayAfterPrivateUnlock(it) } },
+                onSetCompactTapArea = { scope.launch { app.prefs.setCompactTapArea(it) } },
                 privateSpaceSection = privateSpaceSection,
                 onSetPrivateSpaceSection = { scope.launch { app.prefs.setPrivateSpaceSection(it) } },
                 recentSection = recentSection,
@@ -701,6 +716,8 @@ fun VictoriaNavHost(
                 onSetRecentSectionCount = { scope.launch { app.prefs.setRecentSectionCount(it) } },
                 onSetTextShadow = { scope.launch { app.prefs.setTextShadow(it) } },
                 edgeZoneInsetDp = edgeZoneInsetDp,
+                edgeZoneInsetAuto = edgeZoneInsetAuto,
+                onSetEdgeZoneInsetAuto = { scope.launch { app.prefs.setEdgeZoneInsetAuto(it) } },
                 onSetEdgeZoneInsetDp = { scope.launch { app.prefs.setEdgeZoneInsetDp(it) } },
                 onSetMarkWorkApps = { scope.launch { app.prefs.setMarkWorkApps(it) } },
                 onSetDimOthersScrubbing = { scope.launch { app.prefs.setDimOthersScrubbing(it) } },

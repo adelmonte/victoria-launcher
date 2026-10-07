@@ -103,6 +103,7 @@ import dev.victorialauncher.ui.theme.toFontFamily
 import dev.victorialauncher.R
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import dev.victorialauncher.ui.theme.SHADOW_STRENGTH_RANGE
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -160,6 +161,12 @@ fun SettingsScreen(
     onSetMarkWorkApps: (Boolean) -> Unit,
     textShadow: Boolean,
     onSetTextShadow: (Boolean) -> Unit,
+    textShadowStrength: Int,
+    onSetTextShadowStrength: (Int) -> Unit,
+    compactTapArea: Boolean,
+    onSetCompactTapArea: (Boolean) -> Unit,
+    stayAfterPrivateUnlock: Boolean,
+    onSetStayAfterPrivateUnlock: (Boolean) -> Unit,
     privateSpaceSection: Boolean,
     onSetPrivateSpaceSection: (Boolean) -> Unit,
     recentSection: Boolean,
@@ -168,6 +175,8 @@ fun SettingsScreen(
     onSetRecentSectionCount: (Int) -> Unit,
     edgeZoneInsetDp: Int,
     onSetEdgeZoneInsetDp: (Int) -> Unit,
+    edgeZoneInsetAuto: Boolean,
+    onSetEdgeZoneInsetAuto: (Boolean) -> Unit,
     webSearchFallback: Boolean,
     onSetWebSearchFallback: (Boolean) -> Unit,
     swipeUpOpensSearch: Boolean,
@@ -347,7 +356,9 @@ fun SettingsScreen(
         SettingsEntry(SettingsSection.APPEARANCE, stringResource(R.string.settings_icon_size), "size") {
             SliderRow(
                 label = stringResource(R.string.settings_icon_size),
-                value = iconSizeDp.toFloat(), range = 32f..96f,
+                // Down to where an icon is still a recognisable shape. A list of names wants
+                // the icon as a marker, not a picture, and how small is the reader's call.
+                value = iconSizeDp.toFloat(), range = 12f..96f,
                 valueLabel = "${iconSizeDp}dp",
                 onValueChange = { onSetIconSize(it.toInt()) },
             )
@@ -536,6 +547,13 @@ fun SettingsScreen(
                 checked = swipeUpOpensSearch, onCheckedChange = onSetSwipeUpOpensSearch,
             )
         },
+        SettingsEntry(SettingsSection.APP_LIST, stringResource(R.string.settings_stay_private_unlock), "private space unlock stay list") {
+            SwitchRowWithDetail(
+                label = stringResource(R.string.settings_stay_private_unlock),
+                detail = stringResource(R.string.settings_stay_private_unlock_detail),
+                checked = stayAfterPrivateUnlock, onCheckedChange = onSetStayAfterPrivateUnlock,
+            )
+        },
         SettingsEntry(SettingsSection.APP_LIST, stringResource(R.string.settings_private_space_section), "private space profile section") {
             SwitchRowWithDetail(
                 label = stringResource(R.string.settings_private_space_section),
@@ -602,7 +620,17 @@ fun SettingsScreen(
                 checked = edgeZoneBandOnly, onCheckedChange = onSetEdgeZoneBandOnly,
             )
         },
-        SettingsEntry(SettingsSection.APP_LIST, stringResource(R.string.settings_edge_inset), "back gesture edge conflict") {
+        SettingsEntry(SettingsSection.APP_LIST, stringResource(R.string.settings_edge_inset_auto), "back gesture edge conflict automatic") {
+            SwitchRowWithDetail(
+                label = stringResource(R.string.settings_edge_inset_auto),
+                detail = stringResource(R.string.settings_edge_inset_auto_detail),
+                checked = edgeZoneInsetAuto, onCheckedChange = onSetEdgeZoneInsetAuto,
+            )
+        },
+        SettingsEntry(
+            SettingsSection.APP_LIST, stringResource(R.string.settings_edge_inset), "back gesture edge conflict",
+            visible = !edgeZoneInsetAuto,
+        ) {
             SliderRow(
                 label = stringResource(R.string.settings_edge_inset),
                 value = edgeZoneInsetDp.toFloat(),
@@ -790,11 +818,30 @@ fun SettingsScreen(
                 onClick = onOpenFavorites,
             )
         },
+        SettingsEntry(SettingsSection.HOME, stringResource(R.string.settings_compact_tap), "tap area accidental launch empty") {
+            SwitchRowWithDetail(
+                label = stringResource(R.string.settings_compact_tap),
+                detail = stringResource(R.string.settings_compact_tap_detail),
+                checked = compactTapArea, onCheckedChange = onSetCompactTapArea,
+            )
+        },
         SettingsEntry(SettingsSection.APPEARANCE, stringResource(R.string.settings_text_shadow), "contrast readability wallpaper") {
             SwitchRowWithDetail(
                 label = stringResource(R.string.settings_text_shadow),
                 detail = stringResource(R.string.settings_text_shadow_detail),
                 checked = textShadow, onCheckedChange = onSetTextShadow,
+            )
+        },
+        SettingsEntry(
+            SettingsSection.APPEARANCE, stringResource(R.string.settings_text_shadow_strength),
+            "contrast readability wallpaper", visible = textShadow,
+        ) {
+            SliderRow(
+                label = stringResource(R.string.settings_text_shadow_strength),
+                value = textShadowStrength.toFloat(),
+                range = SHADOW_STRENGTH_RANGE.first.toFloat()..SHADOW_STRENGTH_RANGE.last.toFloat(),
+                valueLabel = textShadowStrength.toString(),
+                onValueChange = { onSetTextShadowStrength(it.toInt()) },
             )
         },
         SettingsEntry(SettingsSection.APPS, stringResource(R.string.settings_default_launcher), "home default launcher set") {
