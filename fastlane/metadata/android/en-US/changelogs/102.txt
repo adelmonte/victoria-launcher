@@ -1,0 +1,2 @@
+Fixed:
+* Dragging a folder among apps in Edit layout threw the rows about. Reordering folders with folders, or apps with apps, was unaffected.
