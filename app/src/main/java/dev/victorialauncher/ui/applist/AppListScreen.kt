@@ -1199,10 +1199,13 @@ fun AppListScreen(
 
             itemsIndexed(
                 items = displayModel.rows,
+                // The section is part of the key because the same app legitimately appears
+                // twice: once under its letter and again under a section that repeats it.
                 key = { _, row ->
                     when (row) {
                         is AppListRow.Header -> "header:${row.text}"
-                        is AppListRow.Entry -> row.app.key
+                        is AppListRow.Entry ->
+                            row.section?.let { "$it:${row.app.key}" } ?: row.app.key
                     }
                 },
                 // Headers and app rows are laid out nothing alike; telling the list so lets

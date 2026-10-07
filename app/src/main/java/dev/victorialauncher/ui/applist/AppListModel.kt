@@ -8,10 +8,23 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import java.text.Normalizer
 
+/** Section tags, which only have to be distinct from each other and from no tag at all. */
+internal const val PRIVATE_SECTION = "private"
+internal const val RECENT_SECTION = "recent"
+
 @Immutable
 sealed interface AppListRow {
     data class Header(val text: String) : AppListRow
-    data class Entry(val app: AppInfo) : AppListRow
+
+    /**
+     * One app, and which part of the list it is in.
+     *
+     * [section] is null throughout the alphabet and names the section otherwise. An app shown
+     * again under "Recently installed" is the same app in two places, and a list keyed by the
+     * app alone then has the same key twice — which Compose refuses outright, taking the home
+     * screen down with it.
+     */
+    data class Entry(val app: AppInfo, val section: String? = null) : AppListRow
 }
 
 /**
@@ -207,7 +220,7 @@ fun buildAppListModel(
         if (privateApps.isNotEmpty()) {
             rows += AppListRow.Header(label)
             privateApps.sortedBy { displayName(it).lowercase() }
-                .forEach { rows += AppListRow.Entry(it) }
+                .forEach { rows += AppListRow.Entry(it, section = PRIVATE_SECTION) }
         }
     }
 
@@ -217,7 +230,7 @@ fun buildAppListModel(
             .take(limit)
         if (recent.isNotEmpty()) {
             rows += AppListRow.Header(label)
-            recent.forEach { rows += AppListRow.Entry(it) }
+            recent.forEach { rows += AppListRow.Entry(it, section = RECENT_SECTION) }
         }
     }
 
