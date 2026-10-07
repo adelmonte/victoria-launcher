@@ -1,0 +1,10 @@
+New:
+* Favorites can open only when you tap their icon or name, not anywhere along the line. Off by default.
+* The A-Z strip can make room for Android's back swipe automatically. Changes nothing with button navigation.
+* Icons can go down to 12dp.
+* A strength setting for the text shadow.
+* Unlocking Private Space can keep the app list open. Off by default.
+
+Fixed:
+* With the swipe edge on the same side as your favorites, tapping a favorite opened the app list instead.
+* Private Space showed in the list even when set to hidden in Android's settings.
