@@ -1,0 +1,3 @@
+Fixed:
+* Picking a second custom font could leave letters missing until the launcher restarted.
+* Turning on "Hide private space" in Android's settings now hides it in the list right away, not only after the next lock.
