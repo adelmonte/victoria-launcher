@@ -249,7 +249,17 @@ fun VictoriaNavHost(
             if (event != Lifecycle.Event.ON_START) return@LifecycleEventObserver
             scope.launch {
                 val probe = withContext(Dispatchers.Default) { app.appRepository.privateSpace() }
-                if (probe == appsAndSpace.privateSpace) return@launch
+                if (probe == appsAndSpace.privateSpace) {
+                    // Android's "hide when locked" is set in Settings while the space stays
+                    // locked, so the state reads the same and only the padlock row differs.
+                    val row = withContext(Dispatchers.Default) { app.appRepository.privateSpaceRow(probe) }
+                    val shown = appsAndSpace.apps.filter { it.kind == EntryKind.PRIVATE_SPACE }
+                    if (row.map { it.componentName } == shown.map { it.componentName }) return@launch
+                    val pass = reloadOrder.begin()
+                    val state = withContext(Dispatchers.Default) { app.appRepository.privateSpace() }
+                    adoptPrivateSpace(state, pass)
+                    return@launch
+                }
                 // Only once there is something to do: a number taken to decide nothing changed
                 // would supersede a reload already running and leave the list as it was. But
                 // the read above was made before the number, so something newer may have
@@ -812,16 +822,23 @@ fun VictoriaNavHost(
                 // Copied in rather than referenced: a document URI is only as durable as the
                 // file behind it, and a font picked from Downloads would break the moment it
                 // was moved or cleaned up.
+                //
+                // A new name every time: the font on screen is mapped from its file, so
+                // writing the next one over it garbled the text until a restart (#110).
                 onPickFontFile = { uri ->
                     scope.launch {
                         val path = withContext(Dispatchers.IO) {
                             runCatching {
-                                val out = java.io.File(context.filesDir, "custom_font")
+                                val out = java.io.File(context.filesDir, "custom_font_${System.currentTimeMillis()}")
                                 context.contentResolver.openInputStream(uri)?.use { input ->
                                     out.outputStream().use { input.copyTo(it) }
                                 } ?: return@runCatching null
                                 // Proves it parses before anything starts drawing with it.
-                                android.graphics.Typeface.createFromFile(out)
+                                runCatching { android.graphics.Typeface.createFromFile(out) }
+                                    .onFailure { out.delete() }.getOrThrow()
+                                context.filesDir.listFiles()
+                                    ?.filter { it.name.startsWith("custom_font") && it != out }
+                                    ?.forEach { it.delete() }
                                 out.absolutePath
                             }.getOrNull()
                         }
