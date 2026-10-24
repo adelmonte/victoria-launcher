@@ -1,0 +1,408 @@
+<resources>
+    <string name="app_name">Victoria Launcher</string>
+    <string name="accessibility_description">Pozwala gestem przesunięcia w dół otwierać obszar powiadomień. Victoria Launcher nie odczytuje zawartości ekranu ani nie wchodzi z nią w interakcje.</string>
+
+    <!-- Shared actions -->
+    <string name="action_back">Wstecz</string>
+    <string name="action_save">Zapisz</string>
+    <string name="action_cancel">Anuluj</string>
+    <string name="action_reset">Resetuj</string>
+    <string name="action_create">Utwórz</string>
+    <string name="action_done">Gotowe</string>
+    <string name="action_remove">Usuń</string>
+    <string name="action_app_info">Informacje o aplikacji</string>
+    <string name="action_edit_layout">Edytuj układ</string>
+    <string name="action_edit_icon_and_name">Edytuj ikonę i nazwę</string>
+    <string name="action_move_to_folder">Przenieś do folderu…</string>
+    <string name="action_change_icon">Zmień ikonę…</string>
+    <string name="action_open_settings">Ustawienia Victoria Launcher</string>
+    <string name="action_remove_shortcut">Usuń skrót</string>
+
+    <!-- Home screen -->
+    <string name="home_drag_handle">Zmień kolejność</string>
+    <string name="home_no_favorites_title">Brak ulubionych</string>
+    <string name="home_no_favorites_body">Dotknij krawędzi ekranu, aby otworzyć listę aplikacji, lub wybierz ulubione z poniższej listy.</string>
+    <string name="home_choose_favorites">Wybierz ulubione</string>
+    <string name="home_folder_choose_apps">Zarządzaj folderem</string>
+    <string name="home_folder_delete">Usuń folder</string>
+    <string name="home_folder_remove_app">Usuń z folderu</string>
+    <string name="home_folder_empty">Pusty — przytrzymaj folder, aby wybrać aplikacje</string>
+    <string name="home_folder_name_label">Nazwa folderu</string>
+    <string name="home_folder_use_previews">Użyj podglądu aplikacji</string>
+    <string name="home_display_name_label">Wyświetlana nazwa</string>
+
+    <!-- Edit-mode drag handles -->
+    <string name="handle_side_padding">Margines boczny</string>
+    <string name="handle_widget_top">Góra widżetu</string>
+    <string name="handle_widget_bottom">Dół widżetu</string>
+    <string name="handle_widget_height">Wysokość widżetu</string>
+    <string name="handle_widget_side_padding">Margines boczny widżetu</string>
+    <string name="handle_widget_offset_x">Widżet w lewo / w prawo</string>
+    <string name="handle_az_range">Zakres paska A–Z</string>
+    <string name="edit_value_range">Od %1$d do %2$d dp</string>
+    <string name="handle_favorites_top">Góra ulubionych</string>
+    <string name="handle_favorites_bottom">Dół ulubionych</string>
+    <string name="handle_now_playing_top">Góra sekcji "Teraz odtwarzane"</string>
+    <string name="handle_now_playing_bottom">Dół sekcji "Teraz odtwarzane"</string>
+    <string name="handle_now_playing_height">Wysokość sekcji "Teraz odtwarzane"</string>
+
+    <!-- App list -->
+    <string name="applist_add_favorite">Dodaj do ulubionych</string>
+    <string name="applist_remove_favorite">Usuń z ulubionych</string>
+    <string name="applist_hide">Ukryj z listy</string>
+    <string name="applist_unhide">Pokaż na liście</string>
+
+    <string name="applist_band_hint">Przeciągnij pasek, aby go przesunąć, lub chwyć, aby zmienić jego rozmiar</string>
+    <string name="applist_band_top">Góra paska A–Z</string>
+    <string name="applist_band_bottom">Dół paska A–Z</string>
+
+    <string name="applist_search">Szukaj aplikacji</string>
+
+    <!-- Toasts -->
+    <string name="toast_enable_accessibility_shade">Włącz Victoria Launcher w Ustawieniach → Ułatwienia dostępu, aby otwierać powiadomienia</string>
+    <string name="toast_enable_accessibility_lock">Włącz Victoria Launcher w Ustawieniach → Ułatwienia dostępu, aby zablokować ekran</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Ustawienia Victoria</string>
+    <string name="settings_section_home">Ekran Główny</string>
+    <string name="settings_section_app_list">Lista aplikacji</string>
+    <string name="settings_section_gestures">Gesty</string>
+    <string name="settings_section_notifications">Powiadomienia</string>
+    <string name="settings_preview">Podgląd</string>
+    <string name="settings_search">Szukaj w ustawieniach</string>
+    <string name="settings_corner_search">Otwórz wyszukiwanie</string>
+    <string name="settings_corner_button">Przycisk w dolnym rogu</string>
+    <string name="settings_last_letter">Każda litera w tej samej linii</string>
+    <string name="settings_last_letter_detail">Litery na końcu listy sięgają tej samej linii co reszta. Kosztuje to ekran pustej przestrzeni pod ostatnią aplikacją</string>
+    <string name="settings_auto_keyboard">Otwieraj klawiaturę wraz z listą</string>
+    <string name="settings_auto_keyboard_detail">Zacznij pisać od razu po otwarciu listy aplikacji. Po wyłączeniu klawiatura czeka na stuknięcie w pole wyszukiwania</string>
+    <string name="settings_settings_row">Wiersz ustawień na liście aplikacji</string>
+    <string name="settings_settings_row_detail">Wiersz po literze Z, który otwiera te ustawienia. Długie przytrzymanie tapety otwiera je w obu przypadkach</string>
+    <string name="settings_search_none">Brak wyników pasujących do zapytania</string>
+    <string name="settings_section_appearance">Wygląd</string>
+    <string name="settings_section_apps">Aplikacje</string>
+    <string name="settings_section_about">O aplikacji</string>
+    <string name="settings_preview_sample">Przykładowa aplikacja</string>
+    <string name="settings_icon_pack">Zestaw ikon</string>
+    <string name="settings_icon_pack_default">Domyślny</string>
+    <string name="settings_icons_favorites">Ikony w ulubionych</string>
+    <string name="settings_icons_app_list">Ikony na liście aplikacji</string>
+    <string name="settings_list_headers">Nagłówki liter</string>
+    <string name="settings_list_headers_detail">Wyłączenie daje jedną ciągłą listę. Pasek A–Z nadal przenosi do odpowiedniej litery</string>
+    <string name="settings_notification_badges">Licznik powiadomień na ikonach</string>
+    <string name="settings_notification_badges_detail">Wymaga tego samego dostępu do powiadomień co sekcja "Teraz odtwarzane". Tylko liczby, nigdy treść powiadomień</string>
+    <string name="settings_section_top">Pozycja liter</string>
+    <string name="settings_close_folder">Zamknij folder po uruchomieniu aplikacji</string>
+    <string name="settings_close_folder_detail">Wyłączenie pozostawia go otwartym do momentu ręcznego zamknięcia</string>
+    <string name="settings_favorites_source">Ulubione</string>
+    <string name="settings_frequent_count">Ile pozycji</string>
+    <string name="favorites_source_manual">Lista, którą prowadzisz</string>
+    <string name="favorites_source_frequent">Najczęściej używane</string>
+    <string name="settings_icon_pack_no_icons">Brak</string>
+    <string name="settings_icon_pack_none">Nie znaleziono na tym urządzeniu aplikacji z zestawami ikon.</string>
+    <string name="settings_icon_size">Rozmiar ikon</string>
+    <string name="settings_text_size">Rozmiar tekstu</string>
+    <string name="settings_favorite_spacing">Odstępy między ulubionymi</string>
+    <string name="settings_font">Czcionka</string>
+    <string name="settings_text_color">Kolor tekstu</string>
+    <string name="settings_text_color_detail">Automatycznie odczytuje tapetę i wybiera czytelny wariant</string>
+    <string name="settings_show_names">Pokaż nazwy obok ikon ulubionych</string>
+    <string name="settings_hide_status_bar">Ukryj pasek stanu na ekranie startowym</string>
+    <string name="settings_hide_status_bar_applist">Ukryj pasek stanu na liście aplikacji</string>
+    <string name="settings_status_bar_timeout">Pasek stanu pozostaje przez</string>
+    <string name="settings_dim_home">Przyciemnij tapetę na ekranie startowym</string>
+    <string name="settings_dim_applist">Przyciemnij tapetę za listą aplikacji</string>
+    <string name="settings_haptics">Wibracje interfejsu</string>
+    <string name="settings_haptics_detail">Zgodne z ustawieniami wibracji dotknięć w systemie</string>
+    <string name="settings_edge_side">Krawędź otwieranego menu aplikacji</string>
+    <string name="settings_double_tap_lock">Stuknij dwukrotnie, aby zablokować ekran</string>
+    <string name="settings_double_tap_lock_detail">Stuknij dwukrotnie w pasek A–Z</string>
+    <string name="settings_lock_needs_accessibility">Wymaga włączenia Victoria Launcher w Ułatwieniach dostępu. Jeśli przełącznik jest nieaktywny (szary), otwórz Informacje o aplikacji i zezwól najpierw na ustawienia ograniczone z menu ⋮.</string>
+    <string name="settings_az_visibility">Pokaż A–Z na ekranie startowym</string>
+    <string name="az_visibility_never">Nigdy</string>
+    <string name="az_visibility_landscape">W poziomie</string>
+    <string name="az_visibility_always">Zawsze</string>
+    <string name="settings_always_show_az">Zawsze pokazuj A–Z</string>
+    <string name="settings_show_alphabet">Pokaż A–Z na liście aplikacji</string>
+    <string name="applist_search_web">Szukaj w internecie „%1$s”</string>
+    <string name="settings_web_search">Oferuj wyszukiwanie w internecie</string>
+    <string name="settings_web_search_detail">Gdy nic na liście nie pasuje do wpisanego tekstu, wiersz pozwala przekazać zapytanie do przeglądarki. Nic nie jest wysyłane nigdzie, dopóki w to nie stukniesz</string>
+    <string name="settings_swipe_up_search">Przesunięcie w górę otwiera wyszukiwanie</string>
+    <string name="settings_swipe_up_search_detail">Przesunięcie w górę otwiera listę aplikacji z kursorem już w polu wyszukiwania</string>
+    <string name="app_work_suffix"> (Służbowe)</string>
+    <string name="settings_edge_inset_auto">Automatycznie zrób miejsce na gest wstecz</string>
+    <string name="settings_edge_inset_auto_detail">Chroni pasek A–Z przed krawędzią używaną przez Androida do gestu cofania. Nic nie zmienia w nawigacji przyciskowej</string>
+    <string name="settings_edge_inset">Zostaw miejsce na gest wstecz</string>
+    <string name="settings_mark_work_apps">Oznaczaj aplikacje służbowe</string>
+    <string name="settings_mark_work_apps_detail">Aplikacje z profilu służbowego mają odpowiednią dopiskę po nazwie, co pozwala odróżnić dwie kopie tej samej aplikacji</string>
+    <string name="settings_dim_others">Przyciemniaj pozostałe podczas przewijania A–Z</string>
+    <string name="settings_dim_others_detail">Aplikacje spoza wybranej litery bledną, co ją wyróżnia. Wyłączenie pozostawia widoczną całą listę</string>
+    <string name="settings_hold_scroll">Przytrzymaj literę, aby kontynuować przewijanie</string>
+    <string name="settings_hold_scroll_detail">Przytrzymaj palec na literze, a lista będzie automatycznie przewijać jej aplikacje (przydatne przy długich sekcjach)</string>
+    <string name="settings_hold_scroll_speed">Prędkość przewijania</string>
+    <string name="settings_edge_band_only">Krawędź tylko obok liter</string>
+    <string name="settings_edge_band_only_detail">Krawędź ekranu otwiera listę aplikacji tylko tam, gdzie znajduje się pasek A–Z, a nie na całej wysokości. Zapobiega to kolizjom z widżetami</string>
+    <string name="settings_edge_zone_width">Szerokość strefy gestu od krawędzi</string>
+    <string name="settings_swipe_up_list">Przesuń w górę, aby otworzyć listę aplikacji</string>
+    <string name="settings_swipe_up_list_detail">Pociągnij w górę poza dolną krawędź ekranu startowego</string>
+    <string name="settings_quick_launch_left">Przesunięcie w lewo pod ulubionymi</string>
+    <string name="settings_quick_launch_right">Przesunięcie w prawo pod ulubionymi</string>
+    <string name="settings_quick_launch_none">Brak</string>
+    <string name="settings_search_bar">Pasek wyszukiwania na liście aplikacji</string>
+    <string name="settings_search_bar_detail">Pole do filtrowania listy po nazwie</string>
+    <string name="settings_search_bar_bottom">Pasek wyszukiwania na dole</string>
+    <string name="settings_search_hidden">Wyszukiwanie uwzględnia ukryte aplikacje</string>
+    <string name="settings_search_hidden_detail">Aplikacje ukryte z listy nadal pojawiają się w wynikach wyszukiwania po wpisaniu ich nazwy</string>
+    <string name="settings_sort_by_usage">Sortuj według częstotliwości użycia</string>
+    <string name="settings_sort_by_usage_detail">W obrębie każdej litery najpierw najczęściej używane</string>
+    <string name="settings_alignment_favorites">Wyrównanie ulubionych</string>
+    <string name="settings_alignment_applist">Wyrównanie listy aplikacji</string>
+    <string name="settings_icon_side">Strona ikony</string>
+    <string name="settings_shade_gesture">Przesuń w dół, aby pokazać powiadomienia</string>
+    <string name="settings_shade_ready">Gotowe — pociągnij w dół na ekranie startowym</string>
+    <string name="settings_shade_not_ready">Pociągnij w dół na ekranie startowym. Jeśli nic się nie dzieje, włącz Victoria Launcher w Ułatwieniach dostępu — a jeśli przełącznik jest nieaktywny, zezwól najpierw na ustawienia ograniczone w Informacjach o aplikacji.</string>
+    <string name="settings_enable">Włącz</string>
+    <string name="settings_app_info">Informacje o aplikacji</string>
+    <string name="settings_now_playing_show">Pokaż widżet „Teraz odtwarzane”</string>
+    <string name="settings_notification_access_granted">Przyznano dostęp do powiadomień</string>
+    <string name="settings_notification_access_missing">Brak dostępu do powiadomień</string>
+    <string name="settings_notification_access_detail">Wymagane do wyświetlania obecnie odtwarzanego utworu</string>
+    <string name="settings_open_settings">Otwórz ustawienia</string>
+    <string name="settings_favorites">Ulubione</string>
+    <string name="settings_favorites_detail">Wybierz aplikacje, które pojawią się na ekranie startowym</string>
+    <string name="applist_private_space_section">Przestrzeń prywatna</string>
+    <string name="applist_recent_section">Ostatnio zainstalowane</string>
+    <string name="settings_stay_private_unlock">Pozostań na liście po odblokowaniu</string>
+    <string name="settings_stay_private_unlock_detail">Odblokowanie przestrzeni prywatnej utrzymuje otwartą listę aplikacji zamiast wracać do ekranu startowego</string>
+    <string name="settings_private_space_section">Sekcja przestrzeni prywatnej</string>
+    <string name="settings_private_space_section_detail">Grupuje aplikacje z przestrzeni prywatnej pod alfabetem zamiast je mieszać, co ułatwia odróżnienie dwóch kopii tej samej aplikacji</string>
+    <string name="settings_recent_section">Sekcja ostatnio zainstalowanych</string>
+    <string name="settings_recent_section_detail">Umieszcza na końcu listy aplikacji te, które przybyły jako ostatnie</string>
+    <string name="settings_recent_section_count">Liczba ostatnich aplikacji</string>
+    <string name="settings_compact_tap">Reaguj tylko na ikonę i nazwę</string>
+    <string name="settings_compact_tap_detail">Ulubiona aplikacja otwiera się tylko po stuknięciu w jej ikonę lub nazwę, a nie w dowolnym miejscu wiersza</string>
+    <string name="settings_text_shadow_strength">Siła cienia</string>
+    <string name="settings_text_shadow">Cień pod tekstem</string>
+    <string name="settings_text_shadow_detail">Pomaga nazwam aplikacji wyróżnić się na tle zajętej tapety. Stosowany tylko za jasnym tekstem, gdzie zwiększa kontrast zamiast go pogarszać</string>
+    <string name="settings_default_launcher">Domyślny launcher</string>
+    <string name="settings_default_launcher_yes">Victoria Launcher</string>
+    <string name="settings_default_launcher_no">Nie ustawiono — stuknij, aby wybrać</string>
+    <string name="settings_frequent_excluded">Wykluczone z najczęściej używanych</string>
+    <string name="settings_frequent_excluded_none">Brak wykluczonych aplikacji</string>
+    <string name="frequent_excluded_count">Wykluczone (%1$d)</string>
+    <string name="frequent_excluded_add">Wyklucz aplikację</string>
+    <string name="settings_hidden_apps">Ukryte aplikacje</string>
+    <string name="hidden_count">Ukryto z listy: %1$d</string>
+    <string name="hidden_add_apps">Cała reszta</string>
+    <string name="settings_hidden_none">Brak ukrytych</string>
+    <string name="settings_hidden_count">Ukryto: %1$d</string>
+    <string name="settings_version">Wersja %1$s</string>
+    <string name="settings_less">Mniej</string>
+    <string name="settings_more">Więcej</string>
+
+    <!-- Font choices -->
+    <string name="font_system">Systemowa</string>
+    <string name="font_sans_serif">Bezszeryfowa</string>
+    <string name="font_serif">Szeryfowa</string>
+    <string name="font_monospace">Monospace</string>
+    <string name="font_custom">Własna…</string>
+    <string name="font_custom_pick">Wybierz plik czcionki</string>
+    <string name="font_custom_detail">Plik .ttf lub .otf skopiowany do launchera, dzięki czemu przetrwa przenoszenie plików</string>
+    <string name="font_custom_failed">Nie udało się odczytać tego pliku jako czcionki</string>
+    <string name="text_color_material">Material</string>
+    <string name="text_color_custom">Własny</string>
+    <string name="text_color_pick">Wybierz kolor</string>
+    <string name="settings_swipe_shortcuts">Przesuń aplikację, aby zobaczyć jej skróty</string>
+    <string name="settings_swipe_shortcuts_detail">Przesuń element w ulubionych lub wiersz na liście aplikacji. Aplikacje, które ich nie udostępniają, nic nie zrobią</string>
+    <string name="shortcut_swipe_off">Wyłączone</string>
+    <string name="shortcut_swipe_right">Przesunięcie w prawo</string>
+    <string name="shortcut_swipe_left">Przesunięcie w lewo</string>
+    <string name="settings_allow_rotation">Obracaj wraz z urządzeniem</string>
+    <string name="settings_allow_rotation_detail">Wyłączone na telefonach: w poziomie jest tam około jednej trzeciej wysokości wymaganej przez ten układ. Włączone domyślnie na tabletach</string>
+    <string name="settings_section_backup">Kopia zapasowa</string>
+    <string name="settings_crash_copy">Skopiuj ostatni błąd</string>
+    <string name="settings_crash_detail">Launcher zatrzymał się nieoczekiwanie. Skopiuj szczegóły, aby dołączyć je do zgłoszenia błędu</string>
+    <string name="settings_crash_copied">Skopiowano szczegóły błędu</string>
+    <string name="settings_export">Eksportuj ustawienia</string>
+    <string name="settings_export_detail">Zapisz do pliku ulubione, foldery, układ i wszystkie inne ustawienia</string>
+    <string name="settings_import">Przywróć ustawienia</string>
+    <string name="settings_import_detail">Zastąp wszystko danymi z wcześniej zapisanego pliku</string>
+    <string name="settings_export_done">Zapisano ustawienia</string>
+    <string name="settings_export_done_private_omitted">Zapisano ustawienia. Pominięto aplikacje z przestrzeni prywatnej.</string>
+    <string name="settings_import_done">Przywrócono ustawienia</string>
+    <string name="settings_backup_failed">Nie udało się odczytać pliku</string>
+    <string name="settings_dim_color">Kolor przyciemnienia</string>
+    <string name="settings_dim_color_detail">Kolor, którym przyciemniana jest tapeta; powyższe suwaki określają stopień</string>
+    <string name="color_from_wallpaper">Z tapety</string>
+    <string name="icon_shape">Kształt ikon</string>
+    <string name="icon_shape_detail">Zmienia kształt tylko ikon adaptacyjnych; starsze pozostają bez zmian</string>
+    <string name="icon_shape_system">Systemowy</string>
+    <string name="icon_shape_circle">Koło</string>
+    <string name="icon_shape_rounded">Zaokrąglony</string>
+    <string name="icon_shape_square">Kwadrat</string>
+    <string name="settings_icon_pack_themed">Z motywem</string>
+
+    <!-- Text color choices -->
+    <string name="text_color_auto">Automatyczny</string>
+    <string name="text_color_light">Jasny</string>
+    <string name="text_color_dark">Ciemny</string>
+
+    <!-- Alignment choices -->
+    <string name="alignment_left">Do lewej</string>
+    <string name="alignment_center">Do środka</string>
+    <string name="alignment_right">Do prawej</string>
+
+    <!-- Edge choices -->
+    <string name="edge_left">Lewa</string>
+    <string name="edge_right">Prawa</string>
+    <string name="edge_both">Obie</string>
+
+    <!-- Private space -->
+    <string name="private_space">Przestrzeń prywatna</string>
+
+    <!-- Favorites / hidden / folder pickers -->
+    <string name="favorites_title">Ulubione</string>
+    <string name="favorites_count">%1$d na ekranie startowym</string>
+    <string name="folder_title_fallback">Folder</string>
+    <string name="folder_gone">Ten folder już nie istnieje.</string>
+    <string name="folder_member_count">%1$d w tym folderze — przeciągnij, aby zmienić kolejność</string>
+    <string name="folder_add_apps">Dodaj więcej</string>
+    <string name="folder_member_missing">Aplikacja nie jest już zainstalowana</string>
+    <string name="folder_picker_title">Przenieś %1$s do…</string>
+    <string name="folder_picker_app_count">%1$d aplikacji</string>
+    <string name="folder_picker_new">Nowy folder</string>
+    <string name="folder_picker_new_detail">Aplikacja zostanie przeniesiona do nowego folderu na ekranie startowym.</string>
+
+    <!-- Icon picker -->
+    <string name="icon_picker_title">Ikona dla %1$s</string>
+    <string name="icon_picker_gallery">Galeria…</string>
+    <string name="icon_picker_all">Wszystkie</string>
+    <string name="icon_picker_reset">Przywróć domyślną</string>
+    <string name="icon_picker_no_packs">Brak zainstalowanych zestawów ikon. Zainstaluj pakiet z Google Play lub wybierz obraz z galerii.</string>
+    <string name="icon_picker_search">Szukaj ikon</string>
+    <string name="icon_picker_clear_search">Wyczyść wyszukiwanie</string>
+    <string name="icon_picker_not_browsable">Ten pakiet nie udostępnia przeglądanej listy ikon.</string>
+    <string name="icon_picker_no_matches">Brak ikon pasujących do „%1$s”.</string>
+
+    <!-- Welcome -->
+    <string name="welcome_title">Witaj w Victorii</string>
+    <string name="welcome_favorites">Przytrzymaj tapetę, aby dodać ulubione, widżet lub otworzyć ustawienia.</string>
+    <string name="welcome_widget">Przesuń palcem od dowolnej krawędzi ekranu, aby zobaczyć wszystkie aplikacje, i przeciągnij wzdłuż paska A–Z, aby przejść do wybranej litery.</string>
+    <string name="welcome_layout">Edycja układu pozwala przestawiać elementy i zmieniać odstępy.</string>
+    <string name="welcome_got_it">Rozumiem</string>
+
+    <!-- Widgets -->
+    <string name="widget_add">Dodaj widżet</string>
+    <string name="widget_clock_label">Zegar i data</string>
+    <string name="widget_clock_description">Godzina i data w stylu launchera</string>
+    <string name="widget_clock_time">Godzina</string>
+    <string name="widget_clock_date">Data</string>
+    <string name="widget_clock_hour">Zegar</string>
+    <string name="widget_clock_hour_system">Systemowy</string>
+    <string name="widget_clock_hour_12">12-godzinny</string>
+    <string name="widget_clock_hour_24">24-godzinny</string>
+    <string name="widget_clock_date_format">Data</string>
+    <string name="widget_clock_date_none">Brak daty</string>
+    <string name="widget_clock_size">Rozmiar godziny</string>
+    <string name="widget_clock_date_size">Rozmiar daty</string>
+    <string name="widget_clock_color">Kolor</string>
+    <string name="widget_clock_color_pick">Wybierz</string>
+    <string name="widget_clock_size_preview">12:34</string>
+    <string name="widget_clock_weather">Pogoda</string>
+    <string name="widget_clock_notifications">Powiadomienia</string>
+    <string name="widget_clock_weather_show">Pogoda</string>
+    <string name="widget_clock_weather_hide">Brak pogody</string>
+    <string name="widget_clock_weather_celsius">°C</string>
+    <string name="widget_clock_weather_fahrenheit">°F</string>
+    <string name="widget_clock_weather_size">Rozmiar pogody</string>
+    <string name="widget_clock_weather_opacity">Nieprzezroczystość pogody</string>
+    <string name="widget_clock_date_custom_chip">Własny</string>
+    <string name="widget_clock_date_custom">Niestandardowy format daty</string>
+    <string name="widget_clock_date_custom_label">Wzorzec</string>
+    <string name="widget_clock_date_custom_invalid">To nie jest wzorzec, który można obsłużyć</string>
+    <string name="widget_clock_date_custom_hint">d – dzień, M – miesiąc, y – rok, E – dzień tygodnia. Powtórz literę, aby uzyskać dłuższą formę: d, dd, EEE, EEEE.</string>
+    <string name="widget_clock_agenda">Nadchodzące</string>
+    <string name="widget_clock_event_untitled">(Brak tytułu)</string>
+    <string name="widget_clock_event_at">%1$s  %2$s</string>
+    <string name="widget_clock_event_tomorrow">Jutro</string>
+    <string name="widget_clock_event_day_at">%1$s %2$s</string>
+    <string name="widget_clock_event_day_only">%1$s  %2$s</string>
+    <string name="widget_clock_event_all_day">%1$s  dzisiaj</string>
+    <string name="widget_clock_event_now">%1$s  teraz</string>
+    <string name="widget_clock_alarm_at">Alarm %1$s</string>
+    <string name="widget_clock_agenda_show">Nadchodzące</string>
+    <string name="widget_clock_agenda_hide">Brak</string>
+    <string name="widget_clock_agenda_size">Rozmiar nadchodzących</string>
+    <string name="widget_clock_agenda_opacity">Nieprzezroczystość nadchodzących</string>
+    <string name="widget_clock_agenda_count">Liczba wydarzeń</string>
+    <string name="widget_clock_agenda_hours">Liczba godzin do przodu</string>
+    <string name="widget_clock_agenda_relative">Za 20 minut</string>
+    <string name="widget_clock_agenda_absolute">O 12:30</string>
+    <string name="widget_clock_alarm_show">Następny alarm</string>
+    <string name="widget_clock_alarm_hide">Brak alarmu</string>
+    <string name="widget_clock_agenda_permission">Zezwól na dostęp do kalendarza</string>
+    <string name="widget_clock_agenda_empty">Brak nadchodzących wydarzeń</string>
+    <string name="widget_clock_agenda_hint">Odczytywanie kalendarza wymaga uprawnień. Nic nie opuszcza telefonu: Victoria nie ma dostępu do sieci.</string>
+    <string name="widget_clock_weather_opens">Działanie po stuknięciu w pogodę</string>
+    <string name="widget_clock_weather_waiting">Oczekiwanie na aplikację pogodową</string>
+    <string name="widget_clock_weather_hint">Dane o pogodzie pochodzą z aplikacji pogodowej, która już je posiada, więc Victoria nie potrzebuje dostępu do sieci ani lokalizacji. W Breezy Weather włącz Ustawienia → Widżety i żywa tapeta → Udostępnianie danych.</string>
+    <string name="widget_clock_notifications_show">Liczba powiadomień</string>
+    <string name="widget_clock_notifications_hide">Brak licznika</string>
+    <string name="widget_clock_notifications_size">Rozmiar licznika</string>
+    <string name="widget_clock_notifications_opacity">Nieprzezroczystość licznika</string>
+    <string name="widget_clock_battery">Bateria</string>
+    <string name="widget_clock_battery_show">Pokaż</string>
+    <string name="widget_clock_battery_hide">Ukryj</string>
+    <string name="widget_clock_battery_size">Rozmiar baterii</string>
+    <string name="widget_clock_battery_percent">%1$d%%</string>
+    <string name="widget_clock_time_opacity">Nieprzezroczystość godziny</string>
+    <string name="widget_clock_date_opacity">Nieprzezroczystość daty</string>
+    <string name="widget_clock_battery_opacity">Nieprzezroczystość baterii</string>
+    <string name="widget_add_another">Dodaj kolejny widżet</string>
+    <string name="widget_remove_this">Usuń ten widżet</string>
+    <string name="widget_unavailable">Ten widżet nie jest już dostępny</string>
+    <string name="widget_change_settings">Zmień ustawienia widżetu</string>
+    <string name="widget_none_found">Nie znaleziono widżetów na tym urządzeniu.</string>
+
+    <!-- Pinned shortcuts -->
+    <string name="shortcut_unavailable">Ten skrót nie jest już dostępny</string>
+    <string name="shortcut_pin_title">Dodać do ekranu startowego?</string>
+    <string name="shortcut_pin_from">Od %1$s</string>
+    <string name="shortcut_pin_add">Dodaj</string>
+    <string name="shortcut_pin_failed">Nie udało się potwierdzić przypięcia skrótu</string>
+    <string name="shortcut_unpin_failed">Nie udało się usunąć skrótu</string>
+
+    <!-- Now Playing -->
+    <string name="now_playing_placeholder">Teraz odtwarzane</string>
+    <string name="now_playing_enable_access">Włącz dostęp do sekcji „Teraz odtwarzane”</string>
+    <string name="now_playing_open_failed">Nie można otworzyć odtwarzającej aplikacji</string>
+    <string name="now_playing_unknown_title">Nieznany tytuł</string>
+    <string name="now_playing_previous">Poprzedni</string>
+    <string name="now_playing_play_pause">Odtwórz/Pauza</string>
+    <string name="now_playing_next">Następny</string>
+    
+    <plurals name="widget_clock_notification_count">
+        <item quantity="one">%1$d powiadomienie</item>
+        <item quantity="few">%1$d powiadomienia</item>
+        <item quantity="many">%1$d powiadomień</item>
+        <item quantity="other">%1$d powiadomienia</item>
+    </plurals>
+    <plurals name="widget_clock_event_in_minutes">
+        <item quantity="one">%1$s  za %2$d minutę</item>
+        <item quantity="few">%1$s  za %2$d minuty</item>
+        <item quantity="many">%1$s  za %2$d minut</item>
+        <item quantity="other">%1$s  za %2$d minuty</item>
+    </plurals>
+    <plurals name="widget_clock_event_in_hours">
+        <item quantity="one">%1$s  za %2$d godzinę</item>
+        <item quantity="few">%1$s  za %2$d godziny</item>
+        <item quantity="many">%1$s  za %2$d godzin</item>
+        <item quantity="other">%1$s  za %2$d godziny</item>
+    </plurals>
+    <plurals name="settings_frequent_excluded_count">
+        <item quantity="one">%1$d wykluczona aplikacja</item>
+        <item quantity="few">%1$d wykluczone aplikacje</item>
+        <item quantity="many">%1$d wykluczonych aplikacji</item>
+        <item quantity="other">%1$d wykluczonej aplikacji</item>
+    </plurals>
+</resources>
