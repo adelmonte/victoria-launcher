@@ -68,6 +68,7 @@ import dev.victorialauncher.ui.common.LocalIconConfig
 import dev.victorialauncher.ui.common.clearIconCache
 import dev.victorialauncher.ui.common.encodePackOverride
 import dev.victorialauncher.ui.common.warmIconCache
+import dev.victorialauncher.ui.common.iconCacheGeneration
 import dev.victorialauncher.ui.home.FavoriteEntry
 import dev.victorialauncher.ui.home.HomeRoute
 import dev.victorialauncher.ui.home.HomeSettings
@@ -458,7 +459,8 @@ fun VictoriaNavHost(
             foreground = scheme.onPrimaryContainer.toArgb(),
         )
     }
-    LaunchedEffect(allApps, iconPackPackage, iconOverrides, listIconPx, priorityKeys, iconStyle) {
+    val cacheGeneration by iconCacheGeneration.collectAsState()
+    LaunchedEffect(allApps, iconPackPackage, iconOverrides, listIconPx, priorityKeys, iconStyle, cacheGeneration) {
         warmIconCache(context, allApps, iconPackPackage, iconOverrides, listIconPx, iconStyle, priorityKeys)
     }
 

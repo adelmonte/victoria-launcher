@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 package dev.victorialauncher.ui.common
 
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import android.content.Context
 import android.graphics.drawable.Drawable
 import android.net.Uri
@@ -76,10 +78,23 @@ private object IconCache {
      * icon in an update keeps none of the key's components, so nothing else would invalidate
      * the stale bitmap.
      */
-    fun clear() = cache.evictAll()
+    fun clear() {
+        cache.evictAll()
+        generation.value++
+    }
+
+    /**
+     * Bumped on every clear, so the warm pass can run again. It used to run only when the
+     * list of apps changed, and most clears leave the list as it was — an app publishing new
+     * shortcuts clears it — so the next open drew every icon mid-scroll (#119).
+     */
+    val generation = MutableStateFlow(0)
 }
 
 fun clearIconCache() = IconCache.clear()
+
+/** Changes whenever the icon cache has been emptied. */
+val iconCacheGeneration: StateFlow<Int> get() = IconCache.generation
 
 // The class name is in here for the rows whose key alone cannot tell two pictures apart: the
 // private-space row keeps one key across locking and unlocking, and the padlock it draws is
