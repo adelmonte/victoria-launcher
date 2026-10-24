@@ -1,0 +1,2 @@
+New:
+* Folders can hold widgets. Long-press a folder and pick "Add widget". It shows at the top when the folder is open.
