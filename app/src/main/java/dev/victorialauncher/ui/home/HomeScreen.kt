@@ -94,6 +94,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.boundsInWindow
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.zIndex
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.layout.positionInWindow
@@ -265,6 +268,8 @@ fun HomeScreen(
     /** True when the corner opens the app list's search rather than launching anything. */
     cornerButtonIsSearch: Boolean,
     onOpenCornerSearch: () -> Unit,
+    /** Where the corner button is in the window, or null when there is none to keep clear. */
+    onCornerButtonBounds: (Rect?) -> Unit = {},
 ) {    // Appended at the point of showing rather than stored in the label, so a rename still
     // wins and turning this off needs no re-reading of every app.
     val workSuffix = stringResource(R.string.app_work_suffix)
@@ -1113,11 +1118,15 @@ fun HomeScreen(
         // it, and it steps aside in edit mode, where that corner belongs to Done.
         if ((cornerButtonApp != null || cornerButtonIsSearch) && !editMode) {
             val corner = if (alignment == HomeAlignment.RIGHT) Alignment.BottomStart else Alignment.BottomEnd
+            DisposableEffect(Unit) { onDispose { onCornerButtonBounds(null) } }
             Box(
                 modifier = Modifier
                     .align(corner)
                     .navigationBarsPadding()
                     .padding(horizontal = 20.dp, vertical = 24.dp)
+                    // Reported so the swipe edge can stop short of it, or a tap on it opens
+                    // the list instead (#113).
+                    .onGloballyPositioned { onCornerButtonBounds(it.boundsInWindow()) }
                     .clip(CircleShape)
                     .clickable {
                         if (cornerButtonIsSearch) onOpenCornerSearch()

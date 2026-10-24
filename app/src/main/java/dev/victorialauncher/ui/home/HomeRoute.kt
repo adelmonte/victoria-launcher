@@ -248,6 +248,7 @@ fun HomeRoute(
     val searchModel = hiddenSearchModel ?: listModel
 
     var appListVisible by remember { mutableStateOf(false) }
+    var cornerButtonBounds by remember { mutableStateOf<androidx.compose.ui.geometry.Rect?>(null) }
     val scrub = remember { ScrubState() }
     var viewportHeightPx by remember { mutableIntStateOf(0) }
     var favBand by remember { mutableStateOf<ScrubBand?>(null) }
@@ -626,6 +627,7 @@ fun HomeRoute(
                     scope.launch { openAnim.snapTo(openDistancePx) }
                     searchFocusTick++
                 },
+                onCornerButtonBounds = { cornerButtonBounds = it },
                 favoritesReorderable = settings.favoritesSource == FavoritesSource.MANUAL,
                 shortcutSwipe = settings.shortcutSwipe,
                 favorites = favorites,
@@ -989,10 +991,20 @@ fun HomeRoute(
                 }
             }
             sides.forEach { side ->
+                val insetDp = if (side == EdgeSide.LEFT) insetLeftDp else insetRightDp
+                // The strip runs the full height, and the corner button can sit under it;
+                // so it stops above the button whenever the two share any width.
+                val keepOut = cornerButtonBounds?.takeIf { !appListVisible }?.let { b ->
+                    val d = densityNow.density
+                    val reach = (insetDp + settings.edgeZoneWidthDp) * d
+                    val overlaps = if (side == EdgeSide.LEFT) b.left < reach else b.right > view.width - reach
+                    if (overlaps) ((view.height - b.top) / d).dp else null
+                } ?: 0.dp
                 EdgeTouchZone(
                     side = side,
                     widthDp = settings.edgeZoneWidthDp.dp,
-                    insetDp = (if (side == EdgeSide.LEFT) insetLeftDp else insetRightDp).dp,
+                    insetDp = insetDp.dp,
+                    bottomKeepOut = keepOut,
                     letters = listModel.letters,
                     band = band,
                     bandOnly = settings.edgeZoneBandOnly,

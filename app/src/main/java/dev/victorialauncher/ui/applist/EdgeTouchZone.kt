@@ -74,6 +74,8 @@ fun EdgeTouchZone(
     holdScroll: Boolean,
     /** How much of the very edge is left to the system's own gestures. */
     insetDp: Dp,
+    /** How far up from the bottom the strip stops, to leave the corner button its taps. */
+    bottomKeepOut: Dp = 0.dp,
     hapticsEnabled: Boolean,
     state: ScrubState,
     /** Whether the app list is already showing, so a tap on the strip knows which it is. */
@@ -106,7 +108,7 @@ fun EdgeTouchZone(
             // meant for whatever shares that side of the screen.
             .then(
                 if (!bandOnly) {
-                    Modifier.fillMaxHeight()
+                    Modifier.padding(bottom = bottomKeepOut).fillMaxHeight()
                 } else {
                     Modifier
                         .offset { IntOffset(0, band.topPx.roundToInt()) }
