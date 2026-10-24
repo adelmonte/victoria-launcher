@@ -1,0 +1,9 @@
+New:
+* Folders can show in the app list too, under their own letter. Off by default.
+* Japanese: apps sort into kana rows after Z, with kanji names under their own heading.
+* The Private Space row is now at the end of the list, and offers "Install apps" while open.
+* The clock widget uses the launcher's font, including a custom one.
+* With icons hidden, an app with notifications gets a dot beside its name.
+
+Fixed:
+* A folder opened near the bottom of the home screen now scrolls into view.
