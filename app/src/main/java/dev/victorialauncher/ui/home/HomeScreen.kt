@@ -7,6 +7,8 @@ import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.calculateTargetValue
 import androidx.compose.animation.core.exponentialDecay
 import androidx.compose.animation.core.spring
+import androidx.compose.runtime.withFrameNanos
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
@@ -51,6 +53,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Checklist
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.StarBorder
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Edit
@@ -234,6 +237,8 @@ fun HomeScreen(
     onResetFolderIcon: (Folder) -> Unit,
     onDeleteFolder: (Folder) -> Unit,
     onManageFolder: (Folder) -> Unit,
+    /** Set when folders are also in the app list, where one taken off here still lives. */
+    onRemoveFolderFromHome: ((Folder) -> Unit)? = null,
     onMoveToFolder: (AppInfo) -> Unit,
     appsByKey: Map<String, AppInfo>,
     onReorderHome: (newFavoriteKeys: List<String>, newWidgetPosition: Int) -> Unit,
@@ -286,6 +291,9 @@ fun HomeScreen(
     var nowPlayingMenu by remember { mutableStateOf(false) }
     var nowPlayingMenuOffset by remember { mutableStateOf(DpOffset.Zero) }
     var expandedFolders by remember { mutableStateOf(setOf<String>()) }
+    // The folder just opened, so the stack can move up enough to show all of it (#114).
+    // Stamped, so opening the same folder again asks again.
+    var revealFolder by remember { mutableStateOf<Pair<String, Long>?>(null) }
     val touchPosition = remember { mutableStateOf(Offset.Zero) }
     val density = LocalDensity.current
     val view = LocalView.current
@@ -537,6 +545,30 @@ fun HomeScreen(
     // Turning the phone changes how much there is to scroll through. A stack dragged up in
     // landscape kept that offset when the screen went tall again, which left it sitting above
     // the top of the display with nothing on screen to drag it back down by.
+    val bottomInsetPx = WindowInsets.navigationBars.getBottom(LocalDensity.current)
+    LaunchedEffect(revealFolder) {
+        val key = folderToken(revealFolder?.first ?: return@LaunchedEffect)
+        // The folder opens with an animation, so its height is followed frame by frame until
+        // it stops growing. Positions are plain maps, written as layout happens.
+        var last = -1
+        var still = 0
+        var frames = 0
+        while (still < 3 && frames++ < 90) {
+            withFrameNanos { }
+            val height = itemHeights[key] ?: return@LaunchedEffect
+            if (height == last) still++ else still = 0
+            last = height
+        }
+        val top = (itemTops[key] ?: return@LaunchedEffect) - rootY
+        val overflow = top + last - (viewportHeight - bottomInsetPx)
+        // Up by what is hidden, but never so far that the folder's own name leaves the top.
+        if (overflow > 0f) {
+            val floor = minOf(0f, (viewportHeight - contentHeight).toFloat())
+            val target = (offsetY.value - minOf(overflow, top)).coerceIn(floor, 0f)
+            offsetY.animateTo(target, spring(stiffness = Spring.StiffnessMediumLow))
+        }
+    }
+
     LaunchedEffect(minOffset) {
         val settled = offsetY.value.coerceIn(minOffset, 0f)
         if (settled != offsetY.value) offsetY.snapTo(settled)
@@ -998,6 +1030,7 @@ fun HomeScreen(
                                 expandedFolders = if (item.folder.id in expandedFolders) {
                                     expandedFolders - item.folder.id
                                 } else {
+                                    revealFolder = item.folder.id to System.nanoTime()
                                     expandedFolders + item.folder.id
                                 }
                             },
@@ -1007,6 +1040,9 @@ fun HomeScreen(
                             onEdit = { folderMenuFor = null; folderRenameFor = item.folder },
                             onEditLayout = { folderMenuFor = null; onEditModeChange(true) },
                             onDelete = { folderMenuFor = null; onDeleteFolder(item.folder) },
+                            onRemoveFromHome = onRemoveFolderFromHome?.let { remove ->
+                                { folderMenuFor = null; remove(item.folder) }
+                            },
                             onOpenApp = { member ->
                                 // Closed as the app starts rather than on the way back: there
                                 // is nothing to come back to yet, and a folder that shuts while
@@ -1398,6 +1434,7 @@ private fun FolderRow(
     onEdit: () -> Unit,
     onEditLayout: () -> Unit,
     onDelete: () -> Unit,
+    onRemoveFromHome: (() -> Unit)?,
     onOpenApp: (AppInfo) -> Unit,
     onRemoveApp: (AppInfo) -> Unit,
     onMemberAppInfo: (AppInfo) -> Unit,
@@ -1491,6 +1528,13 @@ private fun FolderRow(
                     onClick = onEditLayout,
                 )
                 HorizontalDivider()
+                onRemoveFromHome?.let { remove ->
+                    DropdownMenuItem(
+                        text = { Text(stringResource(R.string.folder_remove_from_home)) },
+                        leadingIcon = { Icon(Icons.Filled.StarBorder, contentDescription = null) },
+                        onClick = remove,
+                    )
+                }
                 DropdownMenuItem(
                     text = { Text(stringResource(R.string.home_folder_delete)) },
                     leadingIcon = { Icon(Icons.Filled.Delete, contentDescription = null) },
@@ -1713,7 +1757,7 @@ private fun NowPlayingBlock(
     )
 }
 @Composable
-private fun FolderIcon(
+internal fun FolderIcon(
     members: List<AppInfo>,
     sizeDp: Int,
     contentColor: Color,

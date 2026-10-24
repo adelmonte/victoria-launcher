@@ -117,6 +117,15 @@ import androidx.compose.ui.unit.sp
 import dev.victorialauncher.data.AppInfo
 import dev.victorialauncher.data.EdgeSide
 import dev.victorialauncher.data.EntryKind
+import dev.victorialauncher.data.Folder
+import dev.victorialauncher.data.folderToken
+import dev.victorialauncher.ui.home.FolderIcon
+import androidx.compose.material.icons.filled.Delete
+import dev.victorialauncher.data.PRIVATE_SPACE_UNLOCKED_CLASS
+import dev.victorialauncher.VictoriaApp
+import androidx.compose.ui.platform.LocalContext
+import android.widget.Toast
+import androidx.compose.material.icons.filled.Add
 import dev.victorialauncher.data.HomeAlignment
 import dev.victorialauncher.data.IconSide
 import dev.victorialauncher.data.ShortcutSwipe
@@ -218,6 +227,12 @@ fun AppListScreen(
     /** Which apps are hidden, so a search that turns one up can say so and put it back. */
     hiddenApps: Set<String>,
     onMoveToFolder: (AppInfo) -> Unit,
+    /** Opens or closes a folder filed in the list. */
+    onToggleFolder: (Folder) -> Unit = {},
+    onManageFolder: (Folder) -> Unit = {},
+    onDeleteFolder: (Folder) -> Unit = {},
+    onSetFolderOnHome: (Folder, Boolean) -> Unit = { _, _ -> },
+    onRemoveFromFolder: (Folder, AppInfo) -> Unit = { _, _ -> },
     onOpenSettings: () -> Unit,
     onDismiss: () -> Unit,
     contentColor: Color,
@@ -983,7 +998,12 @@ fun AppListScreen(
     }
 
     // Long-press anywhere in the list (not just favorites) to edit that app.
+    // Keyed by row rather than by app: the same app can be listed twice, under its letter and
+    // in an open folder or a section, and a long press opened the menu on both.
     var menuForKey by remember { mutableStateOf<String?>(null) }
+    val folderById = remember(displayModel) {
+        displayModel.rows.filterIsInstance<AppListRow.FolderRow>().associate { it.folder.id to it.folder }
+    }
     var menuOffset by remember { mutableStateOf(DpOffset.Zero) }
     var editDialogFor by remember { mutableStateOf<AppInfo?>(null) }
     val touchPosition = remember { mutableStateOf(Offset.Zero) }
@@ -1203,16 +1223,16 @@ fun AppListScreen(
                 items = displayModel.rows,
                 // The section is part of the key because the same app legitimately appears
                 // twice: once under its letter and again under a section that repeats it.
-                key = { _, row ->
-                    when (row) {
-                        is AppListRow.Header -> "header:${row.text}"
-                        is AppListRow.Entry ->
-                            row.section?.let { "$it:${row.app.key}" } ?: row.app.key
-                    }
-                },
+                key = { _, row -> rowKey(row) },
                 // Headers and app rows are laid out nothing alike; telling the list so lets
                 // it reuse each kind against its own pool while scrubbing.
-                contentType = { _, row -> row is AppListRow.Header },
+                contentType = { _, row ->
+                    when (row) {
+                        is AppListRow.Header -> 0
+                        is AppListRow.Entry -> 1
+                        is AppListRow.FolderRow -> 2
+                    }
+                },
             ) { index, row ->
                 Box(
                     // Read in the draw phase on purpose: the scrub fade would otherwise
@@ -1223,7 +1243,31 @@ fun AppListScreen(
                 ) {
                 when (row) {
                     is AppListRow.Header -> SectionHeader(row.text, labelSizeSp, contentColor, alignment)
-                    is AppListRow.Entry -> AppRow(
+                    is AppListRow.FolderRow -> FolderListRow(
+                        row = row,
+                        contentColor = contentColor,
+                        alignment = alignment,
+                        iconSide = iconSide,
+                        iconSizeDp = iconSizeDp,
+                        labelSizeSp = labelSizeSp,
+                        onHome = favoriteKeys.contains(folderToken(row.folder.id)),
+                        menuExpanded = menuForKey == rowKey(row),
+                        menuOffset = menuOffset,
+                        touchPosition = touchPosition,
+                        onToggle = { onToggleFolder(row.folder) },
+                        onLongPress = { offset -> menuOffset = offset; menuForKey = rowKey(row) },
+                        onDismissMenu = { menuForKey = null },
+                        onManage = { menuForKey = null; onManageFolder(row.folder) },
+                        onSetOnHome = { menuForKey = null; onSetFolderOnHome(row.folder, it) },
+                        onDelete = { menuForKey = null; onDeleteFolder(row.folder) },
+                    )
+                    is AppListRow.Entry -> Box(
+                        // A folder's apps sit in from it, so where the folder ends is plain.
+                        Modifier.padding(
+                            start = if (row.inFolder && alignment == HomeAlignment.LEFT) FOLDER_INDENT else 0.dp,
+                            end = if (row.inFolder && alignment == HomeAlignment.RIGHT) FOLDER_INDENT else 0.dp,
+                        )
+                    ) { AppRow(
                         shortcutSwipe = shortcutSwipe,
                         favoritesEditable = favoritesEditable,
                         contentColor = contentColor,
@@ -1234,11 +1278,11 @@ fun AppListScreen(
                         iconSizeDp = iconSizeDp,
                         labelSizeSp = labelSizeSp,
                         isFavorite = favoriteKeys.contains(row.app.key),
-                        menuExpanded = menuForKey == row.app.key,
+                        menuExpanded = menuForKey == rowKey(row),
                         menuOffset = menuOffset,
                         touchPosition = touchPosition,
                         onLaunch = { onLaunch(row.app) },
-                        onLongPress = { offset -> menuOffset = offset; menuForKey = row.app.key },
+                        onLongPress = { offset -> menuOffset = offset; menuForKey = rowKey(row) },
                         onDismissMenu = { menuForKey = null },
                         onSetFavorite = { onSetFavorite(row.app, it) },
                         onEdit = { editDialogFor = row.app },
@@ -1247,7 +1291,11 @@ fun AppListScreen(
                         onHide = { onHideApp(row.app, row.app.key !in hiddenApps) },
                         isHidden = row.app.key in hiddenApps,
                         onMoveToFolder = { onMoveToFolder(row.app) },
-                    )
+                        onRemoveFromFolder = row.section?.removePrefix("folder:")
+                            ?.takeIf { row.inFolder }
+                            ?.let { id -> folderById[id] }
+                            ?.let { folder -> { onRemoveFromFolder(folder, row.app) } },
+                    ) }
                 }
                 }
             }
@@ -1422,6 +1470,8 @@ private fun AppRow(
     onMoveToFolder: () -> Unit,
     /** Hidden apps only ever reach this list through a search. */
     isHidden: Boolean,
+    /** Set for an app listed inside an open folder. */
+    onRemoveFromFolder: (() -> Unit)? = null,
 ) {
     // Same press treatment as the home screen: the stock ripple all but vanishes against a
     // wallpaper, and without any feedback a tap that did register reads as one that didn't.
@@ -1543,6 +1593,20 @@ private fun AppRow(
                     onClick = { onDismissMenu(); onAppInfo() },
                 )
             }
+            if (app.kind == EntryKind.PRIVATE_SPACE && app.componentName.className == PRIVATE_SPACE_UNLOCKED_CLASS) {
+                val context = LocalContext.current
+                DropdownMenuItem(
+                    text = { Text(stringResource(R.string.private_space_install_apps)) },
+                    leadingIcon = { Icon(Icons.Filled.Add, contentDescription = null) },
+                    onClick = {
+                        onDismissMenu()
+                        val repo = (context.applicationContext as VictoriaApp).appRepository
+                        if (!repo.openPrivateSpaceStore(context)) {
+                            Toast.makeText(context, R.string.private_space_install_failed, Toast.LENGTH_SHORT).show()
+                        }
+                    },
+                )
+            }
             // Hands the shortcut back to the app that pinned it, which is the only way one
             // ever leaves: nothing uninstalls a shortcut.
             if (app.kind == EntryKind.SHORTCUT) {
@@ -1557,6 +1621,13 @@ private fun AppRow(
                 leadingIcon = { Icon(Icons.Filled.Folder, contentDescription = null) },
                 onClick = { onDismissMenu(); onMoveToFolder() },
             )
+            onRemoveFromFolder?.let { remove ->
+                DropdownMenuItem(
+                    text = { Text(stringResource(R.string.home_folder_remove_app)) },
+                    leadingIcon = { Icon(Icons.Filled.LinkOff, contentDescription = null) },
+                    onClick = { onDismissMenu(); remove() },
+                )
+            }
             DropdownMenuItem(
                 text = {
                     Text(
@@ -1572,6 +1643,114 @@ private fun AppRow(
                     )
                 },
                 onClick = { onDismissMenu(); onHide() },
+            )
+        }
+    }
+}
+
+private fun rowKey(row: AppListRow): String = when (row) {
+    is AppListRow.Header -> "header:${row.text}"
+    is AppListRow.FolderRow -> "folderrow:${row.folder.id}"
+    is AppListRow.Entry -> row.section?.let { "$it:${row.app.key}" } ?: row.app.key
+}
+
+private val FOLDER_INDENT = 24.dp
+
+/** A folder filed in the list. A tap opens it in place, as it does on the home screen. */
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun FolderListRow(
+    row: AppListRow.FolderRow,
+    contentColor: Color,
+    alignment: HomeAlignment,
+    iconSide: IconSide,
+    iconSizeDp: Int,
+    labelSizeSp: Int,
+    onHome: Boolean,
+    menuExpanded: Boolean,
+    menuOffset: DpOffset,
+    touchPosition: MutableState<Offset>,
+    onToggle: () -> Unit,
+    onLongPress: (DpOffset) -> Unit,
+    onDismissMenu: () -> Unit,
+    onManage: () -> Unit,
+    onSetOnHome: (Boolean) -> Unit,
+    onDelete: () -> Unit,
+) {
+    val interaction = remember { MutableInteractionSource() }
+    val pressed by interaction.collectIsPressedAsState()
+    val density = LocalDensity.current
+    Box {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .recordTouchPosition(touchPosition)
+                .padding(horizontal = 20.dp)
+                .background(
+                    color = if (pressed) contentColor.copy(alpha = 0.15f) else Color.Transparent,
+                    shape = RoundedCornerShape(18.dp),
+                )
+                .combinedClickable(
+                    interactionSource = interaction,
+                    indication = null,
+                    onClick = onToggle,
+                    onLongClick = {
+                        onLongPress(
+                            with(density) {
+                                DpOffset(touchPosition.value.x.toDp(), touchPosition.value.y.toDp())
+                            }
+                        )
+                    },
+                )
+                .heightIn(min = MIN_ROW_HEIGHT)
+                .padding(horizontal = 8.dp, vertical = 6.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = when (alignment) {
+                HomeAlignment.LEFT -> Arrangement.Start
+                HomeAlignment.CENTER -> Arrangement.Center
+                HomeAlignment.RIGHT -> Arrangement.End
+            },
+        ) {
+            val gap = if (LocalIconConfig.current.showIcons) 16.dp else 0.dp
+            val icon: @Composable () -> Unit = {
+                FolderIcon(row.members, iconSizeDp, contentColor, row.folder.icon)
+            }
+            val text: @Composable () -> Unit = {
+                Text(
+                    row.folder.name,
+                    color = contentColor,
+                    fontSize = labelSizeSp.sp,
+                    modifier = Modifier.weight(1f, fill = false),
+                )
+            }
+            if (iconSide == IconSide.RIGHT) {
+                text()
+                Spacer(Modifier.width(gap))
+                icon()
+            } else {
+                icon()
+                Spacer(Modifier.width(gap))
+                text()
+            }
+        }
+
+        DropdownMenu(expanded = menuExpanded, onDismissRequest = onDismissMenu, offset = menuOffset) {
+            DropdownMenuItem(
+                text = { Text(stringResource(R.string.home_folder_choose_apps)) },
+                leadingIcon = { Icon(Icons.Filled.Tune, contentDescription = null) },
+                onClick = onManage,
+            )
+            DropdownMenuItem(
+                text = {
+                    Text(stringResource(if (onHome) R.string.folder_remove_from_home else R.string.folder_add_to_home))
+                },
+                leadingIcon = { Icon(if (onHome) Icons.Filled.StarBorder else Icons.Filled.Star, contentDescription = null) },
+                onClick = { onSetOnHome(!onHome) },
+            )
+            DropdownMenuItem(
+                text = { Text(stringResource(R.string.home_folder_delete)) },
+                leadingIcon = { Icon(Icons.Filled.Delete, contentDescription = null) },
+                onClick = onDelete,
             )
         }
     }

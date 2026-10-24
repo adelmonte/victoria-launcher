@@ -289,6 +289,7 @@ fun VictoriaNavHost(
     val compactTapArea by app.prefs.compactTapArea.collectAsState(initial = false)
     val stayAfterPrivateUnlock by app.prefs.stayAfterPrivateUnlock.collectAsState(initial = false)
     val privateSpaceSection by app.prefs.privateSpaceSection.collectAsState(initial = false)
+    val foldersInAppList by app.prefs.foldersInAppList.collectAsState(initial = false)
     val recentSection by app.prefs.recentSection.collectAsState(initial = false)
     val recentSectionCount by app.prefs.recentSectionCount.collectAsState(initial = 5)
     val edgeZoneInsetDp by app.prefs.edgeZoneInsetDp.collectAsState(initial = 0)
@@ -544,6 +545,7 @@ fun VictoriaNavHost(
         compactTapArea = compactTapArea,
         stayAfterPrivateUnlock = stayAfterPrivateUnlock,
         privateSpaceSection = privateSpaceSection,
+        foldersInAppList = foldersInAppList,
         recentSection = recentSection,
         recentSectionCount = recentSectionCount,
         edgeZoneInsetDp = edgeZoneInsetDp,
@@ -720,6 +722,8 @@ fun VictoriaNavHost(
                 onSetCompactTapArea = { scope.launch { app.prefs.setCompactTapArea(it) } },
                 privateSpaceSection = privateSpaceSection,
                 onSetPrivateSpaceSection = { scope.launch { app.prefs.setPrivateSpaceSection(it) } },
+                foldersInAppList = foldersInAppList,
+                onSetFoldersInAppList = { scope.launch { app.prefs.setFoldersInAppList(it) } },
                 recentSection = recentSection,
                 onSetRecentSection = { scope.launch { app.prefs.setRecentSection(it) } },
                 recentSectionCount = recentSectionCount,

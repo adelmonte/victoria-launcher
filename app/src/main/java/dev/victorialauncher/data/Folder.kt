@@ -7,9 +7,9 @@ import org.json.JSONObject
 /**
  * A named group of apps that lives in the favorites list.
  *
- * Folders deliberately don't touch the A-Z list: that list is an index of everything
- * installed and stays flat, so a folder never hides an app from where you'd look for it.
- * Instead a folder occupies one row on the home screen and expands in place.
+ * A folder occupies one row on the home screen and expands in place. It can also be filed in
+ * the A-Z list under its name (#126), but never instead of its apps: that list is an index of
+ * everything installed, so a folder never hides an app from where you'd look for it.
  */
 data class Folder(
     val id: String,

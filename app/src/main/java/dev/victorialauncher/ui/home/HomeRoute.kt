@@ -189,6 +189,14 @@ fun HomeRoute(
     // the list's own model otherwise, so nothing is grouped and sorted twice for nothing.
     val includeHiddenInSearch = settings.appListSearchHidden && hiddenApps.isNotEmpty()
 
+    // Folders filed in the list, and which of them are open there. Kept apart from the home
+    // screen's own open folders: the two are different places to have left one open.
+    val listFolders = if (settings.foldersInAppList) folders else emptyList()
+    var listOpenFolders by remember { mutableStateOf(setOf<String>()) }
+
+    // Read from the configuration so a change of language, which recreates this, is picked up.
+    val japanese = LocalConfiguration.current.locales[0].language == "ja"
+
     // Grouping, sorting and flattening every installed app is too much to do in composition,
     // and it re-runs whenever a name override changes.
     val listModel by produceState(
@@ -199,6 +207,8 @@ fun HomeRoute(
         // Empty unless the sort is on, so an ordinary launch doesn't rebuild the whole list.
         if (settings.sortByUsage) launchCounts else emptyMap(),
         settings.showListHeaders,
+        listFolders,
+        listOpenFolders,
     ) {
         val apps = appsByKey.values.toList()
         val counts = if (settings.sortByUsage) launchCounts else emptyMap()
@@ -213,6 +223,9 @@ fun HomeRoute(
                 renamed = { it.key in nameOverrides },
                 privateSectionLabel = privateSectionLabel,
                 recentSection = recentSectionArg,
+                japanese = japanese,
+                folders = listFolders,
+                expandedFolders = listOpenFolders,
             )
         }
     }
@@ -224,6 +237,8 @@ fun HomeRoute(
         includeHiddenInSearch,
         if (settings.sortByUsage) launchCounts else emptyMap(),
         settings.showListHeaders,
+        listFolders,
+        listOpenFolders,
     ) {
         val apps = appsByKey.values.toList()
         val counts = if (settings.sortByUsage) launchCounts else emptyMap()
@@ -241,6 +256,9 @@ fun HomeRoute(
                     renamed = { it.key in nameOverrides },
                     privateSectionLabel = privateSectionLabel,
                     recentSection = recentSectionArg,
+                    japanese = japanese,
+                    folders = listFolders,
+                    expandedFolders = listOpenFolders,
                 )
             }
         }
@@ -672,6 +690,9 @@ fun HomeRoute(
                 onChangeFolderIcon = { folder -> onNavigate(iconPickerRoute(folderToken(folder.id))) },
                 onResetFolderIcon = { folder -> scope.launch { app.prefs.setFolderIcon(folder.id, null) } },
                 onManageFolder = { folder -> onNavigate("folder/" + folder.id) },
+                onRemoveFolderFromHome = if (!settings.foldersInAppList) null else { folder ->
+                    scope.launch { app.prefs.removeFavorite(folderToken(folder.id)) }
+                },
                 onRemoveFromFolder = { folder, appInfo ->
                     scope.launch { app.prefs.removeAppFromFolder(folder.id, appInfo.key) }
                 },
@@ -863,6 +884,20 @@ fun HomeRoute(
                 onHideApp = { appInfo, hide -> scope.launch { app.prefs.setHidden(appInfo.key, hide) } },
                 hiddenApps = hiddenApps,
                 onMoveToFolder = { appInfo -> closeAppList(); folderPickerFor = appInfo },
+                onToggleFolder = { folder ->
+                    listOpenFolders = if (folder.id in listOpenFolders) listOpenFolders - folder.id else listOpenFolders + folder.id
+                },
+                onManageFolder = { folder -> closeAppList(); onNavigate("folder/" + folder.id) },
+                onDeleteFolder = { folder -> scope.launch { app.prefs.deleteFolder(folder.id) } },
+                onSetFolderOnHome = { folder, onHome ->
+                    scope.launch {
+                        if (onHome) app.prefs.addFavorite(folderToken(folder.id))
+                        else app.prefs.removeFavorite(folderToken(folder.id))
+                    }
+                },
+                onRemoveFromFolder = { folder, appInfo ->
+                    scope.launch { app.prefs.removeAppFromFolder(folder.id, appInfo.key) }
+                },
                 onOpenSettings = { closeAppList(); onNavigate("settings") },
                 onDismiss = { closeAppList() },
                 contentColor = settings.contentColor,
@@ -1076,6 +1111,7 @@ data class HomeSettings(
     val textShadowStrength: Int,
     val compactTapArea: Boolean,
     val privateSpaceSection: Boolean,
+    val foldersInAppList: Boolean,
     val recentSection: Boolean,
     val recentSectionCount: Int,
     val edgeZoneInsetDp: Int,

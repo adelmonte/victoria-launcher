@@ -90,7 +90,7 @@
     <string name="settings_list_headers">Letter headings</string>
     <string name="settings_list_headers_detail">Off gives one continuous list. The A-Z strip still jumps to the letter</string>
     <string name="settings_notification_badges">Notification count on icons</string>
-    <string name="settings_notification_badges_detail">Needs the same notification access Now Playing does. Counts only, never what a notification says</string>
+    <string name="settings_notification_badges_detail">Needs the same notification access Now Playing does. Counts only, never what a notification says. A dot beside the name when icons are hidden</string>
     <string name="settings_section_top">Where a letter lands</string>
     <string name="settings_close_folder">Close a folder after opening an app</string>
     <string name="settings_close_folder_detail">Off leaves it open until you close it yourself</string>
@@ -175,6 +175,10 @@
     <string name="settings_stay_private_unlock">Stay in the list after unlocking</string>
     <string name="settings_stay_private_unlock_detail">Unlocking Private Space keeps the app list open instead of going back to the home screen</string>
     <string name="settings_private_space_section">Private Space section</string>
+    <string name="settings_folders_in_list">Folders in the app list</string>
+    <string name="settings_folders_in_list_detail">Each folder also shows under its own letter. Its apps stay under theirs too</string>
+    <string name="folder_add_to_home">Add to home screen</string>
+    <string name="folder_remove_from_home">Remove from home screen</string>
     <string name="settings_private_space_section_detail">Groups the private space apps below the alphabet instead of mixing them in, so the two copies of an app can be told apart</string>
     <string name="settings_recent_section">Recently installed section</string>
     <string name="settings_recent_section_detail">Ends the app list with whatever arrived most recently</string>
@@ -259,6 +263,8 @@
 
     <!-- Private space -->
     <string name="private_space">Private space</string>
+    <string name="private_space_install_apps">Install apps</string>
+    <string name="private_space_install_failed">No app store to open in the private space</string>
 
     <!-- Favorites / hidden / folder pickers -->
     <string name="favorites_title">Favorites</string>

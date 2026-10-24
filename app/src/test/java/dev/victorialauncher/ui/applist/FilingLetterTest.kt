@@ -39,4 +39,24 @@ class FilingLetterTest {
         assertEquals('F', letter)
         assertEquals(false, asked)
     }
+
+    @Test
+    fun `japanese kanji files under the kanji heading, not its english name`() {
+        assertEquals(KANJI_HEADING, filingLetter("天気", renamed = false, japanese = true) { "Weather" })
+    }
+
+    @Test
+    fun `japanese kana file under their row`() {
+        assertEquals('は', filingLetter("ブルー", renamed = false, japanese = true) { "Blue" })
+        assertEquals('か', japaneseHeading("ガイド"))
+        assertEquals('た', japaneseHeading("ﾂｲｯﾀｰ"))
+        assertEquals('や', japaneseHeading("ゃ"))
+        assertEquals('わ', japaneseHeading("ん"))
+        assertEquals('あ', japaneseHeading("あ"))
+    }
+
+    @Test
+    fun `latin names keep their letter on a japanese phone`() {
+        assertEquals('L', filingLetter("LINE", renamed = false, japanese = true) { null })
+    }
 }

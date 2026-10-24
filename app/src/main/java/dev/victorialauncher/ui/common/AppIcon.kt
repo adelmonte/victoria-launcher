@@ -7,6 +7,7 @@ import android.net.Uri
 import android.util.LruCache
 import androidx.compose.foundation.background
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
@@ -185,8 +186,20 @@ fun AppIcon(app: AppInfo, sizeDp: Int, modifier: Modifier = Modifier) {
     val context = LocalContext.current
     val victoriaApp = context.applicationContext as VictoriaApp
     val config = LocalIconConfig.current
-    // Nothing drawn and no space taken, so rows close up rather than leaving a hole.
-    if (!config.showIcons) return
+    // Nothing drawn and no space taken, so rows close up rather than leaving a hole. Except
+    // for a dot beside the name while the app has notifications, or a list with no icons
+    // could never show the count at all (#121).
+    if (!config.showIcons) {
+        if (notificationBadgeCount(app) > 0) {
+            Box(
+                modifier
+                    .padding(horizontal = 6.dp)
+                    .size(8.dp)
+                    .background(MaterialTheme.colorScheme.primary, CircleShape)
+            )
+        }
+        return
+    }
     val iconPackPackage = config.pack
     val overrideValue = config.overrides[app.key]
     val px = with(LocalDensity.current) { sizeDp.dp.roundToPx() }.coerceAtLeast(1)

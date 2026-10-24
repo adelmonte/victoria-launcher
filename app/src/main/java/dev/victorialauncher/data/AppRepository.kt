@@ -284,6 +284,31 @@ class AppRepository(
      * system's own authentication — none of which belongs on the main thread, and all of which
      * starts from a press on a row.
      */
+    /**
+     * Opens the app store inside an open private space, the way the stock launcher's install
+     * button does. Settings' own route to it can come up empty while another launcher is the
+     * default (#124). False when there is no open space or no store to open.
+     */
+    fun openPrivateSpaceStore(from: Context): Boolean {
+        if (Build.VERSION.SDK_INT < PRIVATE_SPACE_SDK) return false
+        val user = (privateSpace() as? PrivateSpace.Unlocked)?.user ?: return false
+        return runCatching {
+            val sender = launcherApps.getAppMarketActivityIntent(null, user) ?: return false
+            // The system made this sender, so starting it rests on our being in front, which
+            // Android 14 only lends to it when asked.
+            val options = android.app.ActivityOptions.makeBasic()
+                .setPendingIntentBackgroundActivityStartMode(
+                    android.app.ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED
+                )
+            from.startIntentSender(
+                sender, null,
+                Intent.FLAG_ACTIVITY_NEW_TASK, Intent.FLAG_ACTIVITY_NEW_TASK, 0,
+                options.toBundle(),
+            )
+            true
+        }.getOrDefault(false)
+    }
+
     suspend fun togglePrivateSpace(): PrivateSpace? = withContext(Dispatchers.IO) {
         if (Build.VERSION.SDK_INT < PRIVATE_SPACE_SDK) return@withContext null
         val state = privateSpace()

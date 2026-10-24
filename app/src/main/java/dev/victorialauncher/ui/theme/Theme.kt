@@ -48,6 +48,21 @@ fun fontFamilyOf(font: AppFont, fontFile: String?): FontFamily {
 
 private val customFontCache = mutableMapOf<String, FontFamily>()
 
+/** The same choice as a platform typeface, for the views a widget is drawn with. */
+fun widgetTypeface(font: AppFont, fontFile: String?): Typeface = when (font) {
+    AppFont.SYSTEM -> Typeface.DEFAULT
+    AppFont.SANS_SERIF -> Typeface.SANS_SERIF
+    AppFont.SERIF -> Typeface.SERIF
+    AppFont.MONOSPACE -> Typeface.MONOSPACE
+    AppFont.CUSTOM -> fontFile?.let { path ->
+        customTypefaceCache.getOrPut(path) {
+            runCatching { Typeface.createFromFile(File(path)) }.getOrDefault(Typeface.DEFAULT)
+        }
+    } ?: Typeface.DEFAULT
+}
+
+private val customTypefaceCache = mutableMapOf<String, Typeface>()
+
 private val DarkColors = darkColorScheme(
     primary = Color(0xFF7FD1E0),
     onPrimary = Color(0xFF00363F),

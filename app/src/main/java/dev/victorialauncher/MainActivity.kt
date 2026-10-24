@@ -28,6 +28,7 @@ import dev.victorialauncher.ui.VictoriaNavHost
 import dev.victorialauncher.ui.common.IconConfig
 import dev.victorialauncher.ui.common.LocalIconConfig
 import dev.victorialauncher.ui.theme.VictoriaTheme
+import dev.victorialauncher.ui.theme.widgetTypeface
 import kotlinx.coroutines.delay
 
 /** One keystroke taken on the home screen; a null character is a backspace. */
@@ -98,6 +99,7 @@ class MainActivity : ComponentActivity() {
 
             val font by app.prefs.font.collectAsState(initial = AppFont.SYSTEM)
             val fontFile by app.prefs.fontFile.collectAsState(initial = null)
+            LaunchedEffect(font, fontFile) { app.widgetHost.typeface = widgetTypeface(font, fontFile) }
             val allowRotation by app.prefs.allowRotation.collectAsState(initial = null)
             LaunchedEffect(allowRotation, rotatesByDefault) {
                 requestedOrientation = if (allowRotation ?: rotatesByDefault) {

@@ -169,6 +169,8 @@ fun SettingsScreen(
     onSetStayAfterPrivateUnlock: (Boolean) -> Unit,
     privateSpaceSection: Boolean,
     onSetPrivateSpaceSection: (Boolean) -> Unit,
+    foldersInAppList: Boolean,
+    onSetFoldersInAppList: (Boolean) -> Unit,
     recentSection: Boolean,
     onSetRecentSection: (Boolean) -> Unit,
     recentSectionCount: Int,
@@ -559,6 +561,13 @@ fun SettingsScreen(
                 label = stringResource(R.string.settings_private_space_section),
                 detail = stringResource(R.string.settings_private_space_section_detail),
                 checked = privateSpaceSection, onCheckedChange = onSetPrivateSpaceSection,
+            )
+        },
+        SettingsEntry(SettingsSection.APP_LIST, stringResource(R.string.settings_folders_in_list), "folders groups") {
+            SwitchRowWithDetail(
+                label = stringResource(R.string.settings_folders_in_list),
+                detail = stringResource(R.string.settings_folders_in_list_detail),
+                checked = foldersInAppList, onCheckedChange = onSetFoldersInAppList,
             )
         },
         SettingsEntry(SettingsSection.APP_LIST, stringResource(R.string.settings_recent_section), "recently installed new apps") {

@@ -168,6 +168,7 @@ class Prefs(private val context: Context) {
         val COMPACT_TAP_AREA = booleanPreferencesKey("compact_tap_area")
         val STAY_AFTER_PRIVATE_UNLOCK = booleanPreferencesKey("stay_after_private_unlock")
         val PRIVATE_SPACE_SECTION = booleanPreferencesKey("private_space_section")
+        val FOLDERS_IN_APP_LIST = booleanPreferencesKey("folders_in_app_list")
         val RECENT_SECTION = booleanPreferencesKey("recent_section")
         val RECENT_SECTION_COUNT = intPreferencesKey("recent_section_count")
         val SHOW_APP_ICONS = booleanPreferencesKey("show_app_icons")
@@ -672,6 +673,10 @@ class Prefs(private val context: Context) {
      */
     val privateSpaceSection: Flow<Boolean> =
         data.map { it[Keys.PRIVATE_SPACE_SECTION] ?: false }.distinctUntilChanged()
+
+    /** Whether folders also appear in the app list, filed under their own names (#126). */
+    val foldersInAppList: Flow<Boolean> =
+        data.map { it[Keys.FOLDERS_IN_APP_LIST] ?: false }.distinctUntilChanged()
 
     /** Whether the list ends with what was installed most recently. */
     val recentSection: Flow<Boolean> =
@@ -1249,6 +1254,10 @@ class Prefs(private val context: Context) {
 
     suspend fun setPrivateSpaceSection(v: Boolean) {
         context.dataStore.edit { it[Keys.PRIVATE_SPACE_SECTION] = v }
+    }
+
+    suspend fun setFoldersInAppList(v: Boolean) {
+        context.dataStore.edit { it[Keys.FOLDERS_IN_APP_LIST] = v }
     }
 
     suspend fun setRecentSection(v: Boolean) {
