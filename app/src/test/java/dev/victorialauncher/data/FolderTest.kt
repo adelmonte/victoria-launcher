@@ -48,4 +48,18 @@ class FolderTest {
         val restored = foldersFromJson(foldersToJson(listOf(Folder("1", "Plain", emptyList()))))
         assertNull(restored.single().icon)
     }
+
+    @Test
+    fun `a folder's widgets survive a JSON round-trip`() {
+        val folders = listOf(
+            Folder(id = "1", name = "Music", apps = listOf("a/A"), widgets = listOf(FolderWidget(42, 200), FolderWidget(7, 96))),
+        )
+        assertEquals(folders, foldersFromJson(foldersToJson(folders)))
+    }
+
+    @Test
+    fun `a folder saved before widgets reads back with none`() {
+        val restored = foldersFromJson("""[{"id":"1","name":"Old","apps":["a/A"]}]""")
+        assertEquals(emptyList<FolderWidget>(), restored.single().widgets)
+    }
 }

@@ -686,7 +686,11 @@ fun HomeRoute(
                 onRenameFolder = { folder, name ->
                     scope.launch { app.prefs.upsertFolder(folder.copy(name = name)) }
                 },
-                onDeleteFolder = { folder -> scope.launch { app.prefs.deleteFolder(folder.id) } },
+                onDeleteFolder = { folder ->
+                    // Its widgets go with it, released so their apps stop updating them.
+                    folder.widgets.forEach { runCatching { app.widgetHost.deleteAppWidgetId(it.id) } }
+                    scope.launch { app.prefs.deleteFolder(folder.id) }
+                },
                 onChangeFolderIcon = { folder -> onNavigate(iconPickerRoute(folderToken(folder.id))) },
                 onResetFolderIcon = { folder -> scope.launch { app.prefs.setFolderIcon(folder.id, null) } },
                 onManageFolder = { folder -> onNavigate("folder/" + folder.id) },
@@ -888,7 +892,11 @@ fun HomeRoute(
                     listOpenFolders = if (folder.id in listOpenFolders) listOpenFolders - folder.id else listOpenFolders + folder.id
                 },
                 onManageFolder = { folder -> closeAppList(); onNavigate("folder/" + folder.id) },
-                onDeleteFolder = { folder -> scope.launch { app.prefs.deleteFolder(folder.id) } },
+                onDeleteFolder = { folder ->
+                    // Its widgets go with it, released so their apps stop updating them.
+                    folder.widgets.forEach { runCatching { app.widgetHost.deleteAppWidgetId(it.id) } }
+                    scope.launch { app.prefs.deleteFolder(folder.id) }
+                },
                 onSetFolderOnHome = { folder, onHome ->
                     scope.launch {
                         if (onHome) app.prefs.addFavorite(folderToken(folder.id))

@@ -8,6 +8,10 @@ import androidx.compose.animation.core.calculateTargetValue
 import androidx.compose.animation.core.exponentialDecay
 import androidx.compose.animation.core.spring
 import androidx.compose.runtime.withFrameNanos
+import androidx.compose.material3.LocalContentColor
+import androidx.compose.material.icons.filled.Widgets
+import dev.victorialauncher.widget.WidgetPage
+import dev.victorialauncher.data.FolderWidget
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -1043,6 +1047,7 @@ fun HomeScreen(
                             onRemoveFromHome = onRemoveFolderFromHome?.let { remove ->
                                 { folderMenuFor = null; remove(item.folder) }
                             },
+                            widgetActions = widgetActions,
                             onOpenApp = { member ->
                                 // Closed as the app starts rather than on the way back: there
                                 // is nothing to come back to yet, and a folder that shuts while
@@ -1404,6 +1409,67 @@ private fun FavoriteRow(
     }
 }
 
+/**
+ * One widget inside an open folder, with its own menu. The widget itself is the same hosted
+ * view the home screen's widget area draws, so a widget that fails is contained the same way.
+ */
+@Composable
+private fun FolderWidgetBlock(folderId: String, widget: FolderWidget, actions: WidgetSlotActions) {
+    var menuExpanded by remember { mutableStateOf(false) }
+    var menuOffset by remember { mutableStateOf(DpOffset.Zero) }
+    var resizing by remember { mutableStateOf(false) }
+    // Followed while the stepper is held, and stored once the change is done.
+    var liveHeight by remember(widget.heightDp) { mutableIntStateOf(widget.heightDp) }
+    val density = LocalDensity.current
+    Column(Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 4.dp)) {
+        Box(Modifier.fillMaxWidth().height(liveHeight.dp)) {
+            WidgetPage(widget.id) { x, y ->
+                menuOffset = with(density) { DpOffset(x.toDp(), y.toDp()) }
+                menuExpanded = true
+            }
+            TouchAnchoredMenu(expanded = menuExpanded, offset = menuOffset, onDismissRequest = { menuExpanded = false }) {
+                DropdownMenuItem(
+                    text = { Text(stringResource(R.string.handle_widget_height)) },
+                    leadingIcon = { Icon(Icons.Filled.Height, contentDescription = null) },
+                    onClick = { menuExpanded = false; resizing = true },
+                )
+                DropdownMenuItem(
+                    text = { Text(stringResource(R.string.widget_change_settings)) },
+                    leadingIcon = { Icon(Icons.Filled.Tune, contentDescription = null) },
+                    onClick = { menuExpanded = false; actions.onWidgetSettings(widget.id) },
+                )
+                DropdownMenuItem(
+                    text = { Text(stringResource(R.string.action_app_info)) },
+                    leadingIcon = { Icon(Icons.Filled.Info, contentDescription = null) },
+                    onClick = { menuExpanded = false; actions.onAppInfo(widget.id) },
+                )
+                DropdownMenuItem(
+                    text = { Text(stringResource(R.string.widget_remove_this)) },
+                    leadingIcon = { Icon(Icons.Filled.Delete, contentDescription = null) },
+                    onClick = { menuExpanded = false; actions.onRemoveFolderWidget(folderId, widget.id) },
+                )
+            }
+        }
+        if (resizing) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                StepperRow(
+                    label = stringResource(R.string.handle_widget_height),
+                    value = liveHeight,
+                    range = 80..900,
+                    step = HEIGHT_STEP_DP,
+                    onChange = { liveHeight = it },
+                    contentColor = LocalContentColor.current,
+                    modifier = Modifier.weight(1f),
+                )
+                TextButton(onClick = {
+                    resizing = false
+                    if (liveHeight != widget.heightDp) actions.onResizeFolderWidget(folderId, widget.id, liveHeight)
+                }) { Text(stringResource(R.string.action_done)) }
+            }
+        }
+    }
+}
+
 /** A folder row, which expands in place to show its apps. */
 @Composable
 private fun FolderRow(
@@ -1435,6 +1501,7 @@ private fun FolderRow(
     onEditLayout: () -> Unit,
     onDelete: () -> Unit,
     onRemoveFromHome: (() -> Unit)?,
+    widgetActions: WidgetSlotActions,
     onOpenApp: (AppInfo) -> Unit,
     onRemoveApp: (AppInfo) -> Unit,
     onMemberAppInfo: (AppInfo) -> Unit,
@@ -1518,6 +1585,11 @@ private fun FolderRow(
                     onClick = onManage,
                 )
                 DropdownMenuItem(
+                    text = { Text(stringResource(R.string.widget_add)) },
+                    leadingIcon = { Icon(Icons.Filled.Widgets, contentDescription = null) },
+                    onClick = { onDismissMenu(); widgetActions.onAddWidgetToFolder(folder.id) },
+                )
+                DropdownMenuItem(
                     text = { Text(stringResource(R.string.action_edit_icon_and_name)) },
                     leadingIcon = { Icon(Icons.Filled.Edit, contentDescription = null) },
                     onClick = onEdit,
@@ -1546,6 +1618,10 @@ private fun FolderRow(
         // Members expand in place rather than opening a separate screen.
         AnimatedVisibility(visible = expanded && !editMode) {
             Column {
+                // Above the apps, so a folder's widget is what it opens onto.
+                folder.widgets.forEach { widget ->
+                    key(widget.id) { FolderWidgetBlock(folder.id, widget, widgetActions) }
+                }
                 members.forEach { member ->
                     Box {
                     Row(

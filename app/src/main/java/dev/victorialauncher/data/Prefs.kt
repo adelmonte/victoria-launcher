@@ -936,6 +936,26 @@ class Prefs(private val context: Context) {
         }
     }
 
+    /** Changes one folder in place, leaving the rest of the list as it was. */
+    private suspend fun updateFolder(folderId: String, change: (Folder) -> Folder) {
+        context.dataStore.edit { pref ->
+            val updated = foldersFromJson(pref[Keys.FOLDERS]).map { if (it.id == folderId) change(it) else it }
+            pref[Keys.FOLDERS] = foldersToJson(updated)
+        }
+    }
+
+    suspend fun addFolderWidget(folderId: String, widgetId: Int) = updateFolder(folderId) {
+        it.copy(widgets = it.widgets + FolderWidget(widgetId, FOLDER_WIDGET_DEFAULT_HEIGHT_DP))
+    }
+
+    suspend fun removeFolderWidget(folderId: String, widgetId: Int) = updateFolder(folderId) {
+        it.copy(widgets = it.widgets.filterNot { w -> w.id == widgetId })
+    }
+
+    suspend fun setFolderWidgetHeight(folderId: String, widgetId: Int, heightDp: Int) = updateFolder(folderId) {
+        it.copy(widgets = it.widgets.map { w -> if (w.id == widgetId) w.copy(heightDp = heightDp) else w })
+    }
+
     suspend fun removeAppFromFolder(folderId: String, componentKey: String) {
         context.dataStore.edit { pref ->
             val updated = foldersFromJson(pref[Keys.FOLDERS]).map { folder ->

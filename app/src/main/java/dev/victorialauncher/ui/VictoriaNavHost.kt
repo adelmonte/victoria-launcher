@@ -18,6 +18,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -601,6 +602,18 @@ fun VictoriaNavHost(
         }
     }
 
+    // The folder a widget being picked is for. Held here rather than passed through the
+    // picker, which only knows about widget ids.
+    var folderWidgetTarget by rememberSaveable { mutableStateOf<String?>(null) }
+    val folderWidgetPickerLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        val folderId = folderWidgetTarget
+        folderWidgetTarget = null
+        if (result.resultCode == RESULT_OK && folderId != null) {
+            val id = result.data?.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, -1) ?: -1
+            if (id != -1) scope.launch { app.prefs.addFolderWidget(folderId, id) }
+        }
+    }
+
     val widgetActions = remember {
         WidgetSlotActions(
             onAddWidget = { widgetPickerLauncher.launch(Intent(context, WidgetPickerActivity::class.java)) },
@@ -628,6 +641,19 @@ fun VictoriaNavHost(
             },
             onResize = { newHeight -> scope.launch { app.prefs.setWidgetHeightDp(newHeight) } },
             onOpenSettings = { navController.navigate("settings") },
+            onAddWidgetToFolder = { folderId ->
+                folderWidgetTarget = folderId
+                folderWidgetPickerLauncher.launch(Intent(context, WidgetPickerActivity::class.java))
+            },
+            onRemoveFolderWidget = { folderId, id ->
+                scope.launch {
+                    if (id > 0) runCatching { app.widgetHost.deleteAppWidgetId(id) }
+                    app.prefs.removeFolderWidget(folderId, id)
+                }
+            },
+            onResizeFolderWidget = { folderId, id, height ->
+                scope.launch { app.prefs.setFolderWidgetHeight(folderId, id, height) }
+            },
         )
     }
 

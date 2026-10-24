@@ -65,6 +65,10 @@ data class WidgetSlotActions(
     val onAppInfo: (widgetId: Int) -> Unit,
     val onResize: (heightDp: Int) -> Unit,
     val onOpenSettings: () -> Unit,
+    /** The same picker, with whatever it binds kept in a folder instead (#115). */
+    val onAddWidgetToFolder: (folderId: String) -> Unit = {},
+    val onRemoveFolderWidget: (folderId: String, widgetId: Int) -> Unit = { _, _ -> },
+    val onResizeFolderWidget: (folderId: String, widgetId: Int, heightDp: Int) -> Unit = { _, _, _ -> },
 )
 
 /**
@@ -230,7 +234,7 @@ fun WidgetSlot(
 
 /** One hosted widget. [onLongPress] carries the press position in this page's local pixels. */
 @Composable
-private fun WidgetPage(widgetId: Int, onPressAndHold: (x: Float, y: Float) -> Unit) {
+internal fun WidgetPage(widgetId: Int, onPressAndHold: (x: Float, y: Float) -> Unit) {
     val context = LocalContext.current
     val app = context.applicationContext as VictoriaApp
     val appWidgetManager = remember { AppWidgetManager.getInstance(context) }
