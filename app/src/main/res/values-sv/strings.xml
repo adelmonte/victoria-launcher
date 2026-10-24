@@ -1,0 +1,399 @@
+<resources>
+    <string name="app_name">Victoria Launcher</string>
+    <string name="accessibility_description">Gör så att svep-ner-gesten öppnar aviseringsfältet. Victoria Launcher varken läser av eller agerar på skärminnehållet.</string>
+
+    <!-- Shared actions -->
+    <string name="action_back">Tillbaka</string>
+    <string name="action_save">Spara</string>
+    <string name="action_cancel">Avbryt</string>
+    <string name="action_reset">Återställ</string>
+    <string name="action_create">Skapa</string>
+    <string name="action_done">Klar</string>
+    <string name="action_remove">Ta bort</string>
+    <string name="action_app_info">Appinfo</string>
+    <string name="action_edit_layout">Redigera layout</string>
+    <string name="action_edit_icon_and_name">Redigera ikon &amp; namn</string>
+    <string name="action_move_to_folder">Flytta till mapp …</string>
+    <string name="action_change_icon">Byt ikon …</string>
+    <string name="action_open_settings">Victoria Launcher-inställningar</string>
+    <string name="action_remove_shortcut">Ta bort genväg</string>
+
+    <!-- Home screen -->
+    <string name="home_drag_handle">Ändra ordning</string>
+    <string name="home_no_favorites_title">Inga favoriter ännu</string>
+    <string name="home_no_favorites_body">Tryck på skärmkanten för att öppna applistan, eller välj dina favoriter från listan nedan.</string>
+    <string name="home_choose_favorites">Välj favoriter</string>
+    <string name="home_folder_choose_apps">Hantera mapp</string>
+    <string name="home_folder_delete">Radera mapp</string>
+    <string name="home_folder_remove_app">Ta bort från mapp</string>
+    <string name="home_folder_empty">Tom — långtryck på mappen för att välja appar</string>
+    <string name="home_folder_name_label">Mappnamn</string>
+    <string name="home_folder_use_previews">Använd appförhandsvisningar</string>
+    <string name="home_display_name_label">Visningsnamn</string>
+
+    <!-- Edit-mode drag handles -->
+    <string name="handle_side_padding">Sidoutfyllnad</string>
+    <string name="handle_widget_top">Widgetens överkant</string>
+    <string name="handle_widget_bottom">Widgetens nederkant</string>
+    <string name="handle_widget_height">Widgetens höjd</string>
+    <string name="handle_widget_side_padding">Widgetens sidoutfyllnad</string>
+    <string name="handle_widget_offset_x">Widgetens vänster / höger</string>
+    <string name="handle_az_range">A-Z-remsans utsträckning</string>
+    <string name="edit_value_range">%1$d till %2$d dp</string>
+    <string name="handle_favorites_top">Favoriternas överkant</string>
+    <string name="handle_favorites_bottom">Favoriternas nederkant</string>
+    <string name="handle_now_playing_top">Nu spelas överkant</string>
+    <string name="handle_now_playing_bottom">Nu spelas nederkant</string>
+    <string name="handle_now_playing_height">Nu spelas höjd</string>
+
+    <!-- App list -->
+    <string name="applist_add_favorite">Lägg till i favoriter</string>
+    <string name="applist_remove_favorite">Ta bort från favoriter</string>
+    <string name="applist_hide">Dölj från lista</string>
+    <string name="applist_unhide">Visa i lista</string>
+
+    <string name="applist_band_hint">Dra i bandet för att flytta det eller i något av handtagen för att ändra storlek på det</string>
+    <string name="applist_band_top">Överkant på A-Z-remsan</string>
+    <string name="applist_band_bottom">Nederkant på A-Z-remsan</string>
+
+    <string name="applist_search">Sök efter appar</string>
+
+    <!-- Toasts -->
+    <string name="toast_enable_accessibility_shade">Aktivera Victoria Launcher under Inställningar → Tillgänglighet för att öppna aviseringar</string>
+    <string name="toast_enable_accessibility_lock">Aktivera Victoria Launcher under Inställningar → Tillgänglighet för att låsa skärmen</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Victoria-inställningar</string>
+    <string name="settings_section_home">Startskärm</string>
+    <string name="settings_section_app_list">Applista</string>
+    <string name="settings_section_gestures">Gester</string>
+    <string name="settings_section_notifications">Aviseringar</string>
+    <string name="settings_preview">Förhandsgranskning</string>
+    <string name="settings_search">Sök efter inställningar</string>
+    <string name="settings_corner_search">Öppna sökfunktionen</string>
+    <string name="settings_corner_button">Knapp i det nedre hörnet</string>
+    <string name="settings_last_letter">Varje bokstav på samma rad</string>
+    <string name="settings_last_letter_detail">Bokstäverna i slutet av listan hamnar på samma rad som de övriga. Tar upp en skärm med tomt utrymme under den sista appen.</string>
+    <string name="settings_auto_keyboard">Öppna tangentbordet med listan</string>
+    <string name="settings_auto_keyboard_detail">Börja skriva så fort applistan öppnas. Av, tangentbordet väntar tills du trycker på sökrutan.</string>
+    <string name="settings_settings_row">Inställningar-rad i applistan</string>
+    <string name="settings_settings_row_detail">Raden efter Z som öppnar dessa inställningar. En långtryckning på bakgrundsbilden leder till dem hur som helst.</string>
+    <string name="settings_search_none">Inget matchar detta</string>
+    <string name="settings_section_appearance">Utseende</string>
+    <string name="settings_section_apps">Appar</string>
+    <string name="settings_section_about">Om</string>
+    <string name="settings_preview_sample">Exempelapp</string>
+    <string name="settings_icon_pack">Ikonpaket</string>
+    <string name="settings_icon_pack_default">Standard</string>
+    <string name="settings_icons_favorites">Ikoner för favoriter</string>
+    <string name="settings_icons_app_list">Ikoner i applistan</string>
+    <string name="settings_list_headers">Bokstavsrubriker</string>
+    <string name="settings_list_headers_detail">Av ger en sammanhängande lista. A-Z-remsan hoppar fortfarande till bokstaven.</string>
+    <string name="settings_notification_badges">Aviseringsräknare på ikoner</string>
+    <string name="settings_notification_badges_detail">Behöver samma aviseringsåtkomst som Nu spelas gör. Endast räknare, aldrig vad en avisering säger.</string>
+    <string name="settings_section_top">Vart en bokstav hamnar</string>
+    <string name="settings_close_folder">Stäng en mapp efter att en app har öppnats</string>
+    <string name="settings_close_folder_detail">Av lämnar den öppen tills du stänger den själv</string>
+    <string name="settings_favorites_source">Favoriter</string>
+    <string name="settings_frequent_count">Hur många</string>
+    <string name="favorites_source_manual">Listan som du gör</string>
+    <string name="favorites_source_frequent">Mest använda</string>
+    <string name="settings_icon_pack_no_icons">Inget</string>
+    <string name="settings_icon_pack_none">Inga ikonpaketsappar hittades på den här enheten.</string>
+    <string name="settings_icon_size">Ikonstorlek</string>
+    <string name="settings_text_size">Textstorlek</string>
+    <string name="settings_favorite_spacing">Avstånd mellan favoriter</string>
+    <string name="settings_font">Teckensnitt</string>
+    <string name="settings_text_color">Textfärg</string>
+    <string name="settings_text_color_detail">Auto läser av bakgrundsbilden och väljer den som är läsbar</string>
+    <string name="settings_show_names">Visa appnamn bredvid favoritikonerna</string>
+    <string name="settings_hide_status_bar">Dölj statusfält på startskärmen</string>
+    <string name="settings_hide_status_bar_applist">Dölj statusfält i applistan</string>
+    <string name="settings_status_bar_timeout">Statusfält visas i</string>
+    <string name="settings_dim_home">Dämpa bakgrundsbild på startskärmen</string>
+    <string name="settings_dim_applist">Dämpa bakgrundsbild bakom applistan</string>
+    <string name="settings_haptics">Haptisk återkoppling</string>
+    <string name="settings_haptics_detail">Följer ditt systems inställning för beröringsåterkoppling</string>
+    <string name="settings_edge_side">Vilken kant öppnar applistan</string>
+    <string name="settings_double_tap_lock">Dubbeltryck för att låsa skärmen</string>
+    <string name="settings_double_tap_lock_detail">Tryck två gånger på A-Z-remsan</string>
+    <string name="settings_lock_needs_accessibility">Victoria Launcher måste vara aktiverad under Tillgänglighet. Om den knappen är gråmarkerad, öppna Appinfo och tillåt blockerade inställningar från ⋮-menyn först.</string>
+    <string name="settings_az_visibility">Visa A-Z på startskärmen</string>
+    <string name="az_visibility_never">Aldrig</string>
+    <string name="az_visibility_landscape">Liggande</string>
+    <string name="az_visibility_always">Alltid</string>
+    <string name="settings_always_show_az">Visa alltid A-Z</string>
+    <string name="settings_show_alphabet">Visa A-Z i applistan</string>
+    <string name="applist_search_web">Sök på webben efter \"%1$s\"</string>
+    <string name="settings_web_search">Erbjud en webbsökning</string>
+    <string name="settings_web_search_detail">När inget i listan matchar det du skrev, erbjuder en rad orden till din webbläsare. Ingenting skickas någonstans om du inte trycker på den.</string>
+    <string name="settings_swipe_up_search">Svep uppåt öppnar sökfunktionen</string>
+    <string name="settings_swipe_up_search_detail">En svepning uppåt öppnar applistan med markören redan i sökrutan</string>
+    <string name="app_work_suffix"> (jobb)</string>
+    <string name="settings_edge_inset_auto">Gör plats för tillbaka-gesten automatiskt</string>
+    <string name="settings_edge_inset_auto_detail">Ser till att A-Z-remsan inte täcker den kant som Android använder för sin tillbaka-svepning. Ändrar ingenting med knappnavigering.</string>
+    <string name="settings_edge_inset">Lämna utrymme för tillbaka-gesten</string>
+    <string name="settings_mark_work_apps">Markera jobbappar</string>
+    <string name="settings_mark_work_apps_detail">Appar från en jobbprofil säger detta efter deras namn, så att två kopior av samma app kan särskiljas</string>
+    <string name="settings_dim_others">Dämpa resten medan A-Z används</string>
+    <string name="settings_dim_others_detail">Apparna utanför den bokstav som du befinner dig på tonas ut, vilket gör att den sticker ut. Av håller hela listan synlig.</string>
+    <string name="settings_hold_scroll">Håll på en bokstav för att fortsätta bläddra</string>
+    <string name="settings_hold_scroll_detail">Vila ditt finger på en bokstav så bläddrar listan igenom dess appar, för bokstäver där det finns många av dem</string>
+    <string name="settings_hold_scroll_speed">Bläddringshastighet</string>
+    <string name="settings_edge_band_only">Kant endast bredvid bokstäverna</string>
+    <string name="settings_edge_band_only_detail">Skärmens sida öppnar applistan endast där A-Z-remsan finns, i stället för hela vägen ner. Gör att den inte hamnar i vägen för en widget.</string>
+    <string name="settings_edge_zone_width">Kantsvepningsbredd</string>
+    <string name="settings_swipe_up_list">Svep uppåt för applistan</string>
+    <string name="settings_swipe_up_list_detail">Bläddra uppåt förbi slutet av startskärmen</string>
+    <string name="settings_quick_launch_left">Svep åt vänster under favoriterna</string>
+    <string name="settings_quick_launch_right">Svep åt höger under favoriterna</string>
+    <string name="settings_quick_launch_none">Ingen</string>
+    <string name="settings_search_bar">Sökfält i applistan</string>
+    <string name="settings_search_bar_detail">Ett fält för att filtrera listan efter namn</string>
+    <string name="settings_search_bar_bottom">Sökfält längst ner</string>
+    <string name="settings_search_hidden">Sökning hittar dolda appar</string>
+    <string name="settings_search_hidden_detail">Appar som är dolda i listan dyker ändå upp när du söker efter dem med namn</string>
+    <string name="settings_sort_by_usage">Sortera efter hur ofta du använder apparna</string>
+    <string name="settings_sort_by_usage_detail">Inom varje bokstav, de mest använda först</string>
+    <string name="settings_alignment_favorites">Justering av favoriter</string>
+    <string name="settings_alignment_applist">Justering av applistan</string>
+    <string name="settings_icon_side">Ikonsida</string>
+    <string name="settings_shade_gesture">Svep nedåt för aviseringar</string>
+    <string name="settings_shade_ready">Redo — dra nedåt på startskärmen</string>
+    <string name="settings_shade_not_ready">Dra nedåt på startskärmen. Om ingenting händer, aktivera Victoria Launcher under Tillgänglighet — och om den knappen är gråmarkerad, tillåt blockerade inställningar från Appinfo först.</string>
+    <string name="settings_enable">Aktivera</string>
+    <string name="settings_app_info">Appinfo</string>
+    <string name="settings_now_playing_show">Visa Nu spelas-widget</string>
+    <string name="settings_notification_access_granted">Aviseringsåtkomst beviljad</string>
+    <string name="settings_notification_access_missing">Aviseringsåtkomst ej beviljad</string>
+    <string name="settings_notification_access_detail">Behövs för att visa vilken låt som spelas just nu</string>
+    <string name="settings_open_settings">Öppna inställningar</string>
+    <string name="settings_favorites">Favoriter</string>
+    <string name="settings_favorites_detail">Välj vilka appar som ska visas på startskärmen</string>
+    <string name="applist_private_space_section">Privat utrymme</string>
+    <string name="applist_recent_section">Nyligen installerade</string>
+    <string name="settings_stay_private_unlock">Stanna kvar i listan efter upplåsning</string>
+    <string name="settings_stay_private_unlock_detail">Upplåsning av det privata utrymmet behåller applistan öppen i stället för att gå tillbaka till startskärmen</string>
+    <string name="settings_private_space_section">Privat utrymme-sektion</string>
+    <string name="settings_private_space_section_detail">Grupperar apparna i det privata utrymmet under alfabetet i stället för att blanda in dem, så att de två kopiorna av en app kan särskiljas</string>
+    <string name="settings_recent_section">Nyligen installerade-sektion</string>
+    <string name="settings_recent_section_detail">Avslutar applistan med de senast tillagda apparna</string>
+    <string name="settings_recent_section_count">Hur många nyligen installerade appar</string>
+    <string name="settings_compact_tap">Tryck endast på ikonen och namnet</string>
+    <string name="settings_compact_tap_detail">En favorit öppnas endast när du trycker på dess ikon eller namn, inte var som helst på dess rad</string>
+    <string name="settings_text_shadow_strength">Skuggans styrka</string>
+    <string name="settings_text_shadow">Skugga bakom text</string>
+    <string name="settings_text_shadow_detail">Hjälper appnamn att sticka ut mot en livlig bakgrund. Tillämpas endast bakom ljus text, där den ökar kontrasten snarare än att göra texten otydlig</string>
+    <string name="settings_default_launcher">Förvald startskärmsapp</string>
+    <string name="settings_default_launcher_yes">Victoria Launcher</string>
+    <string name="settings_default_launcher_no">Ej angiven — tryck för att välja</string>
+    <string name="settings_frequent_excluded">Exkluderas från Mest använda</string>
+    <string name="settings_frequent_excluded_none">Inga appar exkluderade</string>
+    <string name="frequent_excluded_count">Exkluderade (%1$d)</string>
+    <string name="frequent_excluded_add">Exkludera en app</string>
+    <string name="settings_hidden_apps">Dolda appar</string>
+    <string name="hidden_count">%1$d dolda från applistan</string>
+    <string name="hidden_add_apps">Allt annat</string>
+    <string name="settings_hidden_none">Inga dolda</string>
+    <string name="settings_hidden_count">%1$d dolda</string>
+    <string name="settings_version">Version %1$s</string>
+    <string name="settings_less">Mindre</string>
+    <string name="settings_more">Mer</string>
+
+    <!-- Font choices -->
+    <string name="font_system">System</string>
+    <string name="font_sans_serif">Sans serif</string>
+    <string name="font_serif">Serif</string>
+    <string name="font_monospace">Monospace</string>
+    <string name="font_custom">Anpassat …</string>
+    <string name="font_custom_pick">Välj en teckensnittsfil</string>
+    <string name="font_custom_detail">En .ttf- eller .otf-fil, som kopieras till startskärmsappen så att den bevaras även om filen flyttas</string>
+    <string name="font_custom_failed">Den valda filen kunde inte läsas in som ett teckensnitt</string>
+    <string name="text_color_material">Material</string>
+    <string name="text_color_custom">Anpassad</string>
+    <string name="text_color_pick">Välj en färg</string>
+    <string name="settings_swipe_shortcuts">Svep över en app för dess genvägar</string>
+    <string name="settings_swipe_shortcuts_detail">Svep över en favorit eller en rad i applistan. Appar som inte tillhandahåller några gör ingenting.</string>
+    <string name="shortcut_swipe_off">Av</string>
+    <string name="shortcut_swipe_right">Svep åt höger</string>
+    <string name="shortcut_swipe_left">Svep åt vänster</string>
+    <string name="settings_allow_rotation">Rotera med enheten</string>
+    <string name="settings_allow_rotation_detail">Av på telefoner: i liggande läge finns det ungefär en tredjedel av den höjd som denna layout kräver. På som standard på surfplattor.</string>
+    <string name="settings_section_backup">Säkerhetskopiering</string>
+    <string name="settings_crash_copy">Kopiera senaste kraschen</string>
+    <string name="settings_crash_detail">Startskärmsappen stannade oväntat. Kopiera uppgifterna för att inkludera dem i en felrapport.</string>
+    <string name="settings_crash_copied">Kraschuppgifterna har kopierats</string>
+    <string name="settings_export">Exportera inställningar</string>
+    <string name="settings_export_detail">Spara favoriter, mappar, layout och allt annat i en fil</string>
+    <string name="settings_import">Importera inställningar</string>
+    <string name="settings_import_detail">Ersätt allt med en fil som har sparats tidigare</string>
+    <string name="settings_export_done">Inställningarna har sparats</string>
+    <string name="settings_export_done_private_omitted">Inställningarna har sparats. Apparna i ditt privata utrymme har utelämnats.</string>
+    <string name="settings_import_done">Inställningarna har återställts</string>
+    <string name="settings_backup_failed">Den valda filen kunde inte läsas in</string>
+    <string name="settings_dim_color">Dämpningsfärg</string>
+    <string name="settings_dim_color_detail">Vad bakgrundsbilden dämpas med; reglagen ovan anger hur mycket</string>
+    <string name="color_from_wallpaper">Från din bakgrundsbild</string>
+    <string name="icon_shape">Ikonform</string>
+    <string name="icon_shape_detail">Omformar endast adaptiva ikoner; alla äldre lämnas oförändrade</string>
+    <string name="icon_shape_system">System</string>
+    <string name="icon_shape_circle">Cirkel</string>
+    <string name="icon_shape_rounded">Rundad</string>
+    <string name="icon_shape_square">Kvadrat</string>
+    <string name="settings_icon_pack_themed">Tematiserad</string>
+
+    <!-- Text color choices -->
+    <string name="text_color_auto">Auto</string>
+    <string name="text_color_light">Ljus</string>
+    <string name="text_color_dark">Mörk</string>
+
+    <!-- Alignment choices -->
+    <string name="alignment_left">Vänster</string>
+    <string name="alignment_center">Mitten</string>
+    <string name="alignment_right">Höger</string>
+
+    <!-- Edge choices -->
+    <string name="edge_left">Vänster</string>
+    <string name="edge_right">Höger</string>
+    <string name="edge_both">Båda</string>
+
+    <!-- Private space -->
+    <string name="private_space">Privat utrymme</string>
+
+    <!-- Favorites / hidden / folder pickers -->
+    <string name="favorites_title">Favoriter</string>
+    <string name="favorites_count">%1$d på din startskärm</string>
+    <string name="folder_title_fallback">Mapp</string>
+    <string name="folder_gone">Den här mappen finns inte längre.</string>
+    <string name="folder_member_count">%1$d i den här mappen — dra för att ändra ordning</string>
+    <string name="folder_add_apps">Lägg till fler</string>
+    <string name="folder_member_missing">Appen är inte längre installerad</string>
+    <string name="folder_picker_title">Flytta %1$s till …</string>
+    <string name="folder_picker_app_count">%1$d appar</string>
+    <string name="folder_picker_new">Ny mapp</string>
+    <string name="folder_picker_new_detail">Appen flyttas till den nya mappen på din startskärm.</string>
+
+    <!-- Icon picker -->
+    <string name="icon_picker_title">Ikon för %1$s</string>
+    <string name="icon_picker_gallery">Galleri …</string>
+    <string name="icon_picker_all">Alla</string>
+    <string name="icon_picker_reset">Återställ till standard</string>
+    <string name="icon_picker_no_packs">Inga ikonpaket är installerade. Installera ett ikonpaket från Play Butik, eller välj en bild från ditt galleri.</string>
+    <string name="icon_picker_search">Sök efter ikoner</string>
+    <string name="icon_picker_clear_search">Rensa sökning</string>
+    <string name="icon_picker_not_browsable">Det här paketet innehöll inte någon bläddringsbar ikonlista.</string>
+    <string name="icon_picker_no_matches">Inga ikoner matchar “%1$s”.</string>
+
+    <!-- Welcome -->
+    <string name="welcome_title">Välkommen till Victoria</string>
+    <string name="welcome_favorites">Långtryck på bakgrundsbilden för att lägga till favoriter, lägga till en widget eller öppna inställningarna.</string>
+    <string name="welcome_widget">Svep in från någon av skärmens kanter för alla dina appar, och dra längs A-Z-remsan för att hoppa till en bokstav.</string>
+    <string name="welcome_layout">Redigera layout låter dig flytta runt objekt och ange avståndet mellan dem.</string>
+    <string name="welcome_got_it">Jag fattar</string>
+
+    <!-- Widgets -->
+    <string name="widget_add">Lägg till widget</string>
+    <string name="widget_clock_label">Klocka och datum</string>
+    <string name="widget_clock_description">Tid och datum, i startskärmsappens egen stil</string>
+    <string name="widget_clock_time">Tid</string>
+    <string name="widget_clock_date">Datum</string>
+    <string name="widget_clock_hour">Klocka</string>
+    <string name="widget_clock_hour_system">System</string>
+    <string name="widget_clock_hour_12">12-timmars</string>
+    <string name="widget_clock_hour_24">24-timmars</string>
+    <string name="widget_clock_date_format">Datum</string>
+    <string name="widget_clock_date_none">Inget datum</string>
+    <string name="widget_clock_size">Klockans storlek</string>
+    <string name="widget_clock_date_size">Datumets storlek</string>
+    <string name="widget_clock_color">Färg</string>
+    <string name="widget_clock_color_pick">Välj</string>
+    <string name="widget_clock_size_preview">12:34</string>
+    <string name="widget_clock_weather">Väder</string>
+    <string name="widget_clock_notifications">Aviseringar</string>
+    <string name="widget_clock_weather_show">Väder</string>
+    <string name="widget_clock_weather_hide">Inget väder</string>
+    <string name="widget_clock_weather_celsius">°C</string>
+    <string name="widget_clock_weather_fahrenheit">°F</string>
+    <string name="widget_clock_weather_size">Vädrets storlek</string>
+    <string name="widget_clock_weather_opacity">Vädrets opacitet</string>
+    <string name="widget_clock_date_custom_chip">Anpassat</string>
+    <string name="widget_clock_date_custom">Anpassat datumformat</string>
+    <string name="widget_clock_date_custom_label">Mönster</string>
+    <string name="widget_clock_date_custom_invalid">Detta är inget mönster som denna kan skriva ut</string>
+    <string name="widget_clock_date_custom_hint">d dag, M månad, y år, E veckodag. Upprepa en bokstav för en längre form: d, dd, EEE, EEEE.</string>
+    <string name="widget_clock_agenda">På gång</string>
+    <string name="widget_clock_event_untitled">(Ingen titel)</string>
+    <string name="widget_clock_event_at">%1$s  %2$s</string>
+    <string name="widget_clock_event_tomorrow">I morgon</string>
+    <string name="widget_clock_event_day_at">%1$s %2$s</string>
+    <string name="widget_clock_event_day_only">%1$s  %2$s</string>
+    <string name="widget_clock_event_all_day">%1$s  i dag</string>
+    <string name="widget_clock_event_now">%1$s  nu</string>
+    <string name="widget_clock_alarm_at">Alarm %1$s</string>
+    <string name="widget_clock_agenda_show">På gång</string>
+    <string name="widget_clock_agenda_hide">Ingenting</string>
+    <string name="widget_clock_agenda_size">På gångs storlek</string>
+    <string name="widget_clock_agenda_opacity">På gångs opacitet</string>
+    <string name="widget_clock_agenda_count">Hur många händelser</string>
+    <string name="widget_clock_agenda_hours">Timmar framåt i tiden</string>
+    <string name="widget_clock_agenda_relative">Om 20 minuter</string>
+    <string name="widget_clock_agenda_absolute">Kl. 12:30</string>
+    <string name="widget_clock_alarm_show">Nästa alarm</string>
+    <string name="widget_clock_alarm_hide">Inget alarm</string>
+    <string name="widget_clock_agenda_permission">Tillåt åtkomst till din kalender</string>
+    <string name="widget_clock_agenda_empty">Ingenting på gång</string>
+    <string name="widget_clock_agenda_hint">Läsning av din kalender kräver behörighet. Ingenting lämnar telefonen: Victoria har ingen nätverksåtkomst.</string>
+    <string name="widget_clock_weather_opens">Vad ett tryck på vädret öppnar</string>
+    <string name="widget_clock_weather_waiting">Väntar på en väderapp</string>
+    <string name="widget_clock_weather_hint">Vädret kommer från en väderapp som redan har det, så Victoria behöver ingen nätverksåtkomst och frågar aldrig var du är. I Breezy Weather, aktivera Inställningar → Widgetar &amp; levande bakgrund → Datadelning.</string>
+    <string name="widget_clock_notifications_show">Aviseringsräknare</string>
+    <string name="widget_clock_notifications_hide">Ingen räknare</string>
+    <string name="widget_clock_notifications_size">Räknarens storlek</string>
+    <string name="widget_clock_notifications_opacity">Räknarens opacitet</string>
+    <string name="widget_clock_battery">Batteri</string>
+    <string name="widget_clock_battery_show">Visa</string>
+    <string name="widget_clock_battery_hide">Dölj</string>
+    <string name="widget_clock_battery_size">Batteriets storlek</string>
+    <string name="widget_clock_battery_percent">%1$d %%</string>
+    <string name="widget_clock_time_opacity">Klockans opacitet</string>
+    <string name="widget_clock_date_opacity">Datumets opacitet</string>
+    <string name="widget_clock_battery_opacity">Batteriets opacitet</string>
+    <string name="widget_add_another">Lägg till ytterligare en widget</string>
+    <string name="widget_remove_this">Ta bort den här widgeten</string>
+    <string name="widget_unavailable">Den här widgeten är inte längre tillgänglig</string>
+    <string name="widget_change_settings">Ändra widgetinställningar</string>
+    <string name="widget_none_found">Inga widgetar hittades på den här enheten.</string>
+
+    <!-- Pinned shortcuts -->
+    <string name="shortcut_unavailable">Den här genvägen är inte längre tillgänglig</string>
+    <string name="shortcut_pin_title">Lägg till på startskärmen?</string>
+    <string name="shortcut_pin_from">Från %1$s</string>
+    <string name="shortcut_pin_add">Lägg till</string>
+    <string name="shortcut_pin_failed">Kunde inte bekräfta att genvägen blev fäst</string>
+    <string name="shortcut_unpin_failed">Kunde inte ta bort genvägen</string>
+
+    <!-- Now Playing -->
+    <string name="now_playing_placeholder">Nu spelas</string>
+    <string name="now_playing_enable_access">Aktivera Nu spelas-åtkomst</string>
+    <string name="now_playing_open_failed">Kan inte öppna appen som spelar upp</string>
+    <string name="now_playing_unknown_title">Okänd titel</string>
+    <string name="now_playing_previous">Föregående</string>
+    <string name="now_playing_play_pause">Spela upp/pausa</string>
+    <string name="now_playing_next">Nästa</string>
+    <plurals name="widget_clock_notification_count">
+        <item quantity="one">%1$d avisering</item>
+        <item quantity="other">%1$d aviseringar</item>
+    </plurals>
+    <plurals name="widget_clock_event_in_minutes">
+        <item quantity="one">%1$s  om %2$d minut</item>
+        <item quantity="other">%1$s  om %2$d minuter</item>
+    </plurals>
+    <plurals name="widget_clock_event_in_hours">
+        <item quantity="one">%1$s  om %2$d timme</item>
+        <item quantity="other">%1$s  om %2$d timmar</item>
+    </plurals>
+    <plurals name="settings_frequent_excluded_count">
+        <item quantity="one">%1$d app exkluderad</item>
+        <item quantity="other">%1$d appar exkluderade</item>
+    </plurals>
+</resources>
