@@ -1,0 +1,2 @@
+New:
+* "Private space settings" in the private space row's long-press menu. From there, "Install available apps" can copy your apps into the private space.
