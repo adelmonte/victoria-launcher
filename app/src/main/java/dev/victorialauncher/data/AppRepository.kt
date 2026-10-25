@@ -293,20 +293,36 @@ class AppRepository(
         if (Build.VERSION.SDK_INT < PRIVATE_SPACE_SDK) return false
         val user = (privateSpace() as? PrivateSpace.Unlocked)?.user ?: return false
         return runCatching {
-            val sender = launcherApps.getAppMarketActivityIntent(null, user) ?: return false
-            // The system made this sender, so starting it rests on our being in front, which
-            // Android 14 only lends to it when asked.
-            val options = android.app.ActivityOptions.makeBasic()
-                .setPendingIntentBackgroundActivityStartMode(
-                    android.app.ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED
-                )
-            from.startIntentSender(
-                sender, null,
-                Intent.FLAG_ACTIVITY_NEW_TASK, Intent.FLAG_ACTIVITY_NEW_TASK, 0,
-                options.toBundle(),
-            )
-            true
+            startSystemSender(from, launcherApps.getAppMarketActivityIntent(null, user) ?: return false)
         }.getOrDefault(false)
+    }
+
+    // Settings opened this way runs as the main user, which its "Install available apps" page
+    // needs to list anything to copy over.
+    fun openPrivateSpaceSettings(from: Context): Boolean {
+        if (Build.VERSION.SDK_INT < PRIVATE_SPACE_SDK) return false
+        return runCatching {
+            // Public from Android 16, past the SDK this builds against.
+            val sender = LauncherApps::class.java.getMethod("getPrivateSpaceSettingsIntent")
+                .invoke(launcherApps) as? android.content.IntentSender ?: return false
+            startSystemSender(from, sender)
+        }.getOrDefault(false)
+    }
+
+    @androidx.annotation.RequiresApi(PRIVATE_SPACE_SDK)
+    private fun startSystemSender(from: Context, sender: android.content.IntentSender): Boolean {
+        // The system made this sender, so starting it rests on our being in front, which
+        // Android 14 only lends to it when asked.
+        val options = android.app.ActivityOptions.makeBasic()
+            .setPendingIntentBackgroundActivityStartMode(
+                android.app.ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED
+            )
+        from.startIntentSender(
+            sender, null,
+            Intent.FLAG_ACTIVITY_NEW_TASK, Intent.FLAG_ACTIVITY_NEW_TASK, 0,
+            options.toBundle(),
+        )
+        return true
     }
 
     suspend fun togglePrivateSpace(): PrivateSpace? = withContext(Dispatchers.IO) {

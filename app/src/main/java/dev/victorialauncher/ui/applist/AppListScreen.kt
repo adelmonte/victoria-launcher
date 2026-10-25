@@ -1607,6 +1607,20 @@ private fun AppRow(
                     },
                 )
             }
+            if (app.kind == EntryKind.PRIVATE_SPACE) {
+                val context = LocalContext.current
+                DropdownMenuItem(
+                    text = { Text(stringResource(R.string.private_space_settings)) },
+                    leadingIcon = { Icon(Icons.Filled.Settings, contentDescription = null) },
+                    onClick = {
+                        onDismissMenu()
+                        val repo = (context.applicationContext as VictoriaApp).appRepository
+                        if (!repo.openPrivateSpaceSettings(context)) {
+                            Toast.makeText(context, R.string.private_space_settings_failed, Toast.LENGTH_SHORT).show()
+                        }
+                    },
+                )
+            }
             // Hands the shortcut back to the app that pinned it, which is the only way one
             // ever leaves: nothing uninstalls a shortcut.
             if (app.kind == EntryKind.SHORTCUT) {

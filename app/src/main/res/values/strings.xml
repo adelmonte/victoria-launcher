@@ -265,6 +265,8 @@
     <string name="private_space">Private space</string>
     <string name="private_space_install_apps">Install apps</string>
     <string name="private_space_install_failed">No app store to open in the private space</string>
+    <string name="private_space_settings">Private space settings</string>
+    <string name="private_space_settings_failed">Couldn\'t open private space settings</string>
 
     <!-- Favorites / hidden / folder pickers -->
     <string name="favorites_title">Favorites</string>
