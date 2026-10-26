@@ -1,0 +1,2 @@
+New:
+* Optional notification text on the home screen. Turn on "Notification text on home screen" in Settings → Notifications, and an app with a notification shows its newest one under its name. Off by default.
