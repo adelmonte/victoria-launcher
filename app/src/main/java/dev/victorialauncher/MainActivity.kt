@@ -113,6 +113,7 @@ class MainActivity : ComponentActivity() {
             val showAppIcons by app.prefs.showAppIcons.collectAsState(initial = true)
             val themedIcons by app.prefs.themedIcons.collectAsState(initial = false)
             val notificationBadges by app.prefs.notificationBadges.collectAsState(initial = false)
+            val notificationPreviews by app.prefs.notificationPreviews.collectAsState(initial = false)
             val iconShape by app.prefs.iconShape.collectAsState(initial = IconShape.SYSTEM)
             val iconConfig = remember(
                 iconPackPackage,
@@ -120,6 +121,7 @@ class MainActivity : ComponentActivity() {
                 showAppIcons,
                 themedIcons,
                 notificationBadges,
+                notificationPreviews,
                 iconShape,
             ) {
                 IconConfig(
@@ -128,6 +130,7 @@ class MainActivity : ComponentActivity() {
                     showIcons = showAppIcons,
                     themed = themedIcons,
                     notificationBadges = notificationBadges,
+                    notificationPreviews = notificationPreviews,
                     shape = iconShape,
                 )
             }

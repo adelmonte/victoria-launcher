@@ -92,6 +92,7 @@ import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -111,6 +112,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.IntOffset
@@ -145,6 +147,7 @@ import kotlinx.coroutines.launch
 import kotlin.math.abs
 import kotlin.math.roundToInt
 import dev.victorialauncher.R
+import dev.victorialauncher.media.NotificationCountBus
 import androidx.compose.ui.res.stringResource
 
 private sealed interface HomeItem {
@@ -1333,16 +1336,28 @@ private fun FavoriteRow(
                 iconWidth = iconSizeDp.dp,
                 icon = { AppIcon(app = app, sizeDp = iconSizeDp) },
             ) { labelModifier ->
-                Text(
-                    label,
-                    // Same dimming a hidden app gets in the A-Z list: a shortcut its
-                    // publisher has switched off is still listed, but tapping it only
-                    // explains why it will not open.
-                    color = if (app.disabled) contentColor.copy(alpha = 0.5f) else contentColor,
-                    fontSize = labelSizeSp.sp,
-                    modifier = labelModifier,
-                    textAlign = alignment.textAlign(),
-                )
+                val preview = notificationPreview(app)
+                Column(labelModifier, horizontalAlignment = alignment.columnAlignment()) {
+                    Text(
+                        label,
+                        // Same dimming a hidden app gets in the A-Z list: a shortcut its
+                        // publisher has switched off is still listed, but tapping it only
+                        // explains why it will not open.
+                        color = if (app.disabled) contentColor.copy(alpha = 0.5f) else contentColor,
+                        fontSize = labelSizeSp.sp,
+                        textAlign = alignment.textAlign(),
+                    )
+                    if (preview != null) {
+                        Text(
+                            preview,
+                            color = contentColor.copy(alpha = 0.6f),
+                            fontSize = (labelSizeSp * 0.6f).sp,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            textAlign = alignment.textAlign(),
+                        )
+                    }
+                }
             }
         }
 
@@ -1976,6 +1991,20 @@ private fun HomeAlignment.boxAlignment() = when (this) {
     HomeAlignment.LEFT -> Alignment.CenterStart
     HomeAlignment.CENTER -> Alignment.Center
     HomeAlignment.RIGHT -> Alignment.CenterEnd
+}
+
+private fun HomeAlignment.columnAlignment() = when (this) {
+    HomeAlignment.LEFT -> Alignment.Start
+    HomeAlignment.CENTER -> Alignment.CenterHorizontally
+    HomeAlignment.RIGHT -> Alignment.End
+}
+
+/** The newest notification's text for this app, or null when the setting is off or there is none. */
+@Composable
+private fun notificationPreview(app: AppInfo): String? {
+    if (!LocalIconConfig.current.notificationPreviews || app.kind != EntryKind.APP) return null
+    val previews by NotificationCountBus.previews.collectAsState()
+    return previews[app.componentName.packageName]
 }
 
 private fun HomeAlignment.textAlign() = when (this) {

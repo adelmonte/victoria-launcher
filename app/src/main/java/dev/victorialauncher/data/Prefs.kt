@@ -177,6 +177,7 @@ class Prefs(private val context: Context) {
         val FREQUENT_COUNT = intPreferencesKey("frequent_count")
         val SHOW_LIST_HEADERS = booleanPreferencesKey("show_list_headers")
         val NOTIFICATION_BADGES = booleanPreferencesKey("notification_badges")
+        val NOTIFICATION_PREVIEWS = booleanPreferencesKey("notification_previews")
         val SECTION_TOP_PERCENT = intPreferencesKey("section_top_percent")
         val CLOSE_FOLDER_ON_LAUNCH = booleanPreferencesKey("close_folder_on_launch")
         val SHOW_SETTINGS_ROW = booleanPreferencesKey("show_settings_row")
@@ -600,6 +601,9 @@ class Prefs(private val context: Context) {
 
     val notificationBadges: Flow<Boolean> =
         data.map { it[Keys.NOTIFICATION_BADGES] ?: false }.distinctUntilChanged()
+
+    val notificationPreviews: Flow<Boolean> =
+        data.map { it[Keys.NOTIFICATION_PREVIEWS] ?: false }.distinctUntilChanged()
 
     /** How far down the screen a scrubbed letter is parked, as a percentage of the viewport. */
     val sectionTopPercent: Flow<Int> =
@@ -1212,6 +1216,10 @@ class Prefs(private val context: Context) {
 
     suspend fun setNotificationBadges(v: Boolean) {
         context.dataStore.edit { it[Keys.NOTIFICATION_BADGES] = v }
+    }
+
+    suspend fun setNotificationPreviews(v: Boolean) {
+        context.dataStore.edit { it[Keys.NOTIFICATION_PREVIEWS] = v }
     }
 
     suspend fun setSectionTopPercent(v: Int) {

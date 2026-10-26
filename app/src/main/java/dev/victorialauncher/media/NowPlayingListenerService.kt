@@ -111,17 +111,34 @@ class NowPlayingListenerService : NotificationListenerService() {
             return
         }
         val counts = HashMap<String, Int>()
+        val newest = HashMap<String, StatusBarNotification>()
         active.forEach { sbn ->
             if (!sbn.isClearable) return@forEach
             val notification = sbn.notification ?: return@forEach
             if (notification.flags and Notification.FLAG_GROUP_SUMMARY != 0) return@forEach
             counts[sbn.packageName] = (counts[sbn.packageName] ?: 0) + 1
+            if (notification.visibility == Notification.VISIBILITY_SECRET) return@forEach
+            val held = newest[sbn.packageName]
+            if (held == null || sbn.postTime > held.postTime) newest[sbn.packageName] = sbn
         }
+        val previews = newest.mapNotNull { (pkg, sbn) -> previewOf(sbn.notification)?.let { pkg to it } }.toMap()
         val before = NotificationCountBus.counts.value.values.sum()
-        NotificationCountBus.update(counts)
+        NotificationCountBus.update(counts, previews)
         // A widget is drawn only when something asks. The home screen follows the bus on its
         // own; a RemoteViews cannot, so the total changing is what has to ask for it.
         if (counts.values.sum() != before) ClockWidgetProvider.renderAll(this)
+    }
+
+    /** "Title: text" on one line, or whichever of the two the notification has. */
+    private fun previewOf(notification: Notification): String? {
+        val extras = notification.extras ?: return null
+        val title = extras.getCharSequence(Notification.EXTRA_TITLE)?.toString()?.trim().orEmpty()
+        val text = extras.getCharSequence(Notification.EXTRA_TEXT)?.toString()?.trim().orEmpty()
+        val line = when {
+            title.isNotEmpty() && text.isNotEmpty() -> "$title: $text"
+            else -> title + text
+        }
+        return line.replace('\n', ' ').takeIf { it.isNotEmpty() }
     }
 
     /** Follow whichever session is worth showing, and watch it for changes. */

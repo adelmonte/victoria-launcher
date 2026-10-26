@@ -187,6 +187,8 @@ fun SettingsScreen(
     onSetHoldScrollSpeed: (Int) -> Unit,
     notificationBadges: Boolean,
     onSetNotificationBadges: (Boolean) -> Unit,
+    notificationPreviews: Boolean,
+    onSetNotificationPreviews: (Boolean) -> Unit,
     sectionTopPercent: Int,
     onSetSectionTopPercent: (Int) -> Unit,
     closeFolderOnLaunch: Boolean,
@@ -786,12 +788,19 @@ fun SettingsScreen(
                 checked = notificationBadges, onCheckedChange = onSetNotificationBadges,
             )
         },
+        SettingsEntry(SettingsSection.NOTIFICATIONS, stringResource(R.string.settings_notification_previews), "text message preview home") {
+            SwitchRowWithDetail(
+                label = stringResource(R.string.settings_notification_previews),
+                detail = stringResource(R.string.settings_notification_previews_detail),
+                checked = notificationPreviews, onCheckedChange = onSetNotificationPreviews,
+            )
+        },
         SettingsEntry(SettingsSection.NOTIFICATIONS, stringResource(R.string.settings_now_playing_show), "media music") {
             SwitchRow(stringResource(R.string.settings_now_playing_show), nowPlayingEnabled, onSetNowPlayingEnabled)
         },
         SettingsEntry(
             SettingsSection.NOTIFICATIONS, stringResource(R.string.settings_notification_access_detail), "permission access",
-            visible = nowPlayingEnabled || notificationBadges,
+            visible = nowPlayingEnabled || notificationBadges || notificationPreviews,
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
