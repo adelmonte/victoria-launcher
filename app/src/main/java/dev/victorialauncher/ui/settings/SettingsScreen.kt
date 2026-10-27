@@ -86,6 +86,8 @@ import dev.victorialauncher.data.AppInfo
 import dev.victorialauncher.data.AzStripVisibility
 import dev.victorialauncher.data.IconShape
 import dev.victorialauncher.data.EdgeSide
+import dev.victorialauncher.data.RippleParams
+import dev.victorialauncher.data.ScrubStyle
 import dev.victorialauncher.data.EDGE_ZONE_INSET_RANGE
 import dev.victorialauncher.data.HOLD_SCROLL_RANGE
 import dev.victorialauncher.data.RECENT_SECTION_RANGE
@@ -132,6 +134,8 @@ fun SettingsScreen(
     themedIcons: Boolean,
     doubleTapToLock: Boolean,
     edgeSide: EdgeSide,
+    scrubStyle: ScrubStyle,
+    rippleParams: RippleParams,
     azStripVisibility: AzStripVisibility,
     showAlphabet: Boolean,
     sortByUsage: Boolean,
@@ -226,6 +230,8 @@ fun SettingsScreen(
     onSetDoubleTapToLock: (Boolean) -> Unit,
     edgeZoneWidthDp: Int,
     onSetEdgeSide: (EdgeSide) -> Unit,
+    onSetScrubStyle: (ScrubStyle) -> Unit,
+    onSetRippleParams: (RippleParams) -> Unit,
     onSetEdgeZoneWidth: (Int) -> Unit,
     onSetAzStripVisibility: (AzStripVisibility) -> Unit,
     onSetShowAlphabet: (Boolean) -> Unit,
@@ -535,6 +541,54 @@ fun SettingsScreen(
         },
         SettingsEntry(SettingsSection.APP_LIST, stringResource(R.string.settings_edge_side), "a-z strip left right") {
             EdgeSideRow(edgeSide) { edgePreviewTick++; onSetEdgeSide(it) }
+        },
+        SettingsEntry(SettingsSection.APP_LIST, stringResource(R.string.settings_scrub_style), "a-z strip animation ripple wave bell") {
+            ScrubStyleRow(scrubStyle, onSetScrubStyle)
+        },
+        // The simulation's tunables only mean anything for the ripple style.
+        SettingsEntry(
+            SettingsSection.APP_LIST, stringResource(R.string.settings_ripple_speed), "a-z strip ripple wave speed",
+            visible = scrubStyle == ScrubStyle.RIPPLE,
+        ) {
+            SliderRow(
+                label = stringResource(R.string.settings_ripple_speed),
+                value = rippleParams.speed, range = RippleParams.SPEED_RANGE,
+                valueLabel = stringResource(R.string.settings_ripple_speed_value, rippleParams.speed),
+                onValueChange = { onSetRippleParams(rippleParams.copy(speed = it)) },
+            )
+        },
+        SettingsEntry(
+            SettingsSection.APP_LIST, stringResource(R.string.settings_ripple_damping), "a-z strip ripple wave damping decay",
+            visible = scrubStyle == ScrubStyle.RIPPLE,
+        ) {
+            SliderRow(
+                label = stringResource(R.string.settings_ripple_damping),
+                value = rippleParams.damping, range = RippleParams.DAMPING_RANGE,
+                valueLabel = "%.1f".format(rippleParams.damping),
+                onValueChange = { onSetRippleParams(rippleParams.copy(damping = it)) },
+                step = 0.5f,
+            )
+        },
+        SettingsEntry(
+            SettingsSection.APP_LIST, stringResource(R.string.settings_ripple_stiffness), "a-z strip ripple wave stiffness follow spring",
+            visible = scrubStyle == ScrubStyle.RIPPLE,
+        ) {
+            SliderRow(
+                label = stringResource(R.string.settings_ripple_stiffness),
+                value = rippleParams.stiffness, range = RippleParams.STIFFNESS_RANGE,
+                valueLabel = "%.0f".format(rippleParams.stiffness),
+                onValueChange = { onSetRippleParams(rippleParams.copy(stiffness = it)) },
+                step = 10f,
+            )
+        },
+        SettingsEntry(
+            SettingsSection.APP_LIST, stringResource(R.string.settings_ripple_reset), "a-z strip ripple defaults",
+            visible = scrubStyle == ScrubStyle.RIPPLE && rippleParams != RippleParams(),
+        ) {
+            TextButton(
+                onClick = { onSetRippleParams(RippleParams()) },
+                modifier = Modifier.padding(horizontal = 8.dp),
+            ) { Text(stringResource(R.string.settings_ripple_reset)) }
         },
         SettingsEntry(SettingsSection.APP_LIST, stringResource(R.string.settings_web_search), "search web browser") {
             SwitchRowWithDetail(
@@ -1787,6 +1841,21 @@ private fun ShortcutSwipeRow(selected: ShortcutSwipe, onSelect: (ShortcutSwipe) 
         ) {
             ShortcutSwipe.entries.forEach { mode ->
                 FilledChip(stringResource(mode.labelRes()), selected == mode) { onSelect(mode) }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ScrubStyleRow(selected: ScrubStyle, onSelect: (ScrubStyle) -> Unit) {
+    Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)) {
+        Text(stringResource(R.string.settings_scrub_style), style = MaterialTheme.typography.bodyMedium)
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(top = 10.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            ScrubStyle.entries.forEach { style ->
+                FilledChip(stringResource(style.labelRes()), selected == style) { onSelect(style) }
             }
         }
     }

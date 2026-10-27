@@ -116,6 +116,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import dev.victorialauncher.data.AppInfo
 import dev.victorialauncher.data.EdgeSide
+import dev.victorialauncher.data.RippleParams
+import dev.victorialauncher.data.ScrubStyle
 import dev.victorialauncher.data.EntryKind
 import dev.victorialauncher.data.Folder
 import dev.victorialauncher.data.folderToken
@@ -238,6 +240,8 @@ fun AppListScreen(
     contentColor: Color,
     showAlphabet: Boolean,
     edgeSide: EdgeSide,
+    scrubStyle: ScrubStyle,
+    rippleParams: RippleParams,
     /** Hoisted so a swipe that overshoots the opening animation can keep scrolling it. */
     listState: LazyListState,
     /** How far the list still has to travel to be fully open; 0 once it has arrived. */
@@ -1370,6 +1374,8 @@ fun AppListScreen(
                 pullPx = pullPx,
                 band = band,
                 side = activeSide,
+                style = scrubStyle,
+                ripple = rippleParams,
                 modifier = Modifier.align(
                     if (activeSide == EdgeSide.LEFT) Alignment.CenterStart else Alignment.CenterEnd
                 ),

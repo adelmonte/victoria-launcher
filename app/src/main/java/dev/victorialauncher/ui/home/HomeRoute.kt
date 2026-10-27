@@ -61,6 +61,8 @@ import dev.victorialauncher.data.EntryKind
 import dev.victorialauncher.data.restoreConcealed
 import dev.victorialauncher.data.AzStripVisibility
 import dev.victorialauncher.data.EdgeSide
+import dev.victorialauncher.data.RippleParams
+import dev.victorialauncher.data.ScrubStyle
 import dev.victorialauncher.data.FavoritesSource
 import dev.victorialauncher.data.ShortcutSwipe
 import dev.victorialauncher.data.HomeAlignment
@@ -911,6 +913,8 @@ fun HomeRoute(
                 contentColor = settings.contentColor,
                 showAlphabet = settings.showAlphabet,
                 edgeSide = settings.edgeSide,
+                scrubStyle = settings.scrubStyle,
+                rippleParams = settings.rippleParams,
                 statusBarHidden = settings.hideStatusBarAppList,
                 searchModel = searchModel,
                 shortcutSwipe = settings.shortcutSwipe,
@@ -967,6 +971,8 @@ fun HomeRoute(
                 pullPx = { 0f },
                 band = band,
                 side = scrub.side,
+                style = settings.scrubStyle,
+                ripple = settings.rippleParams,
                 modifier = Modifier.align(
                     if (scrub.side == EdgeSide.LEFT) Alignment.CenterStart else Alignment.CenterEnd
                 ),
@@ -1092,6 +1098,8 @@ data class HomeSettings(
     val nowPlayingHeightDp: Int,
     val nowPlayingEnabled: Boolean,
     val edgeSide: EdgeSide,
+    val scrubStyle: ScrubStyle,
+    val rippleParams: RippleParams,
     val azStripVisibility: AzStripVisibility,
     val shortcutSwipe: ShortcutSwipe,
     val showAlphabet: Boolean,

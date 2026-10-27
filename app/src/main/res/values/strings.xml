@@ -118,6 +118,14 @@
     <string name="settings_haptics">Haptic feedback</string>
     <string name="settings_haptics_detail">Follows your system\'s touch feedback setting</string>
     <string name="settings_edge_side">Which edge opens the app list</string>
+    <string name="settings_scrub_style">A-Z strip animation</string>
+    <string name="scrub_style_bell">Bell</string>
+    <string name="scrub_style_ripple">Ripple</string>
+    <string name="settings_ripple_speed">Ripple speed</string>
+    <string name="settings_ripple_speed_value">%1$.0f letters/s</string>
+    <string name="settings_ripple_damping">Ripple damping</string>
+    <string name="settings_ripple_stiffness">Follow strength</string>
+    <string name="settings_ripple_reset">Reset ripple to defaults</string>
     <string name="settings_double_tap_lock">Double-tap to lock screen</string>
     <string name="settings_double_tap_lock_detail">Tap the A-Z strip twice</string>
     <string name="settings_lock_needs_accessibility">Needs Victoria Launcher enabled under Accessibility. If that switch is greyed out, open App info and allow restricted settings from the ⋮ menu first.</string>
