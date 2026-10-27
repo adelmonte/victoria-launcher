@@ -231,6 +231,7 @@ fun HomeScreen(
     widgetIds: List<Int>,
     widgetPosition: Int,
     widgetHeightDp: Int,
+    widgetsStacked: Boolean,
     hapticsEnabled: Boolean,
     nowPlayingEnabled: Boolean,
     nowPlayingHeightDp: Int,
@@ -994,6 +995,7 @@ fun HomeScreen(
                             WidgetSlot(
                                 widgetIds = widgetIds,
                                 heightDp = widgetHeightDp,
+                                stacked = widgetsStacked,
                                 onEditLayout = { onEditModeChange(true) },
                                 actions = widgetActions,
                                 homeIntentTick = homeIntentTick,

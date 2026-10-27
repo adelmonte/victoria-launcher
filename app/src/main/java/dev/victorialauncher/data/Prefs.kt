@@ -177,6 +177,7 @@ class Prefs(private val context: Context) {
         val WIDGET_POSITION = intPreferencesKey("widget_position")
         val WIDGET_HEIGHT_DP = intPreferencesKey("widget_height_dp")
         val WIDGET_IDS = stringPreferencesKey("widget_ids")
+        val WIDGETS_STACKED = booleanPreferencesKey("widgets_stacked")
         val WIDGET_SIDE_PADDING_DP = intPreferencesKey("widget_side_padding_dp")
         val WIDGET_OFFSET_X_DP = intPreferencesKey("widget_offset_x_dp")
         val SWIPE_UP_OPENS_LIST = booleanPreferencesKey("swipe_up_opens_list")
@@ -534,6 +535,13 @@ class Prefs(private val context: Context) {
     /** Index into the merged (favorites + widget) home list where the widget sits. 0 = top. */
     val widgetPosition: Flow<Int> = data.map { it[Keys.WIDGET_POSITION] ?: 0 }.distinctUntilChanged()
     val widgetHeightDp: Flow<Int> = data.map { it[Keys.WIDGET_HEIGHT_DP] ?: 180 }.distinctUntilChanged()
+
+    /** Home widgets one under another instead of swiped between (#128). */
+    val widgetsStacked: Flow<Boolean> = data.map { it[Keys.WIDGETS_STACKED] ?: false }.distinctUntilChanged()
+
+    suspend fun setWidgetsStacked(v: Boolean) {
+        context.dataStore.edit { it[Keys.WIDGETS_STACKED] = v }
+    }
 
     val widgetIds: Flow<List<Int>> = data.map { readWidgetIds(it) }.distinctUntilChanged()
 

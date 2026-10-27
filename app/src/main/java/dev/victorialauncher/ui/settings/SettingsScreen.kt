@@ -120,6 +120,7 @@ fun SettingsScreen(
     itemSpacingDp: Int,
     font: AppFont,
     hideStatusBar: Boolean,
+    widgetsStacked: Boolean,
     hideStatusBarAppList: Boolean,
     dimWallpaperAlpha: Float,
     hapticsEnabled: Boolean,
@@ -213,6 +214,7 @@ fun SettingsScreen(
     onSetFont: (AppFont) -> Unit,
     statusBarPeekSeconds: Int,
     onSetHideStatusBar: (Boolean) -> Unit,
+    onSetWidgetsStacked: (Boolean) -> Unit,
     onSetHideStatusBarAppList: (Boolean) -> Unit,
     onSetStatusBarPeekSeconds: (Int) -> Unit,
     onSetDimWallpaper: (Float) -> Unit,
@@ -430,6 +432,13 @@ fun SettingsScreen(
                 label = stringResource(R.string.settings_close_folder),
                 detail = stringResource(R.string.settings_close_folder_detail),
                 checked = closeFolderOnLaunch, onCheckedChange = onSetCloseFolderOnLaunch,
+            )
+        },
+        SettingsEntry(SettingsSection.HOME, stringResource(R.string.settings_widgets_stacked), "widgets stack below carousel") {
+            SwitchRowWithDetail(
+                label = stringResource(R.string.settings_widgets_stacked),
+                detail = stringResource(R.string.settings_widgets_stacked_detail),
+                checked = widgetsStacked, onCheckedChange = onSetWidgetsStacked,
             )
         },
         SettingsEntry(SettingsSection.HOME, stringResource(R.string.settings_hide_status_bar), "status bar") {

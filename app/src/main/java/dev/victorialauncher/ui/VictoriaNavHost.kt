@@ -330,6 +330,7 @@ fun VictoriaNavHost(
     val widgetId by app.prefs.widgetId.collectAsState(initial = -1)
     val widgetPosition by app.prefs.widgetPosition.collectAsState(initial = 0)
     val widgetHeightDp by app.prefs.widgetHeightDp.collectAsState(initial = 180)
+    val widgetsStacked by app.prefs.widgetsStacked.collectAsState(initial = false)
     val nowPlayingEnabled by app.prefs.nowPlayingEnabled.collectAsState(initial = false)
     val folders by app.prefs.folders.collectAsState(initial = emptyList())
     val widgetIds by app.prefs.widgetIds.collectAsState(initial = emptyList())
@@ -698,6 +699,7 @@ fun VictoriaNavHost(
                 widgetIds = widgetIds,
                 widgetPosition = widgetPosition,
                 widgetHeightDp = widgetHeightDp,
+                widgetsStacked = widgetsStacked,
                 widgetActions = widgetActions,
                 launchCounts = launchCounts,
                 // Both flows start at a value that shows nothing, so the dialog can't flash
@@ -815,6 +817,7 @@ fun VictoriaNavHost(
                 itemSpacingDp = itemSpacingDp,
                 font = font,
                 hideStatusBar = hideStatusBar,
+                widgetsStacked = widgetsStacked,
                 hideStatusBarAppList = hideStatusBarAppList,
                 statusBarPeekSeconds = statusBarPeekSeconds,
                 dimWallpaperAlpha = dimWallpaperAlpha,
@@ -854,6 +857,7 @@ fun VictoriaNavHost(
                 onSetItemSpacing = { scope.launch { app.prefs.setItemSpacingDp(it) } },
                 onSetFont = { scope.launch { app.prefs.setFont(it) } },
                 onSetHideStatusBar = { scope.launch { app.prefs.setHideStatusBar(it) } },
+                onSetWidgetsStacked = { scope.launch { app.prefs.setWidgetsStacked(it) } },
                 onSetHideStatusBarAppList = { scope.launch { app.prefs.setHideStatusBarAppList(it) } },
                 onSetStatusBarPeekSeconds = { scope.launch { app.prefs.setStatusBarPeekSeconds(it) } },
                 onSetDimWallpaper = { scope.launch { app.prefs.setDimWallpaperAlpha(it) } },
