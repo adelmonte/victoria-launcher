@@ -121,6 +121,11 @@
     <string name="settings_scrub_style">A-Z strip animation</string>
     <string name="scrub_style_bell">Bell</string>
     <string name="scrub_style_ripple">Ripple</string>
+    <string name="settings_scrub_bubble">Letter bubble</string>
+    <string name="scrub_bubble_rounded">Rounded</string>
+    <string name="scrub_bubble_circle">Circle</string>
+    <string name="scrub_bubble_square">Square</string>
+    <string name="scrub_bubble_hidden">Hidden</string>
     <string name="settings_ripple_speed">Ripple speed</string>
     <string name="settings_ripple_speed_value">%1$.0f letters/s</string>
     <string name="settings_ripple_damping">Ripple damping</string>

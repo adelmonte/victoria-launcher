@@ -26,6 +26,9 @@ enum class EdgeSide { LEFT, RIGHT, BOTH }
 /** How the A-Z strip moves under a fingertip. */
 enum class ScrubStyle { BELL, RIPPLE }
 
+/** The bubble that shows the letter under a finger on the A-Z strip, or none at all. */
+enum class ScrubBubbleShape { ROUNDED, CIRCLE, SQUARE, HIDDEN }
+
 /**
  * Tunables for the ripple strip's wave simulation.
  *
@@ -160,6 +163,7 @@ class Prefs(private val context: Context) {
         val DOUBLE_TAP_TO_LOCK = booleanPreferencesKey("double_tap_to_lock")
         val EDGE_SIDE = stringPreferencesKey("edge_side")
         val SCRUB_STYLE = stringPreferencesKey("scrub_style")
+        val SCRUB_BUBBLE_SHAPE = stringPreferencesKey("scrub_bubble_shape")
         val RIPPLE_SPEED = floatPreferencesKey("ripple_speed")
         val RIPPLE_DAMPING = floatPreferencesKey("ripple_damping")
         val RIPPLE_STIFFNESS = floatPreferencesKey("ripple_stiffness")
@@ -487,6 +491,11 @@ class Prefs(private val context: Context) {
 
     val scrubStyle: Flow<ScrubStyle> = data.map {
         runCatching { ScrubStyle.valueOf(it[Keys.SCRUB_STYLE] ?: ScrubStyle.BELL.name) }.getOrDefault(ScrubStyle.BELL)
+    }.distinctUntilChanged()
+
+    val scrubBubbleShape: Flow<ScrubBubbleShape> = data.map {
+        runCatching { ScrubBubbleShape.valueOf(it[Keys.SCRUB_BUBBLE_SHAPE] ?: ScrubBubbleShape.ROUNDED.name) }
+            .getOrDefault(ScrubBubbleShape.ROUNDED)
     }.distinctUntilChanged()
 
     val rippleParams: Flow<RippleParams> = data.map {
@@ -1161,6 +1170,10 @@ class Prefs(private val context: Context) {
 
     suspend fun setScrubStyle(v: ScrubStyle) {
         context.dataStore.edit { it[Keys.SCRUB_STYLE] = v.name }
+    }
+
+    suspend fun setScrubBubbleShape(v: ScrubBubbleShape) {
+        context.dataStore.edit { it[Keys.SCRUB_BUBBLE_SHAPE] = v.name }
     }
 
     suspend fun setIconPackPackage(pkg: String?) {

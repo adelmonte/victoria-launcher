@@ -55,6 +55,7 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Folder
@@ -94,6 +95,7 @@ import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
@@ -118,6 +120,7 @@ import dev.victorialauncher.data.AppInfo
 import dev.victorialauncher.data.EdgeSide
 import dev.victorialauncher.data.RippleParams
 import dev.victorialauncher.data.ScrubStyle
+import dev.victorialauncher.data.ScrubBubbleShape
 import dev.victorialauncher.data.EntryKind
 import dev.victorialauncher.data.Folder
 import dev.victorialauncher.data.folderToken
@@ -241,6 +244,7 @@ fun AppListScreen(
     showAlphabet: Boolean,
     edgeSide: EdgeSide,
     scrubStyle: ScrubStyle,
+    scrubBubbleShape: ScrubBubbleShape,
     rippleParams: RippleParams,
     /** Hoisted so a swipe that overshoots the opening animation can keep scrolling it. */
     listState: LazyListState,
@@ -1396,13 +1400,17 @@ fun AppListScreen(
         }
 
         // Bubble for the current letter, dragged out from the strip and springing back.
-        if (scrubLetter != null) {
+        if (scrubLetter != null && scrubBubbleShape != ScrubBubbleShape.HIDDEN) {
             val bubble = 72.dp
             val halfPx = with(density) { (bubble / 2).toPx() }
             val insetPx = with(density) { SCRUB_BUBBLE_INSET_DP.dp.toPx() }
             Surface(
                 color = Color.Black.copy(alpha = 0.6f),
-                shape = RoundedCornerShape(22.dp),
+                shape = when (scrubBubbleShape) {
+                    ScrubBubbleShape.CIRCLE -> CircleShape
+                    ScrubBubbleShape.SQUARE -> RectangleShape
+                    else -> RoundedCornerShape(22.dp)
+                },
                 modifier = Modifier
                     .align(if (activeSide == EdgeSide.LEFT) Alignment.TopStart else Alignment.TopEnd)
                     .offset {

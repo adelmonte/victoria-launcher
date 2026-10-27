@@ -51,6 +51,7 @@ import dev.victorialauncher.data.AzStripVisibility
 import dev.victorialauncher.data.EdgeSide
 import dev.victorialauncher.data.RippleParams
 import dev.victorialauncher.data.ScrubStyle
+import dev.victorialauncher.data.ScrubBubbleShape
 import dev.victorialauncher.data.EntryKeys
 import dev.victorialauncher.data.FavoritesSource
 import dev.victorialauncher.data.ShortcutSwipe
@@ -315,6 +316,7 @@ fun VictoriaNavHost(
     val homePaddings by app.prefs.homePaddings.collectAsState(initial = HomePaddings.Default)
     val edgeSide by app.prefs.edgeSide.collectAsState(initial = EdgeSide.RIGHT)
     val scrubStyle by app.prefs.scrubStyle.collectAsState(initial = ScrubStyle.BELL)
+    val scrubBubbleShape by app.prefs.scrubBubbleShape.collectAsState(initial = ScrubBubbleShape.ROUNDED)
     val rippleParams by app.prefs.rippleParams.collectAsState(initial = RippleParams())
     val azStripVisibility by app.prefs.azStripVisibility.collectAsState(initial = AzStripVisibility.NEVER)
     val showAlphabet by app.prefs.showAlphabet.collectAsState(initial = true)
@@ -528,6 +530,7 @@ fun VictoriaNavHost(
         nowPlayingEnabled = nowPlayingEnabled,
         edgeSide = edgeSide,
         scrubStyle = scrubStyle,
+        scrubBubbleShape = scrubBubbleShape,
         rippleParams = rippleParams,
         azStripVisibility = azStripVisibility,
         shortcutSwipe = shortcutSwipe,
@@ -829,6 +832,7 @@ fun VictoriaNavHost(
                 doubleTapToLock = doubleTapToLock,
                 edgeSide = edgeSide,
                 scrubStyle = scrubStyle,
+                scrubBubbleShape = scrubBubbleShape,
                 rippleParams = rippleParams,
                 edgeZoneWidthDp = edgeZoneWidthDp,
                 azStripVisibility = azStripVisibility,
@@ -899,6 +903,7 @@ fun VictoriaNavHost(
                 onSetDoubleTapToLock = { scope.launch { app.prefs.setDoubleTapToLock(it) } },
                 onSetEdgeSide = { scope.launch { app.prefs.setEdgeSide(it) } },
                 onSetScrubStyle = { scope.launch { app.prefs.setScrubStyle(it) } },
+                onSetScrubBubbleShape = { scope.launch { app.prefs.setScrubBubbleShape(it) } },
                 onSetRippleParams = { scope.launch { app.prefs.setRippleParams(it) } },
                 onSetEdgeZoneWidth = { scope.launch { app.prefs.setEdgeZoneWidthDp(it) } },
                 onSetAzStripVisibility = { scope.launch { app.prefs.setAzStripVisibility(it) } },

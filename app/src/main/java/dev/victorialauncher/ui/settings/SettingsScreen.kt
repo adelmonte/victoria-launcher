@@ -88,6 +88,7 @@ import dev.victorialauncher.data.IconShape
 import dev.victorialauncher.data.EdgeSide
 import dev.victorialauncher.data.RippleParams
 import dev.victorialauncher.data.ScrubStyle
+import dev.victorialauncher.data.ScrubBubbleShape
 import dev.victorialauncher.data.EDGE_ZONE_INSET_RANGE
 import dev.victorialauncher.data.HOLD_SCROLL_RANGE
 import dev.victorialauncher.data.RECENT_SECTION_RANGE
@@ -135,6 +136,7 @@ fun SettingsScreen(
     doubleTapToLock: Boolean,
     edgeSide: EdgeSide,
     scrubStyle: ScrubStyle,
+    scrubBubbleShape: ScrubBubbleShape,
     rippleParams: RippleParams,
     azStripVisibility: AzStripVisibility,
     showAlphabet: Boolean,
@@ -231,6 +233,7 @@ fun SettingsScreen(
     edgeZoneWidthDp: Int,
     onSetEdgeSide: (EdgeSide) -> Unit,
     onSetScrubStyle: (ScrubStyle) -> Unit,
+    onSetScrubBubbleShape: (ScrubBubbleShape) -> Unit,
     onSetRippleParams: (RippleParams) -> Unit,
     onSetEdgeZoneWidth: (Int) -> Unit,
     onSetAzStripVisibility: (AzStripVisibility) -> Unit,
@@ -544,6 +547,9 @@ fun SettingsScreen(
         },
         SettingsEntry(SettingsSection.APP_LIST, stringResource(R.string.settings_scrub_style), "a-z strip animation ripple wave bell") {
             ScrubStyleRow(scrubStyle, onSetScrubStyle)
+        },
+        SettingsEntry(SettingsSection.APP_LIST, stringResource(R.string.settings_scrub_bubble), "a-z strip letter bubble shape circle square hide") {
+            ScrubBubbleShapeRow(scrubBubbleShape, onSetScrubBubbleShape)
         },
         // The simulation's tunables only mean anything for the ripple style.
         SettingsEntry(
@@ -1841,6 +1847,21 @@ private fun ShortcutSwipeRow(selected: ShortcutSwipe, onSelect: (ShortcutSwipe) 
         ) {
             ShortcutSwipe.entries.forEach { mode ->
                 FilledChip(stringResource(mode.labelRes()), selected == mode) { onSelect(mode) }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ScrubBubbleShapeRow(selected: ScrubBubbleShape, onSelect: (ScrubBubbleShape) -> Unit) {
+    Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)) {
+        Text(stringResource(R.string.settings_scrub_bubble), style = MaterialTheme.typography.bodyMedium)
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(top = 10.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            ScrubBubbleShape.entries.forEach { shape ->
+                FilledChip(stringResource(shape.labelRes()), selected == shape) { onSelect(shape) }
             }
         }
     }
