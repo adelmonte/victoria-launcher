@@ -1,0 +1,2 @@
+New:
+* Folders can show the Now Playing card. Long-press a folder → "Add Now Playing". It works with any music app.
