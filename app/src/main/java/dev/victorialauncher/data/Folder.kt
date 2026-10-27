@@ -19,6 +19,8 @@ data class Folder(
     val icon: String? = null,
     /** Shown above the apps while the folder is open (#115). */
     val widgets: List<FolderWidget> = emptyList(),
+    /** Whether the Now Playing card opens with the folder too (#130). */
+    val nowPlaying: Boolean = false,
 )
 
 /** A widget kept in a folder, and how tall it is drawn there. */
@@ -48,6 +50,7 @@ internal fun foldersToJson(folders: List<Folder>): String {
                         folder.widgets.forEach { put(JSONObject().put("id", it.id).put("h", it.heightDp)) }
                     })
                 }
+                if (folder.nowPlaying) put("nowPlaying", true)
             }
         )
     }
@@ -74,6 +77,7 @@ internal fun foldersFromJson(json: String?): List<Folder> {
                         FolderWidget(wid, w.optInt("h", FOLDER_WIDGET_DEFAULT_HEIGHT_DP))
                     }
                 }.orEmpty(),
+                nowPlaying = obj.optBoolean("nowPlaying", false),
             )
         }
     }.getOrDefault(emptyList())

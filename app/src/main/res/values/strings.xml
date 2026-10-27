@@ -110,6 +110,8 @@
     <string name="settings_text_color">Text color</string>
     <string name="settings_text_color_detail">Auto reads the wallpaper and picks whichever is legible</string>
     <string name="settings_show_names">Show app names beside favorite icons</string>
+    <string name="folder_add_now_playing">Add Now Playing</string>
+    <string name="folder_remove_now_playing">Remove Now Playing</string>
     <string name="settings_widgets_stacked">Show all widgets at once</string>
     <string name="settings_widgets_stacked_detail">Home widgets sit one under another instead of being swiped between. Each one is the widget area\'s height</string>
     <string name="settings_hide_status_bar">Hide status bar on the home screen</string>

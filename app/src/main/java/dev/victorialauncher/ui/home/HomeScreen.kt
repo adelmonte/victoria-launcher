@@ -61,6 +61,7 @@ import androidx.compose.material.icons.filled.StarBorder
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Info
@@ -1599,6 +1600,13 @@ private fun FolderRow(
                     onClick = { onDismissMenu(); widgetActions.onAddWidgetToFolder(folder.id) },
                 )
                 DropdownMenuItem(
+                    text = {
+                        Text(stringResource(if (folder.nowPlaying) R.string.folder_remove_now_playing else R.string.folder_add_now_playing))
+                    },
+                    leadingIcon = { Icon(Icons.Filled.PlayArrow, contentDescription = null) },
+                    onClick = { onDismissMenu(); widgetActions.onSetFolderNowPlaying(folder.id, !folder.nowPlaying) },
+                )
+                DropdownMenuItem(
                     text = { Text(stringResource(R.string.action_edit_icon_and_name)) },
                     leadingIcon = { Icon(Icons.Filled.Edit, contentDescription = null) },
                     onClick = onEdit,
@@ -1630,6 +1638,24 @@ private fun FolderRow(
                 // Above the apps, so a folder's widget is what it opens onto.
                 folder.widgets.forEach { widget ->
                     key(widget.id) { FolderWidgetBlock(folder.id, widget, widgetActions) }
+                }
+                if (folder.nowPlaying) {
+                    // Shown even when silent: it was put here on purpose, and an Audio folder
+                    // that opens without it looks like it lost it.
+                    val context = LocalContext.current
+                    NowPlayingWidget(
+                        contentColor = contentColor,
+                        alignment = alignment,
+                        showPlaceholder = true,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = sidePaddingDp.dp)
+                            .clickable {
+                                if (!openNowPlayingApp(context)) {
+                                    Toast.makeText(context, context.getString(R.string.now_playing_open_failed), Toast.LENGTH_SHORT).show()
+                                }
+                            },
+                    )
                 }
                 members.forEach { member ->
                     Box {

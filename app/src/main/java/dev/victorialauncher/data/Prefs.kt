@@ -1009,6 +1009,10 @@ class Prefs(private val context: Context) {
         }
     }
 
+    suspend fun setFolderNowPlaying(folderId: String, on: Boolean) = updateFolder(folderId) {
+        it.copy(nowPlaying = on)
+    }
+
     suspend fun addFolderWidget(folderId: String, widgetId: Int) = updateFolder(folderId) {
         it.copy(widgets = it.widgets + FolderWidget(widgetId, FOLDER_WIDGET_DEFAULT_HEIGHT_DP))
     }

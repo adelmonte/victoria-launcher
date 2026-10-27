@@ -71,6 +71,7 @@ data class WidgetSlotActions(
     val onAddWidgetToFolder: (folderId: String) -> Unit = {},
     val onRemoveFolderWidget: (folderId: String, widgetId: Int) -> Unit = { _, _ -> },
     val onResizeFolderWidget: (folderId: String, widgetId: Int, heightDp: Int) -> Unit = { _, _, _ -> },
+    val onSetFolderNowPlaying: (folderId: String, on: Boolean) -> Unit = { _, _ -> },
 )
 
 /**

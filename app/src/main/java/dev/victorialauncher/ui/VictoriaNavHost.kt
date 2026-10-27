@@ -666,6 +666,9 @@ fun VictoriaNavHost(
             onResizeFolderWidget = { folderId, id, height ->
                 scope.launch { app.prefs.setFolderWidgetHeight(folderId, id, height) }
             },
+            onSetFolderNowPlaying = { folderId, on ->
+                scope.launch { app.prefs.setFolderNowPlaying(folderId, on) }
+            },
         )
     }
 

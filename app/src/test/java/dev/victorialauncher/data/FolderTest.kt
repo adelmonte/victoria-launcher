@@ -62,4 +62,11 @@ class FolderTest {
         val restored = foldersFromJson("""[{"id":"1","name":"Old","apps":["a/A"]}]""")
         assertEquals(emptyList<FolderWidget>(), restored.single().widgets)
     }
+
+    @Test
+    fun `a folder keeps its Now Playing card`() {
+        val folders = listOf(Folder(id = "1", name = "Audio", apps = listOf("a/A"), nowPlaying = true))
+        assertEquals(folders, foldersFromJson(foldersToJson(folders)))
+        assertEquals(false, foldersFromJson("""[{"id":"1","name":"Old","apps":["a/A"]}]""").single().nowPlaying)
+    }
 }
