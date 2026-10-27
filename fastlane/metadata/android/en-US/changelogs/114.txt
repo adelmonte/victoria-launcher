@@ -1,0 +1,3 @@
+New:
+* Notification text on the home screen now lists up to 3 notifications per app, one per line. Tap a line to open that notification.
+* Size setting for the notification text, under Settings → Notifications.
