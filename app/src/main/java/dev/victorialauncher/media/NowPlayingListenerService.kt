@@ -62,6 +62,7 @@ class NowPlayingListenerService : NotificationListenerService() {
 
     override fun onListenerConnected() {
         super.onListenerConnected()
+        NotificationCountBus.canceller = { key -> cancelNotification(key) }
         publishCounts()
         sessionManager = getSystemService(MediaSessionManager::class.java)
         componentName = ComponentName(this, NowPlayingListenerService::class.java)
@@ -75,6 +76,7 @@ class NowPlayingListenerService : NotificationListenerService() {
 
     override fun onListenerDisconnected() {
         super.onListenerDisconnected()
+        NotificationCountBus.canceller = null
         runCatching { sessionManager.removeOnActiveSessionsChangedListener(sessionsListener) }
         detach()
         NowPlayingBus.update(null)
@@ -111,17 +113,27 @@ class NowPlayingListenerService : NotificationListenerService() {
             return
         }
         val counts = HashMap<String, Int>()
-        val newest = HashMap<String, StatusBarNotification>()
+        val shown = HashMap<String, MutableList<StatusBarNotification>>()
         active.forEach { sbn ->
             if (!sbn.isClearable) return@forEach
             val notification = sbn.notification ?: return@forEach
             if (notification.flags and Notification.FLAG_GROUP_SUMMARY != 0) return@forEach
             counts[sbn.packageName] = (counts[sbn.packageName] ?: 0) + 1
             if (notification.visibility == Notification.VISIBILITY_SECRET) return@forEach
-            val held = newest[sbn.packageName]
-            if (held == null || sbn.postTime > held.postTime) newest[sbn.packageName] = sbn
+            shown.getOrPut(sbn.packageName) { mutableListOf() }.add(sbn)
         }
-        val previews = newest.mapNotNull { (pkg, sbn) -> previewOf(sbn.notification)?.let { pkg to it } }.toMap()
+        val previews = shown.mapValues { (_, list) ->
+            list.sortedByDescending { it.postTime }.mapNotNull { sbn ->
+                previewOf(sbn.notification)?.let { text ->
+                    NotificationLine(
+                        key = sbn.key,
+                        text = text,
+                        intent = sbn.notification.contentIntent,
+                        autoCancel = sbn.notification.flags and Notification.FLAG_AUTO_CANCEL != 0,
+                    )
+                }
+            }.take(MAX_NOTIFICATION_LINES)
+        }.filterValues { it.isNotEmpty() }
         val before = NotificationCountBus.counts.value.values.sum()
         NotificationCountBus.update(counts, previews)
         // A widget is drawn only when something asks. The home screen follows the bus on its

@@ -91,7 +91,8 @@
     <string name="settings_list_headers_detail">Off gives one continuous list. The A-Z strip still jumps to the letter</string>
     <string name="settings_notification_badges">Notification count on icons</string>
     <string name="settings_notification_previews">Notification text on home screen</string>
-    <string name="settings_notification_previews_detail">Shows the newest notification under the app\'s name, so anyone looking at your phone can read it. Needs notification access</string>
+    <string name="settings_notification_previews_detail">Lists an app\'s newest notifications under its name, and tapping one opens it. Anyone looking at your phone can read them. Needs notification access</string>
+    <string name="settings_notification_text_size">Notification text size</string>
     <string name="settings_notification_badges_detail">Needs the same notification access Now Playing does. Counts only, never what a notification says. A dot beside the name when icons are hidden</string>
     <string name="settings_section_top">Where a letter lands</string>
     <string name="settings_close_folder">Close a folder after opening an app</string>

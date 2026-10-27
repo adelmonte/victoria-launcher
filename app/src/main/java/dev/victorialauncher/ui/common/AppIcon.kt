@@ -182,8 +182,9 @@ data class IconConfig(
     val themed: Boolean,
     /** Whether an app showing notifications is badged with how many. */
     val notificationBadges: Boolean,
-    /** Whether a home screen app shows its newest notification's text under its name. */
+    /** Whether a home screen app lists its newest notifications under its name. */
     val notificationPreviews: Boolean,
+    val notificationTextSp: Int,
     val shape: IconShape,
 )
 
@@ -195,6 +196,7 @@ val LocalIconConfig = staticCompositionLocalOf {
         themed = false,
         notificationBadges = false,
         notificationPreviews = false,
+        notificationTextSp = 12,
         shape = IconShape.SYSTEM,
     )
 }

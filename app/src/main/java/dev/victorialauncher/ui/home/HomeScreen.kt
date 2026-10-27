@@ -148,6 +148,7 @@ import kotlin.math.abs
 import kotlin.math.roundToInt
 import dev.victorialauncher.R
 import dev.victorialauncher.media.NotificationCountBus
+import dev.victorialauncher.media.NotificationLine
 import androidx.compose.ui.res.stringResource
 
 private sealed interface HomeItem {
@@ -1347,14 +1348,18 @@ private fun FavoriteRow(
                         fontSize = labelSizeSp.sp,
                         textAlign = alignment.textAlign(),
                     )
-                    if (preview != null) {
+                    val context = LocalContext.current
+                    preview.forEach { line ->
                         Text(
-                            preview,
+                            line.text,
                             color = contentColor.copy(alpha = 0.6f),
-                            fontSize = (labelSizeSp * 0.6f).sp,
+                            fontSize = LocalIconConfig.current.notificationTextSp.sp,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
                             textAlign = alignment.textAlign(),
+                            modifier = if (editMode) Modifier else Modifier.clickable {
+                                if (!NotificationCountBus.open(context, line)) onLaunch()
+                            },
                         )
                     }
                 }
@@ -1999,12 +2004,12 @@ private fun HomeAlignment.columnAlignment() = when (this) {
     HomeAlignment.RIGHT -> Alignment.End
 }
 
-/** The newest notification's text for this app, or null when the setting is off or there is none. */
+/** This app's newest notifications, or none when the setting is off. */
 @Composable
-private fun notificationPreview(app: AppInfo): String? {
-    if (!LocalIconConfig.current.notificationPreviews || app.kind != EntryKind.APP) return null
+private fun notificationPreview(app: AppInfo): List<NotificationLine> {
+    if (!LocalIconConfig.current.notificationPreviews || app.kind != EntryKind.APP) return emptyList()
     val previews by NotificationCountBus.previews.collectAsState()
-    return previews[app.componentName.packageName]
+    return previews[app.componentName.packageName].orEmpty()
 }
 
 private fun HomeAlignment.textAlign() = when (this) {

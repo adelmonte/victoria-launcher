@@ -351,6 +351,7 @@ fun VictoriaNavHost(
     val showAppIcons by app.prefs.showAppIcons.collectAsState(initial = true)
     val notificationBadges by app.prefs.notificationBadges.collectAsState(initial = false)
     val notificationPreviews by app.prefs.notificationPreviews.collectAsState(initial = false)
+    val notificationTextSp by app.prefs.notificationTextSp.collectAsState(initial = 12)
     val fontFile by app.prefs.fontFile.collectAsState(initial = null)
     val textColorCustom by app.prefs.textColorCustom.collectAsState(initial = 0xFFFFFFFF.toInt())
     val dimColor by app.prefs.dimColor.collectAsState(initial = 0xFF000000.toInt())
@@ -778,6 +779,8 @@ fun VictoriaNavHost(
                 onSetNotificationBadges = { scope.launch { app.prefs.setNotificationBadges(it) } },
                 notificationPreviews = notificationPreviews,
                 onSetNotificationPreviews = { scope.launch { app.prefs.setNotificationPreviews(it) } },
+                notificationTextSp = notificationTextSp,
+                onSetNotificationTextSp = { scope.launch { app.prefs.setNotificationTextSp(it) } },
                 sectionTopPercent = sectionTopPercent,
                 onSetSectionTopPercent = { scope.launch { app.prefs.setSectionTopPercent(it) } },
                 closeFolderOnLaunch = closeFolderOnLaunch,

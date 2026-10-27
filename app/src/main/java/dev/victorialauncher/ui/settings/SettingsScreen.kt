@@ -189,6 +189,8 @@ fun SettingsScreen(
     onSetNotificationBadges: (Boolean) -> Unit,
     notificationPreviews: Boolean,
     onSetNotificationPreviews: (Boolean) -> Unit,
+    notificationTextSp: Int,
+    onSetNotificationTextSp: (Int) -> Unit,
     sectionTopPercent: Int,
     onSetSectionTopPercent: (Int) -> Unit,
     closeFolderOnLaunch: Boolean,
@@ -793,6 +795,17 @@ fun SettingsScreen(
                 label = stringResource(R.string.settings_notification_previews),
                 detail = stringResource(R.string.settings_notification_previews_detail),
                 checked = notificationPreviews, onCheckedChange = onSetNotificationPreviews,
+            )
+        },
+        SettingsEntry(
+            SettingsSection.NOTIFICATIONS, stringResource(R.string.settings_notification_text_size), "font notification size",
+            visible = notificationPreviews,
+        ) {
+            SliderRow(
+                label = stringResource(R.string.settings_notification_text_size),
+                value = notificationTextSp.toFloat(), range = 8f..24f,
+                valueLabel = "${notificationTextSp}sp",
+                onValueChange = { onSetNotificationTextSp(it.toInt()) },
             )
         },
         SettingsEntry(SettingsSection.NOTIFICATIONS, stringResource(R.string.settings_now_playing_show), "media music") {
