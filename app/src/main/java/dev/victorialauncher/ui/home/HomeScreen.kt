@@ -1348,20 +1348,7 @@ private fun FavoriteRow(
                         fontSize = labelSizeSp.sp,
                         textAlign = alignment.textAlign(),
                     )
-                    val context = LocalContext.current
-                    preview.forEach { line ->
-                        Text(
-                            line.text,
-                            color = contentColor.copy(alpha = 0.6f),
-                            fontSize = LocalIconConfig.current.notificationTextSp.sp,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                            textAlign = alignment.textAlign(),
-                            modifier = if (editMode) Modifier else Modifier.clickable {
-                                if (!NotificationCountBus.open(context, line)) onLaunch()
-                            },
-                        )
-                    }
+                    NotificationLines(preview, alignment, contentColor, interactive = !editMode, onFallback = onLaunch)
                 }
             }
         }
@@ -1681,13 +1668,18 @@ private fun FolderRow(
                             iconWidth = (iconSizeDp * 0.8f).dp,
                             icon = { AppIcon(app = member, sizeDp = (iconSizeDp * 0.8f).toInt()) },
                         ) { labelModifier ->
-                            Text(
-                                displayName(member),
-                                color = if (member.disabled) contentColor.copy(alpha = 0.5f) else contentColor,
-                                fontSize = labelSizeSp.sp,
-                                modifier = labelModifier,
-                                textAlign = alignment.textAlign(),
-                            )
+                            Column(labelModifier, horizontalAlignment = alignment.columnAlignment()) {
+                                Text(
+                                    displayName(member),
+                                    color = if (member.disabled) contentColor.copy(alpha = 0.5f) else contentColor,
+                                    fontSize = labelSizeSp.sp,
+                                    textAlign = alignment.textAlign(),
+                                )
+                                NotificationLines(
+                                    notificationPreview(member), alignment, contentColor,
+                                    interactive = true, onFallback = { onOpenApp(member) },
+                                )
+                            }
                         }
                     }
 
@@ -2002,6 +1994,58 @@ private fun HomeAlignment.columnAlignment() = when (this) {
     HomeAlignment.LEFT -> Alignment.Start
     HomeAlignment.CENTER -> Alignment.CenterHorizontally
     HomeAlignment.RIGHT -> Alignment.End
+}
+
+/**
+ * An app's notifications, a line each. A tap opens that one and a sideways swipe clears it,
+ * as in the shade; only clearable notifications ever reach this list.
+ */
+@Composable
+private fun NotificationLines(
+    lines: List<NotificationLine>,
+    alignment: HomeAlignment,
+    contentColor: Color,
+    interactive: Boolean,
+    onFallback: () -> Unit,
+) {
+    val context = LocalContext.current
+    val sizeSp = LocalIconConfig.current.notificationTextSp
+    lines.forEach { line ->
+        key(line.key) {
+            val offset = remember { Animatable(0f) }
+            val scope = rememberCoroutineScope()
+            var width by remember { mutableStateOf(1) }
+            Text(
+                line.text,
+                color = contentColor.copy(alpha = 0.6f * (1f - (abs(offset.value) / width).coerceIn(0f, 1f))),
+                fontSize = sizeSp.sp,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                textAlign = alignment.textAlign(),
+                modifier = Modifier
+                    .onSizeChanged { width = it.width.coerceAtLeast(1) }
+                    .graphicsLayer { translationX = offset.value }
+                    .then(
+                        if (!interactive) Modifier else Modifier
+                            .clickable { if (!NotificationCountBus.open(context, line)) onFallback() }
+                            .draggable(
+                                orientation = Orientation.Horizontal,
+                                state = rememberDraggableState { delta ->
+                                    scope.launch { offset.snapTo(offset.value + delta) }
+                                },
+                                onDragStopped = {
+                                    if (abs(offset.value) > width / 3f) {
+                                        offset.animateTo(if (offset.value > 0) width.toFloat() else -width.toFloat())
+                                        NotificationCountBus.dismiss(line.key)
+                                    } else {
+                                        offset.animateTo(0f)
+                                    }
+                                },
+                            )
+                    ),
+            )
+        }
+    }
 }
 
 /** This app's newest notifications, or none when the setting is off. */

@@ -45,6 +45,11 @@ object NotificationCountBus {
         _previews.value = previews
     }
 
+    /** Clears the notification, as swiping it away in the shade would. */
+    fun dismiss(key: String) {
+        runCatching { canceller?.invoke(key) }
+    }
+
     /** Opens what the notification opens, as the shade would. False if there was nothing to open. */
     fun open(context: Context, line: NotificationLine): Boolean {
         val intent = line.intent ?: return false
