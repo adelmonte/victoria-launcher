@@ -239,7 +239,7 @@
     <string name="settings_import_done">Settings restored</string>
     <string name="settings_backup_failed">That file could not be read</string>
     <string name="settings_dim_color">Dim color</string>
-    <string name="settings_dim_color_detail">What the wallpaper is dimmed with; the sliders above set how much</string>
+    <string name="settings_dim_color_detail">What the wallpaper is dimmed with. How much is set under Home screen and App list</string>
     <string name="color_from_wallpaper">From your wallpaper</string>
     <string name="icon_shape">Icon shape</string>
     <string name="icon_shape_detail">Only reshapes adaptive icons; anything older is left as it is</string>

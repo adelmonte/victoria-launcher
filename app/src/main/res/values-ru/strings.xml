@@ -160,7 +160,6 @@
     <string name="settings_import_done">Настройки успешно загружены</string>
     <string name="settings_backup_failed">Данный файл не может быть прочтён</string>
     <string name="settings_dim_color">Цвет фона</string>
-    <string name="settings_dim_color_detail">Каким цветом затемнятся обои. Ползунки выше определяют степень затемнения</string>
     <string name="color_from_wallpaper">Цвет с обоев</string>
     <string name="icon_shape">Форма иконки</string>
     <string name="icon_shape_detail">Меняет форму с адаптивных иконок; остальные - без изменений</string>

@@ -232,7 +232,6 @@
     <string name="settings_import_done">Inställningarna har återställts</string>
     <string name="settings_backup_failed">Den valda filen kunde inte läsas in</string>
     <string name="settings_dim_color">Dämpningsfärg</string>
-    <string name="settings_dim_color_detail">Vad bakgrundsbilden dämpas med; reglagen ovan anger hur mycket</string>
     <string name="color_from_wallpaper">Från din bakgrundsbild</string>
     <string name="icon_shape">Ikonform</string>
     <string name="icon_shape_detail">Omformar endast adaptiva ikoner; alla äldre lämnas oförändrade</string>

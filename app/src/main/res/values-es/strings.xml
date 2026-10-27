@@ -158,7 +158,6 @@
     <string name="settings_import_done">Ajustes restaurados</string>
     <string name="settings_backup_failed">No se ha podido leer ese archivo</string>
     <string name="settings_dim_color">Color de atenuación</string>
-    <string name="settings_dim_color_detail">El color con el que se atenúa el fondo; los controles de arriba fijan cuánto</string>
     <string name="color_from_wallpaper">De tu fondo de pantalla</string>
     <string name="icon_shape">Forma de los iconos</string>
     <string name="icon_shape_detail">Solo cambia la forma de los iconos adaptables; los más antiguos se dejan como están</string>
