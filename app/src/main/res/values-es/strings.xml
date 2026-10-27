@@ -100,8 +100,8 @@
     <string name="settings_edge_zone_width">Ancho del deslizamiento en el borde</string>
     <string name="settings_swipe_up_list">Deslizar hacia arriba para la lista de aplicaciones</string>
     <string name="settings_swipe_up_list_detail">Empuja hacia arriba más allá del final de la pantalla de inicio</string>
-    <string name="settings_quick_launch_left">Deslizar a la izquierda bajo los favoritos</string>
-    <string name="settings_quick_launch_right">Deslizar a la derecha bajo los favoritos</string>
+    <string name="settings_quick_launch_left">Deslizar a la izquierda en la parte inferior</string>
+    <string name="settings_quick_launch_right">Deslizar a la derecha en la parte inferior</string>
     <string name="settings_quick_launch_none">Ninguna</string>
     <string name="settings_search_bar">Barra de búsqueda en la lista de aplicaciones</string>
     <string name="settings_search_bar_detail">Un campo para filtrar la lista por nombre</string>
@@ -158,6 +158,7 @@
     <string name="settings_import_done">Ajustes restaurados</string>
     <string name="settings_backup_failed">No se ha podido leer ese archivo</string>
     <string name="settings_dim_color">Color de atenuación</string>
+    <string name="settings_dim_color_detail">Con qué se atenúa el fondo de pantalla. La intensidad se ajusta en Pantalla de inicio y Lista de apps</string>
     <string name="color_from_wallpaper">De tu fondo de pantalla</string>
     <string name="icon_shape">Forma de los iconos</string>
     <string name="icon_shape_detail">Solo cambia la forma de los iconos adaptables; los más antiguos se dejan como están</string>
@@ -239,4 +240,6 @@
     <string name="now_playing_previous">Anterior</string>
     <string name="now_playing_play_pause">Reproducir/pausar</string>
     <string name="now_playing_next">Siguiente</string>
+    <string name="settings_section_home">Pantalla de inicio</string>
+    <string name="settings_section_app_list">Lista de apps</string>
 </resources>

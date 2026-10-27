@@ -100,8 +100,8 @@
     <string name="settings_edge_zone_width">Ширина боковой области</string>
     <string name="settings_swipe_up_list">Провести вверх для открытия меню приложений</string>
     <string name="settings_swipe_up_list_detail">Смахните вверх за пределы нижней границы домашнего экрана</string>
-    <string name="settings_quick_launch_left">Действие на свайп влево (ниже избранных)</string>
-    <string name="settings_quick_launch_right">Действие на свайп вправо (ниже избранных)</string>
+    <string name="settings_quick_launch_left">Действие на свайп влево (внизу экрана)</string>
+    <string name="settings_quick_launch_right">Действие на свайп вправо (внизу экрана)</string>
     <string name="settings_quick_launch_none">Ничего</string>
     <string name="settings_search_bar">Панель поиска в меню приложений</string>
     <string name="settings_search_bar_detail">Фильтрует список по запросу</string>
@@ -160,6 +160,7 @@
     <string name="settings_import_done">Настройки успешно загружены</string>
     <string name="settings_backup_failed">Данный файл не может быть прочтён</string>
     <string name="settings_dim_color">Цвет фона</string>
+    <string name="settings_dim_color_detail">Каким цветом затемняются обои. Силу затемнения можно задать в разделах «Главный экран» и «Список приложений»</string>
     <string name="color_from_wallpaper">Цвет с обоев</string>
     <string name="icon_shape">Форма иконки</string>
     <string name="icon_shape_detail">Меняет форму с адаптивных иконок; остальные - без изменений</string>
@@ -229,5 +230,7 @@
     <string name="now_playing_previous">Предыдущий</string>
     <string name="now_playing_play_pause">Воспроизвести/Приостановить</string>
     <string name="now_playing_next">Следующий</string>
+    <string name="settings_section_home">Главный экран</string>
+    <string name="settings_section_app_list">Список приложений</string>
 </resources>
 

@@ -145,8 +145,8 @@
     <string name="settings_edge_zone_width">Kantsvepningsbredd</string>
     <string name="settings_swipe_up_list">Svep uppåt för applistan</string>
     <string name="settings_swipe_up_list_detail">Bläddra uppåt förbi slutet av startskärmen</string>
-    <string name="settings_quick_launch_left">Svep åt vänster under favoriterna</string>
-    <string name="settings_quick_launch_right">Svep åt höger under favoriterna</string>
+    <string name="settings_quick_launch_left">Svep åt vänster längst ner</string>
+    <string name="settings_quick_launch_right">Svep åt höger längst ner</string>
     <string name="settings_quick_launch_none">Ingen</string>
     <string name="settings_search_bar">Sökfält i applistan</string>
     <string name="settings_search_bar_detail">Ett fält för att filtrera listan efter namn</string>
@@ -232,6 +232,7 @@
     <string name="settings_import_done">Inställningarna har återställts</string>
     <string name="settings_backup_failed">Den valda filen kunde inte läsas in</string>
     <string name="settings_dim_color">Dämpningsfärg</string>
+    <string name="settings_dim_color_detail">Vilken färg bakgrunden dämpas med. Hur mycket ställs in under Startskärm och Applista</string>
     <string name="color_from_wallpaper">Från din bakgrundsbild</string>
     <string name="icon_shape">Ikonform</string>
     <string name="icon_shape_detail">Omformar endast adaptiva ikoner; alla äldre lämnas oförändrade</string>

@@ -94,8 +94,8 @@
     <string name="settings_edge_zone_width">Breite des Randbereichs zum Wischen</string>
     <string name="settings_swipe_up_list">Nach oben wischen für die App-Liste</string>
     <string name="settings_swipe_up_list_detail">Über das Ende des Startbildschirms hinaus nach oben schieben</string>
-    <string name="settings_quick_launch_left">Nach links wischen unter den Favoriten</string>
-    <string name="settings_quick_launch_right">Nach rechts wischen unter den Favoriten</string>
+    <string name="settings_quick_launch_left">Unten nach links wischen</string>
+    <string name="settings_quick_launch_right">Unten nach rechts wischen</string>
     <string name="settings_quick_launch_none">Keine</string>
     <string name="settings_search_bar">Suchleiste in der App-Liste</string>
     <string name="settings_search_bar_detail">Ein Feld zum Filtern der Liste nach Namen</string>
