@@ -150,7 +150,7 @@ class MainActivity : ComponentActivity() {
                         hideStatusBarAppList = hideStatusBarAppList,
                         iconPackPackage = iconPackPackage,
                         iconOverrides = iconOverrides,
-                        onPeekStatusBar = { statusBarPeek = true },
+                        onPeekStatusBar = { if (peekSeconds > 0) statusBarPeek = true },
                         onAppListVisibleChange = { appListOpen = it },
                     )
                 }

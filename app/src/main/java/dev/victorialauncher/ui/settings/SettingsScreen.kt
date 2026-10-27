@@ -432,7 +432,7 @@ fun SettingsScreen(
         ) {
             SliderRow(
                 label = stringResource(R.string.settings_status_bar_timeout),
-                value = statusBarPeekSeconds.toFloat(), range = 1f..30f,
+                value = statusBarPeekSeconds.toFloat(), range = 0f..30f,
                 valueLabel = "${statusBarPeekSeconds}s",
                 onValueChange = { onSetStatusBarPeekSeconds(it.roundToInt()) },
             )
