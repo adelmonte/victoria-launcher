@@ -165,8 +165,8 @@
     <string name="settings_edge_zone_width">Edge swipe width</string>
     <string name="settings_swipe_up_list">Swipe up for the app list</string>
     <string name="settings_swipe_up_list_detail">Push up past the end of the home screen</string>
-    <string name="settings_quick_launch_left">Swipe left below favorites</string>
-    <string name="settings_quick_launch_right">Swipe right below favorites</string>
+    <string name="settings_quick_launch_left">Swipe left at the bottom</string>
+    <string name="settings_quick_launch_right">Swipe right at the bottom</string>
     <string name="settings_quick_launch_none">None</string>
     <string name="settings_search_bar">Search bar in the app list</string>
     <string name="settings_search_bar_detail">A box for filtering the list by name</string>

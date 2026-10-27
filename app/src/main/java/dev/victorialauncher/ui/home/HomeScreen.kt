@@ -681,9 +681,14 @@ fun HomeScreen(
                         var travelled = 0f
                         detectHorizontalDragGestures(
                             onDragStart = { start ->
-                                // The empty space under the whole stack. Anywhere higher is a
-                                // row, the widget, or Now Playing, and belongs to them.
-                                eligible = !editMode && start.y > offsetY.value + contentHeight
+                                // The empty space under the whole stack, and the bottom of the
+                                // screen even when favorites reach it, for a list too long to
+                                // leave any space (#131). A row that swipes for its shortcuts
+                                // still claims the gesture first.
+                                eligible = !editMode && (
+                                    start.y > offsetY.value + contentHeight ||
+                                        start.y > size.height * (1f - QUICK_LAUNCH_BOTTOM_FRACTION)
+                                    )
                                 travelled = 0f
                             },
                             onDragEnd = {
@@ -2095,6 +2100,9 @@ private fun HomeAlignment.arrangement() = when (this) {
     HomeAlignment.CENTER -> Arrangement.Center
     HomeAlignment.RIGHT -> Arrangement.End
 }
+
+/** How much of the bottom of the home screen always answers the quick-launch swipes. */
+private const val QUICK_LAUNCH_BOTTOM_FRACTION = 0.2f
 
 /** Folders get the same treatment as apps: their own name and their own icon. */
 @Composable
