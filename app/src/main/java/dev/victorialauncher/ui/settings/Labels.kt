@@ -6,6 +6,7 @@ import dev.victorialauncher.R
 import dev.victorialauncher.data.AppFont
 import dev.victorialauncher.data.AzStripVisibility
 import dev.victorialauncher.data.EdgeSide
+import dev.victorialauncher.data.ScrubStyle
 import dev.victorialauncher.data.FavoritesSource
 import dev.victorialauncher.data.ShortcutSwipe
 import dev.victorialauncher.data.HomeAlignment
@@ -50,6 +51,12 @@ fun EdgeSide.labelRes(): Int = when (this) {
     EdgeSide.LEFT -> R.string.edge_left
     EdgeSide.RIGHT -> R.string.edge_right
     EdgeSide.BOTH -> R.string.edge_both
+}
+
+@StringRes
+fun ScrubStyle.labelRes(): Int = when (this) {
+    ScrubStyle.BELL -> R.string.scrub_style_bell
+    ScrubStyle.RIPPLE -> R.string.scrub_style_ripple
 }
 
 @StringRes

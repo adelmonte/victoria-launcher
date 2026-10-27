@@ -49,6 +49,8 @@ import dev.victorialauncher.data.EntryKind
 import dev.victorialauncher.data.PrivateSpace
 import dev.victorialauncher.data.AzStripVisibility
 import dev.victorialauncher.data.EdgeSide
+import dev.victorialauncher.data.RippleParams
+import dev.victorialauncher.data.ScrubStyle
 import dev.victorialauncher.data.EntryKeys
 import dev.victorialauncher.data.FavoritesSource
 import dev.victorialauncher.data.ShortcutSwipe
@@ -312,6 +314,8 @@ fun VictoriaNavHost(
     val nowPlayingHeightDp by app.prefs.nowPlayingHeightDp.collectAsState(initial = 64)
     val homePaddings by app.prefs.homePaddings.collectAsState(initial = HomePaddings.Default)
     val edgeSide by app.prefs.edgeSide.collectAsState(initial = EdgeSide.RIGHT)
+    val scrubStyle by app.prefs.scrubStyle.collectAsState(initial = ScrubStyle.BELL)
+    val rippleParams by app.prefs.rippleParams.collectAsState(initial = RippleParams())
     val azStripVisibility by app.prefs.azStripVisibility.collectAsState(initial = AzStripVisibility.NEVER)
     val showAlphabet by app.prefs.showAlphabet.collectAsState(initial = true)
     val alignRight by app.prefs.alignRight.collectAsState(initial = false)
@@ -523,6 +527,8 @@ fun VictoriaNavHost(
         nowPlayingHeightDp = nowPlayingHeightDp,
         nowPlayingEnabled = nowPlayingEnabled,
         edgeSide = edgeSide,
+        scrubStyle = scrubStyle,
+        rippleParams = rippleParams,
         azStripVisibility = azStripVisibility,
         shortcutSwipe = shortcutSwipe,
         showAlphabet = showAlphabet,
@@ -822,6 +828,8 @@ fun VictoriaNavHost(
                 themedIcons = themedIcons,
                 doubleTapToLock = doubleTapToLock,
                 edgeSide = edgeSide,
+                scrubStyle = scrubStyle,
+                rippleParams = rippleParams,
                 edgeZoneWidthDp = edgeZoneWidthDp,
                 azStripVisibility = azStripVisibility,
                 showAlphabet = showAlphabet,
@@ -890,6 +898,8 @@ fun VictoriaNavHost(
                 },
                 onSetDoubleTapToLock = { scope.launch { app.prefs.setDoubleTapToLock(it) } },
                 onSetEdgeSide = { scope.launch { app.prefs.setEdgeSide(it) } },
+                onSetScrubStyle = { scope.launch { app.prefs.setScrubStyle(it) } },
+                onSetRippleParams = { scope.launch { app.prefs.setRippleParams(it) } },
                 onSetEdgeZoneWidth = { scope.launch { app.prefs.setEdgeZoneWidthDp(it) } },
                 onSetAzStripVisibility = { scope.launch { app.prefs.setAzStripVisibility(it) } },
                 onSetShowAlphabet = { scope.launch { app.prefs.setShowAlphabet(it) } },

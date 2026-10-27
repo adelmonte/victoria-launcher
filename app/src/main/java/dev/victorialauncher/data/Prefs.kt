@@ -23,6 +23,29 @@ import org.json.JSONObject
 
 enum class EdgeSide { LEFT, RIGHT, BOTH }
 
+/** How the A-Z strip moves under a fingertip. */
+enum class ScrubStyle { BELL, RIPPLE }
+
+/**
+ * Tunables for the ripple strip's wave simulation.
+ *
+ * @property speed how fast ripples travel along the strip, in letters per second
+ * @property damping how quickly they die out (1/s); low values ring for longer
+ * @property stiffness how hard the strip is pulled toward the bell under the finger; low
+ *   values lag and wobble, high values track tightly
+ */
+data class RippleParams(
+    val speed: Float = 30f,
+    val damping: Float = 20f,
+    val stiffness: Float = 600f,
+) {
+    companion object {
+        val SPEED_RANGE = 4f..60f
+        val DAMPING_RANGE = 0.5f..40f
+        val STIFFNESS_RANGE = 5f..1200f
+    }
+}
+
 /**
  * Which way an app row is swiped to reach the shortcuts it publishes.
  *
@@ -136,6 +159,10 @@ class Prefs(private val context: Context) {
         val TEXT_COLOR_MODE = stringPreferencesKey("text_color_mode")
         val DOUBLE_TAP_TO_LOCK = booleanPreferencesKey("double_tap_to_lock")
         val EDGE_SIDE = stringPreferencesKey("edge_side")
+        val SCRUB_STYLE = stringPreferencesKey("scrub_style")
+        val RIPPLE_SPEED = floatPreferencesKey("ripple_speed")
+        val RIPPLE_DAMPING = floatPreferencesKey("ripple_damping")
+        val RIPPLE_STIFFNESS = floatPreferencesKey("ripple_stiffness")
         val ALWAYS_SHOW_AZ = booleanPreferencesKey("always_show_az")
         val AZ_STRIP_VISIBILITY = stringPreferencesKey("az_strip_visibility")
         val SHOW_ALPHABET = booleanPreferencesKey("show_alphabet")
@@ -456,6 +483,19 @@ class Prefs(private val context: Context) {
 
     val edgeSide: Flow<EdgeSide> = data.map {
         runCatching { EdgeSide.valueOf(it[Keys.EDGE_SIDE] ?: EdgeSide.RIGHT.name) }.getOrDefault(EdgeSide.RIGHT)
+    }.distinctUntilChanged()
+
+    val scrubStyle: Flow<ScrubStyle> = data.map {
+        runCatching { ScrubStyle.valueOf(it[Keys.SCRUB_STYLE] ?: ScrubStyle.BELL.name) }.getOrDefault(ScrubStyle.BELL)
+    }.distinctUntilChanged()
+
+    val rippleParams: Flow<RippleParams> = data.map {
+        val d = RippleParams()
+        RippleParams(
+            speed = (it[Keys.RIPPLE_SPEED] ?: d.speed).coerceIn(RippleParams.SPEED_RANGE),
+            damping = (it[Keys.RIPPLE_DAMPING] ?: d.damping).coerceIn(RippleParams.DAMPING_RANGE),
+            stiffness = (it[Keys.RIPPLE_STIFFNESS] ?: d.stiffness).coerceIn(RippleParams.STIFFNESS_RANGE),
+        )
     }.distinctUntilChanged()
 
     /** Keep the A-Z strip on screen even when the app list is closed. */
@@ -1109,6 +1149,18 @@ class Prefs(private val context: Context) {
 
     suspend fun setEdgeSide(v: EdgeSide) {
         context.dataStore.edit { it[Keys.EDGE_SIDE] = v.name }
+    }
+
+    suspend fun setRippleParams(v: RippleParams) {
+        context.dataStore.edit {
+            it[Keys.RIPPLE_SPEED] = v.speed
+            it[Keys.RIPPLE_DAMPING] = v.damping
+            it[Keys.RIPPLE_STIFFNESS] = v.stiffness
+        }
+    }
+
+    suspend fun setScrubStyle(v: ScrubStyle) {
+        context.dataStore.edit { it[Keys.SCRUB_STYLE] = v.name }
     }
 
     suspend fun setIconPackPackage(pkg: String?) {
