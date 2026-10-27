@@ -1,0 +1,2 @@
+Changed:
+* The left and right swipes that open an app now also work at the bottom of the screen, even when your favorites reach down there.
