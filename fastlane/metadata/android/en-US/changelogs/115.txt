@@ -1,0 +1,8 @@
+New:
+* Show all home widgets at once, one under another, instead of swiping between them (Settings → Home screen).
+* Ripple animation for the A-Z strip, by make-42 (Settings → App list).
+* Choose the shape of the A-Z letter bubble, or hide it.
+* Notification text now also shows for apps inside folders, and you can swipe a line away to clear it.
+* The status bar can be set to hide right away (0 seconds).
+Fixed:
+* The "Dim color" description pointed to sliders that weren't there.
