@@ -1,0 +1,6 @@
+Fixed:
+* The Now Playing buttons in a folder work again. The edge that opens the app list was taking their taps.
+
+Changed:
+* With the status bar peek set to 0, the status bar now hides at once instead of fading out.
+* Updated German, Spanish, Polish, Russian and Swedish translations.
