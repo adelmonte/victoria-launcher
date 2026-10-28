@@ -530,6 +530,16 @@ fun HomeScreen(
         val end = maxOf(if (covers(stripInsetSide, EdgeSide.RIGHT)) STRIP_INSET else 0.dp, zoneEnd)
         if (start == 0.dp && end == 0.dp) Modifier else Modifier.padding(start = start, end = end)
     }
+    // A Now Playing card in a folder has its buttons at the far end, which is the end the inset
+    // above leaves under the zone — and there the zone takes their taps. So the card makes up
+    // whatever the folder's own inset did not clear.
+    val folderNowPlayingInset = remember(edgeZoneSide, edgeZoneExtentDp, alignment) {
+        fun covers(which: EdgeSide) = edgeZoneSide == which || edgeZoneSide == EdgeSide.BOTH
+        val zone = edgeZoneExtentDp.dp
+        val start = if (covers(EdgeSide.LEFT) && alignment == HomeAlignment.RIGHT) zone else 0.dp
+        val end = if (covers(EdgeSide.RIGHT) && alignment == HomeAlignment.LEFT) zone else 0.dp
+        if (start == 0.dp && end == 0.dp) Modifier else Modifier.padding(start = start, end = end)
+    }
 
     // Free vertical drag with spring bounce at both ends, outside edit mode.
     val offsetY = remember { Animatable(0f) }
@@ -1034,6 +1044,7 @@ fun HomeScreen(
                             iconSizeDp = iconSizeDp,
                             labelSizeSp = labelSizeSp,
                             sidePaddingDp = sidePaddingDp,
+                            nowPlayingInset = folderNowPlayingInset,
                             contentColor = contentColor,
                             showLabels = showFavoriteLabels,
                             alignment = alignment,
@@ -1500,6 +1511,7 @@ private fun FolderRow(
     iconSizeDp: Int,
     labelSizeSp: Int,
     sidePaddingDp: Int,
+    nowPlayingInset: Modifier,
     contentColor: Color,
     showLabels: Boolean,
     alignment: HomeAlignment,
@@ -1654,6 +1666,7 @@ private fun FolderRow(
                         showPlaceholder = true,
                         modifier = Modifier
                             .fillMaxWidth()
+                            .then(nowPlayingInset)
                             .padding(horizontal = sidePaddingDp.dp)
                             .clickable {
                                 if (!openNowPlayingApp(context)) {

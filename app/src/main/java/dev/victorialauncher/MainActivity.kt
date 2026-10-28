@@ -94,7 +94,8 @@ class MainActivity : ComponentActivity() {
             // shown — so opening the list with both set to hide flashed it into view.
             LaunchedEffect(statusBarVisible) {
                 desiredStatusBarVisible = statusBarVisible
-                StatusBarFader.setVisible(window, visible = statusBarVisible)
+                // A peek of 0 is someone who wants the bar gone, and a fade is the bar lingering.
+                StatusBarFader.setVisible(window, visible = statusBarVisible, instant = peekSeconds == 0)
             }
 
             val font by app.prefs.font.collectAsState(initial = AppFont.SYSTEM)

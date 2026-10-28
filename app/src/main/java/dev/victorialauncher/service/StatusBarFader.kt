@@ -34,7 +34,8 @@ object StatusBarFader {
     fun setVisible(
         window: Window,
         visible: Boolean,
-        durationMs: Long = if (visible) 220 else 650,
+        instant: Boolean = false,
+        durationMs: Long = if (instant) 0 else if (visible) 220 else 650,
     ) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             val faded = runCatching { fade(window, visible, durationMs) }.getOrDefault(false)
