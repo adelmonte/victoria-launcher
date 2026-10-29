@@ -530,10 +530,10 @@ fun HomeScreen(
         val end = maxOf(if (covers(stripInsetSide, EdgeSide.RIGHT)) STRIP_INSET else 0.dp, zoneEnd)
         if (start == 0.dp && end == 0.dp) Modifier else Modifier.padding(start = start, end = end)
     }
-    // A Now Playing card in a folder has its buttons at the far end, which is the end the inset
-    // above leaves under the zone — and there the zone takes their taps. So the card makes up
-    // whatever the folder's own inset did not clear.
-    val folderNowPlayingInset = remember(edgeZoneSide, edgeZoneExtentDp, alignment) {
+    // Controls in a folder — Now Playing's buttons, a widget's height stepper — reach the far
+    // end, which is the end the inset above leaves under the zone, and there the zone takes
+    // their taps. So they make up whatever the folder's own inset did not clear.
+    val folderControlsInset = remember(edgeZoneSide, edgeZoneExtentDp, alignment) {
         fun covers(which: EdgeSide) = edgeZoneSide == which || edgeZoneSide == EdgeSide.BOTH
         val zone = edgeZoneExtentDp.dp
         val start = if (covers(EdgeSide.LEFT) && alignment == HomeAlignment.RIGHT) zone else 0.dp
@@ -1044,7 +1044,7 @@ fun HomeScreen(
                             iconSizeDp = iconSizeDp,
                             labelSizeSp = labelSizeSp,
                             sidePaddingDp = sidePaddingDp,
-                            nowPlayingInset = folderNowPlayingInset,
+                            controlsInset = folderControlsInset,
                             contentColor = contentColor,
                             showLabels = showFavoriteLabels,
                             alignment = alignment,
@@ -1440,7 +1440,12 @@ private fun FavoriteRow(
  * view the home screen's widget area draws, so a widget that fails is contained the same way.
  */
 @Composable
-private fun FolderWidgetBlock(folderId: String, widget: FolderWidget, actions: WidgetSlotActions) {
+private fun FolderWidgetBlock(
+    folderId: String,
+    widget: FolderWidget,
+    actions: WidgetSlotActions,
+    controlsInset: Modifier,
+) {
     var menuExpanded by remember { mutableStateOf(false) }
     var menuOffset by remember { mutableStateOf(DpOffset.Zero) }
     var resizing by remember { mutableStateOf(false) }
@@ -1477,7 +1482,7 @@ private fun FolderWidgetBlock(folderId: String, widget: FolderWidget, actions: W
             }
         }
         if (resizing) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
+            Row(modifier = controlsInset, verticalAlignment = Alignment.CenterVertically) {
                 StepperRow(
                     label = stringResource(R.string.handle_widget_height),
                     value = liveHeight,
@@ -1511,7 +1516,7 @@ private fun FolderRow(
     iconSizeDp: Int,
     labelSizeSp: Int,
     sidePaddingDp: Int,
-    nowPlayingInset: Modifier,
+    controlsInset: Modifier,
     contentColor: Color,
     showLabels: Boolean,
     alignment: HomeAlignment,
@@ -1654,7 +1659,7 @@ private fun FolderRow(
             Column {
                 // Above the apps, so a folder's widget is what it opens onto.
                 folder.widgets.forEach { widget ->
-                    key(widget.id) { FolderWidgetBlock(folder.id, widget, widgetActions) }
+                    key(widget.id) { FolderWidgetBlock(folder.id, widget, widgetActions, controlsInset) }
                 }
                 if (folder.nowPlaying) {
                     // Shown even when silent: it was put here on purpose, and an Audio folder
@@ -1666,7 +1671,7 @@ private fun FolderRow(
                         showPlaceholder = true,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .then(nowPlayingInset)
+                            .then(controlsInset)
                             .padding(horizontal = sidePaddingDp.dp)
                             .clickable {
                                 if (!openNowPlayingApp(context)) {

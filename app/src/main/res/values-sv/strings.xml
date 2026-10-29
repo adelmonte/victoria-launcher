@@ -89,8 +89,11 @@
     <string name="settings_icons_app_list">Ikoner i applistan</string>
     <string name="settings_list_headers">Bokstavsrubriker</string>
     <string name="settings_list_headers_detail">Av ger en sammanhängande lista. A-Z-remsan hoppar fortfarande till bokstaven.</string>
-    <string name="settings_notification_badges">Aviseringsräknare på ikoner</string>
-    <string name="settings_notification_badges_detail">Behöver samma aviseringsåtkomst som Nu spelas gör. Endast räknare, aldrig vad en avisering säger.</string>
+    <string name="settings_notification_badges">Aviseringsräknare på ikonerna</string>
+    <string name="settings_notification_previews">Aviseringstext på startskärmen</string>
+    <string name="settings_notification_previews_detail">Listar en apps senaste aviseringar under dess namn, och att trycka på en öppnar den. Vem som helst som tittar på din telefon kan läsa dem. Kräver aviseringsåtkomst.</string>
+    <string name="settings_notification_text_size">Aviseringstextens storlek</string>
+    <string name="settings_notification_badges_detail">Behöver samma aviseringsåtkomst som Nu spelas gör. Endast räknare, aldrig vad en avisering säger. En prick bredvid namnet när ikonerna är dolda.</string>
     <string name="settings_section_top">Vart en bokstav hamnar</string>
     <string name="settings_close_folder">Stäng en mapp efter att en app har öppnats</string>
     <string name="settings_close_folder_detail">Av lämnar den öppen tills du stänger den själv</string>
@@ -107,14 +110,31 @@
     <string name="settings_text_color">Textfärg</string>
     <string name="settings_text_color_detail">Auto läser av bakgrundsbilden och väljer den som är läsbar</string>
     <string name="settings_show_names">Visa appnamn bredvid favoritikonerna</string>
-    <string name="settings_hide_status_bar">Dölj statusfält på startskärmen</string>
-    <string name="settings_hide_status_bar_applist">Dölj statusfält i applistan</string>
-    <string name="settings_status_bar_timeout">Statusfält visas i</string>
-    <string name="settings_dim_home">Dämpa bakgrundsbild på startskärmen</string>
-    <string name="settings_dim_applist">Dämpa bakgrundsbild bakom applistan</string>
+    <string name="folder_add_now_playing">Lägg till Nu spelas</string>
+    <string name="folder_remove_now_playing">Ta bort Nu spelas</string>
+    <string name="settings_widgets_stacked">Visa alla widgetar samtidigt</string>
+    <string name="settings_widgets_stacked_detail">Startskärmswidgetar placeras under varandra i stället för att bytas genom svepning. Var och en upptar widgetområdets höjd.</string>
+    <string name="settings_hide_status_bar">Dölj statusfältet på startskärmen</string>
+    <string name="settings_hide_status_bar_applist">Dölj statusfältet i applistan</string>
+    <string name="settings_status_bar_timeout">Statusfältet visas i</string>
+    <string name="settings_dim_home">Dämpa bakgrundsbilden på startskärmen</string>
+    <string name="settings_dim_applist">Dämpa bakgrundsbilden bakom applistan</string>
     <string name="settings_haptics">Haptisk återkoppling</string>
     <string name="settings_haptics_detail">Följer ditt systems inställning för beröringsåterkoppling</string>
     <string name="settings_edge_side">Vilken kant öppnar applistan</string>
+    <string name="settings_scrub_style">A-Z-remsans animation</string>
+    <string name="scrub_style_bell">Klocka</string>
+    <string name="scrub_style_ripple">Våg</string>
+    <string name="settings_scrub_bubble">Bokstavsbubbla</string>
+    <string name="scrub_bubble_rounded">Rundad</string>
+    <string name="scrub_bubble_circle">Cirkel</string>
+    <string name="scrub_bubble_square">Kvadrat</string>
+    <string name="scrub_bubble_hidden">Dold</string>
+    <string name="settings_ripple_speed">Våghastighet</string>
+    <string name="settings_ripple_speed_value">%1$.0f bokstäver/s</string>
+    <string name="settings_ripple_damping">Vågdämpning</string>
+    <string name="settings_ripple_stiffness">Följstyrka</string>
+    <string name="settings_ripple_reset">Återställ vågen till standardvärdena</string>
     <string name="settings_double_tap_lock">Dubbeltryck för att låsa skärmen</string>
     <string name="settings_double_tap_lock_detail">Tryck två gånger på A-Z-remsan</string>
     <string name="settings_lock_needs_accessibility">Victoria Launcher måste vara aktiverad under Tillgänglighet. Om den knappen är gråmarkerad, öppna Appinfo och tillåt blockerade inställningar från ⋮-menyn först.</string>
@@ -136,7 +156,7 @@
     <string name="settings_mark_work_apps">Markera jobbappar</string>
     <string name="settings_mark_work_apps_detail">Appar från en jobbprofil säger detta efter deras namn, så att två kopior av samma app kan särskiljas</string>
     <string name="settings_dim_others">Dämpa resten medan A-Z används</string>
-    <string name="settings_dim_others_detail">Apparna utanför den bokstav som du befinner dig på tonas ut, vilket gör att den sticker ut. Av håller hela listan synlig.</string>
+    <string name="settings_dim_others_detail">Apparna utanför den bokstav som du befinner dig på tonas ut, vilket gör att den sticker ut. Av behåller hela listan synlig.</string>
     <string name="settings_hold_scroll">Håll på en bokstav för att fortsätta bläddra</string>
     <string name="settings_hold_scroll_detail">Vila ditt finger på en bokstav så bläddrar listan igenom dess appar, för bokstäver där det finns många av dem</string>
     <string name="settings_hold_scroll_speed">Bläddringshastighet</string>
@@ -175,6 +195,10 @@
     <string name="settings_stay_private_unlock">Stanna kvar i listan efter upplåsning</string>
     <string name="settings_stay_private_unlock_detail">Upplåsning av det privata utrymmet behåller applistan öppen i stället för att gå tillbaka till startskärmen</string>
     <string name="settings_private_space_section">Privat utrymme-sektion</string>
+    <string name="settings_folders_in_list">Mappar i applistan</string>
+    <string name="settings_folders_in_list_detail">Varje mapp visas även under sin egen bokstav. Dess appar hamnar också under sina.</string>
+    <string name="folder_add_to_home">Lägg till på startskärmen</string>
+    <string name="folder_remove_from_home">Ta bort från startskärmen</string>
     <string name="settings_private_space_section_detail">Grupperar apparna i det privata utrymmet under alfabetet i stället för att blanda in dem, så att de två kopiorna av en app kan särskiljas</string>
     <string name="settings_recent_section">Nyligen installerade-sektion</string>
     <string name="settings_recent_section_detail">Avslutar applistan med de senast tillagda apparna</string>
@@ -232,7 +256,7 @@
     <string name="settings_import_done">Inställningarna har återställts</string>
     <string name="settings_backup_failed">Den valda filen kunde inte läsas in</string>
     <string name="settings_dim_color">Dämpningsfärg</string>
-    <string name="settings_dim_color_detail">Vilken färg bakgrunden dämpas med. Hur mycket ställs in under Startskärm och Applista</string>
+    <string name="settings_dim_color_detail">Vad bakgrundsbilden dämpas med. Hur mycket anges under Startskärm och Applista.</string>
     <string name="color_from_wallpaper">Från din bakgrundsbild</string>
     <string name="icon_shape">Ikonform</string>
     <string name="icon_shape_detail">Omformar endast adaptiva ikoner; alla äldre lämnas oförändrade</string>
@@ -240,7 +264,7 @@
     <string name="icon_shape_circle">Cirkel</string>
     <string name="icon_shape_rounded">Rundad</string>
     <string name="icon_shape_square">Kvadrat</string>
-    <string name="settings_icon_pack_themed">Tematiserad</string>
+    <string name="settings_icon_pack_themed">Tematiserat</string>
 
     <!-- Text color choices -->
     <string name="text_color_auto">Auto</string>
@@ -259,6 +283,10 @@
 
     <!-- Private space -->
     <string name="private_space">Privat utrymme</string>
+    <string name="private_space_install_apps">Installera appar</string>
+    <string name="private_space_install_failed">Ingen appbutik att öppna i det privata utrymmet</string>
+    <string name="private_space_settings">Privat utrymme-inställningar</string>
+    <string name="private_space_settings_failed">Kunde inte öppna privat utrymme-inställningarna</string>
 
     <!-- Favorites / hidden / folder pickers -->
     <string name="favorites_title">Favoriter</string>
@@ -289,7 +317,7 @@
     <string name="welcome_favorites">Långtryck på bakgrundsbilden för att lägga till favoriter, lägga till en widget eller öppna inställningarna.</string>
     <string name="welcome_widget">Svep in från någon av skärmens kanter för alla dina appar, och dra längs A-Z-remsan för att hoppa till en bokstav.</string>
     <string name="welcome_layout">Redigera layout låter dig flytta runt objekt och ange avståndet mellan dem.</string>
-    <string name="welcome_got_it">Jag fattar</string>
+    <string name="welcome_got_it">Uppfattat</string>
 
     <!-- Widgets -->
     <string name="widget_add">Lägg till widget</string>
