@@ -1,0 +1,6 @@
+Fixed:
+* The height buttons for a widget in a folder work again. The edge that opens the app list was taking their taps.
+* With the status bar peek set to 0, the status bar now also hides at once when you come back from an app.
+
+Changed:
+* Swedish translation is complete again.
