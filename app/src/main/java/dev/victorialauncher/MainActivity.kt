@@ -222,6 +222,13 @@ class MainActivity : ComponentActivity() {
         // already in restarts the fade, and a fade out begins by showing the bar in full.
         if (!hasFocus) return
         val want = desiredStatusBarVisible ?: return
+        // Coming back from an app, the system hides the bar again with a fade of its own, and
+        // the insets already read as hidden while it plays. An instant hide cuts that fade
+        // short, and costs nothing when the bar is already gone.
+        if (!want && hideStatusBarInstantly) {
+            StatusBarFader.setVisible(window, visible = false, instant = true)
+            return
+        }
         val actual = ViewCompat.getRootWindowInsets(window.decorView)
             ?.isVisible(WindowInsetsCompat.Type.statusBars()) ?: return
         if (actual != want) StatusBarFader.setVisible(window, visible = want, instant = hideStatusBarInstantly)
