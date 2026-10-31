@@ -2,6 +2,9 @@
 package dev.victorialauncher.data
 
 import android.content.Context
+import androidx.datastore.core.DataStore
+import androidx.datastore.core.handlers.ReplaceFileCorruptionHandler
+import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.MutablePreferences
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
@@ -10,7 +13,7 @@ import androidx.datastore.preferences.core.floatPreferencesKey
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
-import androidx.datastore.preferences.preferencesDataStore
+import androidx.datastore.preferences.preferencesDataStoreFile
 import dev.victorialauncher.ui.theme.DEFAULT_SHADOW_STRENGTH
 import dev.victorialauncher.ui.theme.SHADOW_STRENGTH_RANGE
 import kotlinx.coroutines.flow.Flow
@@ -113,7 +116,30 @@ enum class IconShape { SYSTEM, CIRCLE, ROUNDED, SQUARE }
 /** When the A-Z strip shows on the home screen itself. */
 enum class AzStripVisibility { NEVER, LANDSCAPE, ALWAYS }
 
-private val Context.dataStore by preferencesDataStore(name = "victoria_prefs")
+private const val PREFS_NAME = "victoria_prefs"
+
+@Volatile
+private var store: DataStore<Preferences>? = null
+private val storeLock = Any()
+
+/**
+ * The one store for the whole process: two open on the same file is an error.
+ *
+ * Built by hand rather than through the property delegate because recovering from a damaged
+ * file needs to know where the file is, and the delegate's corruption handler is never told.
+ * Without one, a file that does not parse throws on every read, which for a home app is a
+ * crash at every start and a phone stuck restarting it.
+ */
+private val Context.dataStore: DataStore<Preferences>
+    get() = store ?: synchronized(storeLock) {
+        store ?: applicationContext.let { app ->
+            val file = app.preferencesDataStoreFile(PREFS_NAME)
+            PreferenceDataStoreFactory.create(
+                corruptionHandler = ReplaceFileCorruptionHandler { salvagePreferences(file) },
+                produceFile = { file },
+            )
+        }.also { store = it }
+    }
 
 /** Bumped only if the shape of an exported file changes, so an old one can be refused. */
 private const val EXPORT_FORMAT = 1
