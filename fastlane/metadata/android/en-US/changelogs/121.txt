@@ -1,0 +1,2 @@
+Fixed:
+* A damaged settings file no longer makes the launcher crash at every start. It keeps every setting it can still read and starts normally.
