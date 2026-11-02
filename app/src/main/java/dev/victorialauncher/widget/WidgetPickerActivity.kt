@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 package dev.victorialauncher.widget
 
+import android.app.ActivityOptions
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProviderInfo
 import android.content.Intent
@@ -36,6 +37,7 @@ import dev.victorialauncher.R
 import androidx.compose.ui.res.stringResource
 
 private const val REQUEST_CONFIGURE = 1
+private const val STATE_PENDING_ID = "pending_widget_id"
 
 class WidgetPickerActivity : ComponentActivity() {
 
@@ -58,6 +60,9 @@ class WidgetPickerActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         appWidgetManager = AppWidgetManager.getInstance(this)
         widgetHost = (application as VictoriaApp).widgetHost
+        // The setup screen can outlast this one; coming back to a fresh instance without the
+        // id, a widget set up in full was added as nothing.
+        pendingWidgetId = savedInstanceState?.getInt(STATE_PENDING_ID, -1) ?: -1
 
         setContent {
             VictoriaTheme {
@@ -112,6 +117,11 @@ class WidgetPickerActivity : ComponentActivity() {
         }
     }
 
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putInt(STATE_PENDING_ID, pendingWidgetId)
+    }
+
     @Composable
     private fun WidgetRow(info: AppWidgetProviderInfo, onClick: () -> Unit) {
         val icon = remember(info) {
@@ -150,12 +160,26 @@ class WidgetPickerActivity : ComponentActivity() {
         // widget id — so starting it directly is refused, and that refusal is a crash rather
         // than a missed widget. This is the call that carries the host's standing to open it.
         val started = runCatching {
-            widgetHost.startAppWidgetConfigureActivityForResult(this, id, 0, REQUEST_CONFIGURE, null)
+            widgetHost.startAppWidgetConfigureActivityForResult(this, id, 0, REQUEST_CONFIGURE, configureOptions())
             true
         }.getOrDefault(false)
         // A widget whose configure screen will not open is still a widget; it gets added with
         // whatever it defaults to rather than being dropped on the floor.
         if (!started) finishWithWidgetId(id)
+    }
+
+    /**
+     * Lets the setup screen open on the strength of this screen being in front.
+     *
+     * The host starts it through a sender the system made, and from Android 14 being in front
+     * is only lent to such a sender when asked. Without asking, the start is quietly blocked:
+     * nothing opens, the result comes back canceled, and the widget is thrown away.
+     */
+    private fun configureOptions(): Bundle? {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.UPSIDE_DOWN_CAKE) return null
+        return ActivityOptions.makeBasic()
+            .setPendingIntentBackgroundActivityStartMode(ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED)
+            .toBundle()
     }
 
     /** Android 12 let a widget say its configure screen is optional; those can skip it. */
