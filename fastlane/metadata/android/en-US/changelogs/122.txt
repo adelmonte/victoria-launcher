@@ -1,0 +1,2 @@
+Fixed:
+* Widgets with a setup screen can be added again. On Android 14 and newer the setup screen never opened and the widget was thrown away.
