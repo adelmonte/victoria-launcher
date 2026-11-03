@@ -1,0 +1,6 @@
+New:
+* Apps that can't open right now are greyed out, like on the stock launcher. That's an app whose app timer has run out, or a work app while the work profile is paused.
+* Brazilian Portuguese translation, thanks to elspeth00.
+
+Fixed:
+* Opening a folder near the bottom no longer moves the list a moment later. It now scrolls while the folder opens, so you don't tap the wrong app.
