@@ -1,0 +1,2 @@
+New:
+* Choose the color of the notification count. It's under Notifications, next to the count setting.
