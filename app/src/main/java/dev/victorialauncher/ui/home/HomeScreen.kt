@@ -570,6 +570,11 @@ fun HomeScreen(
         val key = folderToken(revealFolder?.first ?: return@LaunchedEffect)
         // The folder opens with an animation, so its height is followed frame by frame until
         // it stops growing. Positions are plain maps, written as layout happens.
+        //
+        // The stack moves with it, frame by frame, rather than once it has finished. Waiting
+        // for the folder to settle meant the list slid up a moment after it looked done —
+        // just as a finger was coming down on one of its apps, which then got the wrong one
+        // (#142).
         var last = -1
         var still = 0
         var frames = 0
@@ -578,14 +583,14 @@ fun HomeScreen(
             val height = itemHeights[key] ?: return@LaunchedEffect
             if (height == last) still++ else still = 0
             last = height
-        }
-        val top = (itemTops[key] ?: return@LaunchedEffect) - rootY
-        val overflow = top + last - (viewportHeight - bottomInsetPx)
-        // Up by what is hidden, but never so far that the folder's own name leaves the top.
-        if (overflow > 0f) {
-            val floor = minOf(0f, (viewportHeight - contentHeight).toFloat())
-            val target = (offsetY.value - minOf(overflow, top)).coerceIn(floor, 0f)
-            offsetY.animateTo(target, spring(stiffness = Spring.StiffnessMediumLow))
+            val top = (itemTops[key] ?: return@LaunchedEffect) - rootY
+            val overflow = top + height - (viewportHeight - bottomInsetPx)
+            // Up by what is hidden, but never so far that the folder's own name leaves the top.
+            if (overflow > 0f) {
+                val floor = minOf(0f, (viewportHeight - contentHeight).toFloat())
+                val target = (offsetY.value - minOf(overflow, top)).coerceIn(floor, 0f)
+                if (target != offsetY.value) offsetY.snapTo(target)
+            }
         }
     }
 
@@ -1363,7 +1368,7 @@ private fun FavoriteRow(
                         // Same dimming a hidden app gets in the A-Z list: a shortcut its
                         // publisher has switched off is still listed, but tapping it only
                         // explains why it will not open.
-                        color = if (app.disabled) contentColor.copy(alpha = 0.5f) else contentColor,
+                        color = if (app.disabled || app.unavailable) contentColor.copy(alpha = 0.5f) else contentColor,
                         fontSize = labelSizeSp.sp,
                         textAlign = alignment.textAlign(),
                     )
@@ -1722,7 +1727,7 @@ private fun FolderRow(
                             Column(labelModifier, horizontalAlignment = alignment.columnAlignment()) {
                                 Text(
                                     displayName(member),
-                                    color = if (member.disabled) contentColor.copy(alpha = 0.5f) else contentColor,
+                                    color = if (member.disabled || member.unavailable) contentColor.copy(alpha = 0.5f) else contentColor,
                                     fontSize = labelSizeSp.sp,
                                     textAlign = alignment.textAlign(),
                                 )
