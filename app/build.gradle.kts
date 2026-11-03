@@ -29,8 +29,8 @@ android {
         applicationId = "dev.victorialauncher"
         minSdk = 26
         targetSdk = 35
-        versionCode = 124
-        versionName = "0.92.0"
+        versionCode = 125
+        versionName = "0.93.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

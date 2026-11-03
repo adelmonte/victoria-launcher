@@ -1,0 +1,2 @@
+New:
+* Auto height for Victoria's clock widget. In edit layout, tick "Auto height" under the widget height, and the clock grows and shrinks with what it shows, like when there's no calendar event.
