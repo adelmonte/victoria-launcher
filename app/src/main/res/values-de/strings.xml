@@ -208,4 +208,5 @@
     <string name="now_playing_previous">Zurück</string>
     <string name="now_playing_play_pause">Wiedergabe/Pause</string>
     <string name="now_playing_next">Weiter</string>
+    <string name="settings_notification_badge_color">Farbe der Benachrichtigungsanzahl</string>
 </resources>

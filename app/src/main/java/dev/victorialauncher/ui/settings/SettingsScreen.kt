@@ -198,6 +198,8 @@ fun SettingsScreen(
     onSetNotificationPreviews: (Boolean) -> Unit,
     notificationTextSp: Int,
     onSetNotificationTextSp: (Int) -> Unit,
+    notificationBadgeColor: Int?,
+    onSetNotificationBadgeColor: (Int?) -> Unit,
     sectionTopPercent: Int,
     onSetSectionTopPercent: (Int) -> Unit,
     closeFolderOnLaunch: Boolean,
@@ -859,6 +861,10 @@ fun SettingsScreen(
                 checked = notificationBadges, onCheckedChange = onSetNotificationBadges,
             )
         },
+        SettingsEntry(
+            SettingsSection.NOTIFICATIONS, stringResource(R.string.settings_notification_badge_color), "count badge dot colour",
+            visible = notificationBadges,
+        ) { BadgeColorRow(notificationBadgeColor, onSetNotificationBadgeColor) },
         SettingsEntry(SettingsSection.NOTIFICATIONS, stringResource(R.string.settings_notification_previews), "text message preview home") {
             SwitchRowWithDetail(
                 label = stringResource(R.string.settings_notification_previews),
@@ -1637,6 +1643,41 @@ private fun DimColorRow(dimColor: Int, onSetDimColor: (Int) -> Unit) {
         ColorPickerDialog(
             initial = dimColor,
             onConfirm = { onSetDimColor(it); picking = false },
+            onDismiss = { picking = false },
+        )
+    }
+}
+
+@Composable
+private fun BadgeColorRow(badgeColor: Int?, onSetBadgeColor: (Int?) -> Unit) {
+    var picking by remember { mutableStateOf(false) }
+    val shown = badgeColor?.let { Color(it) } ?: MaterialTheme.colorScheme.primary
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { picking = true }
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            stringResource(R.string.settings_notification_badge_color),
+            style = MaterialTheme.typography.bodyMedium,
+            modifier = Modifier.weight(1f),
+        )
+        if (badgeColor != null) {
+            TextButton(onClick = { onSetBadgeColor(null) }) { Text(stringResource(R.string.action_reset)) }
+        }
+        Box(
+            modifier = Modifier
+                .size(28.dp)
+                .background(shown, CircleShape)
+                .border(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f), CircleShape)
+        )
+    }
+    if (picking) {
+        ColorPickerDialog(
+            initial = shown.toArgb(),
+            onConfirm = { onSetBadgeColor(it); picking = false },
             onDismiss = { picking = false },
         )
     }

@@ -242,4 +242,5 @@
     <string name="now_playing_next">Siguiente</string>
     <string name="settings_section_home">Pantalla de inicio</string>
     <string name="settings_section_app_list">Lista de apps</string>
+    <string name="settings_notification_badge_color">Color del contador de notificaciones</string>
 </resources>

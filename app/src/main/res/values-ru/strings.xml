@@ -232,5 +232,6 @@
     <string name="now_playing_next">Следующий</string>
     <string name="settings_section_home">Главный экран</string>
     <string name="settings_section_app_list">Список приложений</string>
+    <string name="settings_notification_badge_color">Цвет счётчика уведомлений</string>
 </resources>
 

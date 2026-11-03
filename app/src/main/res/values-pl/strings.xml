@@ -91,6 +91,7 @@
     <string name="settings_list_headers_detail">Wyłączenie daje jedną ciągłą listę. Pasek A–Z nadal przenosi do odpowiedniej litery</string>
     <string name="settings_notification_badges">Licznik powiadomień na ikonach</string>
     <string name="settings_notification_badges_detail">Wymaga tego samego dostępu do powiadomień co sekcja "Teraz odtwarzane". Tylko liczby, nigdy treść powiadomień</string>
+    <string name="settings_notification_badge_color">Kolor licznika powiadomień</string>
     <string name="settings_section_top">Pozycja liter</string>
     <string name="settings_close_folder">Zamknij folder po uruchomieniu aplikacji</string>
     <string name="settings_close_folder_detail">Wyłączenie pozostawia go otwartym do momentu ręcznego zamknięcia</string>

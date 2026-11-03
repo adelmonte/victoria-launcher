@@ -120,6 +120,7 @@ class MainActivity : ComponentActivity() {
             val notificationBadges by app.prefs.notificationBadges.collectAsState(initial = false)
             val notificationPreviews by app.prefs.notificationPreviews.collectAsState(initial = false)
             val notificationTextSp by app.prefs.notificationTextSp.collectAsState(initial = 12)
+            val badgeColor by app.prefs.notificationBadgeColor.collectAsState(initial = null)
             val iconShape by app.prefs.iconShape.collectAsState(initial = IconShape.SYSTEM)
             val iconConfig = remember(
                 iconPackPackage,
@@ -129,6 +130,7 @@ class MainActivity : ComponentActivity() {
                 notificationBadges,
                 notificationPreviews,
                 notificationTextSp,
+                badgeColor,
                 iconShape,
             ) {
                 IconConfig(
@@ -139,6 +141,7 @@ class MainActivity : ComponentActivity() {
                     notificationBadges = notificationBadges,
                     notificationPreviews = notificationPreviews,
                     notificationTextSp = notificationTextSp,
+                    badgeColor = badgeColor,
                     shape = iconShape,
                 )
             }

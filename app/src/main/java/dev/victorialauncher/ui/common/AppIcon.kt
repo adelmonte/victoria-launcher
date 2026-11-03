@@ -23,6 +23,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.toArgb
@@ -185,6 +187,8 @@ data class IconConfig(
     /** Whether a home screen app lists its newest notifications under its name. */
     val notificationPreviews: Boolean,
     val notificationTextSp: Int,
+    /** What the count is drawn in; null for the theme's accent. */
+    val badgeColor: Int?,
     val shape: IconShape,
 )
 
@@ -197,6 +201,7 @@ val LocalIconConfig = staticCompositionLocalOf {
         notificationBadges = false,
         notificationPreviews = false,
         notificationTextSp = 12,
+        badgeColor = null,
         shape = IconShape.SYSTEM,
     )
 }
@@ -215,7 +220,7 @@ fun AppIcon(app: AppInfo, sizeDp: Int, modifier: Modifier = Modifier) {
                 modifier
                     .padding(horizontal = 6.dp)
                     .size(8.dp)
-                    .background(MaterialTheme.colorScheme.primary, CircleShape)
+                    .background(badgeFill(), CircleShape)
             )
         }
         return
@@ -284,21 +289,32 @@ private fun notificationBadgeCount(app: AppInfo): Int {
 @Composable
 private fun NotificationBadge(count: Int, iconSizeDp: Int, modifier: Modifier = Modifier) {
     val diameter = (iconSizeDp * 0.42f).dp.coerceIn(14.dp, 22.dp)
+    val fill = badgeFill()
+    val custom = LocalIconConfig.current.badgeColor != null
     Box(
         modifier = modifier
             .size(diameter)
-            .background(MaterialTheme.colorScheme.primary, CircleShape),
+            .background(fill, CircleShape),
         contentAlignment = Alignment.Center,
     ) {
         Text(
             text = if (count > 9) "9+" else count.toString(),
-            color = MaterialTheme.colorScheme.onPrimary,
+            // A chosen color can be anything, so the number goes dark or light against it.
+            color = when {
+                !custom -> MaterialTheme.colorScheme.onPrimary
+                fill.luminance() > 0.5f -> Color.Black
+                else -> Color.White
+            },
             fontSize = (diameter.value * 0.55f).sp,
             lineHeight = (diameter.value * 0.55f).sp,
             maxLines = 1,
         )
     }
 }
+
+@Composable
+private fun badgeFill(): Color =
+    LocalIconConfig.current.badgeColor?.let { Color(it) } ?: MaterialTheme.colorScheme.primary
 
 /**
  * Resolves an icon override — an icon-pack drawable or a picture from the gallery — for

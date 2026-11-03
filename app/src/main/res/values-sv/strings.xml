@@ -93,6 +93,7 @@
     <string name="settings_notification_previews">Aviseringstext på startskärmen</string>
     <string name="settings_notification_previews_detail">Listar en apps senaste aviseringar under dess namn, och att trycka på en öppnar den. Vem som helst som tittar på din telefon kan läsa dem. Kräver aviseringsåtkomst.</string>
     <string name="settings_notification_text_size">Aviseringstextens storlek</string>
+    <string name="settings_notification_badge_color">Färg på aviseringsräknaren</string>
     <string name="settings_notification_badges_detail">Behöver samma aviseringsåtkomst som Nu spelas gör. Endast räknare, aldrig vad en avisering säger. En prick bredvid namnet när ikonerna är dolda.</string>
     <string name="settings_section_top">Vart en bokstav hamnar</string>
     <string name="settings_close_folder">Stäng en mapp efter att en app har öppnats</string>
