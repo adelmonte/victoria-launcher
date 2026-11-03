@@ -206,6 +206,8 @@ fun VictoriaNavHost(
             override fun onPackageChanged(packageName: String?, user: UserHandle?) = refresh()
             override fun onPackagesAvailable(names: Array<out String>?, user: UserHandle?, replacing: Boolean) = refresh()
             override fun onPackagesUnavailable(names: Array<out String>?, user: UserHandle?, replacing: Boolean) = refresh()
+            override fun onPackagesSuspended(names: Array<out String>?, user: UserHandle?) = refresh()
+            override fun onPackagesUnsuspended(names: Array<out String>?, user: UserHandle?) = refresh()
             // A shortcut can be added, renamed, re-iconed or switched off while we are
             // showing it, none of which is a package change.
             override fun onShortcutsChanged(

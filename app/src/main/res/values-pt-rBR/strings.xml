@@ -424,4 +424,5 @@
         <item quantity="one">%1$d app excluído</item>
         <item quantity="other">%1$d apps excluídos</item>
     </plurals>
+    <string name="settings_notification_badge_color">Cor do contador de notificações</string>
 </resources>

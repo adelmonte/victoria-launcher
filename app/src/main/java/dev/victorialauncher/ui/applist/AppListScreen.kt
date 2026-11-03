@@ -1543,7 +1543,7 @@ private fun AppRow(
                     // and nothing else on the row says it is one. A shortcut its publisher
                     // has switched off gets the same treatment, for the same reason: it is
                     // listed, but tapping it only explains why it will not open.
-                    color = if (isHidden || app.disabled) contentColor.copy(alpha = 0.5f) else contentColor,
+                    color = if (isHidden || app.disabled || app.unavailable) contentColor.copy(alpha = 0.5f) else contentColor,
                     fontSize = labelSizeSp.sp,
                     modifier = labelModifier,
                     textAlign = when (alignment) {

@@ -58,6 +58,12 @@ data class AppInfo(
     val privateProfile: Boolean = false,
     /** When the package was first installed, for listing what arrived recently. Zero if unknown. */
     val installedAt: Long = 0L,
+    /**
+     * Listed but not able to open right now: paused by an app timer, or in a work profile that
+     * is switched off (#141). Greyed out like the stock launcher does, and still tappable,
+     * because the system's own answer to the tap is what explains it and offers the way back.
+     */
+    val unavailable: Boolean = false,
 ) {
     // Held rather than derived: this is the map key for overrides, favorites and list item
     // keys, so it is asked for several times per visible row per frame while scrubbing, and

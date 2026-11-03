@@ -4,6 +4,7 @@ package dev.victorialauncher.data
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ApplicationInfo
 import android.content.pm.LauncherApps
 import android.content.pm.PackageManager
 import android.content.pm.ShortcutInfo
@@ -104,6 +105,9 @@ class AppRepository(
                 val serial = listableSerial(user, mainUser) ?: return@flatMap emptyList()
                 val work = isWorkProfile(user, mainUser)
                 val privateProfile = userType(user) == USER_TYPE_PROFILE_PRIVATE
+                // The private space is never listed while it is off, so only a work profile
+                // can show up here switched off.
+                val profileOff = work && quietMode(user) == true
                 // One call for the lot: asking per package turns a list build into
                 // hundreds of round trips to the package manager.
                 val installTimes = installTimes()
@@ -121,6 +125,9 @@ class AppRepository(
                             work = work,
                             privateProfile = privateProfile,
                             installedAt = installTimes[info.componentName.packageName] ?: 0L,
+                            // An app timer that runs out suspends the package until tomorrow.
+                            unavailable = profileOff ||
+                                (info.applicationInfo.flags and ApplicationInfo.FLAG_SUSPENDED) != 0,
                         )
                     }
             }

@@ -25,6 +25,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorMatrix
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.toArgb
@@ -260,11 +262,17 @@ fun AppIcon(app: AppInfo, sizeDp: Int, modifier: Modifier = Modifier) {
                 bitmap = bitmap,
                 contentDescription = app.label,
                 modifier = Modifier.size(sizeDp.dp),
+                // Greyed at draw time rather than in the bitmap, so the cached icon is the same
+                // one before and after the app comes back.
+                colorFilter = if (app.unavailable) GreyedOut else null,
+                alpha = if (app.unavailable) 0.6f else 1f,
             )
         }
         if (badge > 0) NotificationBadge(badge, sizeDp, Modifier.align(Alignment.TopEnd))
     }
 }
+
+private val GreyedOut = ColorFilter.colorMatrix(ColorMatrix().apply { setToSaturation(0f) })
 
 /**
  * How many notifications to show on this app, or zero for none.
