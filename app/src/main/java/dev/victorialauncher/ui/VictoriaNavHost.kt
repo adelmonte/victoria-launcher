@@ -333,6 +333,7 @@ fun VictoriaNavHost(
     val widgetPosition by app.prefs.widgetPosition.collectAsState(initial = 0)
     val widgetHeightDp by app.prefs.widgetHeightDp.collectAsState(initial = 180)
     val widgetsStacked by app.prefs.widgetsStacked.collectAsState(initial = false)
+    val widgetHeightAuto by app.prefs.widgetHeightAuto.collectAsState(initial = false)
     val nowPlayingEnabled by app.prefs.nowPlayingEnabled.collectAsState(initial = false)
     val folders by app.prefs.folders.collectAsState(initial = emptyList())
     val widgetIds by app.prefs.widgetIds.collectAsState(initial = emptyList())
@@ -655,6 +656,7 @@ fun VictoriaNavHost(
                     ?.let { app.appRepository.openAppInfo(it.provider.packageName) }
             },
             onResize = { newHeight -> scope.launch { app.prefs.setWidgetHeightDp(newHeight) } },
+            onSetAutoHeight = { on -> scope.launch { app.prefs.setWidgetHeightAuto(on) } },
             onOpenSettings = { navController.navigate("settings") },
             onAddWidgetToFolder = { folderId ->
                 folderWidgetTarget = folderId
@@ -706,6 +708,7 @@ fun VictoriaNavHost(
                 widgetPosition = widgetPosition,
                 widgetHeightDp = widgetHeightDp,
                 widgetsStacked = widgetsStacked,
+                widgetHeightAuto = widgetHeightAuto,
                 widgetActions = widgetActions,
                 launchCounts = launchCounts,
                 // Both flows start at a value that shows nothing, so the dialog can't flash

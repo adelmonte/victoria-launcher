@@ -36,6 +36,7 @@
     <string name="handle_widget_top">Margen superior del widget</string>
     <string name="handle_widget_bottom">Margen inferior del widget</string>
     <string name="handle_widget_height">Altura del widget</string>
+    <string name="handle_widget_height_auto">Altura automática (reloj de Victoria)</string>
     <string name="handle_widget_side_padding">Margen lateral del widget</string>
     <string name="handle_widget_offset_x">Widget izquierda / derecha</string>
     <string name="handle_az_range">Alcance de la barra A-Z</string>

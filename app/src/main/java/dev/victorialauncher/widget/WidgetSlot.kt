@@ -1,10 +1,13 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 package dev.victorialauncher.widget
 
+import android.content.Context
 import android.appwidget.AppWidgetHostView
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProviderInfo
 import android.os.Bundle
+import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -56,6 +59,7 @@ import dev.victorialauncher.ui.common.TouchAnchoredMenu
 import kotlinx.coroutines.delay
 import dev.victorialauncher.R
 import androidx.compose.ui.res.stringResource
+import kotlin.math.roundToInt
 
 /** How long the page dots stay up after a swipe settles. */
 private const val DOTS_LINGER_MS = 1200L
@@ -72,7 +76,15 @@ data class WidgetSlotActions(
     val onRemoveFolderWidget: (folderId: String, widgetId: Int) -> Unit = { _, _ -> },
     val onResizeFolderWidget: (folderId: String, widgetId: Int, heightDp: Int) -> Unit = { _, _, _ -> },
     val onSetFolderNowPlaying: (folderId: String, on: Boolean) -> Unit = { _, _ -> },
+    val onSetAutoHeight: (on: Boolean) -> Unit = {},
 )
+
+/** Whether [widgetId] is Victoria's own clock, the one widget that can size itself to fit. */
+fun isVictoriaClock(context: Context, widgetId: Int): Boolean =
+    widgetId > 0 && runCatching {
+        AppWidgetManager.getInstance(context).getAppWidgetInfo(widgetId)?.provider ==
+            ClockWidgetProvider.componentName(context)
+    }.getOrDefault(false)
 
 /**
  * The home screen's widget area: one widget on screen at a time, swiped between, or with
@@ -87,6 +99,12 @@ fun WidgetSlot(
     widgetIds: List<Int>,
     heightDp: Int,
     stacked: Boolean,
+    /**
+     * Victoria's clock takes the height of what it shows rather than [heightDp] (#146), so an
+     * empty agenda is not a gap. Every other widget keeps [heightDp]: none of them says how tall
+     * its content is.
+     */
+    autoHeight: Boolean,
     onEditLayout: () -> Unit,
     actions: WidgetSlotActions,
     /** Bumped when HOME is pressed on a home screen already showing, so the stack goes back. */
@@ -104,14 +122,27 @@ fun WidgetSlot(
         menuExpanded = true
     }
 
-    val rows = if (stacked) widgetIds.size.coerceAtLeast(1) else 1
-    Box(modifier = modifier.height((heightDp * rows).dp)) {
+    // Each clock's own content height, as it last measured.
+    val fitted = remember { mutableStateMapOf<Int, Int>() }
+    fun pageHeight(id: Int): Int = if (autoHeight) fitted[id] ?: heightDp else heightDp
+    fun fitTo(id: Int): ((Int) -> Unit)? = if (autoHeight) ({ h -> fitted[id] = h }) else null
+    // Swiped pages still share one height, the tallest, so a swipe never moves the favorites.
+    val slotHeight = when {
+        widgetIds.isEmpty() -> heightDp
+        stacked -> widgetIds.sumOf { pageHeight(it) }
+        else -> widgetIds.maxOf { pageHeight(it) }
+    }
+    Box(modifier = modifier.height(slotHeight.dp)) {
         if (stacked && widgetIds.isNotEmpty()) {
             Column(Modifier.fillMaxSize()) {
                 widgetIds.forEach { id ->
                     key(id) {
-                        Box(Modifier.fillMaxWidth().height(heightDp.dp)) {
-                            WidgetPage(widgetId = id, onPressAndHold = { x, y -> openMenu(id, x, y) })
+                        Box(Modifier.fillMaxWidth().height(pageHeight(id).dp)) {
+                            WidgetPage(
+                                widgetId = id,
+                                onPressAndHold = { x, y -> openMenu(id, x, y) },
+                                onContentHeight = fitTo(id),
+                            )
                         }
                     }
                 }
@@ -158,7 +189,11 @@ fun WidgetSlot(
                 modifier = Modifier.fillMaxSize(),
             ) { page ->
                 val id = widgetIds[page]
-                WidgetPage(widgetId = id, onPressAndHold = { x, y -> openMenu(id, x, y) })
+                WidgetPage(
+                    widgetId = id,
+                    onPressAndHold = { x, y -> openMenu(id, x, y) },
+                    onContentHeight = fitTo(id),
+                )
             }
 
             if (widgetIds.size > 1) {
@@ -250,7 +285,12 @@ fun WidgetSlot(
 
 /** One hosted widget. [onLongPress] carries the press position in this page's local pixels. */
 @Composable
-internal fun WidgetPage(widgetId: Int, onPressAndHold: (x: Float, y: Float) -> Unit) {
+internal fun WidgetPage(
+    widgetId: Int,
+    onPressAndHold: (x: Float, y: Float) -> Unit,
+    /** Given, the page measures its content's own height and reports it here, in dp. */
+    onContentHeight: ((Int) -> Unit)? = null,
+) {
     val context = LocalContext.current
     val app = context.applicationContext as VictoriaApp
     val appWidgetManager = remember { AppWidgetManager.getInstance(context) }
@@ -287,11 +327,18 @@ internal fun WidgetPage(widgetId: Int, onPressAndHold: (x: Float, y: Float) -> U
 
     // A real long-press (finger held still) opens the edit menu; an ordinary tap or drag
     // still reaches the widget's own view untouched — see LongPressFrameLayout.
+    val fits = onContentHeight != null && providerInfo.provider == ClockWidgetProvider.componentName(context)
     AndroidView(
         modifier = Modifier
-            .fillMaxSize()
+            .fillMaxWidth()
+            // Measured with no height to fill, so it comes out as tall as what it draws. The
+            // slot then takes that height, so the view is never left hanging past its box.
+            .then(if (fits) Modifier.wrapContentHeight(Alignment.Top, unbounded = true) else Modifier.fillMaxSize())
             .onSizeChanged { size ->
                 slotSizeDp = with(density) { size.width.toDp().value.toInt() to size.height.toDp().value.toInt() }
+                if (fits && size.height > 0) {
+                    onContentHeight?.invoke(with(density) { size.height.toDp().value.roundToInt() })
+                }
             },
         factory = { ctx ->
             // A widget draws with code from the app that provides it, and one that throws on

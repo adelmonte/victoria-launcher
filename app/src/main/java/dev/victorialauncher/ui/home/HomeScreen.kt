@@ -10,6 +10,7 @@ import androidx.compose.animation.core.spring
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material.icons.filled.Widgets
+import dev.victorialauncher.widget.isVictoriaClock
 import dev.victorialauncher.widget.WidgetPage
 import dev.victorialauncher.data.FolderWidget
 import androidx.compose.foundation.layout.navigationBars
@@ -233,6 +234,7 @@ fun HomeScreen(
     widgetPosition: Int,
     widgetHeightDp: Int,
     widgetsStacked: Boolean,
+    widgetHeightAuto: Boolean,
     hapticsEnabled: Boolean,
     nowPlayingEnabled: Boolean,
     nowPlayingHeightDp: Int,
@@ -1017,6 +1019,7 @@ fun HomeScreen(
                                 widgetIds = widgetIds,
                                 heightDp = widgetHeightDp,
                                 stacked = widgetsStacked,
+                                autoHeight = widgetHeightAuto,
                                 onEditLayout = { onEditModeChange(true) },
                                 actions = widgetActions,
                                 homeIntentTick = homeIntentTick,
@@ -1134,6 +1137,17 @@ fun HomeScreen(
                             onChange = { widgetActions.onResize(it) },
                             contentColor = contentColor,
                         )
+                        // Only where it can do something: no other widget says how tall its
+                        // content is, so for those the box would do nothing.
+                        val context = LocalContext.current
+                        if (widgetIds.any { isVictoriaClock(context, it) }) {
+                            Spacer(Modifier.height(6.dp))
+                            CheckRow(
+                                label = stringResource(R.string.handle_widget_height_auto),
+                                checked = widgetHeightAuto,
+                                onCheckedChange = { widgetActions.onSetAutoHeight(it) },
+                            )
+                        }
                     }
                     PaddingHandle(
                         editMode = editMode,
@@ -1459,10 +1473,10 @@ private fun FolderWidgetBlock(
     val density = LocalDensity.current
     Column(Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 4.dp)) {
         Box(Modifier.fillMaxWidth().height(liveHeight.dp)) {
-            WidgetPage(widget.id) { x, y ->
+            WidgetPage(widget.id, onPressAndHold = { x, y ->
                 menuOffset = with(density) { DpOffset(x.toDp(), y.toDp()) }
                 menuExpanded = true
-            }
+            })
             TouchAnchoredMenu(expanded = menuExpanded, offset = menuOffset, onDismissRequest = { menuExpanded = false }) {
                 DropdownMenuItem(
                     text = { Text(stringResource(R.string.handle_widget_height)) },

@@ -36,6 +36,7 @@
     <string name="handle_widget_top">Widgetens överkant</string>
     <string name="handle_widget_bottom">Widgetens nederkant</string>
     <string name="handle_widget_height">Widgetens höjd</string>
+    <string name="handle_widget_height_auto">Automatisk höjd (Victorias klocka)</string>
     <string name="handle_widget_side_padding">Widgetens sidoutfyllnad</string>
     <string name="handle_widget_offset_x">Widgetens vänster / höger</string>
     <string name="handle_az_range">A-Z-remsans utsträckning</string>

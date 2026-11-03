@@ -204,6 +204,7 @@ class Prefs(private val context: Context) {
         val WIDGET_HEIGHT_DP = intPreferencesKey("widget_height_dp")
         val WIDGET_IDS = stringPreferencesKey("widget_ids")
         val WIDGETS_STACKED = booleanPreferencesKey("widgets_stacked")
+        val WIDGET_HEIGHT_AUTO = booleanPreferencesKey("widget_height_auto")
         val WIDGET_SIDE_PADDING_DP = intPreferencesKey("widget_side_padding_dp")
         val WIDGET_OFFSET_X_DP = intPreferencesKey("widget_offset_x_dp")
         val SWIPE_UP_OPENS_LIST = booleanPreferencesKey("swipe_up_opens_list")
@@ -568,6 +569,13 @@ class Prefs(private val context: Context) {
 
     suspend fun setWidgetsStacked(v: Boolean) {
         context.dataStore.edit { it[Keys.WIDGETS_STACKED] = v }
+    }
+
+    /** Victoria's own clock takes the height of what it is showing (#146). */
+    val widgetHeightAuto: Flow<Boolean> = data.map { it[Keys.WIDGET_HEIGHT_AUTO] ?: false }.distinctUntilChanged()
+
+    suspend fun setWidgetHeightAuto(v: Boolean) {
+        context.dataStore.edit { it[Keys.WIDGET_HEIGHT_AUTO] = v }
     }
 
     val widgetIds: Flow<List<Int>> = data.map { readWidgetIds(it) }.distinctUntilChanged()

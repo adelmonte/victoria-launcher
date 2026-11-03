@@ -35,7 +35,8 @@
     <string name="handle_side_padding">Боковой отступ</string>
     <string name="handle_widget_top">Виджет: верхний отступ</string>
     <string name="handle_widget_bottom">Виджет: нижний отступ</string>
-    <string name="handle_widget_height">Виджет: ширина</string>
+    <string name="handle_widget_height">Виджет: высота</string>
+    <string name="handle_widget_height_auto">Автовысота (часы Victoria)</string>
     <string name="handle_widget_side_padding">Виджет: боковой отступ</string>
     <string name="handle_widget_offset_x">Виджет: сдвиг влево / вправо</string>
     <string name="handle_az_range">Настройка алфавитной волны</string>

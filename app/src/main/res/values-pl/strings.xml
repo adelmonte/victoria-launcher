@@ -36,6 +36,7 @@
     <string name="handle_widget_top">Góra widżetu</string>
     <string name="handle_widget_bottom">Dół widżetu</string>
     <string name="handle_widget_height">Wysokość widżetu</string>
+    <string name="handle_widget_height_auto">Automatyczna wysokość (zegar Victorii)</string>
     <string name="handle_widget_side_padding">Margines boczny widżetu</string>
     <string name="handle_widget_offset_x">Widżet w lewo / w prawo</string>
     <string name="handle_az_range">Zakres paska A–Z</string>

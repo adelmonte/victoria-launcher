@@ -35,6 +35,7 @@
     <string name="handle_widget_top">Widget oben</string>
     <string name="handle_widget_bottom">Widget unten</string>
     <string name="handle_widget_height">Widget-Höhe</string>
+    <string name="handle_widget_height_auto">Automatische Höhe (Victoria-Uhr)</string>
     <string name="handle_widget_side_padding">Widget-Seitenabstand</string>
     <string name="handle_widget_offset_x">Widget links / rechts</string>
     <string name="handle_az_range">Bereich der A-Z-Leiste</string>

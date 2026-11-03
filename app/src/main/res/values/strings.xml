@@ -36,6 +36,7 @@
     <string name="handle_widget_top">Widget top</string>
     <string name="handle_widget_bottom">Widget bottom</string>
     <string name="handle_widget_height">Widget height</string>
+    <string name="handle_widget_height_auto">Auto height (Victoria clock)</string>
     <string name="handle_widget_side_padding">Widget side padding</string>
     <string name="handle_widget_offset_x">Widget left / right</string>
     <string name="handle_az_range">A-Z strip range</string>

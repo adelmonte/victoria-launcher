@@ -36,6 +36,7 @@
     <string name="handle_widget_top">Limite superior do widget</string>
     <string name="handle_widget_bottom">Limite inferior do widget</string>
     <string name="handle_widget_height">Altura do widget</string>
+    <string name="handle_widget_height_auto">Altura automática (relógio do Victoria)</string>
     <string name="handle_widget_side_padding">Margem lateral do widget</string>
     <string name="handle_widget_offset_x">Posição horizontal do widget</string>
     <string name="handle_az_range">Extensão da barra A-Z</string>
