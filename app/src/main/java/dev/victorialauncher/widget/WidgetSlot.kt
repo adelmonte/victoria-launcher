@@ -122,10 +122,11 @@ fun WidgetSlot(
         menuExpanded = true
     }
 
-    // Each clock's own content height, as it last measured. The set height stays the floor, so
-    // a quiet day does not pull the favorites up further than was asked for.
+    // Each clock's own content height, as it last measured. The set height is left alone rather
+    // than used as a floor: a floor kept the very gap this is here to close, and the value is
+    // still there for whenever auto is turned off.
     val fitted = remember { mutableStateMapOf<Int, Int>() }
-    fun pageHeight(id: Int): Int = if (autoHeight) maxOf(fitted[id] ?: 0, heightDp) else heightDp
+    fun pageHeight(id: Int): Int = if (autoHeight) fitted[id] ?: heightDp else heightDp
     fun fitTo(id: Int): ((Int) -> Unit)? = if (autoHeight) ({ h -> fitted[id] = h }) else null
     // Swiped pages still share one height, the tallest, so a swipe never moves the favorites.
     val slotHeight = when {
