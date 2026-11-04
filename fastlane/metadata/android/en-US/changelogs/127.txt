@@ -1,0 +1,2 @@
+Fixes:
+* Auto height for the clock widget fits what the clock shows again, however tall the set height is. The set height comes back when you turn auto off.
