@@ -210,4 +210,6 @@
     <string name="now_playing_play_pause">Wiedergabe/Pause</string>
     <string name="now_playing_next">Weiter</string>
     <string name="settings_notification_badge_color">Farbe der Benachrichtigungsanzahl</string>
+    <string name="home_folder_delete_confirm">„%1$s“ löschen?</string>
+    <string name="home_folder_delete_confirm_body">Die Apps darin bleiben installiert. Anordnung und Widgets werden entfernt.</string>
 </resources>

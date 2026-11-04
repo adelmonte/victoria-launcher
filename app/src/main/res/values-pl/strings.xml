@@ -407,4 +407,6 @@
         <item quantity="many">%1$d wykluczonych aplikacji</item>
         <item quantity="other">%1$d wykluczonej aplikacji</item>
     </plurals>
+    <string name="home_folder_delete_confirm">Usunąć „%1$s”?</string>
+    <string name="home_folder_delete_confirm_body">Aplikacje pozostaną zainstalowane. Układ i widżety zostaną usunięte.</string>
 </resources>

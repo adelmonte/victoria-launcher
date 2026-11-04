@@ -26,6 +26,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -282,6 +285,9 @@ fun HomeRoute(
     }
     var homeEditMode by remember { mutableStateOf(false) }
     var folderPickerFor by remember { mutableStateOf<AppInfo?>(null) }
+    // Asked first: it sits at the bottom of the menu where the other menus keep settings, and
+    // a folder's arrangement and widgets cannot be had back.
+    var folderToDelete by remember { mutableStateOf<Folder?>(null) }
 
     val nowPlaying by NowPlayingBus.state.collectAsState()
     val listenerGranted = remember(homeIntentTick) { isListenerEnabled(context) }
@@ -693,11 +699,7 @@ fun HomeRoute(
                 onRenameFolder = { folder, name ->
                     scope.launch { app.prefs.upsertFolder(folder.copy(name = name)) }
                 },
-                onDeleteFolder = { folder ->
-                    // Its widgets go with it, released so their apps stop updating them.
-                    folder.widgets.forEach { runCatching { app.widgetHost.deleteAppWidgetId(it.id) } }
-                    scope.launch { app.prefs.deleteFolder(folder.id) }
-                },
+                onDeleteFolder = { folderToDelete = it },
                 onChangeFolderIcon = { folder -> onNavigate(iconPickerRoute(folderToken(folder.id))) },
                 onResetFolderIcon = { folder -> scope.launch { app.prefs.setFolderIcon(folder.id, null) } },
                 onManageFolder = { folder -> onNavigate("folder/" + folder.id) },
@@ -899,11 +901,7 @@ fun HomeRoute(
                     listOpenFolders = if (folder.id in listOpenFolders) listOpenFolders - folder.id else listOpenFolders + folder.id
                 },
                 onManageFolder = { folder -> closeAppList(); onNavigate("folder/" + folder.id) },
-                onDeleteFolder = { folder ->
-                    // Its widgets go with it, released so their apps stop updating them.
-                    folder.widgets.forEach { runCatching { app.widgetHost.deleteAppWidgetId(it.id) } }
-                    scope.launch { app.prefs.deleteFolder(folder.id) }
-                },
+                onDeleteFolder = { folderToDelete = it },
                 onSetFolderOnHome = { folder, onHome ->
                     scope.launch {
                         if (onHome) app.prefs.addFavorite(folderToken(folder.id))
@@ -987,6 +985,25 @@ fun HomeRoute(
 
         if (showWelcome) {
             WelcomeDialog(onDismiss = onWelcomeDismissed)
+        }
+
+        folderToDelete?.let { folder ->
+            AlertDialog(
+                onDismissRequest = { folderToDelete = null },
+                title = { Text(stringResource(R.string.home_folder_delete_confirm, folder.name)) },
+                text = { Text(stringResource(R.string.home_folder_delete_confirm_body)) },
+                confirmButton = {
+                    TextButton(onClick = {
+                        // Its widgets go with it, released so their apps stop updating them.
+                        folder.widgets.forEach { runCatching { app.widgetHost.deleteAppWidgetId(it.id) } }
+                        scope.launch { app.prefs.deleteFolder(folder.id) }
+                        folderToDelete = null
+                    }) { Text(stringResource(R.string.home_folder_delete)) }
+                },
+                dismissButton = {
+                    TextButton(onClick = { folderToDelete = null }) { Text(stringResource(R.string.action_cancel)) }
+                },
+            )
         }
 
         folderPickerFor?.let { target ->

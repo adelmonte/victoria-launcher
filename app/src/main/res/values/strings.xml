@@ -426,4 +426,6 @@
         <item quantity="one">%1$d app kept out</item>
         <item quantity="other">%1$d apps kept out</item>
     </plurals>
+    <string name="home_folder_delete_confirm">Delete “%1$s”?</string>
+    <string name="home_folder_delete_confirm_body">The apps in it stay installed. Its layout and widgets are removed.</string>
 </resources>

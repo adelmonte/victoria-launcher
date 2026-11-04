@@ -426,4 +426,6 @@
         <item quantity="one">%1$d app exkluderad</item>
         <item quantity="other">%1$d appar exkluderade</item>
     </plurals>
+    <string name="home_folder_delete_confirm">Ta bort ”%1$s”?</string>
+    <string name="home_folder_delete_confirm_body">Apparna förblir installerade. Ordningen och widgetarna tas bort.</string>
 </resources>
