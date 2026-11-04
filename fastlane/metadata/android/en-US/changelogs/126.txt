@@ -1,0 +1,4 @@
+Fixes:
+* Deleting a folder now asks first.
+* The clock widget's settings previews are readable again. White text was invisible on a light background.
+* With auto height on, the widget height you set is now the minimum, and the clock only grows past it.
