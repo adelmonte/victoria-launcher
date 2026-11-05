@@ -1,0 +1,2 @@
+Fixes:
+* Auto height for the clock widget now shrinks too. Before, it only grew, so hiding a row left an empty gap above the favorites.
