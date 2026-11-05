@@ -28,6 +28,26 @@ class LongPressFrameLayout(context: Context) : FrameLayout(context) {
     /** x/y are the press position in this view's local pixel coordinates. */
     var onLongPress: ((x: Float, y: Float) -> Unit)? = null
 
+    /**
+     * Given, told the content's own height in pixels on every measure, whatever height this
+     * view is being made to fill.
+     *
+     * Asked here rather than of the Compose side: the hosted view hiding a row did lay itself
+     * out again, but only ever inside the height it already had, so a clock could grow to fit
+     * and never shrink back.
+     */
+    var onNaturalHeight: ((Int) -> Unit)? = null
+        set(value) {
+            val turnedOn = field == null && value != null
+            field = value
+            // Nothing else may be about to lay this out, and the first answer is the one wanted.
+            if (turnedOn) {
+                lastNaturalHeight = -1
+                requestLayout()
+            }
+        }
+    private var lastNaturalHeight = -1
+
     private var longPressFired = false
 
     /** Where the current gesture began, so its direction can be judged as it moves. */
@@ -125,6 +145,22 @@ class LongPressFrameLayout(context: Context) : FrameLayout(context) {
             if (scrollable(getChildAt(i))) return true
         }
         return false
+    }
+
+    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
+        val report = onNaturalHeight
+        val content = getChildAt(0)
+        if (report != null && content != null && MeasureSpec.getSize(widthMeasureSpec) > 0) {
+            content.measure(widthMeasureSpec, MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED))
+            val natural = content.measuredHeight + paddingTop + paddingBottom
+            if (natural > 0 && natural != lastNaturalHeight) {
+                lastNaturalHeight = natural
+                // After the pass rather than inside it: the answer resizes the slot this is
+                // being measured for.
+                post { report(natural) }
+            }
+        }
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec)
     }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {

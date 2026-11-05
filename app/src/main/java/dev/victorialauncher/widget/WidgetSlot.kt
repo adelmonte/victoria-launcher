@@ -7,7 +7,6 @@ import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProviderInfo
 import android.os.Bundle
 import androidx.compose.runtime.mutableStateMapOf
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -42,6 +41,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -330,17 +330,13 @@ internal fun WidgetPage(
     // A real long-press (finger held still) opens the edit menu; an ordinary tap or drag
     // still reaches the widget's own view untouched — see LongPressFrameLayout.
     val fits = onContentHeight != null && providerInfo.provider == ClockWidgetProvider.componentName(context)
+    // The container reports how tall the clock's content is, and the slot takes that height.
+    val latestOnContentHeight by rememberUpdatedState(onContentHeight)
     AndroidView(
         modifier = Modifier
-            .fillMaxWidth()
-            // Measured with no height to fill, so it comes out as tall as what it draws. The
-            // slot then takes that height, so the view is never left hanging past its box.
-            .then(if (fits) Modifier.wrapContentHeight(Alignment.Top, unbounded = true) else Modifier.fillMaxSize())
+            .fillMaxSize()
             .onSizeChanged { size ->
                 slotSizeDp = with(density) { size.width.toDp().value.toInt() to size.height.toDp().value.toInt() }
-                if (fits && size.height > 0) {
-                    onContentHeight?.invoke(with(density) { size.height.toDp().value.roundToInt() })
-                }
             },
         factory = { ctx ->
             // A widget draws with code from the app that provides it, and one that throws on
@@ -384,6 +380,11 @@ internal fun WidgetPage(
                 hostView.updateAppWidgetSize(options, wDp, hDp, wDp, hDp)
             }
             container.onLongPress = { x, y -> onPressAndHold(x, y) }
+            container.onNaturalHeight = if (fits) {
+                { px -> latestOnContentHeight?.invoke(with(density) { px.toDp().value.roundToInt() }) }
+            } else {
+                null
+            }
         },
     )
 }
