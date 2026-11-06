@@ -1,0 +1,3 @@
+# All of Victoria's own code, so the first optimization pass covers every screen.
+HSPLdev/victorialauncher/**->**(**)**
+Ldev/victorialauncher/**;
