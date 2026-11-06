@@ -817,16 +817,20 @@ fun HomeScreen(
                         Text(stringResource(R.string.action_done))
                     }
                 }
-                StepperRow(
-                    label = stringResource(R.string.handle_side_padding),
-                    value = sidePaddingDp,
-                    range = 0..96,
-                    step = PADDING_STEP_DP,
-                    onChange = onSetSidePadding,
-                    contentColor = contentColor,
-                )
+                // Up here only while there are no favorites to put it beside; otherwise it sits
+                // with them, since they are all it moves (#149).
+                if (firstRowIndex < 0) {
+                    StepperRow(
+                        label = stringResource(R.string.handle_side_padding),
+                        value = sidePaddingDp,
+                        range = 0..96,
+                        step = PADDING_STEP_DP,
+                        onChange = onSetSidePadding,
+                        contentColor = contentColor,
+                    )
+                }
                 if (showWidgetSlot) {
-                    Spacer(Modifier.height(6.dp))
+                    if (firstRowIndex < 0) Spacer(Modifier.height(6.dp))
                     StepperRow(
                         label = stringResource(R.string.handle_widget_side_padding),
                         value = widgetSidePaddingDp,
@@ -985,6 +989,16 @@ fun HomeScreen(
                         onChange = { setPadding(PaddingSlot.FAVORITES_TOP, it) },
                         contentColor = contentColor,
                     )
+                    if (editMode) {
+                        StepperRow(
+                            label = stringResource(R.string.handle_side_padding),
+                            value = sidePaddingDp,
+                            range = 0..96,
+                            step = PADDING_STEP_DP,
+                            onChange = onSetSidePadding,
+                            contentColor = contentColor,
+                        )
+                    }
                 }
 
                 Box(

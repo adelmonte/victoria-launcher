@@ -428,4 +428,5 @@
     <string name="settings_notification_badge_color">Cor do contador de notificações</string>
     <string name="home_folder_delete_confirm">Excluir “%1$s”?</string>
     <string name="home_folder_delete_confirm_body">Os apps continuam instalados. A organização e os widgets serão removidos.</string>
+    <string name="widget_clock_gap">Espaço acima</string>
 </resources>

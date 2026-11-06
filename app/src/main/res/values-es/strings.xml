@@ -246,4 +246,5 @@
     <string name="settings_notification_badge_color">Color del contador de notificaciones</string>
     <string name="home_folder_delete_confirm">¿Eliminar «%1$s»?</string>
     <string name="home_folder_delete_confirm_body">Las apps siguen instaladas. Se quitan su orden y sus widgets.</string>
+    <string name="widget_clock_gap">Espacio arriba</string>
 </resources>

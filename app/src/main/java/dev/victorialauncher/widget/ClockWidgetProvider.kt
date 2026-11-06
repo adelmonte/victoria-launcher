@@ -79,7 +79,13 @@ class ClockWidgetProvider : AppWidgetProvider() {
             val config = ClockWidgetConfig.read(context, widgetId)
             val twelve = "h:mm"
             val twentyFour = "HH:mm"
+            val density = context.resources.displayMetrics.density
+            fun gap(dp: Int) = (dp * density).toInt()
             val views = RemoteViews(context.packageName, R.layout.widget_clock).apply {
+                setViewPadding(R.id.widget_date, 0, gap(config.dateGapDp), 0, 0)
+                setViewPadding(R.id.widget_weather, 0, gap(config.weatherGapDp), 0, 0)
+                setViewPadding(R.id.widget_notifications, 0, gap(config.notificationsGapDp), 0, 0)
+                setViewPadding(R.id.widget_battery, 0, gap(config.batteryGapDp), 0, 0)
                 when (config.hourFormat) {
                     ClockWidgetConfig.HourFormat.SYSTEM -> {
                         setCharSequence(R.id.widget_time, "setFormat12Hour", twelve)
@@ -187,6 +193,12 @@ class ClockWidgetProvider : AppWidgetProvider() {
                 }
 
                 val alarm = if (config.showAlarm) ClockWidgetAgenda.nextAlarm(context) else null
+                // Above the group rather than every row in it: the events read as one list.
+                val agendaRows = EVENT_ROWS.toList() + R.id.widget_alarm
+                val firstAgendaRow = if (events.isNotEmpty()) R.id.widget_event_1 else R.id.widget_alarm
+                agendaRows.forEach { viewId ->
+                    setViewPadding(viewId, 0, if (viewId == firstAgendaRow) gap(config.agendaGapDp) else 0, 0, 0)
+                }
                 if (alarm == null) {
                     setViewVisibility(R.id.widget_alarm, View.GONE)
                 } else {

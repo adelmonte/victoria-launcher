@@ -409,4 +409,5 @@
     </plurals>
     <string name="home_folder_delete_confirm">Usunąć „%1$s”?</string>
     <string name="home_folder_delete_confirm_body">Aplikacje pozostaną zainstalowane. Układ i widżety zostaną usunięte.</string>
+    <string name="widget_clock_gap">Odstęp nad</string>
 </resources>

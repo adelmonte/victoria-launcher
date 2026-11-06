@@ -236,5 +236,6 @@
     <string name="settings_notification_badge_color">Цвет счётчика уведомлений</string>
     <string name="home_folder_delete_confirm">Удалить «%1$s»?</string>
     <string name="home_folder_delete_confirm_body">Приложения останутся установленными. Порядок и виджеты будут удалены.</string>
+    <string name="widget_clock_gap">Отступ сверху</string>
 </resources>
 

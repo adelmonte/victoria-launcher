@@ -428,4 +428,5 @@
     </plurals>
     <string name="home_folder_delete_confirm">Delete “%1$s”?</string>
     <string name="home_folder_delete_confirm_body">The apps in it stay installed. Its layout and widgets are removed.</string>
+    <string name="widget_clock_gap">Space above</string>
 </resources>

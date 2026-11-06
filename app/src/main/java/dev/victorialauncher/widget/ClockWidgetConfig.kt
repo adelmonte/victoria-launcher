@@ -43,6 +43,12 @@ data class ClockWidgetConfig(
     val weatherOpacity: Int,
     val notificationsOpacity: Int,
     val agendaOpacity: Int,
+    /** Room above each row, in dp, so the rows can be spaced apart one by one (#149). */
+    val dateGapDp: Int = 0,
+    val weatherGapDp: Int = 0,
+    val notificationsGapDp: Int = 0,
+    val agendaGapDp: Int = 0,
+    val batteryGapDp: Int = 0,
 ) {
     enum class HourFormat { SYSTEM, TWELVE, TWENTY_FOUR }
 
@@ -93,6 +99,8 @@ data class ClockWidgetConfig(
 
         /** Stops short of nothing at all: an invisible row looks like a broken widget. */
         val OPACITY_RANGE = 10..100
+
+        val GAP_RANGE = 0..64
 
         /** More than three and the widget is an agenda rather than a clock. */
         val AGENDA_COUNT_RANGE = 1..3
@@ -150,6 +158,11 @@ data class ClockWidgetConfig(
                 weatherOpacity = prefs.getInt(key("weatherOpacity", widgetId), DEFAULT_OPACITY),
                 notificationsOpacity = prefs.getInt(key("notificationsOpacity", widgetId), DEFAULT_OPACITY),
                 agendaOpacity = prefs.getInt(key("agendaOpacity", widgetId), DEFAULT_OPACITY),
+                dateGapDp = prefs.getInt(key("dateGap", widgetId), 0).coerceIn(GAP_RANGE),
+                weatherGapDp = prefs.getInt(key("weatherGap", widgetId), 0).coerceIn(GAP_RANGE),
+                notificationsGapDp = prefs.getInt(key("notificationsGap", widgetId), 0).coerceIn(GAP_RANGE),
+                agendaGapDp = prefs.getInt(key("agendaGap", widgetId), 0).coerceIn(GAP_RANGE),
+                batteryGapDp = prefs.getInt(key("batteryGap", widgetId), 0).coerceIn(GAP_RANGE),
             )
         }
 
@@ -180,6 +193,11 @@ data class ClockWidgetConfig(
                 .putInt(key("weatherOpacity", widgetId), config.weatherOpacity)
                 .putInt(key("notificationsOpacity", widgetId), config.notificationsOpacity)
                 .putInt(key("agendaOpacity", widgetId), config.agendaOpacity)
+                .putInt(key("dateGap", widgetId), config.dateGapDp)
+                .putInt(key("weatherGap", widgetId), config.weatherGapDp)
+                .putInt(key("notificationsGap", widgetId), config.notificationsGapDp)
+                .putInt(key("agendaGap", widgetId), config.agendaGapDp)
+                .putInt(key("batteryGap", widgetId), config.batteryGapDp)
                 .apply()
         }
 
@@ -211,6 +229,11 @@ data class ClockWidgetConfig(
                 .remove(key("agendaRelative", widgetId))
                 .remove(key("agendaOpacity", widgetId))
                 .remove(key("alarm", widgetId))
+                .remove(key("dateGap", widgetId))
+                .remove(key("weatherGap", widgetId))
+                .remove(key("notificationsGap", widgetId))
+                .remove(key("agendaGap", widgetId))
+                .remove(key("batteryGap", widgetId))
                 .apply()
         }
 
