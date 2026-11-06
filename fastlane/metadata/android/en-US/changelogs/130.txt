@@ -1,0 +1,5 @@
+New:
+* Spacing for the clock widget's rows. In the clock's settings, each row (date, weather, notifications, coming up, battery) has a "Space above" slider.
+
+Changes:
+* In edit layout, "Side padding" now sits beside the favorites, since that's all it moves.
