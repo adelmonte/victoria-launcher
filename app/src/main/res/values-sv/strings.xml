@@ -428,5 +428,9 @@
     </plurals>
     <string name="home_folder_delete_confirm">Ta bort ”%1$s”?</string>
     <string name="home_folder_delete_confirm_body">Apparna förblir installerade. Ordningen och widgetarna tas bort.</string>
-    <string name="widget_clock_gap">Utrymme ovanför</string>
+    <string name="widget_clock_date_gap">Utrymme ovanför datumet</string>
+    <string name="widget_clock_weather_gap">Utrymme ovanför vädret</string>
+    <string name="widget_clock_agenda_gap">Utrymme ovanför På gång</string>
+    <string name="widget_clock_notifications_gap">Utrymme ovanför räknaren</string>
+    <string name="widget_clock_battery_gap">Utrymme ovanför batteriet</string>
 </resources>

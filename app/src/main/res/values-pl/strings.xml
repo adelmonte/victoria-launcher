@@ -409,5 +409,9 @@
     </plurals>
     <string name="home_folder_delete_confirm">Usunąć „%1$s”?</string>
     <string name="home_folder_delete_confirm_body">Aplikacje pozostaną zainstalowane. Układ i widżety zostaną usunięte.</string>
-    <string name="widget_clock_gap">Odstęp nad</string>
+    <string name="widget_clock_date_gap">Odstęp nad datą</string>
+    <string name="widget_clock_weather_gap">Odstęp nad pogodą</string>
+    <string name="widget_clock_agenda_gap">Odstęp nad nadchodzącymi</string>
+    <string name="widget_clock_notifications_gap">Odstęp nad licznikiem</string>
+    <string name="widget_clock_battery_gap">Odstęp nad baterią</string>
 </resources>

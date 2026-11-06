@@ -182,6 +182,7 @@ class ClockWidgetConfigActivity : ComponentActivity() {
                                     onSize = { config = config.copy(dateSizeSp = it) },
                                     onOpacity = { config = config.copy(dateOpacity = it) },
                                     gap = config.dateGapDp,
+                                    gapLabel = stringResource(R.string.widget_clock_date_gap),
                                     onGap = { config = config.copy(dateGapDp = it) },
                                 )
                             }
@@ -200,6 +201,7 @@ class ClockWidgetConfigActivity : ComponentActivity() {
                                     onSize = { config = config.copy(batterySizeSp = it) },
                                     onOpacity = { config = config.copy(batteryOpacity = it) },
                                     gap = config.batteryGapDp,
+                                    gapLabel = stringResource(R.string.widget_clock_battery_gap),
                                     onGap = { config = config.copy(batteryGapDp = it) },
                                 )
                             }
@@ -219,6 +221,7 @@ class ClockWidgetConfigActivity : ComponentActivity() {
                                     onSize = { config = config.copy(weatherSizeSp = it) },
                                     onOpacity = { config = config.copy(weatherOpacity = it) },
                                     gap = config.weatherGapDp,
+                                    gapLabel = stringResource(R.string.widget_clock_weather_gap),
                                     onGap = { config = config.copy(weatherGapDp = it) },
                                 )
                             }
@@ -237,6 +240,7 @@ class ClockWidgetConfigActivity : ComponentActivity() {
                                     onSize = { config = config.copy(agendaSizeSp = it) },
                                     onOpacity = { config = config.copy(agendaOpacity = it) },
                                     gap = config.agendaGapDp,
+                                    gapLabel = stringResource(R.string.widget_clock_agenda_gap),
                                     onGap = { config = config.copy(agendaGapDp = it) },
                                 )
                             }
@@ -254,6 +258,7 @@ class ClockWidgetConfigActivity : ComponentActivity() {
                                     onSize = { config = config.copy(notificationsSizeSp = it) },
                                     onOpacity = { config = config.copy(notificationsOpacity = it) },
                                     gap = config.notificationsGapDp,
+                                    gapLabel = stringResource(R.string.widget_clock_notifications_gap),
                                     onGap = { config = config.copy(notificationsGapDp = it) },
                                 )
                             }
@@ -459,6 +464,7 @@ private fun TextSection(
     onOpacity: (Int) -> Unit,
     /** Room above the row; left out for the time, which has nothing above it. */
     gap: Int? = null,
+    gapLabel: String = "",
     onGap: (Int) -> Unit = {},
 ) {
     val opacityRange = ClockWidgetConfig.OPACITY_RANGE
@@ -466,7 +472,7 @@ private fun TextSection(
         if (gap != null) {
             val gapRange = ClockWidgetConfig.GAP_RANGE
             SliderRow(
-                label = stringResource(R.string.widget_clock_gap),
+                label = gapLabel,
                 value = gap.toFloat(),
                 range = gapRange.first.toFloat()..gapRange.last.toFloat(),
                 valueLabel = "$gap dp",

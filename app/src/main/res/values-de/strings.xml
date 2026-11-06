@@ -212,5 +212,4 @@
     <string name="settings_notification_badge_color">Farbe der Benachrichtigungsanzahl</string>
     <string name="home_folder_delete_confirm">„%1$s“ löschen?</string>
     <string name="home_folder_delete_confirm_body">Die Apps darin bleiben installiert. Anordnung und Widgets werden entfernt.</string>
-    <string name="widget_clock_gap">Abstand oben</string>
 </resources>

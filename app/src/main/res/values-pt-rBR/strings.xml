@@ -428,5 +428,9 @@
     <string name="settings_notification_badge_color">Cor do contador de notificações</string>
     <string name="home_folder_delete_confirm">Excluir “%1$s”?</string>
     <string name="home_folder_delete_confirm_body">Os apps continuam instalados. A organização e os widgets serão removidos.</string>
-    <string name="widget_clock_gap">Espaço acima</string>
+    <string name="widget_clock_date_gap">Espaço acima da data</string>
+    <string name="widget_clock_weather_gap">Espaço acima do clima</string>
+    <string name="widget_clock_agenda_gap">Espaço acima dos próximos eventos</string>
+    <string name="widget_clock_notifications_gap">Espaço acima da contagem</string>
+    <string name="widget_clock_battery_gap">Espaço acima da bateria</string>
 </resources>
