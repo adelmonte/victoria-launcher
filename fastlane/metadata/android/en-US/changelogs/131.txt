@@ -1,0 +1,3 @@
+Fixes:
+* With "Swipe up opens the search" on, the keyboard comes up as the list opens, not a second later.
+* The clock settings' spacing sliders say which row they're for, like "Date space above".
