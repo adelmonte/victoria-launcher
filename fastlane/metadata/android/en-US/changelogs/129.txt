@@ -1,0 +1,2 @@
+Fixes:
+* Smoother scrolling on older and slower devices. Victoria now tells Android to optimize all of its code, not just the parts it has seen being used.
