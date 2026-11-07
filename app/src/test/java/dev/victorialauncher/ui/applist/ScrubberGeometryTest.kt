@@ -56,4 +56,13 @@ class ScrubberGeometryTest {
         )
         assertTrue(band.heightPx >= 0f)
     }
+
+    @Test
+    fun `favorites measured past the screen keep every letter on it`() {
+        val band = ScrubberGeometry.bandForFavorites(
+            topPx = 800f, bottomPx = 3000f, viewportPx = 2000f, minHeightPx = 400f,
+        )
+        assertTrue(band.topPx >= 0f)
+        assertTrue(band.bottomPx <= 2000f)
+    }
 }

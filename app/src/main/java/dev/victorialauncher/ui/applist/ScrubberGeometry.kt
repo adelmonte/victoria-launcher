@@ -38,7 +38,13 @@ object ScrubberGeometry {
         minHeightPx: Float,
     ): ScrubBand {
         val height = (bottomPx - topPx).coerceAtLeast(0f)
-        if (viewportPx <= 0f || height >= minHeightPx) return ScrubBand(topPx, height)
+        if (viewportPx <= 0f) return ScrubBand(topPx, height)
+        // A measurement taken mid-move can run past the screen, and the letters past its
+        // edge could then never be reached. Kept on screen the way a hand-set band is.
+        if (height >= minHeightPx) {
+            val fitted = height.coerceAtMost(viewportPx)
+            return ScrubBand(topPx.coerceIn(0f, viewportPx - fitted), fitted)
+        }
         val wanted = minHeightPx.coerceAtMost(viewportPx)
         val center = (topPx + bottomPx) / 2f
         val top = (center - wanted / 2f).coerceIn(0f, viewportPx - wanted)
