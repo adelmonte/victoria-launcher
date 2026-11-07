@@ -1,0 +1,2 @@
+Fixes:
+* The A-Z strip always fits on screen, so you can reach every letter.
