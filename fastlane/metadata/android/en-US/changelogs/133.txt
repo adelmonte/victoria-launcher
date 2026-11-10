@@ -1,0 +1,3 @@
+Fixes:
+* Swiping up or down on a widget that scrolls, like a calendar, scrolls the widget instead of opening the app list or the notification shade.
+* Scrolling a widget slowly no longer opens its long-press menu.
