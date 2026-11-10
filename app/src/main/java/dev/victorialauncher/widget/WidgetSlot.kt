@@ -9,6 +9,8 @@ import android.os.Bundle
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -47,6 +49,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
@@ -59,6 +62,7 @@ import dev.victorialauncher.ui.common.TouchAnchoredMenu
 import kotlinx.coroutines.delay
 import dev.victorialauncher.R
 import androidx.compose.ui.res.stringResource
+import kotlin.math.abs
 import kotlin.math.roundToInt
 
 /** How long the page dots stay up after a swipe settles. */
@@ -332,12 +336,14 @@ internal fun WidgetPage(
     val fits = onContentHeight != null && providerInfo.provider == ClockWidgetProvider.componentName(context)
     // The container reports how tall the clock's content is, and the slot takes that height.
     val latestOnContentHeight by rememberUpdatedState(onContentHeight)
+    val containerRef = remember { arrayOfNulls<LongPressFrameLayout>(1) }
     AndroidView(
         modifier = Modifier
             .fillMaxSize()
             .onSizeChanged { size ->
                 slotSizeDp = with(density) { size.width.toDp().value.toInt() to size.height.toDp().value.toInt() }
-            },
+            }
+            .claimsVerticalScroll { containerRef[0] },
         factory = { ctx ->
             // A widget draws with code from the app that provides it, and one that throws on
             // the way up would otherwise take the launcher down with it — leaving a home
@@ -351,6 +357,7 @@ internal fun WidgetPage(
             LongPressFrameLayout(ctx).apply {
                 hostView?.let { addView(it) }
                 onLongPress = { x, y -> onPressAndHold(x, y) }
+                containerRef[0] = this
             }
         },
         update = { container ->
@@ -388,3 +395,39 @@ internal fun WidgetPage(
         },
     )
 }
+
+/**
+ * Gives a widget that scrolls its up-and-down drags, before the home screen can take them for
+ * opening the app list or pulling down the shade.
+ *
+ * Watched in the Initial pass, which reaches this before the home screen's own drag sees the
+ * move. The widget's view only hears of a move after that, and a fast swipe covers the home
+ * screen's whole touch slop in its first move — by the time the view could claim it, the
+ * home screen already had.
+ *
+ * Claimed at half a slop and only for up and down. Sideways is never claimed, so the pager
+ * keeps it, and a widget with nothing to scroll is never claimed for either. Until a claim is
+ * made every move is another chance to read the direction: twelve pixels in, a thumb that
+ * has just come down to carry on scrolling is mostly noise. And read with a margin rather
+ * than by a hair, or the same wobble claims a sideways swipe before the pager can have it.
+ */
+private fun Modifier.claimsVerticalScroll(container: () -> LongPressFrameLayout?): Modifier =
+    pointerInput(Unit) {
+        awaitEachGesture {
+            val down = awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Initial)
+            val view = container() ?: return@awaitEachGesture
+            if (!view.hasScrollableContent()) return@awaitEachGesture
+            val decisionSlop = viewConfiguration.touchSlop / 2f
+            while (true) {
+                val change = awaitPointerEvent(PointerEventPass.Initial).changes
+                    .firstOrNull { it.id == down.id } ?: break
+                if (!change.pressed) break
+                val dx = abs(change.position.x - down.position.x)
+                val dy = abs(change.position.y - down.position.y)
+                if (dy > decisionSlop && dy > dx * DIRECTION_MARGIN) {
+                    view.claimScroll()
+                    break
+                }
+            }
+        }
+    }
