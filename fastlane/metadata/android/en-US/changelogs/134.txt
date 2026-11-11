@@ -1,0 +1,2 @@
+Fixes:
+* Updated Swedish translation.
