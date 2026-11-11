@@ -8,7 +8,7 @@
     <string name="action_cancel">Avbryt</string>
     <string name="action_reset">Återställ</string>
     <string name="action_create">Skapa</string>
-    <string name="action_done">Klar</string>
+    <string name="action_done">Klart</string>
     <string name="action_remove">Ta bort</string>
     <string name="action_app_info">Appinfo</string>
     <string name="action_edit_layout">Redigera layout</string>
@@ -36,7 +36,7 @@
     <string name="handle_widget_top">Widgetens överkant</string>
     <string name="handle_widget_bottom">Widgetens nederkant</string>
     <string name="handle_widget_height">Widgetens höjd</string>
-    <string name="handle_widget_height_auto">Automatisk höjd (Victorias klocka)</string>
+    <string name="handle_widget_height_auto">Automatisk höjd (Victoria-klockan)</string>
     <string name="handle_widget_side_padding">Widgetens sidoutfyllnad</string>
     <string name="handle_widget_offset_x">Widgetens vänster / höger</string>
     <string name="handle_az_range">A-Z-remsans utsträckning</string>
@@ -94,7 +94,7 @@
     <string name="settings_notification_previews">Aviseringstext på startskärmen</string>
     <string name="settings_notification_previews_detail">Listar en apps senaste aviseringar under dess namn, och att trycka på en öppnar den. Vem som helst som tittar på din telefon kan läsa dem. Kräver aviseringsåtkomst.</string>
     <string name="settings_notification_text_size">Aviseringstextens storlek</string>
-    <string name="settings_notification_badge_color">Färg på aviseringsräknaren</string>
+    <string name="settings_notification_badge_color">Aviseringsräknarens färg</string>
     <string name="settings_notification_badges_detail">Behöver samma aviseringsåtkomst som Nu spelas gör. Endast räknare, aldrig vad en avisering säger. En prick bredvid namnet när ikonerna är dolda.</string>
     <string name="settings_section_top">Vart en bokstav hamnar</string>
     <string name="settings_close_folder">Stäng en mapp efter att en app har öppnats</string>
@@ -139,7 +139,7 @@
     <string name="settings_ripple_reset">Återställ vågen till standardvärdena</string>
     <string name="settings_double_tap_lock">Dubbeltryck för att låsa skärmen</string>
     <string name="settings_double_tap_lock_detail">Tryck två gånger på A-Z-remsan</string>
-    <string name="settings_lock_needs_accessibility">Victoria Launcher måste vara aktiverad under Tillgänglighet. Om den knappen är gråmarkerad, öppna Appinfo och tillåt blockerade inställningar från ⋮-menyn först.</string>
+    <string name="settings_lock_needs_accessibility">Victoria Launcher måste vara aktiverad under Tillgänglighet. Om den brytaren är gråmarkerad, öppna Appinfo och tillåt blockerade inställningar från ⋮-menyn först.</string>
     <string name="settings_az_visibility">Visa A-Z på startskärmen</string>
     <string name="az_visibility_never">Aldrig</string>
     <string name="az_visibility_landscape">Liggande</string>
@@ -182,7 +182,7 @@
     <string name="settings_icon_side">Ikonsida</string>
     <string name="settings_shade_gesture">Svep nedåt för aviseringar</string>
     <string name="settings_shade_ready">Redo — dra nedåt på startskärmen</string>
-    <string name="settings_shade_not_ready">Dra nedåt på startskärmen. Om ingenting händer, aktivera Victoria Launcher under Tillgänglighet — och om den knappen är gråmarkerad, tillåt blockerade inställningar från Appinfo först.</string>
+    <string name="settings_shade_not_ready">Dra nedåt på startskärmen. Om ingenting händer, aktivera Victoria Launcher under Tillgänglighet — och om den brytaren är gråmarkerad, tillåt blockerade inställningar från Appinfo först.</string>
     <string name="settings_enable">Aktivera</string>
     <string name="settings_app_info">Appinfo</string>
     <string name="settings_now_playing_show">Visa Nu spelas-widget</string>
@@ -351,7 +351,7 @@
     <string name="widget_clock_date_custom_label">Mönster</string>
     <string name="widget_clock_date_custom_invalid">Detta är inget mönster som denna kan skriva ut</string>
     <string name="widget_clock_date_custom_hint">d dag, M månad, y år, E veckodag. Upprepa en bokstav för en längre form: d, dd, EEE, EEEE.</string>
-    <string name="widget_clock_agenda">På gång</string>
+    <string name="widget_clock_agenda">Agenda</string>
     <string name="widget_clock_event_untitled">(Ingen titel)</string>
     <string name="widget_clock_event_at">%1$s  %2$s</string>
     <string name="widget_clock_event_tomorrow">I morgon</string>
@@ -362,8 +362,8 @@
     <string name="widget_clock_alarm_at">Alarm %1$s</string>
     <string name="widget_clock_agenda_show">På gång</string>
     <string name="widget_clock_agenda_hide">Ingenting</string>
-    <string name="widget_clock_agenda_size">På gångs storlek</string>
-    <string name="widget_clock_agenda_opacity">På gångs opacitet</string>
+    <string name="widget_clock_agenda_size">Agendans storlek</string>
+    <string name="widget_clock_agenda_opacity">Agendans opacitet</string>
     <string name="widget_clock_agenda_count">Hur många händelser</string>
     <string name="widget_clock_agenda_hours">Timmar framåt i tiden</string>
     <string name="widget_clock_agenda_relative">Om 20 minuter</string>
@@ -426,11 +426,11 @@
         <item quantity="one">%1$d app exkluderad</item>
         <item quantity="other">%1$d appar exkluderade</item>
     </plurals>
-    <string name="home_folder_delete_confirm">Ta bort ”%1$s”?</string>
-    <string name="home_folder_delete_confirm_body">Apparna förblir installerade. Ordningen och widgetarna tas bort.</string>
+    <string name="home_folder_delete_confirm">Radera ”%1$s”?</string>
+    <string name="home_folder_delete_confirm_body">Apparna i den förblir installerade. Dess layout och widgetar tas bort.</string>
     <string name="widget_clock_date_gap">Utrymme ovanför datumet</string>
     <string name="widget_clock_weather_gap">Utrymme ovanför vädret</string>
-    <string name="widget_clock_agenda_gap">Utrymme ovanför På gång</string>
+    <string name="widget_clock_agenda_gap">Utrymme ovanför agendan</string>
     <string name="widget_clock_notifications_gap">Utrymme ovanför räknaren</string>
     <string name="widget_clock_battery_gap">Utrymme ovanför batteriet</string>
 </resources>
