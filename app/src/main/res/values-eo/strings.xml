@@ -1,0 +1,436 @@
+<resources>
+    <string name="app_name">Victoria Launcher</string>
+    <string name="accessibility_description">Permesas al la malsuprenŝova gesto malfermi la sciigan ombron. Victoria Launcher ne legas aŭ agas laŭ la ekrana enhavo.</string>
+
+    <!-- Shared actions -->
+    <string name="action_back">Reen</string>
+    <string name="action_save">Konservi</string>
+    <string name="action_cancel">Nuligi</string>
+    <string name="action_reset">Restarigi</string>
+    <string name="action_create">Krei</string>
+    <string name="action_done">Farita</string>
+    <string name="action_remove">Forigi</string>
+    <string name="action_app_info">Informoj pri la aplikaĵo</string>
+    <string name="action_edit_layout">Redakti aranĝon</string>
+    <string name="action_edit_icon_and_name">Redakti ikonon kaj nomon</string>
+    <string name="action_move_to_folder">Movi al dosierujo...</string>
+    <string name="action_change_icon">Ŝanĝi ikonon...</string>
+    <string name="action_open_settings">Agordoj de Victoria Launcher</string>
+    <string name="action_remove_shortcut">Forigi ŝparvojon</string>
+
+    <!-- Home screen -->
+    <string name="home_drag_handle">Reordigi</string>
+    <string name="home_no_favorites_title">Ankoraŭ neniuj ŝatatoj</string>
+    <string name="home_no_favorites_body">Tuŝu la ekranan randon por malfermi la liston de aplikaĵoj, aŭ elektu viajn ŝatatojn el la listo sube.</string>
+    <string name="home_choose_favorites">Elekti ŝatatojn</string>
+    <string name="home_folder_choose_apps">Administri dosierujon</string>
+    <string name="home_folder_delete">Forigi dosierujon</string>
+    <string name="home_folder_remove_app">Forigi el dosierujo</string>
+    <string name="home_folder_empty">Malplena — longe premu la dosierujon por elekti aplikaĵojn</string>
+    <string name="home_folder_name_label">Dosieruja nomo</string>
+    <string name="home_folder_use_previews">Uzi antaŭrigardojn de aplikaĵoj</string>
+    <string name="home_display_name_label">Montrata nomo</string>
+
+    <!-- Edit-mode drag handles -->
+    <string name="handle_side_padding">Flanka marĝeno</string>
+    <string name="handle_widget_top">Supro de fenestraĵo</string>
+    <string name="handle_widget_bottom">Subo de fenestraĵo</string>
+    <string name="handle_widget_height">Fenestraĵa alto</string>
+    <string name="handle_widget_height_auto">Aŭtomata alto (Victoria horloĝo)</string>
+    <string name="handle_widget_side_padding">Flanka marĝeno de fenestraĵo</string>
+    <string name="handle_widget_offset_x">Fenestraĵo maldekstre / dekstre</string>
+    <string name="handle_az_range">A-Z-stria intervalo</string>
+    <string name="edit_value_range">%1$d ĝis %2$d dp</string>
+    <string name="handle_favorites_top">Ŝatatoj supre</string>
+    <string name="handle_favorites_bottom">Ŝatatoj sube</string>
+    <string name="handle_now_playing_top">\"Nun ludata\" supre</string>
+    <string name="handle_now_playing_bottom">\"Nun ludata\" sube</string>
+    <string name="handle_now_playing_height">Alto de \"Nun ludata\"</string>
+
+    <!-- App list -->
+    <string name="applist_add_favorite">Aldoni al ŝatatoj</string>
+    <string name="applist_remove_favorite">Forigi el ŝatatoj</string>
+    <string name="applist_hide">Kaŝi el listo</string>
+    <string name="applist_unhide">Montri en listo</string>
+
+    <string name="applist_band_hint">Trenu la bendon por movi ĝin, aŭ unu el la teniloj por ŝanĝi ĝian grandecon</string>
+    <string name="applist_band_top">Supro de la A-Z-strio</string>
+    <string name="applist_band_bottom">Subo de la A-Z-strio</string>
+
+    <string name="applist_search">Serĉi aplikaĵojn</string>
+
+    <!-- Toasts -->
+    <string name="toast_enable_accessibility_shade">Ebligi Victoria Launcher en Agordoj → Alirebleco por malfermi sciigojn</string>
+    <string name="toast_enable_accessibility_lock">Ebligi Victoria Launcher en Agordoj → Alirebleco por ŝlosi la ekranon</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Agordoj de Victoria</string>
+    <string name="settings_section_home">Hejma ekrano</string>
+    <string name="settings_section_app_list">Listo de aplikaĵoj</string>
+    <string name="settings_section_gestures">Gestoj</string>
+    <string name="settings_section_notifications">Sciigoj</string>
+    <string name="settings_preview">Antaŭrigardo</string>
+    <string name="settings_search">Serĉagordoj</string>
+    <string name="settings_corner_search">Malfermi la serĉon</string>
+    <string name="settings_corner_button">Butono en la malsupra angulo</string>
+    <string name="settings_last_letter">Ĉiu litero sur la sama linio</string>
+    <string name="settings_last_letter_detail">Literoj ĉe la fino de la listo atingas la saman linion kiel la ceteraj. Kostas ekranon da malplena spaco sub la lasta aplikaĵo</string>
+    <string name="settings_auto_keyboard">Malfermi la klavaron kun la listo</string>
+    <string name="settings_auto_keyboard_detail">Komencu tajpi tuj kiam la aplikaĵlisto malfermiĝas. Malŝaltita, la klavaro atendas ĝis vi frapetas la serĉkeston</string>
+    <string name="settings_settings_row">Agorda vico en la aplikaĵlisto</string>
+    <string name="settings_settings_row_detail">La vico post Z kiu malfermas ĉi tiujn agordojn. Longa premo sur la ekranfono atingas ilin ĉiukaze</string>
+    <string name="settings_search_none">Nenio kongruas kun tio</string>
+    <string name="settings_section_appearance">Aspekto</string>
+    <string name="settings_section_apps">Aplikaĵoj</string>
+    <string name="settings_section_about">Pri</string>
+    <string name="settings_preview_sample">Ekzempla aplikaĵo</string>
+    <string name="settings_icon_pack">Ikonpakaĵo</string>
+    <string name="settings_icon_pack_default">Defaŭlta</string>
+    <string name="settings_icons_favorites">Ikonoj en ŝatatoj</string>
+    <string name="settings_icons_app_list">Ikonoj en la aplikaĵlisto</string>
+    <string name="settings_list_headers">Litertitoloj</string>
+    <string name="settings_list_headers_detail">Malŝaltita donas unu kontinuan liston. La A-Z-strio ankoraŭ saltas al la litero</string>
+    <string name="settings_notification_badges">Sciigaj nombroj sur ikonoj</string>
+    <string name="settings_notification_previews">Sciiga teksto sur la hejma ekrano</string>
+    <string name="settings_notification_previews_detail">Listas la plej novajn sciigojn de aplikaĵo sub ĝia nomo, kaj frapeto sur unu malfermas ĝin. Ĉiu, kiu rigardas vian telefonon, povas legi ilin. Bezonas aliron al sciigoj</string>
+    <string name="settings_notification_text_size">Sciiga tekstograndeco</string>
+    <string name="settings_notification_badge_color">Sciiga kalkulokoloro</string>
+    <string name="settings_notification_badges_detail">Bezonas la saman sciigan aliron kiel \"Nun ludata\". Kalkulas nur, neniam kion sciigo diras. Punkto apud la nomo kiam ikonoj estas kaŝitaj</string>
+    <string name="settings_section_top">Kie litero alteriĝas</string>
+    <string name="settings_close_folder">Fermi dosierujon post malfermo de aplikaĵo</string>
+    <string name="settings_close_folder_detail">Malŝaltita lasas ĝin malfermita ĝis vi mem fermas ĝin</string>
+    <string name="settings_favorites_source">Ŝatatoj</string>
+    <string name="settings_frequent_count">Kiom</string>
+    <string name="favorites_source_manual">La listo, kiun vi konservas</string>
+    <string name="favorites_source_frequent">Plej uzataj</string>
+    <string name="settings_icon_pack_no_icons">Neniu</string>
+    <string name="settings_icon_pack_none">Neniuj ikonpakaĵaj aplikaĵoj trovitaj sur ĉi tiu aparato.</string>
+    <string name="settings_icon_size">Ikongrandeco</string>
+    <string name="settings_text_size">Tekstagrandeco</string>
+    <string name="settings_favorite_spacing">Interspaco inter ŝatatoj</string>
+    <string name="settings_font">Tiparo</string>
+    <string name="settings_text_color">Tekstakoloro</string>
+    <string name="settings_text_color_detail">\"Aŭtomata\" legas la ekranfonon kaj elektas tiun, kiu estas legebla</string>
+    <string name="settings_show_names">Montri aplikaĵnomojn apud ikonoj de ŝatatoj</string>
+    <string name="folder_add_now_playing">Aldoni \"Nun ludata\"</string>
+    <string name="folder_remove_now_playing">Forigi \"Nun ludata\"</string>
+    <string name="settings_widgets_stacked">Montri ĉiujn fenestraĵojn samtempe</string>
+    <string name="settings_widgets_stacked_detail">Hejmaj fenestraĵoj sidas unu sub la alia anstataŭ esti ŝovitaj inter ili. Ĉiu estas la alto de la fenestraĵa areo</string>
+    <string name="settings_hide_status_bar">Kaŝi statusan stangon sur la hejma ekrano</string>
+    <string name="settings_hide_status_bar_applist">Kaŝi statusan stangon en la aplikaĵlisto</string>
+    <string name="settings_status_bar_timeout">Statusa stango restas dum</string>
+    <string name="settings_dim_home">Mallumigi ekranfonon sur la hejma ekrano</string>
+    <string name="settings_dim_applist">Mallumigi ekranfonon malantaŭ aplikaĵlisto</string>
+    <string name="settings_haptics">Haptika retrosciigo</string>
+    <string name="settings_haptics_detail">Sekvas la tuŝan retrosciigan agordon de via sistemo</string>
+    <string name="settings_edge_side">Kiu rando malfermas la aplikaĵliston</string>
+    <string name="settings_scrub_style">A-Z stria animacio</string>
+    <string name="scrub_style_bell">Sonorilo</string>
+    <string name="scrub_style_ripple">Ondeto</string>
+    <string name="settings_scrub_bubble">Litera veziko</string>
+    <string name="scrub_bubble_rounded">Ronda</string>
+    <string name="scrub_bubble_circle">Cirklo</string>
+    <string name="scrub_bubble_square">Kvadrato</string>
+    <string name="scrub_bubble_hidden">Kaŝita</string>
+    <string name="settings_ripple_speed">Ondeta rapido</string>
+    <string name="settings_ripple_speed_value">%1$.0f literoj/s</string>
+    <string name="settings_ripple_damping">Ondeta amortizo</string>
+    <string name="settings_ripple_stiffness">Sekvi forton</string>
+    <string name="settings_ripple_reset">Restarigi ondeton al defaŭltoj</string>
+    <string name="settings_double_tap_lock">Duobla frapeto por ŝlosi ekranon</string>
+    <string name="settings_double_tap_lock_detail">Frapeti la A-Z strion dufoje</string>
+    <string name="settings_lock_needs_accessibility">Bezonas ke Victoria Launcher estu ebligita sub Alirebleco. Se tiu ŝaltilo estas griza, unue malfermu Aplikaĵajn informojn kaj permesu limigitajn agordojn el la ⋮ menuo.</string>
+    <string name="settings_az_visibility">Montri A-Z sur la hejma ekrano</string>
+    <string name="az_visibility_never">Neniam</string>
+    <string name="az_visibility_landscape">Pejzaĝa</string>
+    <string name="az_visibility_always">Ĉiam</string>
+    <string name="settings_always_show_az">Ĉiam montri A-Z</string>
+    <string name="settings_show_alphabet">Montri A-Z en aplikaĵlisto</string>
+    <string name="applist_search_web">Serĉi en la reto \"%1$s\"</string>
+    <string name="settings_web_search">Proponi retan serĉon</string>
+    <string name="settings_web_search_detail">Kiam nenio en la listo kongruas kun tio, kion vi tajpis, vico ofertas la vortojn al via retumilo. Nenio estas sendita ien krom se vi frapetas ĝin</string>
+    <string name="settings_swipe_up_search">Suprenglitado malfermas la serĉon</string>
+    <string name="settings_swipe_up_search_detail">Suprenglitado malfermas la aplikaĵliston kun la kursoro jam en la serĉkesto</string>
+    <string name="app_work_suffix"> (Laboro)</string>
+    <string name="settings_edge_inset_auto">Aŭtomate krei lokon por la reen-gesto</string>
+    <string name="settings_edge_inset_auto_detail">Tenas la A-Z-strion libera de la rando, kiun Android uzas por sia reen-gesto. Ŝanĝas nenion per butonnavigado</string>
+    <string name="settings_edge_inset">Lasi lokon por la reen-gesto</string>
+    <string name="settings_mark_work_apps">Marki laborajn aplikaĵojn</string>
+    <string name="settings_mark_work_apps_detail">Aplikaĵoj el labora profilo diras tion post sia nomo, do du kopioj de la sama aplikaĵo povas esti distingitaj</string>
+    <string name="settings_dim_others">Mallumigi la ceterajn dum glitado de A al Z</string>
+    <string name="settings_dim_others_detail">La aplikaĵoj ekster la litero, sur kiu vi estas, paliĝas, kio elstarigas ĝin. Malŝaltita tenas la tutan liston videbla</string>
+    <string name="settings_hold_scroll">Teni literon por daŭre rulumi</string>
+    <string name="settings_hold_scroll_detail">Metu vian fingron sur litero kaj la listo pluiras tra siaj aplikaĵoj, por literoj kun multaj el ili</string>
+    <string name="settings_hold_scroll_speed">Rulumrapideco</string>
+    <string name="settings_edge_band_only">Rando nur apud la literoj</string>
+    <string name="settings_edge_band_only_detail">La flanko de la ekrano malfermas la aplikaĵliston nur kie estas la A-Z-strio, anstataŭ tute malsupren. Tenas ĝin for de la vojo de fenestraĵo</string>
+    <string name="settings_edge_zone_width">Larĝo de rando de ŝovo</string>
+    <string name="settings_swipe_up_list">Ŝovi supren por la aplikaĵlisto</string>
+    <string name="settings_swipe_up_list_detail">Puŝu supren preter la fino de la hejma ekrano</string>
+    <string name="settings_quick_launch_left">Ŝovi maldekstren sube</string>
+    <string name="settings_quick_launch_right">Ŝovi dekstren sube</string>
+    <string name="settings_quick_launch_none">Neniu</string>
+    <string name="settings_search_bar">Serĉobreto en la aplikaĵlisto</string>
+    <string name="settings_search_bar_detail">Kesto por filtri la liston laŭ nomo</string>
+    <string name="settings_search_bar_bottom">Serĉobreto sube</string>
+    <string name="settings_search_hidden">Serĉo trovas kaŝitajn aplikaĵojn</string>
+    <string name="settings_search_hidden_detail">Aplikaĵoj kaŝitaj de la listo ankoraŭ aperas kiam vi serĉas ilin laŭ nomo</string>
+    <string name="settings_sort_by_usage">Ordigi laŭ kiom ofte vi uzas aplikaĵojn</string>
+    <string name="settings_sort_by_usage_detail">Ene de ĉiu litero, plej uzataj unue</string>
+    <string name="settings_alignment_favorites">Ĝisrandigo de ŝatatoj</string>
+    <string name="settings_alignment_applist">Ĝisrandigo de aplikaĵlisto</string>
+    <string name="settings_icon_side">Flanko de ikono</string>
+    <string name="settings_shade_gesture">Ŝovi malsupren por sciigoj</string>
+    <string name="settings_shade_ready">Preta — tiru malsupren sur la hejma ekrano</string>
+    <string name="settings_shade_not_ready">Tiru malsupren sur la hejma ekrano. Se nenio okazas, ebligu Victoria Launcher sub Alirebleco — kaj se tiu ŝaltilo estas griza, unue permesu limigitajn agordojn el Aplikaĵaj informoj.</string>
+    <string name="settings_enable">Ebligi</string>
+    <string name="settings_app_info">Aplikaĵaj informoj</string>
+    <string name="settings_now_playing_show">Montri fenestraĵon \"Nun ludata\"</string>
+    <string name="settings_notification_access_granted">Sciigaliro donita</string>
+    <string name="settings_notification_access_missing">Sciigaliro ne donita</string>
+    <string name="settings_notification_access_detail">Necesa por montri la nuntempe ludatan trakon</string>
+    <string name="settings_open_settings">Malfermi agordojn</string>
+    <string name="settings_favorites">Ŝatatoj</string>
+    <string name="settings_favorites_detail">Elekti, kiuj aplikaĵoj sidas sur la hejma ekrano</string>
+    <string name="applist_private_space_section">Privata Spaco</string>
+    <string name="applist_recent_section">Ĵus instalitaj</string>
+    <string name="settings_stay_private_unlock">Resti en la listo post malŝlosado</string>
+    <string name="settings_stay_private_unlock_detail">Malŝlosi Privatan Spacon tenas la aplikaĵliston malfermita anstataŭ reiri al la hejma ekrano</string>
+    <string name="settings_private_space_section">Sekcio Privata Spaco</string>
+    <string name="settings_folders_in_list">Dosierujoj en la aplikaĵlisto</string>
+    <string name="settings_folders_in_list_detail">Ĉiu dosierujo ankaŭ montriĝas sub sia propra litero. Ĝiaj aplikaĵoj restas sub iliaj ankaŭ</string>
+    <string name="folder_add_to_home">Aldoni al la hejma ekrano</string>
+    <string name="folder_remove_from_home">Forigi de la hejma ekrano</string>
+    <string name="settings_private_space_section_detail">Grupigas la privatajn spacajn aplikaĵojn sub la alfabeto anstataŭ miksi ilin, por ke la du kopioj de aplikaĵo povu esti distingitaj</string>
+    <string name="settings_recent_section">Sekcio \"Ĵus instalitaj\"</string>
+    <string name="settings_recent_section_detail">Finas la aplikaĵliston per tio, kio alvenis plej lastatempe</string>
+    <string name="settings_recent_section_count">Kiom da lastatempaj aplikaĵoj</string>
+    <string name="settings_compact_tap">Frapeti nur la ikonon kaj nomon</string>
+    <string name="settings_compact_tap_detail">Ŝatato malfermiĝas nur kiam vi frapas ĝian ikonon aŭ nomon, ne ie ajn laŭ ĝia linio</string>
+    <string name="settings_text_shadow_strength">Forto de ombro</string>
+    <string name="settings_text_shadow">Ombro malantaŭ teksto</string>
+    <string name="settings_text_shadow_detail">Helpas aplikaĵnomojn elstari super okupata ekranfono. Aplikita nur malantaŭ hela teksto, kie ĝi aldonas kontraston anstataŭ malklarigi ĝin</string>
+    <string name="settings_default_launcher">Defaŭlta lanĉilo</string>
+    <string name="settings_default_launcher_yes">Victoria Launcher</string>
+    <string name="settings_default_launcher_no">Ne agordita — frapeti por elekti</string>
+    <string name="settings_frequent_excluded">Ekskluditaj el Plej uzataj</string>
+    <string name="settings_frequent_excluded_none">Neniuj aplikaĵoj ekskluditaj</string>
+    <string name="frequent_excluded_count">Ekskluditaj (%1$d)</string>
+    <string name="frequent_excluded_add">Ekskludi aplikaĵon</string>
+    <string name="settings_hidden_apps">Kaŝitaj aplikaĵoj</string>
+    <string name="hidden_count">%1$d kaŝita de la aplikaĵlisto</string>
+    <string name="hidden_add_apps">Ĉio alia</string>
+    <string name="settings_hidden_none">Neniu kaŝita</string>
+    <string name="settings_hidden_count">%1$d kaŝita</string>
+    <string name="settings_version">Versio %1$s</string>
+    <string name="settings_less">Malpli</string>
+    <string name="settings_more">Pli</string>
+
+    <!-- Font choices -->
+    <string name="font_system">Sistemo</string>
+    <string name="font_sans_serif">Sanserifo</string>
+    <string name="font_serif">Serifo</string>
+    <string name="font_monospace">Unuspaca</string>
+    <string name="font_custom">Propra…</string>
+    <string name="font_custom_pick">Elekti tipardosieron</string>
+    <string name="font_custom_detail">.ttf- aŭ .otf-dosiero, kopiita en la lanĉilon por ke ĝi postvivu la dosiermovon</string>
+    <string name="font_custom_failed">Tiu dosiero ne povis esti legita kiel tiparo</string>
+    <string name="text_color_material">Material</string>
+    <string name="text_color_custom">Propra</string>
+    <string name="text_color_pick">Elekti koloron</string>
+    <string name="settings_swipe_shortcuts">Ŝovi aplikaĵon por ĝiaj ŝparvojoj</string>
+    <string name="settings_swipe_shortcuts_detail">Ŝovu ŝataton aŭ vicon en la aplikaĵlisto. Aplikaĵoj kiuj publikigas neniun faras nenion</string>
+    <string name="shortcut_swipe_off">Malŝaltita</string>
+    <string name="shortcut_swipe_right">Ŝovi dekstren</string>
+    <string name="shortcut_swipe_left">Ŝovi maldekstren</string>
+    <string name="settings_allow_rotation">Rotacii kun la aparato</string>
+    <string name="settings_allow_rotation_detail">Malŝaltita ĉe telefonoj: flanken estas ĉirkaŭ triono de la alto, kiun ĉi tiu aranĝo bezonas. Defaŭlte ŝaltita ĉe tabulkomputiloj</string>
+    <string name="settings_section_backup">Sekurkopio</string>
+    <string name="settings_crash_copy">Kopii lastan kraŝon</string>
+    <string name="settings_crash_detail">La lanĉilo neatendite haltis. Kopii la detalojn por inkluzivi en cimraporto</string>
+    <string name="settings_crash_copied">Detaloj pri kraŝo kopiitaj</string>
+    <string name="settings_export">Eksporti agordojn</string>
+    <string name="settings_export_detail">Konservi ŝatatojn, dosierujojn, aranĝon kaj ĉion alian al dosiero</string>
+    <string name="settings_import">Importi agordojn</string>
+    <string name="settings_import_detail">Anstataŭigi ĉion per dosiero antaŭe konservita</string>
+    <string name="settings_export_done">Agordoj konservitaj</string>
+    <string name="settings_export_done_private_omitted">Agordoj konservitaj. Aplikaĵoj en via privata spaco estis preterlasitaj.</string>
+    <string name="settings_import_done">Agordoj restarigitaj</string>
+    <string name="settings_backup_failed">Tiu dosiero ne povis esti legita</string>
+    <string name="settings_dim_color">Malhela koloro</string>
+    <string name="settings_dim_color_detail">Per kio la ekranfono estas malheligita. La kvanton oni agordas sub Hejma ekrano kaj Aplikaĵlisto</string>
+    <string name="color_from_wallpaper">El via ekranfono</string>
+    <string name="icon_shape">Ikonformo</string>
+    <string name="icon_shape_detail">Nur ŝanĝas la formojn de adaptaj ikonoj; ĉio pli malnova restas kiel ĝi estas</string>
+    <string name="icon_shape_system">Sistemo</string>
+    <string name="icon_shape_circle">Cirklo</string>
+    <string name="icon_shape_rounded">Ronda</string>
+    <string name="icon_shape_square">Kvadrata</string>
+    <string name="settings_icon_pack_themed">Tema</string>
+
+    <!-- Text color choices -->
+    <string name="text_color_auto">Aŭtomata</string>
+    <string name="text_color_light">Hela</string>
+    <string name="text_color_dark">Malluma</string>
+
+    <!-- Alignment choices -->
+    <string name="alignment_left">Maldekstra</string>
+    <string name="alignment_center">Centre</string>
+    <string name="alignment_right">Dekstra</string>
+
+    <!-- Edge choices -->
+    <string name="edge_left">Maldekstra</string>
+    <string name="edge_right">Dekstra</string>
+    <string name="edge_both">Ambaŭ</string>
+
+    <!-- Private space -->
+    <string name="private_space">Privata spaco</string>
+    <string name="private_space_install_apps">Instali aplikaĵojn</string>
+    <string name="private_space_install_failed">Neniu aplikaĵvendejo por malfermi en la privata spaco</string>
+    <string name="private_space_settings">Agordoj de privata spaco</string>
+    <string name="private_space_settings_failed">Ne eblis malfermi agordojn de privata spaco</string>
+
+    <!-- Favorites / hidden / folder pickers -->
+    <string name="favorites_title">Ŝatatoj</string>
+    <string name="favorites_count">%1$d sur via hejma ekrano</string>
+    <string name="folder_title_fallback">Dosierujo</string>
+    <string name="folder_gone">Ĉi tiu dosierujo jam ne ekzistas.</string>
+    <string name="folder_member_count">%1$d en ĉi tiu dosierujo — trenu por reordigi</string>
+    <string name="folder_add_apps">Aldoni pli</string>
+    <string name="folder_member_missing">Aplikaĵo jam ne instalita</string>
+    <string name="folder_picker_title">Movi %1$s al…</string>
+    <string name="folder_picker_app_count">%1$d aplikaĵoj</string>
+    <string name="folder_picker_new">Nova dosierujo</string>
+    <string name="folder_picker_new_detail">La aplikaĵo moviĝas en la novan dosierujon sur via hejma ekrano.</string>
+
+    <!-- Icon picker -->
+    <string name="icon_picker_title">Ikono por %1$s</string>
+    <string name="icon_picker_gallery">Galerio…</string>
+    <string name="icon_picker_all">Ĉiuj</string>
+    <string name="icon_picker_reset">Restarigi al defaŭlto</string>
+    <string name="icon_picker_no_packs">Neniuj ikonpakaĵoj instalitaj. Instalu ikonpakaĵon el la Play Store, aŭ elektu bildon el via galerio.</string>
+    <string name="icon_picker_search">Serĉi ikonojn</string>
+    <string name="icon_picker_clear_search">Forigi serĉon</string>
+    <string name="icon_picker_not_browsable">Ĉi tiu pako ne montris foliumeblan ikonliston.</string>
+    <string name="icon_picker_no_matches">Neniuj ikonoj kongruas kun “%1$s”.</string>
+
+    <!-- Welcome -->
+    <string name="welcome_title">Bonvenon al Victoria</string>
+    <string name="welcome_favorites">Longe premu la ekranfonon por aldoni ŝatatojn, fenestraĵon, aŭ malfermi agordojn.</string>
+    <string name="welcome_widget">Ŝovu enen de iu ajn rando de la ekrano por ĉiuj viaj aplikaĵoj, kaj glitu laŭ la A-Z strio por salti al litero.</string>
+    <string name="welcome_layout">Redakti aranĝon permesas al vi movi aferojn kaj agordi la interspacon.</string>
+    <string name="welcome_got_it">Komprenite</string>
+
+    <!-- Widgets -->
+    <string name="widget_add">Aldoni fenestraĵon</string>
+    <string name="widget_clock_label">Horloĝo kaj dato</string>
+    <string name="widget_clock_description">La horo kaj dato, laŭ la stilo de la lanĉilo mem</string>
+    <string name="widget_clock_time">Horo</string>
+    <string name="widget_clock_date">Dato</string>
+    <string name="widget_clock_hour">Horloĝo</string>
+    <string name="widget_clock_hour_system">Sistemo</string>
+    <string name="widget_clock_hour_12">12-hora</string>
+    <string name="widget_clock_hour_24">24-hora</string>
+    <string name="widget_clock_date_format">Dato</string>
+    <string name="widget_clock_date_none">Neniu dato</string>
+    <string name="widget_clock_size">Grandeco de la horo</string>
+    <string name="widget_clock_date_size">Grandeco de la dato</string>
+    <string name="widget_clock_color">Koloro</string>
+    <string name="widget_clock_color_pick">Elekti</string>
+    <string name="widget_clock_size_preview">12:34</string>
+    <string name="widget_clock_weather">Vetero</string>
+    <string name="widget_clock_notifications">Sciigoj</string>
+    <string name="widget_clock_weather_show">Vetero</string>
+    <string name="widget_clock_weather_hide">Neniu vetero</string>
+    <string name="widget_clock_weather_celsius">°C</string>
+    <string name="widget_clock_weather_fahrenheit">°F</string>
+    <string name="widget_clock_weather_size">Grandeco de la vetero</string>
+    <string name="widget_clock_weather_opacity">Opakeco de la vetero</string>
+    <string name="widget_clock_date_custom_chip">Propra</string>
+    <string name="widget_clock_date_custom">Propra datoformato</string>
+    <string name="widget_clock_date_custom_label">Ŝablono</string>
+    <string name="widget_clock_date_custom_invalid">Tio ne estas ŝablono, kiun la aplikaĵo povas prezenti</string>
+    <string name="widget_clock_date_custom_hint">d tago, M monato, y jaro, E semajntago. Ripetu literon por pli longa formo: d, dd, EEE, EEEE.</string>
+    <string name="widget_clock_agenda">Venonta evento</string>
+    <string name="widget_clock_event_untitled">(Sen titolo)</string>
+    <string name="widget_clock_event_at">%1$s  %2$s</string>
+    <string name="widget_clock_event_tomorrow">Morgaŭ</string>
+    <string name="widget_clock_event_day_at">%1$s %2$s</string>
+    <string name="widget_clock_event_day_only">%1$s  %2$s</string>
+    <string name="widget_clock_event_all_day">%1$s  hodiaŭ</string>
+    <string name="widget_clock_event_now">%1$s  nun</string>
+    <string name="widget_clock_alarm_at">Vekhorloĝo %1$s</string>
+    <string name="widget_clock_agenda_show">Venonta evento</string>
+    <string name="widget_clock_agenda_hide">Nenio</string>
+    <string name="widget_clock_agenda_size">Grandeco de la venonta evento</string>
+    <string name="widget_clock_agenda_opacity">Opakeco de la venonta evento</string>
+    <string name="widget_clock_agenda_count">Kiom da eventoj</string>
+    <string name="widget_clock_agenda_hours">Horoj por antaŭvidi</string>
+    <string name="widget_clock_agenda_relative">Post 20 minutoj</string>
+    <string name="widget_clock_agenda_absolute">Je la 12:30</string>
+    <string name="widget_clock_alarm_show">Sekva vekhorloĝo</string>
+    <string name="widget_clock_alarm_hide">Neniu vekhorloĝo</string>
+    <string name="widget_clock_agenda_permission">Permesi aliron al via kalendaro</string>
+    <string name="widget_clock_agenda_empty">Neniu venonta evento</string>
+    <string name="widget_clock_agenda_hint">Legado de via kalendaro postulas permeson. Nenio forlasas la telefonon: Victoria ne havas retaliron.</string>
+    <string name="widget_clock_weather_opens">Kio malfermiĝas per frapeto sur la vetero</string>
+    <string name="widget_clock_weather_waiting">Atendas veter-aplikaĵon</string>
+    <string name="widget_clock_weather_hint">La vetero venas de veter-aplikaĵo, kiu jam havas la informojn; tial Victoria ne bezonas retaliron kaj neniam demandas, kie vi estas. En Breezy Weather, aktivigu Agordoj → Fenestraĵoj kaj Vivaj Fonbildoj → Kundivido de datumoj.</string>
+    <string name="widget_clock_notifications_show">Nombro de sciigoj</string>
+    <string name="widget_clock_notifications_hide">Neniu nombro</string>
+    <string name="widget_clock_notifications_size">Grandeco de la nombro</string>
+    <string name="widget_clock_notifications_opacity">Opakeco de la nombro</string>
+    <string name="widget_clock_battery">Baterio</string>
+    <string name="widget_clock_battery_show">Montri</string>
+    <string name="widget_clock_battery_hide">Kaŝi</string>
+    <string name="widget_clock_battery_size">Grandeco de la baterio</string>
+    <string name="widget_clock_battery_percent">%1$d%%</string>
+    <string name="widget_clock_time_opacity">Opakeco de la horo</string>
+    <string name="widget_clock_date_opacity">Opakeco de la dato</string>
+    <string name="widget_clock_battery_opacity">Opakeco de la baterio</string>
+    <string name="widget_add_another">Aldoni alian fenestraĵon</string>
+    <string name="widget_remove_this">Forigi ĉi tiun fenestraĵon</string>
+    <string name="widget_unavailable">Ĉi tiu fenestraĵo ne plu estas disponebla</string>
+    <string name="widget_change_settings">Ŝanĝi agordojn de la fenestraĵo</string>
+    <string name="widget_none_found">Neniuj fenestraĵoj trovitaj en ĉi tiu aparato.</string>
+
+    <!-- Pinned shortcuts -->
+    <string name="shortcut_unavailable">Ĉi tiu ŝparvojo ne plu estas disponebla</string>
+    <string name="shortcut_pin_title">Ĉu aldoni al la hejma ekrano?</string>
+    <string name="shortcut_pin_from">De %1$s</string>
+    <string name="shortcut_pin_add">Aldoni</string>
+    <string name="shortcut_pin_failed">Ne eblis konfirmi, ke la ŝparvojo estas fiksita</string>
+    <string name="shortcut_unpin_failed">Ne eblis forigi la ŝparvojon</string>
+
+    <!-- Now Playing -->
+    <string name="now_playing_placeholder">Nun ludata</string>
+    <string name="now_playing_enable_access">Ebligi aliron al \"Nun ludata\"</string>
+    <string name="now_playing_open_failed">Ne eblas malfermi la ludantan aplikaĵon</string>
+    <string name="now_playing_unknown_title">Nekonata titolo</string>
+    <string name="now_playing_previous">Antaŭa</string>
+    <string name="now_playing_play_pause">Ludi/paŭzigi</string>
+    <string name="now_playing_next">Sekva</string>
+    <plurals name="widget_clock_notification_count">
+        <item quantity="one">%1$d sciigo</item>
+        <item quantity="other">%1$d sciigoj</item>
+    </plurals>
+    <plurals name="widget_clock_event_in_minutes">
+        <item quantity="one">%1$s  post %2$d minuto</item>
+        <item quantity="other">%1$s  post %2$d minutoj</item>
+    </plurals>
+    <plurals name="widget_clock_event_in_hours">
+        <item quantity="one">%1$s  post %2$d horo</item>
+        <item quantity="other">%1$s  post %2$d horoj</item>
+    </plurals>
+    <plurals name="settings_frequent_excluded_count">
+        <item quantity="one">%1$d aplikaĵo ekskludita</item>
+        <item quantity="other">%1$d aplikaĵoj ekskluditaj</item>
+    </plurals>
+    <string name="home_folder_delete_confirm">Ĉu forigi “%1$s”?</string>
+    <string name="home_folder_delete_confirm_body">La aplikaĵoj en ĝi restas instalitaj. Ĝia aranĝo kaj ĝiaj fenestraĵoj estas forigataj.</string>
+    <string name="widget_clock_date_gap">Spaco por dato supre</string>
+    <string name="widget_clock_weather_gap">Spaco por vetero supre</string>
+    <string name="widget_clock_agenda_gap">Spaco por venontaj eventoj supre</string>
+    <string name="widget_clock_notifications_gap">Spaco por nombrilo supre</string>
+    <string name="widget_clock_battery_gap">Spaco por baterio supre</string>
+</resources>
