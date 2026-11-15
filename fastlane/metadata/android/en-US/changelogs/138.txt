@@ -1,0 +1,2 @@
+New:
+* The corner button can start the voice assistant listening: pick "Start the voice assistant" in Settings → Button in the bottom corner.
