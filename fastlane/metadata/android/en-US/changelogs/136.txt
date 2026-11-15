@@ -1,0 +1,6 @@
+New:
+* Welsh translation.
+
+Fixes:
+* With the status bar hidden, the top of Settings, Edit layout and other screens no longer runs under the camera cutout.
+* Esperanto wording fix.
