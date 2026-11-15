@@ -433,4 +433,5 @@
     <string name="widget_clock_agenda_gap">Utrymme ovanför agendan</string>
     <string name="widget_clock_notifications_gap">Utrymme ovanför räknaren</string>
     <string name="widget_clock_battery_gap">Utrymme ovanför batteriet</string>
+    <string name="settings_scrub_reach">Vågens räckvidd</string>
 </resources>

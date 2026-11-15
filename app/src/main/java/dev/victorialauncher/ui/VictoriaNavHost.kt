@@ -319,6 +319,7 @@ fun VictoriaNavHost(
     val edgeSide by app.prefs.edgeSide.collectAsState(initial = EdgeSide.RIGHT)
     val scrubStyle by app.prefs.scrubStyle.collectAsState(initial = ScrubStyle.BELL)
     val scrubBubbleShape by app.prefs.scrubBubbleShape.collectAsState(initial = ScrubBubbleShape.ROUNDED)
+    val scrubReachPercent by app.prefs.scrubReachPercent.collectAsState(initial = 100)
     val rippleParams by app.prefs.rippleParams.collectAsState(initial = RippleParams())
     val azStripVisibility by app.prefs.azStripVisibility.collectAsState(initial = AzStripVisibility.NEVER)
     val showAlphabet by app.prefs.showAlphabet.collectAsState(initial = true)
@@ -536,6 +537,7 @@ fun VictoriaNavHost(
         edgeSide = edgeSide,
         scrubStyle = scrubStyle,
         scrubBubbleShape = scrubBubbleShape,
+        scrubReachPercent = scrubReachPercent,
         rippleParams = rippleParams,
         azStripVisibility = azStripVisibility,
         shortcutSwipe = shortcutSwipe,
@@ -847,6 +849,7 @@ fun VictoriaNavHost(
                 edgeSide = edgeSide,
                 scrubStyle = scrubStyle,
                 scrubBubbleShape = scrubBubbleShape,
+                scrubReachPercent = scrubReachPercent,
                 rippleParams = rippleParams,
                 edgeZoneWidthDp = edgeZoneWidthDp,
                 azStripVisibility = azStripVisibility,
@@ -919,6 +922,7 @@ fun VictoriaNavHost(
                 onSetEdgeSide = { scope.launch { app.prefs.setEdgeSide(it) } },
                 onSetScrubStyle = { scope.launch { app.prefs.setScrubStyle(it) } },
                 onSetScrubBubbleShape = { scope.launch { app.prefs.setScrubBubbleShape(it) } },
+                onSetScrubReachPercent = { scope.launch { app.prefs.setScrubReachPercent(it) } },
                 onSetRippleParams = { scope.launch { app.prefs.setRippleParams(it) } },
                 onSetEdgeZoneWidth = { scope.launch { app.prefs.setEdgeZoneWidthDp(it) } },
                 onSetAzStripVisibility = { scope.launch { app.prefs.setAzStripVisibility(it) } },

@@ -1,6 +1,12 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 package dev.victorialauncher.ui.settings
 
+import dev.victorialauncher.ui.applist.scrubEdgeInsetDp
+import dev.victorialauncher.ui.applist.scrubBellDp
+import dev.victorialauncher.ui.applist.scrubBubbleInsetDp
+import dev.victorialauncher.data.SCRUB_REACH_RANGE
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.foundation.layout.offset
 import dev.victorialauncher.ui.common.topBarInsets
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -139,6 +145,7 @@ fun SettingsScreen(
     edgeSide: EdgeSide,
     scrubStyle: ScrubStyle,
     scrubBubbleShape: ScrubBubbleShape,
+    scrubReachPercent: Int,
     rippleParams: RippleParams,
     azStripVisibility: AzStripVisibility,
     showAlphabet: Boolean,
@@ -239,6 +246,7 @@ fun SettingsScreen(
     onSetEdgeSide: (EdgeSide) -> Unit,
     onSetScrubStyle: (ScrubStyle) -> Unit,
     onSetScrubBubbleShape: (ScrubBubbleShape) -> Unit,
+    onSetScrubReachPercent: (Int) -> Unit,
     onSetRippleParams: (RippleParams) -> Unit,
     onSetEdgeZoneWidth: (Int) -> Unit,
     onSetAzStripVisibility: (AzStripVisibility) -> Unit,
@@ -562,6 +570,9 @@ fun SettingsScreen(
         },
         SettingsEntry(SettingsSection.APP_LIST, stringResource(R.string.settings_scrub_bubble), "a-z strip letter bubble shape circle square hide") {
             ScrubBubbleShapeRow(scrubBubbleShape, onSetScrubBubbleShape)
+        },
+        SettingsEntry(SettingsSection.APP_LIST, stringResource(R.string.settings_scrub_reach), "a-z strip wave width reach bubble position narrow") {
+            ScrubReachRow(scrubReachPercent, scrubBubbleShape, edgeSide, onSetScrubReachPercent)
         },
         // The simulation's tunables only mean anything for the ripple style.
         SettingsEntry(
@@ -1899,6 +1910,103 @@ private fun ShortcutSwipeRow(selected: ShortcutSwipe, onSelect: (ShortcutSwipe) 
         ) {
             ShortcutSwipe.entries.forEach { mode ->
                 FilledChip(stringResource(mode.labelRes()), selected == mode) { onSelect(mode) }
+            }
+        }
+    }
+}
+
+/**
+ * How far the A-Z wave reaches toward the middle, and the letter bubble with it (#163).
+ *
+ * Drawn at the size it really is: the strip, the bulge and the bubble keep their true distances
+ * from the screen edge, so what the slider shows is where the bubble will land over the list.
+ */
+@Composable
+private fun ScrubReachRow(
+    percent: Int,
+    bubbleShape: ScrubBubbleShape,
+    side: EdgeSide,
+    onChange: (Int) -> Unit,
+) {
+    val reach = percent / 100f
+    val fromLeft = side == EdgeSide.LEFT
+    val anchor = if (fromLeft) Alignment.TopStart else Alignment.TopEnd
+    val letters = "HIJKLMNOP"
+    val spacing = 18.dp
+    val middle = letters.length / 2
+    val bubble = 72.dp
+    val previewHeight = spacing * letters.length
+    val onSurface = MaterialTheme.colorScheme.onSurface
+    Column(modifier = Modifier.padding(vertical = 4.dp)) {
+        SliderRow(
+            label = stringResource(R.string.settings_scrub_reach),
+            value = percent.toFloat(),
+            range = SCRUB_REACH_RANGE.first.toFloat()..SCRUB_REACH_RANGE.last.toFloat(),
+            valueLabel = "$percent%",
+            onValueChange = { onChange(it.roundToInt()) },
+            step = 5f,
+        )
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(previewHeight)
+                .background(onSurface.copy(alpha = 0.05f)),
+        ) {
+            // Stand-ins for app names, so it shows what the bubble covers.
+            Column(
+                modifier = Modifier
+                    .align(if (fromLeft) Alignment.CenterEnd else Alignment.CenterStart)
+                    .padding(horizontal = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(14.dp),
+            ) {
+                listOf(0.55f, 0.4f, 0.6f, 0.45f, 0.5f).forEach { share ->
+                    Box(
+                        Modifier
+                            .fillMaxWidth(share)
+                            .height(10.dp)
+                            .background(onSurface.copy(alpha = 0.15f), RoundedCornerShape(5.dp)),
+                    )
+                }
+            }
+            letters.forEachIndexed { index, c ->
+                val d = (index - middle).toFloat()
+                // The same bell the strip draws, its finger held on the middle letter.
+                val outward = scrubBellDp(reach) * kotlin.math.exp(-(d * d) / (2f * 2.6f * 2.6f))
+                Box(
+                    modifier = Modifier
+                        .align(anchor)
+                        .offset(
+                            x = (scrubEdgeInsetDp() + outward).dp.let { if (fromLeft) it else -it },
+                            y = spacing * index,
+                        )
+                        .size(20.dp, spacing),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(c.toString(), fontSize = 13.sp, color = onSurface.copy(alpha = if (index == middle) 1f else 0.6f))
+                }
+            }
+            if (bubbleShape != ScrubBubbleShape.HIDDEN) {
+                val inset = scrubBubbleInsetDp(reach).dp
+                Box(
+                    modifier = Modifier
+                        .align(anchor)
+                        .offset(
+                            x = if (fromLeft) inset else -inset,
+                            y = spacing * middle + spacing / 2 - bubble / 2,
+                        )
+                        .size(bubble)
+                        .background(
+                            Color.Black.copy(alpha = 0.6f),
+                            when (bubbleShape) {
+                                ScrubBubbleShape.CIRCLE -> CircleShape
+                                ScrubBubbleShape.SQUARE -> RectangleShape
+                                else -> RoundedCornerShape(22.dp)
+                            },
+                        ),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(letters[middle].toString(), color = Color.White, fontSize = 30.sp, fontWeight = FontWeight.Bold)
+                }
             }
         }
     }

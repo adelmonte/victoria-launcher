@@ -128,6 +128,7 @@
     <string name="scrub_style_bell">Bell</string>
     <string name="scrub_style_ripple">Ripple</string>
     <string name="settings_scrub_bubble">Letter bubble</string>
+    <string name="settings_scrub_reach">Wave reach</string>
     <string name="scrub_bubble_rounded">Rounded</string>
     <string name="scrub_bubble_circle">Circle</string>
     <string name="scrub_bubble_square">Square</string>

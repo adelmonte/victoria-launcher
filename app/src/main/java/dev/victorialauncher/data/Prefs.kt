@@ -99,6 +99,9 @@ val EDGE_ZONE_INSET_RANGE = 0..32
 
 /** Enough to be a list of what is new, short of being a second app list. */
 val RECENT_SECTION_RANGE = 3..15
+
+/** How far the A-Z wave reaches toward the middle, as a percent of its full reach. */
+val SCRUB_REACH_RANGE = 30..100
 enum class AppFont { SYSTEM, SANS_SERIF, SERIF, MONOSPACE, CUSTOM }
 
 /** AUTO picks light or dark text from the wallpaper's own colors. */
@@ -190,6 +193,7 @@ class Prefs(private val context: Context) {
         val EDGE_SIDE = stringPreferencesKey("edge_side")
         val SCRUB_STYLE = stringPreferencesKey("scrub_style")
         val SCRUB_BUBBLE_SHAPE = stringPreferencesKey("scrub_bubble_shape")
+        val SCRUB_REACH_PERCENT = intPreferencesKey("scrub_reach_percent")
         val RIPPLE_SPEED = floatPreferencesKey("ripple_speed")
         val RIPPLE_DAMPING = floatPreferencesKey("ripple_damping")
         val RIPPLE_STIFFNESS = floatPreferencesKey("ripple_stiffness")
@@ -526,6 +530,10 @@ class Prefs(private val context: Context) {
         runCatching { ScrubBubbleShape.valueOf(it[Keys.SCRUB_BUBBLE_SHAPE] ?: ScrubBubbleShape.ROUNDED.name) }
             .getOrDefault(ScrubBubbleShape.ROUNDED)
     }.distinctUntilChanged()
+
+    val scrubReachPercent: Flow<Int> =
+        data.map { (it[Keys.SCRUB_REACH_PERCENT] ?: 100).coerceIn(SCRUB_REACH_RANGE) }
+            .distinctUntilChanged()
 
     val rippleParams: Flow<RippleParams> = data.map {
         val d = RippleParams()
@@ -1225,6 +1233,10 @@ class Prefs(private val context: Context) {
 
     suspend fun setScrubBubbleShape(v: ScrubBubbleShape) {
         context.dataStore.edit { it[Keys.SCRUB_BUBBLE_SHAPE] = v.name }
+    }
+
+    suspend fun setScrubReachPercent(v: Int) {
+        context.dataStore.edit { it[Keys.SCRUB_REACH_PERCENT] = v.coerceIn(SCRUB_REACH_RANGE) }
     }
 
     suspend fun setIconPackPackage(pkg: String?) {
