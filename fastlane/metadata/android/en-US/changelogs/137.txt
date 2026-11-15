@@ -1,0 +1,2 @@
+New:
+* "Wave reach" setting under App list: how far the A-Z wave and the letter bubble reach toward the middle of the screen, with a preview. The default is unchanged.
