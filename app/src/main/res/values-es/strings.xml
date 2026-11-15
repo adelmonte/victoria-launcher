@@ -247,4 +247,6 @@
     <string name="home_folder_delete_confirm">¿Eliminar «%1$s»?</string>
     <string name="home_folder_delete_confirm_body">Las apps siguen instaladas. Se quitan su orden y sus widgets.</string>
     <string name="settings_scrub_reach">Alcance de la onda</string>
+    <string name="settings_corner_assistant">Iniciar el asistente de voz</string>
+    <string name="corner_assistant_missing">No hay asistente de voz</string>
 </resources>

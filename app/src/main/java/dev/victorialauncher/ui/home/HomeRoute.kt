@@ -141,6 +141,8 @@ fun HomeRoute(
     cornerButtonApp: AppInfo?,
     /** True when the corner opens the search instead of launching an app. */
     cornerButtonIsSearch: Boolean,
+    /** True when the corner starts the voice assistant listening. */
+    cornerButtonIsAssistant: Boolean,
     /** Whether opening the app list puts the cursor in its search box. */
     autoKeyboard: Boolean,
     /** Whether the last letters reach the same line as the first. */
@@ -647,6 +649,12 @@ fun HomeRoute(
                 cornerButtonApp = cornerButtonApp,
                 onOpenCornerApp = { launchEntry(it) },
                 cornerButtonIsSearch = cornerButtonIsSearch,
+                cornerButtonIsAssistant = cornerButtonIsAssistant,
+                onOpenCornerAssistant = {
+                    if (!SystemUi.startVoiceAssistant(context)) {
+                        Toast.makeText(context, R.string.corner_assistant_missing, Toast.LENGTH_SHORT).show()
+                    }
+                },
                 onOpenCornerSearch = {
                     appListVisible = true
                     appListQuery = ""

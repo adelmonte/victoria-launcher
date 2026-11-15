@@ -434,4 +434,6 @@
     <string name="widget_clock_notifications_gap">Utrymme ovanför räknaren</string>
     <string name="widget_clock_battery_gap">Utrymme ovanför batteriet</string>
     <string name="settings_scrub_reach">Vågens räckvidd</string>
+    <string name="settings_corner_assistant">Starta röstassistenten</string>
+    <string name="corner_assistant_missing">Ingen röstassistent hittades</string>
 </resources>

@@ -434,4 +434,6 @@
     <string name="widget_clock_notifications_gap">Espaço acima da contagem</string>
     <string name="widget_clock_battery_gap">Espaço acima da bateria</string>
     <string name="settings_scrub_reach">Alcance da onda</string>
+    <string name="settings_corner_assistant">Iniciar o assistente de voz</string>
+    <string name="corner_assistant_missing">Nenhum assistente de voz encontrado</string>
 </resources>

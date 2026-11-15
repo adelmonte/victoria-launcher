@@ -18,6 +18,9 @@ object EntryKeys {
     /** The one search entry. The suffix leaves room for more than one later. */
     const val SEARCH = "search:default"
 
+    /** The corner button's choice to start the voice assistant listening. Never a row. */
+    const val ASSISTANT = "assistant:voice"
+
     /** The one row that locks and unlocks the private space. */
     const val PRIVATE_SPACE = "private:space"
 

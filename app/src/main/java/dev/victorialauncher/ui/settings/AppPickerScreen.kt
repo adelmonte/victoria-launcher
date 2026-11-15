@@ -50,7 +50,8 @@ fun AppPickerScreen(
      * Null for the pickers that only ever bind an app. The corner button also takes "open the
      * search", which is a thing to do rather than a thing to launch and so has no app to pick.
      */
-    extraChoice: Pair<String, String>? = null,
+    /** Choices that are not apps, as key to label, listed above the apps. */
+    extraChoices: List<Pair<String, String>> = emptyList(),
     onPickExtra: (String) -> Unit = {},
     onBack: () -> Unit,
 ) {
@@ -93,9 +94,8 @@ fun AppPickerScreen(
                 HorizontalDivider()
             }
 
-            if (extraChoice != null) {
-                val (key, label) = extraChoice
-                item {
+            extraChoices.forEach { (key, label) ->
+                item(key = "extra:$key") {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()

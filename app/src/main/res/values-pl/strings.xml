@@ -415,4 +415,6 @@
     <string name="widget_clock_notifications_gap">Odstęp nad licznikiem</string>
     <string name="widget_clock_battery_gap">Odstęp nad baterią</string>
     <string name="settings_scrub_reach">Zasięg fali</string>
+    <string name="settings_corner_assistant">Uruchom asystenta głosowego</string>
+    <string name="corner_assistant_missing">Brak asystenta głosowego</string>
 </resources>

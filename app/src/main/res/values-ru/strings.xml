@@ -237,5 +237,7 @@
     <string name="home_folder_delete_confirm">Удалить «%1$s»?</string>
     <string name="home_folder_delete_confirm_body">Приложения останутся установленными. Порядок и виджеты будут удалены.</string>
     <string name="settings_scrub_reach">Размах волны</string>
+    <string name="settings_corner_assistant">Запустить голосового помощника</string>
+    <string name="corner_assistant_missing">Голосовой помощник не найден</string>
 </resources>
 

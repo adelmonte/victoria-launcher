@@ -64,6 +64,7 @@ import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Folder
+import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.LinkOff
@@ -285,6 +286,9 @@ fun HomeScreen(
     /** True when the corner opens the app list's search rather than launching anything. */
     cornerButtonIsSearch: Boolean,
     onOpenCornerSearch: () -> Unit,
+    /** True when the corner starts the voice assistant listening. */
+    cornerButtonIsAssistant: Boolean = false,
+    onOpenCornerAssistant: () -> Unit = {},
     /** Where the corner button is in the window, or null when there is none to keep clear. */
     onCornerButtonBounds: (Rect?) -> Unit = {},
 ) {    // Appended at the point of showing rather than stored in the label, so a rename still
@@ -1214,7 +1218,7 @@ fun HomeScreen(
         // A button in the corner nearest the thumb, for the one app reached often enough to
         // deserve a target rather than a gesture. Nothing is drawn without an app chosen for
         // it, and it steps aside in edit mode, where that corner belongs to Done.
-        if ((cornerButtonApp != null || cornerButtonIsSearch) && !editMode) {
+        if ((cornerButtonApp != null || cornerButtonIsSearch || cornerButtonIsAssistant) && !editMode) {
             val corner = if (alignment == HomeAlignment.RIGHT) Alignment.BottomStart else Alignment.BottomEnd
             DisposableEffect(Unit) { onDispose { onCornerButtonBounds(null) } }
             Box(
@@ -1227,8 +1231,11 @@ fun HomeScreen(
                     .onGloballyPositioned { onCornerButtonBounds(it.boundsInWindow()) }
                     .clip(CircleShape)
                     .clickable {
-                        if (cornerButtonIsSearch) onOpenCornerSearch()
-                        else cornerButtonApp?.let { onOpenCornerApp(it) }
+                        when {
+                            cornerButtonIsSearch -> onOpenCornerSearch()
+                            cornerButtonIsAssistant -> onOpenCornerAssistant()
+                            else -> cornerButtonApp?.let { onOpenCornerApp(it) }
+                        }
                     }
                     .padding(8.dp),
             ) {
@@ -1236,6 +1243,13 @@ fun HomeScreen(
                     Icon(
                         Icons.Filled.Search,
                         contentDescription = stringResource(R.string.applist_search),
+                        tint = contentColor,
+                        modifier = Modifier.size(iconSizeDp.dp),
+                    )
+                } else if (cornerButtonIsAssistant) {
+                    Icon(
+                        Icons.Filled.Mic,
+                        contentDescription = stringResource(R.string.settings_corner_assistant),
                         tint = contentColor,
                         modifier = Modifier.size(iconSizeDp.dp),
                     )

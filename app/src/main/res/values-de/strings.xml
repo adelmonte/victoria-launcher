@@ -213,4 +213,6 @@
     <string name="home_folder_delete_confirm">„%1$s“ löschen?</string>
     <string name="home_folder_delete_confirm_body">Die Apps darin bleiben installiert. Anordnung und Widgets werden entfernt.</string>
     <string name="settings_scrub_reach">Reichweite der Welle</string>
+    <string name="settings_corner_assistant">Sprachassistenten starten</string>
+    <string name="corner_assistant_missing">Kein Sprachassistent gefunden</string>
 </resources>

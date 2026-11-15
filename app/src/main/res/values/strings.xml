@@ -434,4 +434,6 @@
     <string name="widget_clock_agenda_gap">Coming up space above</string>
     <string name="widget_clock_notifications_gap">Count space above</string>
     <string name="widget_clock_battery_gap">Battery space above</string>
+    <string name="settings_corner_assistant">Start the voice assistant</string>
+    <string name="corner_assistant_missing">No voice assistant to start</string>
 </resources>

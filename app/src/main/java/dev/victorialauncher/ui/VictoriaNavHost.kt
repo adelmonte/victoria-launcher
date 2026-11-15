@@ -690,8 +690,11 @@ fun VictoriaNavHost(
     NavHost(navController = navController, startDestination = "home") {
         composable("home") {
             HomeRoute(
-                cornerButtonApp = cornerButtonKey?.takeIf { it != EntryKeys.SEARCH }?.let { appsByKey[it] },
+                cornerButtonApp = cornerButtonKey
+                    ?.takeIf { it != EntryKeys.SEARCH && it != EntryKeys.ASSISTANT }
+                    ?.let { appsByKey[it] },
                 cornerButtonIsSearch = cornerButtonKey == EntryKeys.SEARCH,
+                cornerButtonIsAssistant = cornerButtonKey == EntryKeys.ASSISTANT,
                 autoKeyboard = autoKeyboard,
                 lastLetterToLine = lastLetterToLine,
                 app = app,
@@ -942,6 +945,7 @@ fun VictoriaNavHost(
                 cornerButtonLabel = when (cornerButtonKey) {
                     null -> null
                     EntryKeys.SEARCH -> stringResource(R.string.settings_corner_search)
+                    EntryKeys.ASSISTANT -> stringResource(R.string.settings_corner_assistant)
                     else -> appsByKey[cornerButtonKey]?.let { nameOverrides[it.key] ?: it.label }
                 },
                 onOpenCornerPicker = { navController.navigate("cornerpicker") },
@@ -1077,7 +1081,10 @@ fun VictoriaNavHost(
                 title = stringResource(R.string.settings_corner_button),
                 allApps = allApps,
                 selectedKey = cornerButtonKey,
-                extraChoice = EntryKeys.SEARCH to stringResource(R.string.settings_corner_search),
+                extraChoices = listOf(
+                    EntryKeys.SEARCH to stringResource(R.string.settings_corner_search),
+                    EntryKeys.ASSISTANT to stringResource(R.string.settings_corner_assistant),
+                ),
                 onPickExtra = { key ->
                     scope.launch { app.prefs.setCornerButton(key) }
                     navController.popBackStack()
