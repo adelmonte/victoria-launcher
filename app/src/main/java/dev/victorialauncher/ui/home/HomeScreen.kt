@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 package dev.victorialauncher.ui.home
 
+import dev.victorialauncher.ui.common.topBarInsets
 import android.widget.Toast
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.Spring
@@ -44,7 +45,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.displayCutout
@@ -775,8 +775,9 @@ fun HomeScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         // The overlay draws under the status bar, so without this the Done
-                        // button sits behind the clock.
-                        .statusBarsPadding()
+                        // button sits behind the clock — and under the camera cutout when the
+                        // bar is hidden. Top only: the column already keeps clear sideways.
+                        .windowInsetsPadding(topBarInsets.only(WindowInsetsSides.Top))
                         .padding(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 4.dp),
                     horizontalArrangement = Arrangement.End,
                     verticalAlignment = Alignment.CenterVertically,

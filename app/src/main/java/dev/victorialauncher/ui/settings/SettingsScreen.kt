@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 package dev.victorialauncher.ui.settings
 
+import dev.victorialauncher.ui.common.topBarInsets
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -1013,6 +1014,7 @@ fun SettingsScreen(
         containerColor = surface.copy(alpha = 1f - dimPreviewReveal),
         topBar = {
             TopAppBar(
+                windowInsets = topBarInsets,
                 title = {
                     Text(stringResource(openSection?.labelRes ?: R.string.settings_title))
                 },

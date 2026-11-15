@@ -91,6 +91,7 @@ fun IconPickerScreen(
         containerColor = surface,
         topBar = {
             TopAppBar(
+                windowInsets = topBarInsets,
                 title = { Text(stringResource(R.string.icon_picker_title, appLabel)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {

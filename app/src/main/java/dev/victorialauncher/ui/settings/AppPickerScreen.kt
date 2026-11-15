@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 package dev.victorialauncher.ui.settings
 
+import dev.victorialauncher.ui.common.topBarInsets
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -57,6 +58,7 @@ fun AppPickerScreen(
         containerColor = MaterialTheme.colorScheme.surface,
         topBar = {
             TopAppBar(
+                windowInsets = topBarInsets,
                 title = { Text(title) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {

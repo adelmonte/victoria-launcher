@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 package dev.victorialauncher.ui.settings
 
+import dev.victorialauncher.ui.common.topBarInsets
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -92,6 +93,7 @@ fun ManageFavoritesScreen(
         containerColor = surface,
         topBar = {
             TopAppBar(
+                windowInsets = topBarInsets,
                 title = { Text(stringResource(R.string.favorites_title)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
