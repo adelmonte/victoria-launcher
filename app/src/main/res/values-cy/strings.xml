@@ -4,7 +4,7 @@
 
     <!-- Shared actions -->
     <string name="action_back">Yn ôl</string>
-    <string name="action_save">Arbed</string>
+    <string name="action_save">Cadw</string>
     <string name="action_cancel">Canslo</string>
     <string name="action_reset">Ailosod</string>
     <string name="action_create">Creu</string>
