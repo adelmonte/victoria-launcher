@@ -271,11 +271,11 @@
     <!-- Text color choices -->
     <string name="text_color_auto">Aŭtomata</string>
     <string name="text_color_light">Hela</string>
-    <string name="text_color_dark">Malluma</string>
+    <string name="text_color_dark">Malhela</string>
 
     <!-- Alignment choices -->
     <string name="alignment_left">Maldekstra</string>
-    <string name="alignment_center">Centre</string>
+    <string name="alignment_center">Centra</string>
     <string name="alignment_right">Dekstra</string>
 
     <!-- Edge choices -->
