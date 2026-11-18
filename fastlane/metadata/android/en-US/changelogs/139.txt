@@ -1,0 +1,2 @@
+New:
+* "Strip follows past the ends" setting under App list, off by default: dragging past A or Z slides the letters along with your finger and keeps the list open.
