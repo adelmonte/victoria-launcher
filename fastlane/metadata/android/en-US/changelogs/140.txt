@@ -1,0 +1,3 @@
+New:
+* German, Spanish, Russian, Polish and Welsh are now fully translated.
+* Welsh and Esperanto wording fixes.
