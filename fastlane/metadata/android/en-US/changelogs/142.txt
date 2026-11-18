@@ -1,0 +1,2 @@
+Fixes:
+* The A-Z strip no longer comes up squashed after the launcher restarts.
