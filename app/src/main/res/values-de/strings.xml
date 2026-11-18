@@ -216,7 +216,7 @@
     <string name="settings_corner_assistant">Sprachassistenten starten</string>
     <string name="corner_assistant_missing">Kein Sprachassistent gefunden</string>
     <string name="settings_strip_follows">Leiste folgt über die Enden hinaus</string>
-    <string name="settings_strip_follows_detail">Wenn du über A oder Z hinaus ziehst, wandern die Buchstaben mit deinem Finger mit und die Liste bleibt offen, statt sich zu schließen</string>
+    <string name="settings_strip_follows_detail">Wenn du über A oder Z hinaus ziehst, schiebst du die Buchstaben mit dem Finger mit und die Liste bleibt offen. Über Z hinaus geht es ans Ende der Liste</string>
     <string name="action_remove_shortcut">Verknüpfung entfernen</string>
     <string name="applist_unhide">In der Liste anzeigen</string>
     <string name="settings_section_home">Startbildschirm</string>

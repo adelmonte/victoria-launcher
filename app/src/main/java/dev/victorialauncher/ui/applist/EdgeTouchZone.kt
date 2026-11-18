@@ -138,6 +138,8 @@ fun EdgeTouchZone(
                     // Armed rather than acted on, so the list goes when the finger lifts and
                     // not the instant it crosses — which would take the list away mid-drag.
                     var armedToClose = false
+                    // How far the strip has been pushed by running off an end; see below.
+                    var shiftPx = 0f
                     val zoneTopPx = if (bandOnly) band.topPx else 0f
                     val letterHeight = if (letters.isEmpty()) 0f else band.heightPx / letters.size
                     val overshoot = (letterHeight * OFF_STRIP_DISMISS_LETTERS)
@@ -153,9 +155,20 @@ fun EdgeTouchZone(
                         if (!enteredBand && ScrubberGeometry.isWithin(y, band.topPx, band.heightPx)) {
                             enteredBand = true
                         }
+                        // With the strip set to follow, running off an end pushes the whole strip
+                        // along rather than leaving it behind, and it stays pushed: coming back
+                        // across it picks letters where they now are, and only running off the
+                        // other end pushes it back (#169).
+                        if (followPastEnds && enteredBand) {
+                            if (y - shiftPx < band.topPx) shiftPx = y - band.topPx
+                            else if (y - shiftPx > band.bottomPx) shiftPx = y - band.bottomPx
+                        }
+                        val onStrip = y - shiftPx
+                        // Being pushed past the last letter is asking for the end of the list.
+                        val atEnd = followPastEnds && shiftPx > 0f && onStrip >= band.bottomPx - 0.5f
                         // Same geometry the visible strip uses, so the letter under the
                         // fingertip is the one that swells.
-                        val index = ScrubberGeometry.indexForY(y, band.topPx, band.heightPx, letters.size)
+                        val index = ScrubberGeometry.indexForY(onStrip, band.topPx, band.heightPx, letters.size)
                         if (enteredBand && index != lastIndex) {
                             lastIndex = index
                             HapticUtil.tick(view, hapticsEnabled)
@@ -183,6 +196,8 @@ fun EdgeTouchZone(
                             // No letter while the list is on its way out: placing it at A as
                             // you leave is work nobody asked for and nobody sees.
                             if (enteredBand && !armedToClose) letters.getOrNull(index) else null,
+                            shiftPx = shiftPx,
+                            atEnd = atEnd,
                         )
                     }
 

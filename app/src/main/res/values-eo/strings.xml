@@ -437,5 +437,5 @@
     <string name="settings_corner_assistant">Lanĉi la voĉan asistanton</string>
     <string name="corner_assistant_missing">Neniu voĉa asistanto trovita</string>
     <string name="settings_strip_follows">Strio sekvas preter la finoj</string>
-    <string name="settings_strip_follows_detail">Treni preter A aŭ Z ŝovas la literojn kun via fingro kaj tenas la liston malfermita, anstataŭ fermi ĝin</string>
+    <string name="settings_strip_follows_detail">Treni preter A aŭ Z puŝas la literojn kun via fingro kaj tenas la liston malfermita. Preter Z iras al la fino de la listo</string>
 </resources>

@@ -47,6 +47,8 @@ data class AppListModel(
     val rows: List<AppListRow>,
     /** First row index for each A-Z letter, in scrubber order. */
     val letterIndex: List<Pair<Char, Int>>,
+    /** The first row after the alphabet, where the sections that are not letters begin. */
+    val tailStart: Int = rows.size,
 ) {
     /** The scrubber's alphabet, derived once here rather than at each place that draws it. */
     val letters: List<Char> = letterIndex.map { it.first }
@@ -284,6 +286,8 @@ fun buildAppListModel(
         ).forEach { rows += AppListRow.Entry(it) }
     }
 
+    val tailStart = rows.size
+
     // Appended after the alphabet, each under its own heading. Not given a letter of their
     // own: the strip is the alphabet, and a section that is not a letter has no business
     // claiming a place in it.
@@ -304,7 +308,7 @@ fun buildAppListModel(
     privateApps.sortedBy { displayName(it).lowercase() }
         .forEach { rows += AppListRow.Entry(it, section = PRIVATE_SECTION) }
 
-    return AppListModel(rows, letterIndex)
+    return AppListModel(rows, letterIndex, tailStart)
 }
 
 /**

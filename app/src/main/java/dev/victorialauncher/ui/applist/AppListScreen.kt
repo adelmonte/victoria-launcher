@@ -247,8 +247,6 @@ fun AppListScreen(
     scrubBubbleShape: ScrubBubbleShape,
     rippleParams: RippleParams,
     scrubReach: Float,
-    /** Whether the strip slides along with a finger dragged off either end. */
-    stripFollowsPastEnds: Boolean,
     /** Hoisted so a swipe that overshoots the opening animation can keep scrolling it. */
     listState: LazyListState,
     /** How far the list still has to travel to be fully open; 0 once it has arrived. */
@@ -314,6 +312,7 @@ fun AppListScreen(
     val activeSide = scrub.side
     val scrubY = remember(scrub) { scrub::currentY }
     val pullPx = remember(scrub) { scrub::currentPull }
+    val shiftPx = remember(scrub) { scrub::currentShift }
 
     // Searching is a different mode from scrubbing: the letters shrink to whatever matched,
     // so the strip is hidden and placement stays out of it until the query is cleared.
@@ -387,8 +386,17 @@ fun AppListScreen(
     // From the placement and not from the live letter: the letter is gone by the time a quick
     // tap has composed anything, and the list is placed by what was asked for, not by what is
     // still under a finger.
-    val scrubRowIndex = remember(displayModel, scrubPlacement) {
+    val scrubRowIndex = remember(displayModel, scrubPlacement, showSettingsRow) {
         val letter = scrubPlacement?.letter ?: return@remember -1
+        // Pushed past the last letter: whatever follows the alphabet, or the settings row when
+        // nothing does (#169). With neither, the list just stays at the last letter.
+        if (scrubPlacement.atEnd) {
+            return@remember when {
+                displayModel.tailStart < displayModel.rows.size -> displayModel.tailStart
+                showSettingsRow -> displayModel.rows.size
+                else -> -1
+            }
+        }
         displayModel.letterIndex.firstOrNull { it.first == letter }?.second ?: -1
     }
 
@@ -1384,7 +1392,7 @@ fun AppListScreen(
                 style = scrubStyle,
                 ripple = rippleParams,
                 reach = scrubReach,
-                followPastEnds = stripFollowsPastEnds,
+                shiftPx = shiftPx,
                 modifier = Modifier.align(
                     if (activeSide == EdgeSide.LEFT) Alignment.CenterStart else Alignment.CenterEnd
                 ),

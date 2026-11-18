@@ -935,7 +935,6 @@ fun HomeRoute(
                 scrubBubbleShape = settings.scrubBubbleShape,
                 rippleParams = settings.rippleParams,
                 scrubReach = settings.scrubReachPercent / 100f,
-                stripFollowsPastEnds = settings.stripFollowsPastEnds,
                 statusBarHidden = settings.hideStatusBarAppList,
                 searchModel = searchModel,
                 shortcutSwipe = settings.shortcutSwipe,

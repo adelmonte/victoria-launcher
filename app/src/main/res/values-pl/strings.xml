@@ -418,7 +418,7 @@
     <string name="settings_corner_assistant">Uruchom asystenta głosowego</string>
     <string name="corner_assistant_missing">Brak asystenta głosowego</string>
     <string name="settings_strip_follows">Pasek podąża poza końce</string>
-    <string name="settings_strip_follows_detail">Przeciągnięcie poza A lub Z przesuwa litery razem z palcem i zostawia listę otwartą, zamiast ją zamykać</string>
+    <string name="settings_strip_follows_detail">Przeciągnięcie poza A lub Z przesuwa litery razem z palcem i zostawia listę otwartą. Poza Z przechodzi na koniec listy</string>
     <string name="settings_notification_previews">Tekst powiadomień na ekranie głównym</string>
     <string name="settings_notification_previews_detail">Pokazuje najnowsze powiadomienia aplikacji pod jej nazwą, a dotknięcie jednego je otwiera. Każdy, kto patrzy na Twój telefon, może je przeczytać. Wymaga dostępu do powiadomień</string>
     <string name="settings_notification_text_size">Rozmiar tekstu powiadomień</string>

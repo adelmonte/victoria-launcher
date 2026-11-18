@@ -240,7 +240,7 @@
     <string name="settings_corner_assistant">Запустить голосового помощника</string>
     <string name="corner_assistant_missing">Голосовой помощник не найден</string>
     <string name="settings_strip_follows">Алфавитная волна следует за пальцем за краями</string>
-    <string name="settings_strip_follows_detail">Если провести дальше A или Z, буквы сдвигаются вместе с пальцем, а список остаётся открытым, а не закрывается</string>
+    <string name="settings_strip_follows_detail">Если провести дальше A или Z, буквы сдвигаются вместе с пальцем, а список остаётся открытым. Дальше Z — переход в конец списка</string>
     <string name="settings_section_gestures">Жесты</string>
     <string name="settings_section_notifications">Уведомления</string>
     <string name="settings_search">Поиск по настройкам</string>

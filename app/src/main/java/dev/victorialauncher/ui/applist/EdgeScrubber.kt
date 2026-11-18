@@ -129,8 +129,8 @@ fun EdgeScrubber(
     ripple: RippleParams = RippleParams(),
     /** Share of the full bulge, 0..1 — see [scrubBubbleInsetDp]. */
     reach: Float = 1f,
-    /** Whether the column slides along with a finger dragged off either end (#169). */
-    followPastEnds: Boolean = false,
+    /** How far a finger run off an end has pushed the column, read in the draw phase (#169). */
+    shiftPx: () -> Float = { 0f },
 ) {
     if (letters.isEmpty()) return
     val density = LocalDensity.current.density
@@ -145,14 +145,9 @@ fun EdgeScrubber(
         }
     }
     val sim = remember(letters.size) { RippleString(letters.size) }
-    // Off either end, how far the whole column is carried along under the finger, so the end
-    // letter stays beneath it (#169). The bulge is worked out from where the finger would be
-    // with that taken off, which keeps it on the end letter rather than sliding away from it.
-    val firstCenter = centerYs.first()
-    val lastCenter = centerYs.last()
-    val followState by rememberUpdatedState(followPastEnds)
-    fun shiftFor(y: Float?): Float =
-        if (y == null || !followState) 0f else y - y.coerceIn(firstCenter, lastCenter)
+    // The bulge is worked out against the column where it has been pushed to, so it stays on
+    // the letter under the finger rather than where that letter started.
+    val shiftState by rememberUpdatedState(shiftPx)
     // Read only inside graphicsLayer, so each simulation tick invalidates the draw phase alone.
     var frame by remember { mutableIntStateOf(0) }
     val scrubYState by rememberUpdatedState(scrubY)
@@ -179,7 +174,7 @@ fun EdgeScrubber(
                 last = now
                 acc += dt
 
-                val y = scrubYState()?.let { it - shiftFor(it) }
+                val y = scrubYState()?.let { it - shiftState() }
                 val amplitude = bellPx + pullState()
                 for (i in bell.indices) {
                     bell[i] = if (y == null) 0f else {
@@ -220,7 +215,7 @@ fun EdgeScrubber(
                             outward = sim.u[index].coerceAtLeast(-EDGE_INSET_DP * density)
                             gain = (abs(outward) / bellPx).coerceIn(0f, 1f)
                         } else {
-                            val y = scrubY()?.let { it - shiftFor(it) }
+                            val y = scrubY()?.let { it - shiftPx() }
                             gain = if (y == null) {
                                 0f
                             } else {
@@ -232,7 +227,7 @@ fun EdgeScrubber(
 
                         // Position only — the glyph is never scaled.
                         translationX = if (side == EdgeSide.LEFT) outward else -outward
-                        translationY = shiftFor(scrubY())
+                        translationY = shiftPx()
                         alpha = 0.55f + 0.45f * gain
                     },
                 contentAlignment = Alignment.Center,

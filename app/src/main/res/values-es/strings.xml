@@ -250,7 +250,7 @@
     <string name="settings_corner_assistant">Iniciar el asistente de voz</string>
     <string name="corner_assistant_missing">No hay asistente de voz</string>
     <string name="settings_strip_follows">La barra sigue más allá de los extremos</string>
-    <string name="settings_strip_follows_detail">Arrastrar más allá de la A o la Z desliza las letras con tu dedo y deja la lista abierta, en vez de cerrarla</string>
+    <string name="settings_strip_follows_detail">Arrastrar más allá de la A o la Z empuja las letras con tu dedo y deja la lista abierta. Más allá de la Z va al final de la lista</string>
     <string name="settings_section_gestures">Gestos</string>
     <string name="settings_section_notifications">Notificaciones</string>
     <string name="settings_search">Buscar en los ajustes</string>
