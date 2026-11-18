@@ -279,7 +279,7 @@ fun HomeRoute(
     var cornerButtonBounds by remember { mutableStateOf<androidx.compose.ui.geometry.Rect?>(null) }
     val scrub = remember { ScrubState() }
     var viewportHeightPx by remember { mutableIntStateOf(0) }
-    var favBand by remember { mutableStateOf<ScrubBand?>(null) }
+    var favBounds by remember { mutableStateOf<Pair<Float, Float>?>(null) }
     // Enough height for every letter to be worth aiming at. Counted per letter rather than set
     // as one number, since an alphabet with accents in it has more letters to find room for.
     val minBandHeightPx = with(LocalDensity.current) {
@@ -320,6 +320,18 @@ fun HomeRoute(
                 .coerceIn(0f, (viewportHeightPx - bandHeight).coerceAtLeast(0f))
             ScrubBand(topPx = bandTop, heightPx = bandHeight)
         }
+    // Derived rather than stored, so it is worked out again when the letters arrive. Stored, it
+    // kept the minimum of the moment it was measured: on a cold start the favorites can be laid
+    // out before the app list has loaded, there are no letters yet to need room, and the strip
+    // stayed the height of the favorites until they next moved (#171).
+    val favBand = favBounds?.let { (top, bottom) ->
+        ScrubberGeometry.bandForFavorites(
+            topPx = top,
+            bottomPx = bottom,
+            viewportPx = viewportHeightPx.toFloat(),
+            minHeightPx = minBandHeightPx,
+        )
+    }
     val band = liveBand ?: storedBand ?: favBand ?: ScrubBand.fallbackFor(viewportHeightPx)
 
     /** Locking is a strip gesture now, so the toast that explains it lives with the strip. */
@@ -745,12 +757,7 @@ fun HomeRoute(
                     if (appListVisible || homeEditMode) return@HomeScreen
                     // Not the favorites' own span when that is too short to divide between
                     // the letters — see ScrubberGeometry.bandForFavorites.
-                    favBand = ScrubberGeometry.bandForFavorites(
-                        topPx = top,
-                        bottomPx = bottom,
-                        viewportPx = viewportHeightPx.toFloat(),
-                        minHeightPx = minBandHeightPx,
-                    )
+                    favBounds = top to bottom
                 },
                 nowPlayingHasContent = nowPlayingHasContent,
                 contentColor = settings.contentColor,
