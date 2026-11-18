@@ -128,6 +128,7 @@
     <string name="scrub_style_bell">Cloch</string>
     <string name="scrub_style_ripple">Crych</string>
     <string name="settings_scrub_bubble">Swigen llythyren</string>
+    <string name="settings_scrub_reach">Cyrhaeddiad y don</string>
     <string name="scrub_bubble_rounded">Crwn</string>
     <string name="scrub_bubble_circle">Cylch</string>
     <string name="scrub_bubble_square">Sgwâr</string>
@@ -449,4 +450,6 @@
     <string name="widget_clock_agenda_gap">Gofod uwchben y digwyddiadau i ddod</string>
     <string name="widget_clock_notifications_gap">Gofod uwchben y cyfrif</string>
     <string name="widget_clock_battery_gap">Gofod uwchben y batri</string>
+    <string name="settings_corner_assistant">Lansio\'r cynorthwyydd llais</string>
+    <string name="corner_assistant_missing">Dim cynorthwyydd llais i\'w lansio</string>
 </resources>
