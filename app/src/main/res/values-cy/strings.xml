@@ -452,4 +452,6 @@
     <string name="widget_clock_battery_gap">Gofod uwchben y batri</string>
     <string name="settings_corner_assistant">Lansio\'r cynorthwyydd llais</string>
     <string name="corner_assistant_missing">Dim cynorthwyydd llais i\'w lansio</string>
+    <string name="settings_strip_follows">Y stribed yn dilyn heibio\'r pennau</string>
+    <string name="settings_strip_follows_detail">Mae llusgo heibio A neu Z yn symud y llythrennau gyda\'ch bys ac yn cadw\'r rhestr ar agor, yn lle ei chau</string>
 </resources>
