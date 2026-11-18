@@ -1,0 +1,2 @@
+Fixes:
+* "Strip follows past the ends" now works like Niagara: the letters stay pushed until you push them back the other way, dragging past Z goes to the end of the list, and the strip springs back when you let go.
