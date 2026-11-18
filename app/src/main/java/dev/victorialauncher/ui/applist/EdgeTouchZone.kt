@@ -72,6 +72,8 @@ fun EdgeTouchZone(
     bandOnly: Boolean,
     /** Whether resting on a letter walks the list on through it. */
     holdScroll: Boolean,
+    /** Whether dragging off an end keeps the end letter rather than arming the close (#169). */
+    followPastEnds: Boolean = false,
     /** How much of the very edge is left to the system's own gestures. */
     insetDp: Dp,
     /** How far up from the bottom the strip stops, to leave the corner button its taps. */
@@ -115,7 +117,7 @@ fun EdgeTouchZone(
                         .height((band.heightPx / density).dp)
                 }
             )
-            .pointerInput(letters, band, hapticsEnabled, fromLeft, bandOnly) {
+            .pointerInput(letters, band, hapticsEnabled, fromLeft, bandOnly, followPastEnds) {
                 awaitEachGesture {
                     val down = awaitFirstDown(requireUnconsumed = false)
                     down.consume()
@@ -162,7 +164,9 @@ fun EdgeTouchZone(
                         // overshoot matters: a short one still clamps to A or Z, which is what
                         // lets the first and last letters be grabbed from outside their own
                         // position, and only past that does leaving mean leaving.
-                        val off = enteredBand && (
+                        // Unless the strip is set to follow the finger off the end instead, in
+                        // which case the end letter simply stays picked (#169).
+                        val off = !followPastEnds && enteredBand && (
                             y < band.topPx - overshoot || y > band.bottomPx + overshoot
                         )
                         if (off != armedToClose) {

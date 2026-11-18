@@ -436,4 +436,6 @@
     <string name="settings_scrub_reach">Vågens räckvidd</string>
     <string name="settings_corner_assistant">Starta röstassistenten</string>
     <string name="corner_assistant_missing">Ingen röstassistent hittades</string>
+    <string name="settings_strip_follows">Remsan följer med förbi ändarna</string>
+    <string name="settings_strip_follows_detail">Drar du förbi A eller Z följer bokstäverna med fingret och listan förblir öppen i stället för att stängas</string>
 </resources>

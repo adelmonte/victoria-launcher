@@ -436,4 +436,6 @@
     <string name="widget_clock_battery_gap">Battery space above</string>
     <string name="settings_corner_assistant">Start the voice assistant</string>
     <string name="corner_assistant_missing">No voice assistant to start</string>
+    <string name="settings_strip_follows">Strip follows past the ends</string>
+    <string name="settings_strip_follows_detail">Dragging past A or Z slides the letters along with your finger and keeps the list open, instead of closing it</string>
 </resources>

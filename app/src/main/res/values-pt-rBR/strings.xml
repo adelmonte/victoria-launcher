@@ -436,4 +436,6 @@
     <string name="settings_scrub_reach">Alcance da onda</string>
     <string name="settings_corner_assistant">Iniciar o assistente de voz</string>
     <string name="corner_assistant_missing">Nenhum assistente de voz encontrado</string>
+    <string name="settings_strip_follows">A barra acompanha além das pontas</string>
+    <string name="settings_strip_follows_detail">Arrastar além do A ou do Z leva as letras junto com o dedo e mantém a lista aberta, em vez de fechá-la</string>
 </resources>

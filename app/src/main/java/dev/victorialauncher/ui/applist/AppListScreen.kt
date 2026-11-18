@@ -247,6 +247,8 @@ fun AppListScreen(
     scrubBubbleShape: ScrubBubbleShape,
     rippleParams: RippleParams,
     scrubReach: Float,
+    /** Whether the strip slides along with a finger dragged off either end. */
+    stripFollowsPastEnds: Boolean,
     /** Hoisted so a swipe that overshoots the opening animation can keep scrolling it. */
     listState: LazyListState,
     /** How far the list still has to travel to be fully open; 0 once it has arrived. */
@@ -1382,6 +1384,7 @@ fun AppListScreen(
                 style = scrubStyle,
                 ripple = rippleParams,
                 reach = scrubReach,
+                followPastEnds = stripFollowsPastEnds,
                 modifier = Modifier.align(
                     if (activeSide == EdgeSide.LEFT) Alignment.CenterStart else Alignment.CenterEnd
                 ),

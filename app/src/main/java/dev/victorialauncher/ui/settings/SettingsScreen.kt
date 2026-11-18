@@ -170,6 +170,8 @@ fun SettingsScreen(
     onSetEdgeZoneBandOnly: (Boolean) -> Unit,
     holdScroll: Boolean,
     onSetHoldScroll: (Boolean) -> Unit,
+    stripFollowsPastEnds: Boolean,
+    onSetStripFollowsPastEnds: (Boolean) -> Unit,
     dimOthersScrubbing: Boolean,
     onSetDimOthersScrubbing: (Boolean) -> Unit,
     markWorkApps: Boolean,
@@ -688,6 +690,13 @@ fun SettingsScreen(
                 label = stringResource(R.string.settings_dim_others),
                 detail = stringResource(R.string.settings_dim_others_detail),
                 checked = dimOthersScrubbing, onCheckedChange = onSetDimOthersScrubbing,
+            )
+        },
+        SettingsEntry(SettingsSection.APP_LIST, stringResource(R.string.settings_strip_follows), "a-z strip drag past end follow close") {
+            SwitchRowWithDetail(
+                label = stringResource(R.string.settings_strip_follows),
+                detail = stringResource(R.string.settings_strip_follows_detail),
+                checked = stripFollowsPastEnds, onCheckedChange = onSetStripFollowsPastEnds,
             )
         },
         SettingsEntry(SettingsSection.APP_LIST, stringResource(R.string.settings_hold_scroll), "a-z hold scroll") {

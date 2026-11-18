@@ -215,4 +215,6 @@
     <string name="settings_scrub_reach">Reichweite der Welle</string>
     <string name="settings_corner_assistant">Sprachassistenten starten</string>
     <string name="corner_assistant_missing">Kein Sprachassistent gefunden</string>
+    <string name="settings_strip_follows">Leiste folgt über die Enden hinaus</string>
+    <string name="settings_strip_follows_detail">Wenn du über A oder Z hinaus ziehst, wandern die Buchstaben mit deinem Finger mit und die Liste bleibt offen, statt sich zu schließen</string>
 </resources>
