@@ -1,0 +1,3 @@
+New:
+* Slovak translation.
+* Spanish, Esperanto and Welsh wording improvements.
