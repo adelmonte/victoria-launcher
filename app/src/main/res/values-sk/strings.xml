@@ -73,8 +73,8 @@
     <string name="settings_search">Hľadať v nastaveniach</string>
     <string name="settings_corner_search">Otvorte vyhľadávanie</string>
     <string name="settings_corner_button">Tlačidlo v dolnom rohu</string>
-    <string name="settings_last_letter">Každé písmeno na rovnakom riadku</string>
-    <string name="settings_last_letter_detail">Písmená na konci zoznamu dosahujú rovnaký riadok ako ostatné. Stojí to obrazovku prázdneho miesta pod poslednou aplikáciou</string>
+    <string name="settings_last_letter">Všetky písmená v jednom riadku</string>
+    <string name="settings_last_letter_detail">Písmená na konci zoznamu sa zarovnajú do rovnakého riadku ako ostatné. Zobrazí sa prázdny priestor pod poslednou aplikáciou</string>
     <string name="settings_auto_keyboard">Otvorte klávesnicu so zoznamom</string>
     <string name="settings_auto_keyboard_detail">Začnite písať hneď, ako sa otvorí zoznam aplikácií. Vypnuté, klávesnica čaká, kým neklepnete na vyhľadávacie pole</string>
     <string name="settings_settings_row">Riadok nastavení v zozname aplikácií</string>
@@ -101,7 +101,7 @@
     <string name="settings_close_folder_detail">Vypnutie ho nechá otvorené, kým ho sami nezatvoríte</string>
     <string name="settings_favorites_source">Obľúbené</string>
     <string name="settings_frequent_count">Koľko</string>
-    <string name="favorites_source_manual">Zoznam, ktorý si vediete</string>
+    <string name="favorites_source_manual">Vlastný zoznam</string>
     <string name="favorites_source_frequent">Najpoužívanejšie</string>
     <string name="settings_icon_pack_no_icons">Žiadne</string>
     <string name="settings_icon_pack_none">Na tomto zariadení neboli nájdené žiadne aplikácie balíka ikon.</string>

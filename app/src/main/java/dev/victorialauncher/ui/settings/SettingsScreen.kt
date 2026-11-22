@@ -549,9 +549,10 @@ fun SettingsScreen(
         SettingsEntry(SettingsSection.APP_LIST, stringResource(R.string.settings_az_visibility), "alphabet strip a-z") {
             Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)) {
                 Text(stringResource(R.string.settings_az_visibility), style = MaterialTheme.typography.bodyMedium)
-                Row(
+                FlowRow(
                     modifier = Modifier.fillMaxWidth().padding(top = 10.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     AzStripVisibility.entries.forEach { option ->
                         FilledChip(stringResource(option.labelRes()), azStripVisibility == option) {
@@ -841,36 +842,33 @@ fun SettingsScreen(
             // it belongs right here rather than buried in a toast later.
             visible = doubleTapToLock && !lockGestureReady,
         ) {
-            Row(
+            Column(
                 modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, bottom = 12.dp),
-                verticalAlignment = Alignment.CenterVertically,
+                verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 Text(
                     stringResource(R.string.settings_lock_needs_accessibility),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                    modifier = Modifier.weight(1f),
                 )
                 AccessibilityActions(onOpenAccessibilitySettings, onOpenAppInfo)
             }
         },
         SettingsEntry(SettingsSection.GESTURES, stringResource(R.string.settings_shade_gesture), "notification shade pull") {
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Column(Modifier.weight(1f)) {
-                    Text(stringResource(R.string.settings_shade_gesture), style = MaterialTheme.typography.bodyMedium)
-                    Text(
-                        stringResource(
-                            if (shadeGestureReady) R.string.settings_shade_ready
-                            else R.string.settings_shade_not_ready
-                        ),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                    )
+            Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp)) {
+                Text(stringResource(R.string.settings_shade_gesture), style = MaterialTheme.typography.bodyMedium)
+                Text(
+                    stringResource(
+                        if (shadeGestureReady) R.string.settings_shade_ready
+                        else R.string.settings_shade_not_ready
+                    ),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                )
+                if (!shadeGestureReady) {
+                    Spacer(Modifier.height(8.dp))
+                    AccessibilityActions(onOpenAccessibilitySettings, onOpenAppInfo)
                 }
-                if (!shadeGestureReady) AccessibilityActions(onOpenAccessibilitySettings, onOpenAppInfo)
             }
         },
 
@@ -1806,9 +1804,13 @@ private val SWATCHES = listOf(
  * the point of failure. It has to be unblocked first from the app's own info screen, under the
  * overflow menu, so that screen is one tap away here rather than something to go hunting for.
  */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun AccessibilityActions(onOpenAccessibilitySettings: () -> Unit, onOpenAppInfo: () -> Unit) {
-    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+    FlowRow(
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
         FilledChip(stringResource(R.string.settings_app_info), selected = false, onClick = onOpenAppInfo)
         FilledChip(stringResource(R.string.settings_enable), selected = false, onClick = onOpenAccessibilitySettings)
     }
@@ -1836,12 +1838,16 @@ private fun QuickLaunchRow(label: String, value: String?, onClick: () -> Unit) {
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun AlignmentRow(label: String, selected: HomeAlignment, onSelect: (HomeAlignment) -> Unit) {
     Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)) {
         Text(label, style = MaterialTheme.typography.bodyMedium)
         Spacer(Modifier.height(8.dp))
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        FlowRow(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
             HomeAlignment.entries.forEach { option ->
                 FilledChip(
                     label = stringResource(option.labelRes()),
@@ -1853,12 +1859,16 @@ private fun AlignmentRow(label: String, selected: HomeAlignment, onSelect: (Home
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun IconSideRow(selected: IconSide, onSelect: (IconSide) -> Unit) {
     Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)) {
         Text(stringResource(R.string.settings_icon_side), style = MaterialTheme.typography.bodyMedium)
         Spacer(Modifier.height(8.dp))
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        FlowRow(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
             IconSide.entries.forEach { option ->
                 FilledChip(
                     label = stringResource(option.labelRes()),
@@ -1875,6 +1885,7 @@ private fun IconSideRow(selected: IconSide, onSelect: (IconSide) -> Unit) {
  *
  * The count only appears for the computed one, since the manual list is as long as you made it.
  */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun FavoritesSourceRow(
     selected: FavoritesSource,
@@ -1884,9 +1895,10 @@ private fun FavoritesSourceRow(
 ) {
     Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)) {
         Text(stringResource(R.string.settings_favorites_source), style = MaterialTheme.typography.bodyMedium)
-        Row(
+        FlowRow(
             modifier = Modifier.fillMaxWidth().padding(top = 10.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             FavoritesSource.entries.forEach { source ->
                 FilledChip(stringResource(source.labelRes()), selected == source) { onSelect(source) }
@@ -1904,6 +1916,7 @@ private fun FavoritesSourceRow(
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun ShortcutSwipeRow(selected: ShortcutSwipe, onSelect: (ShortcutSwipe) -> Unit) {
     Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)) {
@@ -1913,9 +1926,10 @@ private fun ShortcutSwipeRow(selected: ShortcutSwipe, onSelect: (ShortcutSwipe) 
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
         )
-        Row(
+        FlowRow(
             modifier = Modifier.fillMaxWidth().padding(top = 10.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             ShortcutSwipe.entries.forEach { mode ->
                 FilledChip(stringResource(mode.labelRes()), selected == mode) { onSelect(mode) }
@@ -2021,13 +2035,15 @@ private fun ScrubReachRow(
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun ScrubBubbleShapeRow(selected: ScrubBubbleShape, onSelect: (ScrubBubbleShape) -> Unit) {
     Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)) {
         Text(stringResource(R.string.settings_scrub_bubble), style = MaterialTheme.typography.bodyMedium)
-        Row(
+        FlowRow(
             modifier = Modifier.fillMaxWidth().padding(top = 10.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             ScrubBubbleShape.entries.forEach { shape ->
                 FilledChip(stringResource(shape.labelRes()), selected == shape) { onSelect(shape) }
@@ -2036,13 +2052,15 @@ private fun ScrubBubbleShapeRow(selected: ScrubBubbleShape, onSelect: (ScrubBubb
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun ScrubStyleRow(selected: ScrubStyle, onSelect: (ScrubStyle) -> Unit) {
     Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)) {
         Text(stringResource(R.string.settings_scrub_style), style = MaterialTheme.typography.bodyMedium)
-        Row(
+        FlowRow(
             modifier = Modifier.fillMaxWidth().padding(top = 10.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             ScrubStyle.entries.forEach { style ->
                 FilledChip(stringResource(style.labelRes()), selected == style) { onSelect(style) }
@@ -2051,13 +2069,15 @@ private fun ScrubStyleRow(selected: ScrubStyle, onSelect: (ScrubStyle) -> Unit) 
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun EdgeSideRow(selected: EdgeSide, onSelect: (EdgeSide) -> Unit) {
     Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)) {
         Text(stringResource(R.string.settings_edge_side), style = MaterialTheme.typography.bodyMedium)
-        Row(
+        FlowRow(
             modifier = Modifier.fillMaxWidth().padding(top = 10.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             EdgeSide.entries.forEach { side ->
                 FilledChip(stringResource(side.labelRes()), selected == side) { onSelect(side) }
