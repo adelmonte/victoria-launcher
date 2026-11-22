@@ -1,0 +1,2 @@
+Settings choices wrap onto a new line instead of squeezing when a translation runs long.
+Slovak wording improvements.
