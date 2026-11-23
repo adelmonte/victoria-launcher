@@ -9,6 +9,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import dev.victorialauncher.data.AppInfo
 import dev.victorialauncher.data.EdgeSide
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
@@ -64,6 +65,44 @@ class ScrubState {
     var scrubbing by mutableStateOf(false)
         private set
 
+    /**
+     * True while the finger has left the letter strip and is travelling over the apps. Letters
+     * stop being picked, every row is shown again, and letting go launches the app under the
+     * finger (or closes the list if there is none).
+     */
+    var onApps by mutableStateOf(false)
+        private set
+
+    /** The app row under the finger while [onApps], for the hover highlight. */
+    var hoverKey by mutableStateOf<String?>(null)
+        private set
+
+    /**
+     * Registered by the list: the app row at a screen y, or null for anything that is not an
+     * app (a letter header, a gap, past either end). Not snapshot state; only the gesture
+     * calls it.
+     */
+    var appAt: ((Float) -> AppInfo?)? = null
+
+    /**
+     * Where the finger is while [onApps], in screen y, so the list can scroll on its own when
+     * the finger nears its top or bottom. Read once a frame by that scroll, so not snapshot
+     * state: a write per touch event would recompose the list for nothing.
+     */
+    var appsFingerY = 0f
+
+    /** Registered by the list: launches [AppInfo] exactly as tapping its row would. */
+    var launchApp: ((AppInfo) -> Unit)? = null
+
+    fun updateOnApps(value: Boolean) {
+        if (onApps != value) onApps = value
+        if (!value) hoverKey = null
+    }
+
+    fun setHover(key: String?) {
+        if (hoverKey != key) hoverKey = key
+    }
+
     /** Which edge is in play, so the strip only appears on the side actually used. */
     var side by mutableStateOf(EdgeSide.RIGHT)
         private set
@@ -106,6 +145,7 @@ class ScrubState {
     fun begin(side: EdgeSide) {
         this.side = side
         active = true
+        updateOnApps(false)
         scrubbing = false
         releasing = false
         shift = 0f
@@ -160,6 +200,7 @@ class ScrubState {
     /** Releases the elastic pull back to the strip. Suspends until the spring settles. */
     suspend fun release() {
         holdScrolling = false
+        updateOnApps(false)
         active = false
         scrubbing = false
         letter = null
@@ -182,6 +223,7 @@ class ScrubState {
     /** Cancels a scrub without the spring, for dismissals that snap (the HOME key). */
     fun cancel() {
         holdScrolling = false
+        updateOnApps(false)
         active = false
         scrubbing = false
         letter = null

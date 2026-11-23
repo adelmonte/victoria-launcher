@@ -20,7 +20,9 @@ import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.IconButton
@@ -76,6 +78,7 @@ import androidx.compose.material3.LocalTextStyle
 import dev.victorialauncher.ui.theme.launcherTextShadow
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.MutableState
@@ -91,7 +94,9 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -210,6 +215,13 @@ private const val COMMIT_FRACTION = 0.4f
  */
 private const val EDGE_STRETCH_DAMPING = 0.55f
 
+/**
+ * With the finger over the apps: how close to the list's top or bottom it has to come before
+ * the list scrolls by itself, and how fast it goes with the finger at the very edge.
+ */
+private const val AUTO_SCROLL_ZONE_DP = 72f
+private const val AUTO_SCROLL_MAX_DP_PER_S = 900f
+
 @OptIn(ExperimentalFoundationApi::class, ExperimentalLayoutApi::class)
 @Composable
 fun AppListScreen(
@@ -307,6 +319,13 @@ fun AppListScreen(
     // behind the overlay never sees the letter change. currentY/currentPull stay as
     // function references so their callers read them in the draw phase, not composition.
     val scrubLetter = scrub.letter
+    // The strip and the letter bubble step aside while the finger is choosing among the apps,
+    // and come back when it returns to the edge. Read in the draw phase only.
+    val lettersAlpha = animateFloatAsState(
+        targetValue = if (scrub.onApps) 0f else 1f,
+        animationSpec = tween(150),
+        label = "lettersAlpha",
+    )
     val scrubPlacement = scrub.placement
     val scrubbing = scrub.scrubbing
     val activeSide = scrub.side
@@ -368,7 +387,8 @@ fun AppListScreen(
         // Not while a held letter is walking the list: the whole point of that is to read what
         // goes past, and everything that went past was faded out. That is what made it look as
         // though only the held letter's own apps ever scrolled.
-        targetValue = if (scrubLetter != null && scrubbing && dimOthers && !scrub.holdScrolling) {
+        // Not once the finger is over the apps either: it is choosing among them now.
+        targetValue = if (scrubLetter != null && scrubbing && dimOthers && !scrub.holdScrolling && !scrub.onApps) {
             0f
         } else {
             1f
@@ -379,6 +399,29 @@ fun AppListScreen(
     // Where a scrubbed letter is parked. A setting because how far up the screen you can
     // still reach is a fact about the hand and the phone, not something to pick for anyone.
     val sectionTopPx = (viewportHeightPx * sectionTopPercent / 100f).roundToInt()
+
+    // Lets the edge gesture ask which app is under the finger and open it. The gesture outlives
+    // this composition, so it reads the latest model and launch callback rather than this
+    // frame's. y arrives in screen space; the list's own top is measured to bring it home.
+    val currentModel by rememberUpdatedState(displayModel)
+    val currentOnLaunch by rememberUpdatedState(onLaunch)
+    var listTopPx by remember { mutableFloatStateOf(0f) }
+    DisposableEffect(scrub, listState) {
+        scrub.appAt = appAt@{ screenY ->
+            // Item offsets are measured from where the content starts, below the top content
+            // padding; viewportStartOffset is that padding, negated.
+            val local = screenY - listTopPx + listState.layoutInfo.viewportStartOffset
+            val item = listState.layoutInfo.visibleItemsInfo
+                .firstOrNull { local >= it.offset && local < it.offset + it.size }
+                ?: return@appAt null
+            (currentModel.rows.getOrNull(item.index) as? AppListRow.Entry)?.app
+        }
+        scrub.launchApp = { app -> currentOnLaunch(app) }
+        onDispose {
+            scrub.appAt = null
+            scrub.launchApp = null
+        }
+    }
 
     // The LazyColumn always holds the full list — while scrubbing it's just hidden and
     // pre-scrolled, with the letter's apps drawn over the top. Filtering the rows themselves
@@ -730,6 +773,35 @@ fun AppListScreen(
             // the loop and the walk stops for good, a letter or two in, which is exactly how
             // it behaved.
             if (delta > 0f) listState.dispatchRawDelta(delta)
+        }
+    }
+
+    // With the finger over the apps and near the top or bottom of the list, the list scrolls
+    // that way by itself, faster the closer the finger gets, so every app of a letter longer
+    // than the screen can still be reached without letting go. The rows moving under a still
+    // finger change which one it is on, so the highlight is worked out again as they go.
+    val onApps = scrub.onApps
+    LaunchedEffect(onApps) {
+        if (!onApps) return@LaunchedEffect
+        val zonePx = with(density) { AUTO_SCROLL_ZONE_DP.dp.toPx() }
+        val maxSpeedPx = with(density) { AUTO_SCROLL_MAX_DP_PER_S.dp.toPx() }
+        var last = withFrameNanos { it }
+        while (true) {
+            val now = withFrameNanos { it }
+            val seconds = (now - last) / 1_000_000_000f
+            last = now
+            val y = scrub.appsFingerY - listTopPx
+            val height = listState.layoutInfo.viewportSize.height
+            val depth = when {
+                y < zonePx -> -(zonePx - y) / zonePx
+                y > height - zonePx -> (y - (height - zonePx)) / zonePx
+                else -> 0f
+            }.coerceIn(-1f, 1f)
+            if (depth == 0f) continue
+            // Squared, so the edge of the zone creeps and only its far end hurries.
+            // dispatchRawDelta for the same reason the hold walk uses it.
+            listState.dispatchRawDelta(depth * kotlin.math.abs(depth) * maxSpeedPx * seconds)
+            scrub.setHover(scrub.appAt?.invoke(scrub.appsFingerY)?.key)
         }
     }
 
@@ -1144,6 +1216,7 @@ fun AppListScreen(
             state = listState,
             modifier = Modifier
                 .fillMaxSize()
+                .onGloballyPositioned { listTopPx = it.positionInRoot().y }
                 .graphicsLayer {
                     translationY = stretchProvider()
                     // The mask below blends against this layer alone, so it can take the
@@ -1297,6 +1370,7 @@ fun AppListScreen(
                         iconSizeDp = iconSizeDp,
                         labelSizeSp = labelSizeSp,
                         isFavorite = favoriteKeys.contains(row.app.key),
+                        hovered = { scrub.hoverKey == row.app.key },
                         menuExpanded = menuForKey == rowKey(row),
                         menuOffset = menuOffset,
                         touchPosition = touchPosition,
@@ -1393,9 +1467,11 @@ fun AppListScreen(
                 ripple = rippleParams,
                 reach = scrubReach,
                 shiftPx = shiftPx,
-                modifier = Modifier.align(
-                    if (activeSide == EdgeSide.LEFT) Alignment.CenterStart else Alignment.CenterEnd
-                ),
+                modifier = Modifier
+                    .align(
+                        if (activeSide == EdgeSide.LEFT) Alignment.CenterStart else Alignment.CenterEnd
+                    )
+                    .graphicsLayer { alpha = lettersAlpha.value },
             )
         }
 
@@ -1433,7 +1509,8 @@ fun AppListScreen(
                             y = ((scrubY() ?: 0f) - halfPx).roundToInt(),
                         )
                     }
-                    .size(bubble),
+                    .size(bubble)
+                    .graphicsLayer { alpha = lettersAlpha.value },
             ) {
                 Box(contentAlignment = Alignment.Center) {
                     Text(
@@ -1484,6 +1561,8 @@ private fun AppRow(
     iconSizeDp: Int,
     labelSizeSp: Int,
     isFavorite: Boolean,
+    /** The finger of an edge gesture is resting on this row. */
+    hovered: () -> Boolean,
     menuExpanded: Boolean,
     menuOffset: DpOffset,
     onLaunch: () -> Unit,
@@ -1522,6 +1601,16 @@ private fun AppRow(
                     color = if (pressed) contentColor.copy(alpha = 0.15f) else Color.Transparent,
                     shape = RoundedCornerShape(18.dp),
                 )
+                // Read while drawing, so the finger moving from row to row repaints one rectangle
+                // instead of recomposing every visible row.
+                .drawBehind {
+                    if (hovered()) {
+                        drawRoundRect(
+                            color = contentColor.copy(alpha = 0.15f),
+                            cornerRadius = CornerRadius(18.dp.toPx()),
+                        )
+                    }
+                }
                 .combinedClickable(
                     interactionSource = interaction,
                     indication = null,

@@ -51,6 +51,15 @@ private const val OFF_STRIP_DISMISS_MAX_DP = 72f
 
 private const val MAX_PULL_DP = 400f
 
+/**
+ * How far in from the edge zone the finger has to travel before it stops picking letters and
+ * starts pointing at apps, and how far back toward the edge it has to return to pick letters
+ * again. Two numbers rather than one so a finger wobbling on the line does not flip between
+ * the two modes.
+ */
+private const val ON_APPS_ENTER_DP = 48f
+private const val ON_APPS_EXIT_DP = 24f
+
 /** How close two taps on the strip have to be to count as one gesture. */
 private const val DOUBLE_TAP_WINDOW_MS = 300L
 
@@ -74,6 +83,8 @@ fun EdgeTouchZone(
     holdScroll: Boolean,
     /** Whether dragging off an end keeps the end letter rather than arming the close (#169). */
     followPastEnds: Boolean = false,
+    /** Whether the finger can carry on from the strip onto the apps and open one by letting go. */
+    releaseToLaunch: Boolean = false,
     /** How much of the very edge is left to the system's own gestures. */
     insetDp: Dp,
     /** How far up from the bottom the strip stops, to leave the corner button its taps. */
@@ -117,7 +128,7 @@ fun EdgeTouchZone(
                         .height((band.heightPx / density).dp)
                 }
             )
-            .pointerInput(letters, band, hapticsEnabled, fromLeft, bandOnly, followPastEnds) {
+            .pointerInput(letters, band, hapticsEnabled, fromLeft, bandOnly, followPastEnds, releaseToLaunch) {
                 awaitEachGesture {
                     val down = awaitFirstDown(requireUnconsumed = false)
                     down.consume()
@@ -140,6 +151,12 @@ fun EdgeTouchZone(
                     var armedToClose = false
                     // How far the strip has been pushed by running off an end; see below.
                     var shiftPx = 0f
+                    // Off the strip and over the apps: letters are no longer picked, and
+                    // letting go launches whatever is under the finger, or closes the list.
+                    var onApps = false
+                    var lastLetter: Char? = null
+                    var lastStripY = down.position.y
+                    var fingerY = down.position.y
                     val zoneTopPx = if (bandOnly) band.topPx else 0f
                     val letterHeight = if (letters.isEmpty()) 0f else band.heightPx / letters.size
                     val overshoot = (letterHeight * OFF_STRIP_DISMISS_LETTERS)
@@ -152,6 +169,40 @@ fun EdgeTouchZone(
                         // is written in — otherwise every y reads as above the band, no letter
                         // is ever picked, and the strip looks dead.
                         val y = localY + zoneTopPx
+                        fingerY = y
+                        // Only a finger that has been on the letters can go on to the apps, so
+                        // a tap on bare strip is still just a tap.
+                        // How far the finger has pulled in toward the middle of the screen.
+                        val inward = if (fromLeft) x - size.width else -x
+                        if (releaseToLaunch && enteredBand) {
+                            val next = inward > (if (onApps) ON_APPS_EXIT_DP else ON_APPS_ENTER_DP) * density
+                            if (next != onApps) {
+                                onApps = next
+                                state.updateOnApps(next)
+                                if (next) state.holdScroll(false)
+                                HapticUtil.tick(view, hapticsEnabled)
+                            }
+                        }
+                        if (onApps) {
+                            armedToClose = false
+                            state.appsFingerY = y
+                            // Against the state's own key, not a copy: the list's auto-scroll
+                            // moves rows under a still finger and updates it too.
+                            val hit = state.appAt?.invoke(y)
+                            if (hit?.key != state.hoverKey) {
+                                state.setHover(hit?.key)
+                                if (hit != null) HapticUtil.tick(view, hapticsEnabled)
+                            }
+                            // The strip stays where the last letter left it, drawn out toward
+                            // the finger; the list stays parked on that letter.
+                            state.update(
+                                lastStripY,
+                                inward.coerceIn(0f, MAX_PULL_DP * density),
+                                lastLetter,
+                                shiftPx = shiftPx,
+                            )
+                            return
+                        }
                         if (!enteredBand && ScrubberGeometry.isWithin(y, band.topPx, band.heightPx)) {
                             enteredBand = true
                         }
@@ -188,14 +239,17 @@ fun EdgeTouchZone(
                             // something other than what it did a moment ago.
                             HapticUtil.tick(view, hapticsEnabled)
                         }
-                        // How far the finger has pulled in toward the middle of the screen.
-                        val inward = if (fromLeft) x - size.width else -x
+                        // No letter while the list is on its way out: placing it at A as
+                        // you leave is work nobody asked for and nobody sees.
+                        val shownLetter = if (enteredBand && !armedToClose) letters.getOrNull(index) else null
+                        if (shownLetter != null) {
+                            lastLetter = shownLetter
+                            lastStripY = y
+                        }
                         state.update(
                             y,
                             inward.coerceIn(0f, MAX_PULL_DP * density),
-                            // No letter while the list is on its way out: placing it at A as
-                            // you leave is work nobody asked for and nobody sees.
-                            if (enteredBand && !armedToClose) letters.getOrNull(index) else null,
+                            shownLetter,
                             shiftPx = shiftPx,
                             atEnd = atEnd,
                         )
@@ -224,7 +278,7 @@ fun EdgeTouchZone(
                             delay(HOLD_START_MS)
                             // Read when it fires, not when it was armed: by now the finger may
                             // have left the letters or crossed the line that means leaving.
-                            if (enteredBand && !armedToClose) state.holdScroll(true)
+                            if (enteredBand && !armedToClose && !onApps) state.holdScroll(true)
                         }
                     }
                     fun cancelHold() {
@@ -259,9 +313,26 @@ fun EdgeTouchZone(
                     cancelHold()
                     scope.launch { state.release() }
 
+                    // Let go over the apps: the one under the finger opens, and anywhere else
+                    // that is not an app closes the list.
+                    if (onApps) {
+                        val app = state.appAt?.invoke(fingerY)
+                        val launch = state.launchApp
+                        if (app != null && launch != null) launch(app) else currentDismiss()
+                        return@awaitEachGesture
+                    }
+
                     // Dragged off the end and let go: the whole gesture was open, look, leave,
                     // without the finger coming up in between.
                     if (armedToClose) {
+                        currentDismiss()
+                        return@awaitEachGesture
+                    }
+
+                    // Scrubbed the letters and let go there, not on an app: nothing was
+                    // chosen, so the list goes away just as it does past either end. A plain
+                    // tap on a letter (no drag) still only places the list.
+                    if (releaseToLaunch && moved && enteredBand) {
                         currentDismiss()
                         return@awaitEachGesture
                     }
