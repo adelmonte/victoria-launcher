@@ -203,6 +203,11 @@ fun HomeRoute(
     // screen's own open folders: the two are different places to have left one open.
     val listFolders = if (settings.foldersInAppList) folders else emptyList()
     var listOpenFolders by remember { mutableStateOf(setOf<String>()) }
+    val foldersSection = stringResource(R.string.applist_folders_section).takeIf { settings.foldersAtTop }
+    // Left out from under their letters, they are still found by a search, which needs a
+    // model of its own for it, as hidden apps do.
+    val hideFolderApps = settings.hideFolderApps && listFolders.isNotEmpty()
+    val separateSearch = includeHiddenInSearch || hideFolderApps
 
     // Read from the configuration so a change of language, which recreates this, is picked up.
     val japanese = LocalConfiguration.current.locales[0].language == "ja"
@@ -219,6 +224,8 @@ fun HomeRoute(
         settings.showListHeaders,
         listFolders,
         listOpenFolders,
+        foldersSection,
+        hideFolderApps,
     ) {
         val apps = appsByKey.values.toList()
         val counts = if (settings.sortByUsage) launchCounts else emptyMap()
@@ -236,6 +243,8 @@ fun HomeRoute(
                 japanese = japanese,
                 folders = listFolders,
                 expandedFolders = listOpenFolders,
+                foldersSection = foldersSection,
+                hideFolderApps = hideFolderApps,
             )
         }
     }
@@ -245,6 +254,8 @@ fun HomeRoute(
         appsByKey,
         nameOverrides,
         includeHiddenInSearch,
+        separateSearch,
+        hiddenApps,
         if (settings.sortByUsage) launchCounts else emptyMap(),
         settings.showListHeaders,
         listFolders,
@@ -252,13 +263,13 @@ fun HomeRoute(
     ) {
         val apps = appsByKey.values.toList()
         val counts = if (settings.sortByUsage) launchCounts else emptyMap()
-        value = if (!includeHiddenInSearch) {
+        value = if (!separateSearch) {
             null
         } else {
             withContext(Dispatchers.Default) {
                 buildAppListModel(
                     apps,
-                    emptySet(),
+                    if (includeHiddenInSearch) emptySet() else hiddenApps,
                     { nameOverrides[it.key] ?: it.label },
                     counts,
                     englishName = { app.appRepository.englishLabel(it) },
@@ -1180,6 +1191,8 @@ data class HomeSettings(
     val compactTapArea: Boolean,
     val privateSpaceSection: Boolean,
     val foldersInAppList: Boolean,
+    val foldersAtTop: Boolean,
+    val hideFolderApps: Boolean,
     val recentSection: Boolean,
     val recentSectionCount: Int,
     val edgeZoneInsetDp: Int,

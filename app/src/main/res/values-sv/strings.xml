@@ -193,12 +193,17 @@
     <string name="settings_favorites">Favoriter</string>
     <string name="settings_favorites_detail">Välj vilka appar som ska visas på startskärmen</string>
     <string name="applist_private_space_section">Privat utrymme</string>
+    <string name="applist_folders_section">Mappar</string>
     <string name="applist_recent_section">Nyligen installerade</string>
     <string name="settings_stay_private_unlock">Stanna kvar i listan efter upplåsning</string>
     <string name="settings_stay_private_unlock_detail">Upplåsning av det privata utrymmet behåller applistan öppen i stället för att gå tillbaka till startskärmen</string>
     <string name="settings_private_space_section">Privat utrymme-sektion</string>
     <string name="settings_folders_in_list">Mappar i applistan</string>
     <string name="settings_folders_in_list_detail">Varje mapp visas även under sin egen bokstav. Dess appar hamnar också under sina.</string>
+    <string name="settings_folders_at_top">Mappar överst</string>
+    <string name="settings_folders_at_top_detail">Listade tillsammans ovanför A, inte under sina bokstäver</string>
+    <string name="settings_hide_folder_apps">Mappappar bara i mappen</string>
+    <string name="settings_hide_folder_apps_detail">Appar i en mapp visas inte längre under sin egen bokstav. Sökningen hittar dem fortfarande</string>
     <string name="folder_add_to_home">Lägg till på startskärmen</string>
     <string name="folder_remove_from_home">Ta bort från startskärmen</string>
     <string name="settings_private_space_section_detail">Grupperar apparna i det privata utrymmet under alfabetet i stället för att blanda in dem, så att de två kopiorna av en app kan särskiljas</string>

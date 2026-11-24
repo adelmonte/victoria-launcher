@@ -194,12 +194,17 @@
     <string name="settings_favorites">Ffefrynnau</string>
     <string name="settings_favorites_detail">Dewis pa apiau sy\'n eistedd ar y sgrin gartref</string>
     <string name="applist_private_space_section">Gofod Preifat</string>
+    <string name="applist_folders_section">Ffolderi</string>
     <string name="applist_recent_section">Wedi\'i osod yn ddiweddar</string>
     <string name="settings_stay_private_unlock">Aros yn y rhestr ar ôl datgloi</string>
     <string name="settings_stay_private_unlock_detail">Mae Datgloi Gofod Preifat yn cadw\'r rhestr apiau ar agor yn lle mynd yn ôl i\'r sgrin gartref</string>
     <string name="settings_private_space_section">Adran Gofod Preifat</string>
     <string name="settings_folders_in_list">Ffolderi yn y rhestr apiau</string>
     <string name="settings_folders_in_list_detail">Mae pob ffolder hefyd yn dangos o dan ei lythyren ei hun. Mae ei apiau yn aros o dan eu rhai nhw hefyd</string>
+    <string name="settings_folders_at_top">Ffolderi ar y brig</string>
+    <string name="settings_folders_at_top_detail">Wedi\'u rhestru gyda\'i gilydd uwchben A, nid o dan eu llythrennau</string>
+    <string name="settings_hide_folder_apps">Apiau ffolder yn eu ffolder yn unig</string>
+    <string name="settings_hide_folder_apps_detail">Nid yw apiau mewn ffolder yn ymddangos o dan eu llythrennau eu hunain mwyach. Mae chwilio\'n dal i\'w canfod</string>
     <string name="folder_add_to_home">Ychwanegu at y sgrin gartref</string>
     <string name="folder_remove_from_home">Tynnu o\'r sgrin gartref</string>
     <string name="settings_private_space_section_detail">Grwpio\'r apiau gofod preifat o dan yr wyddor yn lle eu cymysgu, fel bod modd dweud y ddau gopi o ap ar wahân</string>

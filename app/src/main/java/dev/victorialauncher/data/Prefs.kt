@@ -232,6 +232,8 @@ class Prefs(private val context: Context) {
         val STAY_AFTER_PRIVATE_UNLOCK = booleanPreferencesKey("stay_after_private_unlock")
         val PRIVATE_SPACE_SECTION = booleanPreferencesKey("private_space_section")
         val FOLDERS_IN_APP_LIST = booleanPreferencesKey("folders_in_app_list")
+        val FOLDERS_AT_TOP = booleanPreferencesKey("folders_at_top")
+        val HIDE_FOLDER_APPS = booleanPreferencesKey("hide_folder_apps")
         val RECENT_SECTION = booleanPreferencesKey("recent_section")
         val RECENT_SECTION_COUNT = intPreferencesKey("recent_section_count")
         val SHOW_APP_ICONS = booleanPreferencesKey("show_app_icons")
@@ -791,6 +793,14 @@ class Prefs(private val context: Context) {
     /** Whether folders also appear in the app list, filed under their own names (#126). */
     val foldersInAppList: Flow<Boolean> =
         data.map { it[Keys.FOLDERS_IN_APP_LIST] ?: false }.distinctUntilChanged()
+
+    /** Whether those folders get a section of their own above the letters (#178). */
+    val foldersAtTop: Flow<Boolean> =
+        data.map { it[Keys.FOLDERS_AT_TOP] ?: false }.distinctUntilChanged()
+
+    /** Whether an app in a listed folder is left out from under its own letter (#176). */
+    val hideFolderApps: Flow<Boolean> =
+        data.map { it[Keys.HIDE_FOLDER_APPS] ?: false }.distinctUntilChanged()
 
     /** Whether the list ends with what was installed most recently. */
     val recentSection: Flow<Boolean> =
@@ -1441,6 +1451,14 @@ class Prefs(private val context: Context) {
 
     suspend fun setFoldersInAppList(v: Boolean) {
         context.dataStore.edit { it[Keys.FOLDERS_IN_APP_LIST] = v }
+    }
+
+    suspend fun setFoldersAtTop(v: Boolean) {
+        context.dataStore.edit { it[Keys.FOLDERS_AT_TOP] = v }
+    }
+
+    suspend fun setHideFolderApps(v: Boolean) {
+        context.dataStore.edit { it[Keys.HIDE_FOLDER_APPS] = v }
     }
 
     suspend fun setRecentSection(v: Boolean) {

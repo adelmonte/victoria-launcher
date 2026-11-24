@@ -192,12 +192,17 @@
     <string name="settings_favorites">Favoritos</string>
     <string name="settings_favorites_detail">Escolha quais apps ficam na tela inicial</string>
     <string name="applist_private_space_section">Espaço privado</string>
+    <string name="applist_folders_section">Pastas</string>
     <string name="applist_recent_section">Instalados recentemente</string>
     <string name="settings_stay_private_unlock">Permanecer na lista após desbloquear</string>
     <string name="settings_stay_private_unlock_detail">Desbloquear o Espaço privado mantém a lista de apps aberta em vez de voltar para a tela inicial</string>
     <string name="settings_private_space_section">Seção do Espaço privado</string>
     <string name="settings_folders_in_list">Pastas na lista de apps</string>
     <string name="settings_folders_in_list_detail">Cada pasta também aparece sob a própria letra. Os apps da pasta continuam também sob as próprias letras</string>
+    <string name="settings_folders_at_top">Pastas no topo</string>
+    <string name="settings_folders_at_top_detail">Listadas juntas acima do A, não sob suas letras</string>
+    <string name="settings_hide_folder_apps">Apps de pastas só na pasta</string>
+    <string name="settings_hide_folder_apps_detail">Apps em uma pasta não aparecem mais sob a própria letra. A busca ainda os encontra</string>
     <string name="folder_add_to_home">Adicionar à tela inicial</string>
     <string name="folder_remove_from_home">Remover da tela inicial</string>
     <string name="settings_private_space_section_detail">Agrupa os apps do Espaço privado abaixo do alfabeto em vez de misturá-los, para diferenciar as duas cópias de um app</string>

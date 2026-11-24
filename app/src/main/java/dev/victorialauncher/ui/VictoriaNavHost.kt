@@ -299,6 +299,8 @@ fun VictoriaNavHost(
     val stayAfterPrivateUnlock by app.prefs.stayAfterPrivateUnlock.collectAsState(initial = false)
     val privateSpaceSection by app.prefs.privateSpaceSection.collectAsState(initial = false)
     val foldersInAppList by app.prefs.foldersInAppList.collectAsState(initial = false)
+    val foldersAtTop by app.prefs.foldersAtTop.collectAsState(initial = false)
+    val hideFolderApps by app.prefs.hideFolderApps.collectAsState(initial = false)
     val recentSection by app.prefs.recentSection.collectAsState(initial = false)
     val recentSectionCount by app.prefs.recentSectionCount.collectAsState(initial = 5)
     val edgeZoneInsetDp by app.prefs.edgeZoneInsetDp.collectAsState(initial = 0)
@@ -571,6 +573,8 @@ fun VictoriaNavHost(
         stayAfterPrivateUnlock = stayAfterPrivateUnlock,
         privateSpaceSection = privateSpaceSection,
         foldersInAppList = foldersInAppList,
+        foldersAtTop = foldersAtTop,
+        hideFolderApps = hideFolderApps,
         recentSection = recentSection,
         recentSectionCount = recentSectionCount,
         edgeZoneInsetDp = edgeZoneInsetDp,
@@ -785,6 +789,10 @@ fun VictoriaNavHost(
                 onSetPrivateSpaceSection = { scope.launch { app.prefs.setPrivateSpaceSection(it) } },
                 foldersInAppList = foldersInAppList,
                 onSetFoldersInAppList = { scope.launch { app.prefs.setFoldersInAppList(it) } },
+                foldersAtTop = foldersAtTop,
+                onSetFoldersAtTop = { scope.launch { app.prefs.setFoldersAtTop(it) } },
+                hideFolderApps = hideFolderApps,
+                onSetHideFolderApps = { scope.launch { app.prefs.setHideFolderApps(it) } },
                 recentSection = recentSection,
                 onSetRecentSection = { scope.launch { app.prefs.setRecentSection(it) } },
                 recentSectionCount = recentSectionCount,

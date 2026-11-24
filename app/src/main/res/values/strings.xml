@@ -194,12 +194,17 @@
     <string name="settings_favorites">Favorites</string>
     <string name="settings_favorites_detail">Choose which apps sit on the home screen</string>
     <string name="applist_private_space_section">Private Space</string>
+    <string name="applist_folders_section">Folders</string>
     <string name="applist_recent_section">Recently installed</string>
     <string name="settings_stay_private_unlock">Stay in the list after unlocking</string>
     <string name="settings_stay_private_unlock_detail">Unlocking Private Space keeps the app list open instead of going back to the home screen</string>
     <string name="settings_private_space_section">Private Space section</string>
     <string name="settings_folders_in_list">Folders in the app list</string>
     <string name="settings_folders_in_list_detail">Each folder also shows under its own letter. Its apps stay under theirs too</string>
+    <string name="settings_folders_at_top">Folders at the top</string>
+    <string name="settings_folders_at_top_detail">Listed together above A, not under their letters</string>
+    <string name="settings_hide_folder_apps">Folder apps only in their folder</string>
+    <string name="settings_hide_folder_apps_detail">Apps in a folder no longer show under their own letters. Search still finds them</string>
     <string name="folder_add_to_home">Add to home screen</string>
     <string name="folder_remove_from_home">Remove from home screen</string>
     <string name="settings_private_space_section_detail">Groups the private space apps below the alphabet instead of mixing them in, so the two copies of an app can be told apart</string>

@@ -305,12 +305,17 @@
     <string name="settings_edge_band_only">Край только рядом с буквами</string>
     <string name="settings_edge_band_only_detail">Боковой край открывает список приложений только там, где алфавитная волна, а не по всей высоте. Не мешает виджету</string>
     <string name="applist_private_space_section">Личное пространство</string>
+    <string name="applist_folders_section">Папки</string>
     <string name="applist_recent_section">Недавно установленные</string>
     <string name="settings_stay_private_unlock">Оставаться в списке после разблокировки</string>
     <string name="settings_stay_private_unlock_detail">Разблокировка личного пространства оставляет список приложений открытым, а не возвращает на главный экран</string>
     <string name="settings_private_space_section">Раздел «Личное пространство»</string>
     <string name="settings_folders_in_list">Папки в списке приложений</string>
     <string name="settings_folders_in_list_detail">Каждая папка также показывается под своей буквой. Её приложения остаются под своими</string>
+    <string name="settings_folders_at_top">Папки сверху</string>
+    <string name="settings_folders_at_top_detail">Вместе над буквой A, а не под своими буквами</string>
+    <string name="settings_hide_folder_apps">Приложения папок только в папке</string>
+    <string name="settings_hide_folder_apps_detail">Приложения из папки больше не показываются под своей буквой. Поиск по-прежнему их находит</string>
     <string name="folder_add_to_home">Добавить на главный экран</string>
     <string name="folder_remove_from_home">Убрать с главного экрана</string>
     <string name="settings_private_space_section_detail">Собирает приложения личного пространства под алфавитом, а не вперемешку, чтобы различать две копии приложения</string>

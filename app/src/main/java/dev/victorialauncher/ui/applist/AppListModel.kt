@@ -14,6 +14,9 @@ import java.text.Normalizer
 internal const val PRIVATE_SECTION = "private"
 internal const val RECENT_SECTION = "recent"
 
+/** The strip's mark for the folders when they have a section of their own, above the letters. */
+internal const val FOLDERS_LETTER = '•'
+
 /** The section an open folder's apps are listed in, one per folder. */
 internal fun folderSection(id: String) = "folder:$id"
 
@@ -244,6 +247,10 @@ fun buildAppListModel(
     /** Folders to file among the apps, or none to keep them on the home screen only. */
     folders: List<Folder> = emptyList(),
     expandedFolders: Set<String> = emptySet(),
+    /** Heading for a section of all the folders above the letters, or null to file each under its name (#178). */
+    foldersSection: String? = null,
+    /** Whether an app in one of [folders] is listed only there, not under its own letter too (#176). */
+    hideFolderApps: Boolean = false,
 ): AppListModel {
     val all = apps.filter { it.key !in hidden }
     // The row that locks and unlocks the space goes at the very end rather than under P, where
@@ -256,30 +263,46 @@ fun buildAppListModel(
     }
     val rows = mutableListOf<AppListRow>()
 
-    val byLetter = visible.groupBy { app ->
+    // One whose apps are all hidden or gone has nothing to open, so it is left out.
+    val visibleByKey = visible.associateBy { it.key }
+    val folderRows = folders.mapNotNull { folder ->
+        val members = folder.apps.mapNotNull { visibleByKey[it] }
+        if (members.isEmpty()) null else AppListRow.FolderRow(folder, members, folder.id in expandedFolders)
+    }
+    val inFolders = if (hideFolderApps) folderRows.flatMap { row -> row.members.map { it.key } }.toSet() else emptySet()
+
+    val byLetter = visible.filterNot { it.key in inFolders }.groupBy { app ->
         filingLetter(displayName(app), renamed(app), japanese) { englishName(app) }
     }
 
-    // Filed by the name they were given, the way a renamed app is. One whose apps are all
-    // hidden or gone has nothing to open, so it is left out.
-    val visibleByKey = visible.associateBy { it.key }
-    val foldersByLetter = folders.mapNotNull { folder ->
-        val members = folder.apps.mapNotNull { visibleByKey[it] }
-        if (members.isEmpty()) null else AppListRow.FolderRow(folder, members, folder.id in expandedFolders)
-    }.groupBy { filingLetter(it.folder.name, renamed = true, japanese) { null } }
-
-    val letterIndex = mutableListOf<Pair<Char, Int>>()
-    (byLetter.keys + foldersByLetter.keys).toSortedSet().forEach { letter ->
-        letterIndex += letter to rows.size
-        if (showHeaders) rows += AppListRow.Header(letter.toString())
-        // Ahead of the letter's apps: a handful at most, and found where they always are.
-        foldersByLetter[letter].orEmpty().sortedBy { it.folder.name.lowercase() }.forEach { row ->
+    fun addFolders(list: List<AppListRow.FolderRow>) {
+        list.sortedBy { it.folder.name.lowercase() }.forEach { row ->
             rows += row
             if (row.expanded) {
                 row.members.sortedBy { displayName(it).lowercase() }
                     .forEach { rows += AppListRow.Entry(it, section = folderSection(row.folder.id)) }
             }
         }
+    }
+
+    val letterIndex = mutableListOf<Pair<Char, Int>>()
+    if (foldersSection != null && folderRows.isNotEmpty()) {
+        letterIndex += FOLDERS_LETTER to rows.size
+        if (showHeaders) rows += AppListRow.Header(foldersSection)
+        addFolders(folderRows)
+    }
+    // Otherwise filed by the name they were given, the way a renamed app is.
+    val foldersByLetter = if (foldersSection != null) {
+        emptyMap()
+    } else {
+        folderRows.groupBy { filingLetter(it.folder.name, renamed = true, japanese) { null } }
+    }
+
+    (byLetter.keys + foldersByLetter.keys).toSortedSet().forEach { letter ->
+        letterIndex += letter to rows.size
+        if (showHeaders) rows += AppListRow.Header(letter.toString())
+        // Ahead of the letter's apps: a handful at most, and found where they always are.
+        addFolders(foldersByLetter[letter].orEmpty())
         byLetter[letter].orEmpty().sortedWith(
             compareByDescending<AppInfo> { launchCounts[it.key] ?: 0 }
                 .thenBy { displayName(it).lowercase() }

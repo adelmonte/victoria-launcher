@@ -289,12 +289,17 @@
     <string name="settings_edge_band_only">Rand nur neben den Buchstaben</string>
     <string name="settings_edge_band_only_detail">Die Bildschirmseite öffnet die App-Liste nur dort, wo die A-Z-Leiste ist, statt auf ganzer Höhe. Hält sie einem Widget aus dem Weg</string>
     <string name="applist_private_space_section">Privater Bereich</string>
+    <string name="applist_folders_section">Ordner</string>
     <string name="applist_recent_section">Kürzlich installiert</string>
     <string name="settings_stay_private_unlock">Nach dem Entsperren in der Liste bleiben</string>
     <string name="settings_stay_private_unlock_detail">Das Entsperren des privaten Bereichs lässt die App-Liste offen, statt zum Startbildschirm zurückzukehren</string>
     <string name="settings_private_space_section">Abschnitt Privater Bereich</string>
     <string name="settings_folders_in_list">Ordner in der App-Liste</string>
     <string name="settings_folders_in_list_detail">Jeder Ordner erscheint auch unter seinem eigenen Buchstaben. Seine Apps bleiben ebenfalls unter ihren</string>
+    <string name="settings_folders_at_top">Ordner oben</string>
+    <string name="settings_folders_at_top_detail">Gemeinsam über A aufgeführt statt unter ihren Buchstaben</string>
+    <string name="settings_hide_folder_apps">Ordner-Apps nur im Ordner</string>
+    <string name="settings_hide_folder_apps_detail">Apps in einem Ordner erscheinen nicht mehr unter ihrem eigenen Buchstaben. Die Suche findet sie weiterhin</string>
     <string name="folder_add_to_home">Zum Startbildschirm hinzufügen</string>
     <string name="folder_remove_from_home">Vom Startbildschirm entfernen</string>
     <string name="settings_private_space_section_detail">Fasst die Apps des privaten Bereichs unter dem Alphabet zusammen, statt sie einzumischen, damit zwei Kopien einer App unterscheidbar sind</string>

@@ -173,6 +173,7 @@
     <string name="settings_favorites">Ulubione</string>
     <string name="settings_favorites_detail">Wybierz aplikacje, które pojawią się na ekranie startowym</string>
     <string name="applist_private_space_section">Przestrzeń prywatna</string>
+    <string name="applist_folders_section">Foldery</string>
     <string name="applist_recent_section">Ostatnio zainstalowane</string>
     <string name="settings_stay_private_unlock">Pozostań na liście po odblokowaniu</string>
     <string name="settings_stay_private_unlock_detail">Odblokowanie przestrzeni prywatnej utrzymuje otwartą listę aplikacji zamiast wracać do ekranu startowego</string>
@@ -441,6 +442,10 @@
     <string name="settings_ripple_reset">Przywróć domyślną falę</string>
     <string name="settings_folders_in_list">Foldery na liście aplikacji</string>
     <string name="settings_folders_in_list_detail">Każdy folder pojawia się też pod własną literą. Jego aplikacje zostają pod swoimi</string>
+    <string name="settings_folders_at_top">Foldery na górze</string>
+    <string name="settings_folders_at_top_detail">Razem nad literą A, a nie pod swoimi literami</string>
+    <string name="settings_hide_folder_apps">Aplikacje z folderów tylko w folderze</string>
+    <string name="settings_hide_folder_apps_detail">Aplikacje w folderze nie są już pokazywane pod swoją literą. Wyszukiwanie nadal je znajduje</string>
     <string name="folder_add_to_home">Dodaj do ekranu głównego</string>
     <string name="folder_remove_from_home">Usuń z ekranu głównego</string>
     <string name="private_space_install_apps">Zainstaluj aplikacje</string>

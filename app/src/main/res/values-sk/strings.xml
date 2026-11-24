@@ -194,12 +194,17 @@
     <string name="settings_favorites">Obľúbené</string>
     <string name="settings_favorites_detail">Vyberte, ktoré aplikácie sa zobrazia na domovskej obrazovke</string>
     <string name="applist_private_space_section">Súkromný priestor</string>
+    <string name="applist_folders_section">Priečinky</string>
     <string name="applist_recent_section">Nedávno nainštalované</string>
     <string name="settings_stay_private_unlock">Zostaňte v zozname po odomknutí</string>
     <string name="settings_stay_private_unlock_detail">Odomknutie Súkromného priestoru ponechá zoznam aplikácií otvorený namiesto návratu na domovskú obrazovku</string>
     <string name="settings_private_space_section">Sekcia súkromných priestorov</string>
     <string name="settings_folders_in_list">Priečinky v zozname aplikácií</string>
     <string name="settings_folders_in_list_detail">Každý priečinok sa tiež zobrazuje pod vlastným písmenom. Jeho aplikácie zostávajú tiež pod ich</string>
+    <string name="settings_folders_at_top">Priečinky navrchu</string>
+    <string name="settings_folders_at_top_detail">Spolu nad písmenom A, nie pod svojimi písmenami</string>
+    <string name="settings_hide_folder_apps">Aplikácie z priečinkov len v priečinku</string>
+    <string name="settings_hide_folder_apps_detail">Aplikácie v priečinku sa už nezobrazujú pod vlastným písmenom. Vyhľadávanie ich stále nájde</string>
     <string name="folder_add_to_home">Pridať na domovskú obrazovku</string>
     <string name="folder_remove_from_home">Odstrániť z domovskej obrazovky</string>
     <string name="settings_private_space_section_detail">Zoskupuje aplikácie súkromného priestoru pod abecedu namiesto ich miešania, takže sa dajú odlíšiť dve kópie aplikácie</string>

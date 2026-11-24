@@ -190,6 +190,10 @@ fun SettingsScreen(
     onSetPrivateSpaceSection: (Boolean) -> Unit,
     foldersInAppList: Boolean,
     onSetFoldersInAppList: (Boolean) -> Unit,
+    foldersAtTop: Boolean,
+    onSetFoldersAtTop: (Boolean) -> Unit,
+    hideFolderApps: Boolean,
+    onSetHideFolderApps: (Boolean) -> Unit,
     recentSection: Boolean,
     onSetRecentSection: (Boolean) -> Unit,
     recentSectionCount: Int,
@@ -660,6 +664,26 @@ fun SettingsScreen(
                 label = stringResource(R.string.settings_folders_in_list),
                 detail = stringResource(R.string.settings_folders_in_list_detail),
                 checked = foldersInAppList, onCheckedChange = onSetFoldersInAppList,
+            )
+        },
+        SettingsEntry(
+            SettingsSection.APP_LIST, stringResource(R.string.settings_folders_at_top),
+            "folders groups top section", visible = foldersInAppList,
+        ) {
+            SwitchRowWithDetail(
+                label = stringResource(R.string.settings_folders_at_top),
+                detail = stringResource(R.string.settings_folders_at_top_detail),
+                checked = foldersAtTop, onCheckedChange = onSetFoldersAtTop,
+            )
+        },
+        SettingsEntry(
+            SettingsSection.APP_LIST, stringResource(R.string.settings_hide_folder_apps),
+            "folders groups hide duplicates", visible = foldersInAppList,
+        ) {
+            SwitchRowWithDetail(
+                label = stringResource(R.string.settings_hide_folder_apps),
+                detail = stringResource(R.string.settings_hide_folder_apps_detail),
+                checked = hideFolderApps, onCheckedChange = onSetHideFolderApps,
             )
         },
         SettingsEntry(SettingsSection.APP_LIST, stringResource(R.string.settings_recent_section), "recently installed new apps") {

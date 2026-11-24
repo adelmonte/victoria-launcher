@@ -193,12 +193,17 @@
     <string name="settings_favorites">Ŝatatoj</string>
     <string name="settings_favorites_detail">Elekti, kiuj aplikaĵoj sidas sur la hejma ekrano</string>
     <string name="applist_private_space_section">Privata Spaco</string>
+    <string name="applist_folders_section">Dosierujoj</string>
     <string name="applist_recent_section">Ĵus instalitaj</string>
     <string name="settings_stay_private_unlock">Resti en la listo post malŝlosado</string>
     <string name="settings_stay_private_unlock_detail">Malŝlosi Privatan Spacon tenas la aplikaĵliston malfermita anstataŭ reiri al la hejma ekrano</string>
     <string name="settings_private_space_section">Sekcio Privata Spaco</string>
     <string name="settings_folders_in_list">Dosierujoj en la aplikaĵlisto</string>
     <string name="settings_folders_in_list_detail">Ĉiu dosierujo ankaŭ montriĝas sub sia propra litero. Ĝiaj aplikaĵoj restas sub iliaj ankaŭ</string>
+    <string name="settings_folders_at_top">Dosierujoj supre</string>
+    <string name="settings_folders_at_top_detail">Listigitaj kune super A, ne sub siaj literoj</string>
+    <string name="settings_hide_folder_apps">Dosierujaj aplikaĵoj nur en sia dosierujo</string>
+    <string name="settings_hide_folder_apps_detail">Aplikaĵoj en dosierujo ne plu aperas sub sia propra litero. Serĉo ankoraŭ trovas ilin</string>
     <string name="folder_add_to_home">Aldoni al la hejma ekrano</string>
     <string name="folder_remove_from_home">Forigi de la hejma ekrano</string>
     <string name="settings_private_space_section_detail">Grupigas la privatajn spacajn aplikaĵojn sub la alfabeto anstataŭ miksi ilin, por ke la du kopioj de aplikaĵo povu esti distingitaj</string>
