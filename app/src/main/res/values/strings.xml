@@ -438,4 +438,6 @@
     <string name="corner_assistant_missing">No voice assistant to start</string>
     <string name="settings_strip_follows">Strip follows past the ends</string>
     <string name="settings_strip_follows_detail">Dragging past A or Z pushes the letters along with your finger and keeps the list open. Past Z goes to the end of the list</string>
+    <string name="settings_release_to_launch">Release to open</string>
+    <string name="settings_release_to_launch_detail">Slide off the letters onto the apps and let go on one to open it; letting go anywhere else closes the list</string>
 </resources>

@@ -290,6 +290,7 @@ fun VictoriaNavHost(
     val edgeZoneBandOnly by app.prefs.edgeZoneBandOnly.collectAsState(initial = false)
     val holdScroll by app.prefs.holdScroll.collectAsState(initial = false)
     val stripFollowsPastEnds by app.prefs.stripFollowsPastEnds.collectAsState(initial = false)
+    val releaseToLaunch by app.prefs.releaseToLaunch.collectAsState(initial = false)
     val dimOthersScrubbing by app.prefs.dimOthersScrubbing.collectAsState(initial = true)
     val markWorkApps by app.prefs.markWorkApps.collectAsState(initial = true)
     val textShadow by app.prefs.textShadow.collectAsState(initial = false)
@@ -561,6 +562,7 @@ fun VictoriaNavHost(
         edgeZoneBandOnly = edgeZoneBandOnly,
         holdScroll = holdScroll,
         stripFollowsPastEnds = stripFollowsPastEnds,
+        releaseToLaunch = releaseToLaunch,
         dimOthersScrubbing = dimOthersScrubbing,
         markWorkApps = markWorkApps,
         textShadow = textShadow,
@@ -769,6 +771,7 @@ fun VictoriaNavHost(
                 edgeZoneBandOnly = edgeZoneBandOnly,
                 holdScroll = holdScroll,
                 stripFollowsPastEnds = stripFollowsPastEnds,
+                releaseToLaunch = releaseToLaunch,
                 dimOthersScrubbing = dimOthersScrubbing,
                 markWorkApps = markWorkApps,
                 textShadow = textShadow,
@@ -799,6 +802,7 @@ fun VictoriaNavHost(
                 onSetSwipeUpOpensSearch = { scope.launch { app.prefs.setSwipeUpOpensSearch(it) } },
                 onSetHoldScroll = { scope.launch { app.prefs.setHoldScroll(it) } },
                 onSetStripFollowsPastEnds = { scope.launch { app.prefs.setStripFollowsPastEnds(it) } },
+                onSetReleaseToLaunch = { scope.launch { app.prefs.setReleaseToLaunch(it) } },
                 holdScrollSpeed = holdScrollSpeed,
                 onSetHoldScrollSpeed = { scope.launch { app.prefs.setHoldScrollSpeed(it) } },
                 onSetEdgeZoneBandOnly = { scope.launch { app.prefs.setEdgeZoneBandOnly(it) } },

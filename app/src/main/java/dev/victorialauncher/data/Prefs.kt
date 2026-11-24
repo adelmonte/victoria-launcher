@@ -253,6 +253,7 @@ class Prefs(private val context: Context) {
         val EDGE_ZONE_BAND_ONLY = booleanPreferencesKey("edge_zone_band_only")
         val HOLD_SCROLL = booleanPreferencesKey("hold_scroll")
         val STRIP_FOLLOWS_PAST_ENDS = booleanPreferencesKey("strip_follows_past_ends")
+        val RELEASE_TO_LAUNCH = booleanPreferencesKey("release_to_launch")
         val WEB_SEARCH_FALLBACK = booleanPreferencesKey("web_search_fallback")
         val SWIPE_UP_OPENS_SEARCH = booleanPreferencesKey("swipe_up_opens_search")
         val HOLD_SCROLL_SPEED = intPreferencesKey("hold_scroll_speed")
@@ -855,6 +856,13 @@ class Prefs(private val context: Context) {
     /** Whether dragging off either end of the A-Z strip slides it along instead of closing the list. */
     val stripFollowsPastEnds: Flow<Boolean> =
         data.map { it[Keys.STRIP_FOLLOWS_PAST_ENDS] ?: false }.distinctUntilChanged()
+
+    /**
+     * Whether a scrub can carry on from the A-Z strip onto the apps: letting go on one opens it,
+     * letting go anywhere else closes the list.
+     */
+    val releaseToLaunch: Flow<Boolean> =
+        data.map { it[Keys.RELEASE_TO_LAUNCH] ?: false }.distinctUntilChanged()
 
     /** Whether resting a finger on a letter walks the list on through that letter's apps. */
     val holdScroll: Flow<Boolean> =
@@ -1469,6 +1477,10 @@ class Prefs(private val context: Context) {
 
     suspend fun setStripFollowsPastEnds(v: Boolean) {
         context.dataStore.edit { it[Keys.STRIP_FOLLOWS_PAST_ENDS] = v }
+    }
+
+    suspend fun setReleaseToLaunch(v: Boolean) {
+        context.dataStore.edit { it[Keys.RELEASE_TO_LAUNCH] = v }
     }
 
     suspend fun setHoldScroll(v: Boolean) {
