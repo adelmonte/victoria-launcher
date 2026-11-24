@@ -444,5 +444,5 @@
     <string name="settings_strip_follows">Strio sekvas preter la finoj</string>
     <string name="settings_strip_follows_detail">Treni preter A aŭ Z puŝas la literojn kun via fingro kaj tenas la liston malfermita. Treni preter Z kondukas al la fino de la listo</string>
     <string name="settings_release_to_launch">Ellasi por malfermi</string>
-    <string name="settings_release_to_launch_detail">Glitu de la literoj al la aplikaĵoj kaj ellasu sur unu por malfermi ĝin. Ellasi aliloke fermas la liston</string>
+    <string name="settings_release_to_launch_detail">Glitu de la literoj al la aplikaĵoj kaj ellasu sur unu por malfermi ĝin</string>
 </resources>

@@ -444,5 +444,5 @@
     <string name="settings_strip_follows">A barra acompanha além das pontas</string>
     <string name="settings_strip_follows_detail">Arrastar além do A ou do Z empurra as letras junto com o dedo e mantém a lista aberta. Além do Z vai para o fim da lista</string>
     <string name="settings_release_to_launch">Soltar para abrir</string>
-    <string name="settings_release_to_launch_detail">Deslize das letras até os apps e solte sobre um para abri-lo. Soltar em outro lugar fecha a lista</string>
+    <string name="settings_release_to_launch_detail">Deslize das letras até os apps e solte sobre um para abri-lo</string>
 </resources>
