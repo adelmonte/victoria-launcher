@@ -6,6 +6,10 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.StarBorder
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -19,10 +23,12 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.drawable.toBitmap
+import dev.victorialauncher.R
 import dev.victorialauncher.VictoriaApp
 import dev.victorialauncher.data.AppInfo
 import dev.victorialauncher.data.ShortcutSwipe
@@ -76,6 +82,15 @@ fun AppShortcutItems(
             text = { Text(label, fontSize = labelSizeSp.sp) },
             leadingIcon = icon?.let {
                 { Image(bitmap = it, contentDescription = null, modifier = Modifier.size(iconDp)) }
+            },
+            // Kept as an entry of its own, so it can be a favorite, go in a folder, and so on.
+            trailingIcon = {
+                IconButton(onClick = {
+                    victoriaApp.appRepository.pinAppShortcut(app, shortcut)
+                    onStarted()
+                }) {
+                    Icon(Icons.Filled.StarBorder, contentDescription = stringResource(R.string.applist_add_favorite))
+                }
             },
             onClick = {
                 victoriaApp.appRepository.startAppShortcut(shortcut)

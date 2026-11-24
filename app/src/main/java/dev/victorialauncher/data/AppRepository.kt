@@ -478,6 +478,39 @@ class AppRepository(
         true
     }.getOrDefault(false)
 
+    /**
+     * Pins one of [appShortcuts] as an entry of its own and adds it to the favorites (#182),
+     * the same as an app's own "Add to home screen" would. pinShortcuts replaces the package's
+     * whole pinned set in that profile, so the ids it already has go in with the new one; if
+     * that set cannot be read, nothing is pinned rather than the others being unpinned.
+     */
+    fun pinAppShortcut(app: AppInfo, shortcut: ShortcutInfo) {
+        val pkg = shortcut.`package`
+        val user = app.user ?: Process.myUserHandle()
+        val key = EntryKeys.shortcut(pkg, shortcut.id, app.userSerial)
+        val already = if (!hasShortcutHostPermission() || !EntryKeys.isStorableShortcutId(shortcut.id)) null else {
+            runCatching {
+                launcherApps.getShortcuts(
+                    LauncherApps.ShortcutQuery()
+                        .setQueryFlags(LauncherApps.ShortcutQuery.FLAG_MATCH_PINNED)
+                        .setPackage(pkg),
+                    user,
+                )
+            }.getOrNull()
+        }
+        val pinned = already != null && runCatching {
+            launcherApps.pinShortcuts(pkg, (already.map { it.id } + shortcut.id).distinct(), user)
+        }.isSuccess
+        if (!pinned) {
+            Toast.makeText(context, R.string.shortcut_pin_failed, Toast.LENGTH_SHORT).show()
+            return
+        }
+        scope.launch {
+            prefs.addFavorite(key)
+            noteShortcutsChanged()
+        }
+    }
+
     /** The icon for a shortcut offered in a menu. */
     fun shortcutIcon(shortcut: ShortcutInfo, densityDpi: Int): Drawable? =
         runCatching { launcherApps.getShortcutIconDrawable(shortcut, densityDpi) }.getOrNull()
