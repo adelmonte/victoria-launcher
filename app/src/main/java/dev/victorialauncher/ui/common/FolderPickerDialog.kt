@@ -3,6 +3,8 @@ package dev.victorialauncher.ui.common
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -57,7 +59,9 @@ fun FolderPickerDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.folder_picker_title, appLabel)) },
         text = {
-            Column {
+            // Scrolls, or past about seven folders the New folder row below them was pushed out
+            // of the dialog and no more could be made (#183).
+            Column(Modifier.verticalScroll(rememberScrollState())) {
                 if (!creating) {
                     folders.forEach { folder ->
                         Row(
