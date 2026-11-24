@@ -1,0 +1,3 @@
+Star a shortcut in an app's long-press menu to add it to your favorites.
+Folders in the app list can have their own section above A (off by default).
+Apps in a listed folder can be shown only in their folder. Search still finds them.
