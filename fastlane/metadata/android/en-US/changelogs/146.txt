@@ -1,0 +1,2 @@
+The corner button works again when the A-Z edge is set to the letters only.
+Release to open: the list stays on the letter while you move to an app.
