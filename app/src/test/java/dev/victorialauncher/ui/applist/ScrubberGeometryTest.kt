@@ -65,4 +65,12 @@ class ScrubberGeometryTest {
         assertTrue(band.topPx >= 0f)
         assertTrue(band.bottomPx <= 2000f)
     }
+
+    @Test
+    fun `a band-only strip stops above the corner button`() {
+        val band = ScrubBand(topPx = 1200f, heightPx = 1000f)
+        assertEquals(700f, bandOnlyHeightPx(band, limitPx = 1900f), 0.01f)
+        assertEquals(1000f, bandOnlyHeightPx(band, limitPx = 2400f), 0.01f)
+        assertEquals(0f, bandOnlyHeightPx(band, limitPx = 1000f), 0.01f)
+    }
 }

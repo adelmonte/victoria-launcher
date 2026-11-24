@@ -125,7 +125,9 @@ fun EdgeTouchZone(
                 } else {
                     Modifier
                         .offset { IntOffset(0, band.topPx.roundToInt()) }
-                        .height((band.heightPx / density).dp)
+                        // The band follows the favorites, which can run down past the corner
+                        // button, so it stops above the button too (#180).
+                        .height((bandOnlyHeightPx(band, view.height - bottomKeepOut.value * density) / density).dp)
                 }
             )
             .pointerInput(letters, band, hapticsEnabled, fromLeft, bandOnly, followPastEnds, releaseToLaunch) {
@@ -195,6 +197,20 @@ fun EdgeTouchZone(
                             }
                             // The strip stays where the last letter left it, drawn out toward
                             // the finger; the list stays parked on that letter.
+                            state.update(
+                                lastStripY,
+                                inward.coerceIn(0f, MAX_PULL_DP * density),
+                                lastLetter,
+                                shiftPx = shiftPx,
+                            )
+                            return
+                        }
+                        // On the way in to the apps: the letter stays put. A finger heading for
+                        // an app drifts up or down, and every letter it drifted across moved
+                        // the list on before it arrived (#179).
+                        if (releaseToLaunch && enteredBand && lastLetter != null &&
+                            inward > ON_APPS_EXIT_DP * density
+                        ) {
                             state.update(
                                 lastStripY,
                                 inward.coerceIn(0f, MAX_PULL_DP * density),
@@ -355,3 +371,6 @@ fun EdgeTouchZone(
             },
     )
 }
+/** How tall a band-only strip is when it may reach no lower than [limitPx]. */
+internal fun bandOnlyHeightPx(band: ScrubBand, limitPx: Float): Float =
+    (minOf(band.bottomPx, limitPx) - band.topPx).coerceAtLeast(0f)
