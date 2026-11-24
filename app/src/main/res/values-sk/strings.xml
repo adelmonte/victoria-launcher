@@ -446,4 +446,6 @@
     <string name="corner_assistant_missing">Žiadny hlasový asistent na spustenie</string>
     <string name="settings_strip_follows">Pás pokračuje za okraje</string>
     <string name="settings_strip_follows_detail">Potiahnutím za A alebo Z sa písmená posúvajú s prstom a zoznam zostane otvorený. Za Z sa prejde na koniec zoznamu</string>
+    <string name="settings_release_to_launch">Pustiť a otvoriť</string>
+    <string name="settings_release_to_launch_detail">Posuňte prst z písmen na aplikácie a pustite ho na jednej, aby sa otvorila. Pustením inde sa zoznam zatvorí</string>
 </resources>

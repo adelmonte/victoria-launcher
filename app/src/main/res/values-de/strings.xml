@@ -434,4 +434,6 @@
     <string name="widget_clock_agenda_gap">Abstand über Demnächst</string>
     <string name="widget_clock_notifications_gap">Abstand über der Zahl</string>
     <string name="widget_clock_battery_gap">Abstand über dem Akku</string>
+    <string name="settings_release_to_launch">Loslassen zum Öffnen</string>
+    <string name="settings_release_to_launch_detail">Ziehe von den Buchstaben auf die Apps und lass über einer App los, um sie zu öffnen. Woanders loslassen schließt die Liste</string>
 </resources>

@@ -438,4 +438,6 @@
     <string name="corner_assistant_missing">Ingen röstassistent hittades</string>
     <string name="settings_strip_follows">Remsan följer med förbi ändarna</string>
     <string name="settings_strip_follows_detail">Drar du förbi A eller Z skjuts bokstäverna med fingret och listan förblir öppen. Förbi Z går till slutet av listan</string>
+    <string name="settings_release_to_launch">Släpp för att öppna</string>
+    <string name="settings_release_to_launch_detail">Dra från bokstäverna till apparna och släpp på en för att öppna den. Släpper du någon annanstans stängs listan</string>
 </resources>

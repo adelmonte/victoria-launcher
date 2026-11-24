@@ -1071,6 +1071,7 @@ fun HomeScreen(
                             iconSizeDp = iconSizeDp,
                             labelSizeSp = labelSizeSp,
                             sidePaddingDp = sidePaddingDp,
+                            itemSpacingDp = itemSpacingDp,
                             controlsInset = folderControlsInset,
                             contentColor = contentColor,
                             showLabels = showFavoriteLabels,
@@ -1564,6 +1565,8 @@ private fun FolderRow(
     iconSizeDp: Int,
     labelSizeSp: Int,
     sidePaddingDp: Int,
+    /** The home screen's spacing between apps; the apps inside follow it, scaled to their size. */
+    itemSpacingDp: Int,
     controlsInset: Modifier,
     contentColor: Color,
     showLabels: Boolean,
@@ -1756,7 +1759,8 @@ private fun FolderRow(
                                     memberMenuFor = member.key
                                 },
                             )
-                            .padding(vertical = 4.dp),
+                            // 4dp at the default spacing of 10, as it always was (#174).
+                            .padding(vertical = (itemSpacingDp * 0.4f).dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = alignment.arrangement(),
                     ) {

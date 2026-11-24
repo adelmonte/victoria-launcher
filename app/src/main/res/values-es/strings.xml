@@ -438,4 +438,6 @@
     <string name="widget_clock_agenda_gap">Espacio sobre Próximos eventos</string>
     <string name="widget_clock_notifications_gap">Espacio sobre el número</string>
     <string name="widget_clock_battery_gap">Espacio sobre la batería</string>
+    <string name="settings_release_to_launch">Soltar para abrir</string>
+    <string name="settings_release_to_launch_detail">Desliza desde las letras hasta las aplicaciones y suelta sobre una para abrirla. Si sueltas en otro sitio, la lista se cierra</string>
 </resources>

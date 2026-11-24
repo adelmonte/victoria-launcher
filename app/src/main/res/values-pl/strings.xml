@@ -447,4 +447,6 @@
     <string name="private_space_install_failed">Brak sklepu z aplikacjami do otwarcia w przestrzeni prywatnej</string>
     <string name="private_space_settings">Ustawienia przestrzeni prywatnej</string>
     <string name="private_space_settings_failed">Nie udało się otworzyć ustawień przestrzeni prywatnej</string>
+    <string name="settings_release_to_launch">Puść, aby otworzyć</string>
+    <string name="settings_release_to_launch_detail">Przesuń palec z liter na aplikacje i puść go na jednej, aby ją otworzyć. Puszczenie w innym miejscu zamyka listę</string>
 </resources>

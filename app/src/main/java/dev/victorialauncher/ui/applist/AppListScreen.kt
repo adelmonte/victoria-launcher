@@ -400,29 +400,6 @@ fun AppListScreen(
     // still reach is a fact about the hand and the phone, not something to pick for anyone.
     val sectionTopPx = (viewportHeightPx * sectionTopPercent / 100f).roundToInt()
 
-    // Lets the edge gesture ask which app is under the finger and open it. The gesture outlives
-    // this composition, so it reads the latest model and launch callback rather than this
-    // frame's. y arrives in screen space; the list's own top is measured to bring it home.
-    val currentModel by rememberUpdatedState(displayModel)
-    val currentOnLaunch by rememberUpdatedState(onLaunch)
-    var listTopPx by remember { mutableFloatStateOf(0f) }
-    DisposableEffect(scrub, listState) {
-        scrub.appAt = appAt@{ screenY ->
-            // Item offsets are measured from where the content starts, below the top content
-            // padding; viewportStartOffset is that padding, negated.
-            val local = screenY - listTopPx + listState.layoutInfo.viewportStartOffset
-            val item = listState.layoutInfo.visibleItemsInfo
-                .firstOrNull { local >= it.offset && local < it.offset + it.size }
-                ?: return@appAt null
-            (currentModel.rows.getOrNull(item.index) as? AppListRow.Entry)?.app
-        }
-        scrub.launchApp = { app -> currentOnLaunch(app) }
-        onDispose {
-            scrub.appAt = null
-            scrub.launchApp = null
-        }
-    }
-
     // The LazyColumn always holds the full list — while scrubbing it's just hidden and
     // pre-scrolled, with the letter's apps drawn over the top. Filtering the rows themselves
     // meant that on release the unfiltered list was briefly parked back at A.
@@ -503,6 +480,30 @@ fun AppListScreen(
     val stretchProvider: () -> Float = {
         val raw = if (stretchSettling) stretchAnim.value else stretchPx
         raw.coerceIn(-maxStretchPx, maxStretchPx)
+    }
+
+    // Lets the edge gesture ask which app is under the finger and open it. The gesture outlives
+    // this composition, so it reads the latest model and launch callback rather than this
+    // frame's. y arrives in screen space; the list's own top is measured to bring it home.
+    val currentModel by rememberUpdatedState(displayModel)
+    val currentOnLaunch by rememberUpdatedState(onLaunch)
+    var listTopPx by remember { mutableFloatStateOf(0f) }
+    DisposableEffect(scrub, listState) {
+        scrub.appAt = appAt@{ screenY ->
+            // Item offsets are measured from where the content starts, below the top content
+            // padding; viewportStartOffset is that padding, negated. The stretch moves the rows
+            // in the draw phase only, so the measured top does not include it.
+            val local = screenY - listTopPx - stretchProvider() + listState.layoutInfo.viewportStartOffset
+            val item = listState.layoutInfo.visibleItemsInfo
+                .firstOrNull { local >= it.offset && local < it.offset + it.size }
+                ?: return@appAt null
+            (currentModel.rows.getOrNull(item.index) as? AppListRow.Entry)?.app
+        }
+        scrub.launchApp = { app -> currentOnLaunch(app) }
+        onDispose {
+            scrub.appAt = null
+            scrub.launchApp = null
+        }
     }
 
     // Everything the overlay left behind has to be cleared explicitly, because it stays
