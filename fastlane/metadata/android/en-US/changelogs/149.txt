@@ -1,0 +1,1 @@
+Release to open: letting go on the letters keeps the app list open.
