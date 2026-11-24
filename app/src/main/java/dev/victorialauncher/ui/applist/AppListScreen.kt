@@ -787,15 +787,24 @@ fun AppListScreen(
         val zonePx = with(density) { AUTO_SCROLL_ZONE_DP.dp.toPx() }
         val maxSpeedPx = with(density) { AUTO_SCROLL_MAX_DP_PER_S.dp.toPx() }
         var last = withFrameNanos { it }
+        // A finger that arrives inside a zone starts at its edge, so only moving on toward the
+        // end scrolls; otherwise arriving there sent the list off the letter at once (#179).
+        // The zone grows back as the finger moves away.
+        val arrivedAt = scrub.appsFingerY - listTopPx
+        var topEdge = arrivedAt.coerceIn(0f, zonePx)
+        var bottomEdge = Float.NaN
         while (true) {
             val now = withFrameNanos { it }
             val seconds = (now - last) / 1_000_000_000f
             last = now
             val y = scrub.appsFingerY - listTopPx
             val height = listState.layoutInfo.viewportSize.height
+            if (bottomEdge.isNaN()) bottomEdge = arrivedAt.coerceIn(height - zonePx, height.toFloat())
+            if (y > topEdge) topEdge = y.coerceAtMost(zonePx)
+            if (y < bottomEdge) bottomEdge = y.coerceAtLeast(height - zonePx)
             val depth = when {
-                y < zonePx -> -(zonePx - y) / zonePx
-                y > height - zonePx -> (y - (height - zonePx)) / zonePx
+                y < topEdge -> -(topEdge - y) / zonePx
+                y > bottomEdge -> (y - bottomEdge) / zonePx
                 else -> 0f
             }.coerceIn(-1f, 1f)
             if (depth == 0f) continue
