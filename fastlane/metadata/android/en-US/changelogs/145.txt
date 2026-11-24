@@ -1,0 +1,2 @@
+Release to open (off by default): slide off the A-Z strip onto an app and let go to open it. Thanks AlexS-online.
+Apps inside folders follow the spacing between apps setting.
