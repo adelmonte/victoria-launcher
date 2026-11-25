@@ -25,6 +25,8 @@
     <string name="home_choose_favorites">Choose favorites</string>
     <string name="home_folder_choose_apps">Manage folder</string>
     <string name="home_folder_delete">Delete folder</string>
+    <string name="home_folder_move_to_folder">Move to folder</string>
+    <string name="home_folder_move_to_home">Move to home screen</string>
     <string name="home_folder_remove_app">Remove from folder</string>
     <string name="home_folder_empty">Empty — long-press the folder to choose apps</string>
     <string name="home_folder_name_label">Folder name</string>

@@ -25,6 +25,8 @@
     <string name="home_choose_favorites">Elekti ŝatatojn</string>
     <string name="home_folder_choose_apps">Administri dosierujon</string>
     <string name="home_folder_delete">Forigi dosierujon</string>
+    <string name="home_folder_move_to_folder">Movi en dosierujon</string>
+    <string name="home_folder_move_to_home">Movi al la hejmekrano</string>
     <string name="home_folder_remove_app">Forigi el dosierujo</string>
     <string name="home_folder_empty">Malplena — longe premu la dosierujon por elekti aplikaĵojn</string>
     <string name="home_folder_name_label">Dosieruja nomo</string>

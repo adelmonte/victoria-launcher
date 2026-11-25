@@ -25,6 +25,8 @@
     <string name="home_choose_favorites">Vyberte si obľúbené položky</string>
     <string name="home_folder_choose_apps">Spravovať priečinok</string>
     <string name="home_folder_delete">Vymazať priečinok</string>
+    <string name="home_folder_move_to_folder">Presunúť do priečinka</string>
+    <string name="home_folder_move_to_home">Presunúť na plochu</string>
     <string name="home_folder_remove_app">Odstrániť z priečinka</string>
     <string name="home_folder_empty">Prázdne — dlhým stlačením priečinka vyberte aplikácie</string>
     <string name="home_folder_name_label">Názov priečinka</string>

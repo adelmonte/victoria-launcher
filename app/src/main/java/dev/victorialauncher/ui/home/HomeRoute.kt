@@ -76,6 +76,8 @@ import dev.victorialauncher.data.HomePaddings
 import dev.victorialauncher.data.QuickLaunchSlot
 import dev.victorialauncher.data.PaddingSlot
 import dev.victorialauncher.data.folderToken
+import dev.victorialauncher.data.folderAndDescendants
+import dev.victorialauncher.data.subfolderIds
 import dev.victorialauncher.media.NowPlayingBus
 import dev.victorialauncher.media.NotificationCountBus
 import dev.victorialauncher.media.conversationKey
@@ -300,17 +302,20 @@ fun HomeRoute(
     }
     var homeEditMode by remember { mutableStateOf(false) }
     var folderPickerFor by remember { mutableStateOf<AppInfo?>(null) }
+    var folderMoveFor by remember { mutableStateOf<Folder?>(null) }
     // Asked first: it sits at the bottom of the menu where the other menus keep settings, and
     // a folder's arrangement and widgets cannot be had back.
     var folderToDelete by remember { mutableStateOf<Folder?>(null) }
 
     // The chats on the home screen, in a folder or not, so their notifications show on them
     // rather than on the app (#181).
-    LaunchedEffect(favorites) {
+    LaunchedEffect(favorites, folders) {
         NotificationCountBus.pinnedConversations.value = favorites.flatMap { entry ->
             when (entry) {
                 is FavoriteEntry.App -> listOf(entry.app)
-                is FavoriteEntry.FolderRef -> entry.folder.apps.mapNotNull { appsByKey[it] }
+                is FavoriteEntry.FolderRef -> folderAndDescendants(entry.folder.id, folders.associateBy { it.id })
+                    .flatMap { id -> folders.firstOrNull { it.id == id }?.apps.orEmpty() }
+                    .mapNotNull { appsByKey[it] }
             }
         }.mapNotNullTo(HashSet()) { app ->
             app.shortcutId?.takeIf { app.kind == EntryKind.SHORTCUT }?.let { conversationKey(app.packageName, it) }
@@ -756,6 +761,9 @@ fun HomeRoute(
                     scope.launch { app.prefs.removeAppFromFolder(folder.id, appInfo.key) }
                 },
                 appsByKey = appsByKey,
+                foldersById = folders.associateBy { it.id },
+                onMoveFolder = { folderMoveFor = it },
+                onMoveFolderToHome = { folder -> scope.launch { app.prefs.moveFolder(folder.id, null) } },
                 onMoveToFolder = { folderPickerFor = it },
                 onReorderHome = { newFavKeys, newWidgetPos ->
                     scope.launch {
@@ -1082,6 +1090,30 @@ fun HomeRoute(
                     folderPickerFor = null
                 },
                 onDismiss = { folderPickerFor = null },
+            )
+        }
+
+        folderMoveFor?.let { target ->
+            // Not into itself or any folder inside it, which would put it out of reach.
+            val excluded = folderAndDescendants(target.id, folders.associateBy { it.id })
+            FolderPickerDialog(
+                appLabel = target.name,
+                folders = folders.filter { it.id !in excluded },
+                memberCount = { folder -> folder.apps.count { it in appsByKey } + folder.subfolderIds.size },
+                onPickFolder = { folder ->
+                    scope.launch { app.prefs.moveFolder(target.id, folder.id) }
+                    folderMoveFor = null
+                },
+                onCreateFolder = { name ->
+                    scope.launch {
+                        val folder = Folder(id = System.currentTimeMillis().toString(36), name = name, apps = emptyList())
+                        app.prefs.upsertFolder(folder)
+                        app.prefs.addFavorite(folderToken(folder.id))
+                        app.prefs.moveFolder(target.id, folder.id)
+                    }
+                    folderMoveFor = null
+                },
+                onDismiss = { folderMoveFor = null },
             )
         }
 

@@ -64,6 +64,7 @@ import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Folder
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Info
@@ -126,6 +127,7 @@ import dev.victorialauncher.data.EdgeSide
 import dev.victorialauncher.data.ShortcutSwipe
 import dev.victorialauncher.data.EntryKind
 import dev.victorialauncher.data.Folder
+import dev.victorialauncher.data.subfolderIds
 import dev.victorialauncher.data.QuickLaunchSlot
 import dev.victorialauncher.data.HomeAlignment
 import dev.victorialauncher.data.IconSide
@@ -254,6 +256,10 @@ fun HomeScreen(
     onManageFolder: (Folder) -> Unit,
     /** Set when folders are also in the app list, where one taken off here still lives. */
     onRemoveFolderFromHome: ((Folder) -> Unit)? = null,
+    /** Every folder by id, for the ones kept inside others (#188). */
+    foldersById: Map<String, Folder> = emptyMap(),
+    onMoveFolder: ((Folder) -> Unit)? = null,
+    onMoveFolderToHome: ((Folder) -> Unit)? = null,
     onMoveToFolder: (AppInfo) -> Unit,
     appsByKey: Map<String, AppInfo>,
     onReorderHome: (newFavoriteKeys: List<String>, newWidgetPosition: Int) -> Unit,
@@ -1062,60 +1068,78 @@ fun HomeScreen(
                             }
                         }
 
-                        is HomeItem.FolderItem -> FolderRow(
-                            compactTapArea = compactTapArea,
-                            shortcutSwipe = shortcutSwipe,
-                            folder = item.folder,
-                            members = item.folder.apps.mapNotNull { appsByKey[it] },
-                            expanded = item.folder.id in expandedFolders,
-                            editMode = editMode,
-                            dragHandle = dragHandle,
-                            iconSizeDp = iconSizeDp,
-                            labelSizeSp = labelSizeSp,
-                            sidePaddingDp = sidePaddingDp,
-                            itemSpacingDp = itemSpacingDp,
-                            controlsInset = folderControlsInset,
-                            contentColor = contentColor,
-                            showLabels = showFavoriteLabels,
-                            alignment = alignment,
-                            iconSide = iconSide,
-                            menuExpanded = folderMenuFor == item.folder.id,
-                            menuOffset = menuOffset,
-                            touchPosition = touchPosition,
-                            displayName = { displayName(it) },
-                            onToggleExpanded = {
-                                expandedFolders = if (item.folder.id in expandedFolders) {
-                                    expandedFolders - item.folder.id
-                                } else {
-                                    revealFolder = item.folder.id to System.nanoTime()
-                                    expandedFolders + item.folder.id
-                                }
-                            },
-                            onOpenMenu = { offset -> menuOffset = offset; folderMenuFor = item.folder.id },
-                            onDismissMenu = { folderMenuFor = null },
-                            onManage = { folderMenuFor = null; onManageFolder(item.folder) },
-                            onEdit = { folderMenuFor = null; folderRenameFor = item.folder },
-                            onEditLayout = { folderMenuFor = null; onEditModeChange(true) },
-                            onDelete = { folderMenuFor = null; onDeleteFolder(item.folder) },
-                            onRemoveFromHome = onRemoveFolderFromHome?.let { remove ->
-                                { folderMenuFor = null; remove(item.folder) }
-                            },
-                            widgetActions = widgetActions,
-                            onOpenApp = { member ->
-                                // Closed as the app starts rather than on the way back: there
-                                // is nothing to come back to yet, and a folder that shuts while
-                                // you are still looking at it is the launcher fidgeting.
-                                if (closeFolderOnLaunch) {
-                                    expandedFolders = expandedFolders - item.folder.id
-                                }
-                                onOpenFolderApp(member)
-                            },
-                            onRemoveApp = { member -> onRemoveFromFolder(item.folder, member) },
-                            onMemberAppInfo = onAppInfo,
-                            onMemberUnpin = onUnpinShortcut,
-                            onMemberEditIconName = { member -> renameDialogFor = member },
-                            onOpenSettings = onOpenSettings,
-                        )
+                        is HomeItem.FolderItem -> {
+                            // Recursive for the folders kept inside folders (#188). [path] is
+                            // the way down to this one, so a loop that got stored still ends.
+                            @Composable
+                            fun FolderTree(folder: Folder, depth: Int, parent: Folder?, path: Set<String>) {
+                                val subs = folder.subfolderIds.filter { it !in path }.mapNotNull { foldersById[it] }
+                                FolderRow(
+                                compactTapArea = compactTapArea,
+                                shortcutSwipe = shortcutSwipe,
+                                folder = folder,
+                                members = folder.apps.mapNotNull { appsByKey[it] },
+                                expanded = folder.id in expandedFolders,
+                                editMode = editMode,
+                                dragHandle = if (depth == 0) dragHandle else null,
+                                iconSizeDp = iconSizeDp,
+                                labelSizeSp = labelSizeSp,
+                                sidePaddingDp = sidePaddingDp + depth * 24,
+                                itemSpacingDp = itemSpacingDp,
+                                controlsInset = folderControlsInset,
+                                contentColor = contentColor,
+                                showLabels = showFavoriteLabels,
+                                alignment = alignment,
+                                iconSide = iconSide,
+                                menuExpanded = folderMenuFor == folder.id,
+                                menuOffset = menuOffset,
+                                touchPosition = touchPosition,
+                                displayName = { displayName(it) },
+                                onToggleExpanded = {
+                                    expandedFolders = if (folder.id in expandedFolders) {
+                                        expandedFolders - folder.id
+                                    } else {
+                                        revealFolder = folder.id to System.nanoTime()
+                                        expandedFolders + folder.id
+                                    }
+                                },
+                                onOpenMenu = { offset -> menuOffset = offset; folderMenuFor = folder.id },
+                                onDismissMenu = { folderMenuFor = null },
+                                onManage = { folderMenuFor = null; onManageFolder(folder) },
+                                onEdit = { folderMenuFor = null; folderRenameFor = folder },
+                                onEditLayout = { folderMenuFor = null; onEditModeChange(true) },
+                                onDelete = { folderMenuFor = null; onDeleteFolder(folder) },
+                                onRemoveFromHome = if (depth > 0) null else onRemoveFolderFromHome?.let { remove ->
+                                    { folderMenuFor = null; remove(folder) }
+                                },
+                                widgetActions = widgetActions,
+                                onOpenApp = { member ->
+                                    // Closed as the app starts rather than on the way back: there
+                                    // is nothing to come back to yet, and a folder that shuts while
+                                    // you are still looking at it is the launcher fidgeting.
+                                    if (closeFolderOnLaunch) {
+                                        expandedFolders = expandedFolders - path
+                                    }
+                                    onOpenFolderApp(member)
+                                },
+                                onRemoveApp = { member -> onRemoveFromFolder(folder, member) },
+                                onMemberAppInfo = onAppInfo,
+                                onMemberUnpin = onUnpinShortcut,
+                                onMemberEditIconName = { member -> renameDialogFor = member },
+                                onOpenSettings = onOpenSettings,
+                        
+                                    subfolders = {
+                                        subs.forEach { sub ->
+                                            key(sub.id) { FolderTree(sub, depth + 1, folder, path + sub.id) }
+                                        }
+                                    },
+                                    hasSubfolders = subs.isNotEmpty(),
+                                    onMoveToFolder = onMoveFolder?.let { move -> { move(folder) } },
+                                    onMoveToHome = if (parent == null) null else onMoveFolderToHome?.let { move -> { move(folder) } },
+                                )
+                            }
+                            FolderTree(item.folder, 0, null, setOf(item.folder.id))
+                        }
 
                         is HomeItem.Favorite -> FavoriteRow(
                             compactTapArea = compactTapArea,
@@ -1593,6 +1617,12 @@ private fun FolderRow(
     onMemberUnpin: (AppInfo) -> Unit,
     onMemberEditIconName: (AppInfo) -> Unit,
     onOpenSettings: () -> Unit,
+    /** The folders kept inside this one (#188), drawn in the open folder above its apps. */
+    subfolders: @Composable () -> Unit = {},
+    hasSubfolders: Boolean = false,
+    onMoveToFolder: (() -> Unit)? = null,
+    /** Set for a folder inside another, to take it back out onto the home screen. */
+    onMoveToHome: (() -> Unit)? = null,
 ) {
     val interaction = remember { MutableInteractionSource() }
     val pressed by interaction.collectIsPressedAsState()
@@ -1691,6 +1721,20 @@ private fun FolderRow(
                     leadingIcon = { Icon(Icons.Filled.Tune, contentDescription = null) },
                     onClick = onEditLayout,
                 )
+                onMoveToFolder?.let { move ->
+                    DropdownMenuItem(
+                        text = { Text(stringResource(R.string.home_folder_move_to_folder)) },
+                        leadingIcon = { Icon(Icons.Filled.Folder, contentDescription = null) },
+                        onClick = { onDismissMenu(); move() },
+                    )
+                }
+                onMoveToHome?.let { move ->
+                    DropdownMenuItem(
+                        text = { Text(stringResource(R.string.home_folder_move_to_home)) },
+                        leadingIcon = { Icon(Icons.Filled.Home, contentDescription = null) },
+                        onClick = { onDismissMenu(); move() },
+                    )
+                }
                 HorizontalDivider()
                 onRemoveFromHome?.let { remove ->
                     DropdownMenuItem(
@@ -1733,6 +1777,7 @@ private fun FolderRow(
                             },
                     )
                 }
+                subfolders()
                 members.forEach { member ->
                     Box {
                     Row(
@@ -1840,7 +1885,7 @@ private fun FolderRow(
                     }
                     }
                 }
-                if (members.isEmpty()) {
+                if (members.isEmpty() && !hasSubfolders) {
                     Text(
                         stringResource(R.string.home_folder_empty),
                         color = contentColor.copy(alpha = 0.6f),

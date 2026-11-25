@@ -25,6 +25,8 @@
     <string name="home_choose_favorites">Välj favoriter</string>
     <string name="home_folder_choose_apps">Hantera mapp</string>
     <string name="home_folder_delete">Radera mapp</string>
+    <string name="home_folder_move_to_folder">Flytta till mapp</string>
+    <string name="home_folder_move_to_home">Flytta till hemskärmen</string>
     <string name="home_folder_remove_app">Ta bort från mapp</string>
     <string name="home_folder_empty">Tom — långtryck på mappen för att välja appar</string>
     <string name="home_folder_name_label">Mappnamn</string>

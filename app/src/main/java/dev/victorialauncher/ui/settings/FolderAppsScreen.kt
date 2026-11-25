@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import dev.victorialauncher.R
 import dev.victorialauncher.data.AppInfo
 import dev.victorialauncher.data.Folder
+import dev.victorialauncher.data.folderIdFromToken
 import dev.victorialauncher.data.PrivateSpace
 import dev.victorialauncher.data.concealsStored
 import dev.victorialauncher.data.restoreConcealed
@@ -58,7 +59,8 @@ fun FolderAppsScreen(
     onBack: () -> Unit,
 ) {
     val surface = MaterialTheme.colorScheme.surface
-    val members = folder?.apps.orEmpty()
+    // Apps only; the folders kept inside this one (#188) are moved from their own menu.
+    val members = folder?.apps.orEmpty().filter { folderIdFromToken(it) == null }
     val memberSet = members.toSet()
     val appsByKey = remember(allApps) { allApps.associateBy { it.key } }
     // Left out rather than shown as a missing row, for the same reason as in the favorites

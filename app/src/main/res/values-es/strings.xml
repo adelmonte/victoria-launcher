@@ -25,6 +25,8 @@
     <string name="home_choose_favorites">Elegir favoritos</string>
     <string name="home_folder_choose_apps">Gestionar carpeta</string>
     <string name="home_folder_delete">Eliminar carpeta</string>
+    <string name="home_folder_move_to_folder">Mover a carpeta</string>
+    <string name="home_folder_move_to_home">Mover a la pantalla de inicio</string>
     <string name="home_folder_remove_app">Quitar de la carpeta</string>
     <string name="home_folder_empty">Vacía — mantén pulsada la carpeta para elegir aplicaciones</string>
     <string name="home_folder_name_label">Nombre de la carpeta</string>

@@ -25,6 +25,8 @@
     <string name="home_choose_favorites">Выбрать избранные</string>
     <string name="home_folder_choose_apps">Управление папкой</string>
     <string name="home_folder_delete">Удалить папку</string>
+    <string name="home_folder_move_to_folder">Переместить в папку</string>
+    <string name="home_folder_move_to_home">Переместить на главный экран</string>
     <string name="home_folder_remove_app">Убрать из папки</string>
     <string name="home_folder_empty">Пусто — зажмите для выбора приложений</string>
     <string name="home_folder_name_label">Название папки</string>

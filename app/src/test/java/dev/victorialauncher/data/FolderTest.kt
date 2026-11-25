@@ -69,4 +69,22 @@ class FolderTest {
         assertEquals(folders, foldersFromJson(foldersToJson(folders)))
         assertEquals(false, foldersFromJson("""[{"id":"1","name":"Old","apps":["a/A"]}]""").single().nowPlaying)
     }
+
+    @Test
+    fun `a folder's subfolders are the folder tokens among its apps`() {
+        val folder = Folder(id = "a", name = "A", apps = listOf("com.x/.Main", folderToken("b"), folderToken("c")))
+        assertEquals(listOf("b", "c"), folder.subfolderIds)
+    }
+
+    @Test
+    fun `descendants reach every level and stop at a stored loop`() {
+        val byId = listOf(
+            Folder(id = "a", name = "A", apps = listOf(folderToken("b"))),
+            Folder(id = "b", name = "B", apps = listOf(folderToken("c"))),
+            Folder(id = "c", name = "C", apps = listOf(folderToken("a"))),
+            Folder(id = "d", name = "D", apps = emptyList()),
+        ).associateBy { it.id }
+        assertEquals(setOf("a", "b", "c"), folderAndDescendants("a", byId))
+        assertEquals(setOf("d"), folderAndDescendants("d", byId))
+    }
 }

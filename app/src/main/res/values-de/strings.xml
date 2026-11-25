@@ -24,6 +24,8 @@
     <string name="home_choose_favorites">Favoriten auswählen</string>
     <string name="home_folder_choose_apps">Ordner verwalten</string>
     <string name="home_folder_delete">Ordner löschen</string>
+    <string name="home_folder_move_to_folder">In Ordner verschieben</string>
+    <string name="home_folder_move_to_home">Auf den Startbildschirm verschieben</string>
     <string name="home_folder_remove_app">Aus Ordner entfernen</string>
     <string name="home_folder_empty">Leer — Ordner lange drücken, um Apps auszuwählen</string>
     <string name="home_folder_name_label">Ordnername</string>

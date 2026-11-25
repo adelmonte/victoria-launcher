@@ -25,6 +25,8 @@
     <string name="home_choose_favorites">Escolher favoritos</string>
     <string name="home_folder_choose_apps">Gerenciar pasta</string>
     <string name="home_folder_delete">Excluir pasta</string>
+    <string name="home_folder_move_to_folder">Mover para pasta</string>
+    <string name="home_folder_move_to_home">Mover para a tela inicial</string>
     <string name="home_folder_remove_app">Remover da pasta</string>
     <string name="home_folder_empty">Vazia — toque e segure a pasta para escolher apps</string>
     <string name="home_folder_name_label">Nome da pasta</string>

@@ -36,6 +36,24 @@ fun folderToken(id: String) = "$FOLDER_TOKEN_PREFIX$id"
 fun folderIdFromToken(token: String): String? =
     if (token.startsWith(FOLDER_TOKEN_PREFIX)) token.removePrefix(FOLDER_TOKEN_PREFIX) else null
 
+/** The folders kept inside this one (#188), in its order. Its apps are the rest of [Folder.apps]. */
+val Folder.subfolderIds: List<String> get() = apps.mapNotNull(::folderIdFromToken)
+
+/**
+ * [id] and every folder inside it, however deep: where it cannot be moved without making a
+ * loop. Stops at any folder already seen, so a loop that got stored anyway still ends.
+ */
+fun folderAndDescendants(id: String, foldersById: Map<String, Folder>): Set<String> {
+    val seen = linkedSetOf<String>()
+    val queue = ArrayDeque(listOf(id))
+    while (queue.isNotEmpty()) {
+        val next = queue.removeFirst()
+        if (!seen.add(next)) continue
+        foldersById[next]?.subfolderIds?.let(queue::addAll)
+    }
+    return seen
+}
+
 internal fun foldersToJson(folders: List<Folder>): String {
     val array = JSONArray()
     folders.forEach { folder ->

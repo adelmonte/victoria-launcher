@@ -1034,11 +1034,44 @@ class Prefs(private val context: Context) {
         }
     }
 
-    /** Removes the folder and its row; the apps themselves are untouched. */
+    /**
+     * Removes the folder and its row; the apps themselves are untouched. Folders that were
+     * inside it go to the home screen rather than out of reach.
+     */
     suspend fun deleteFolder(id: String) {
         context.dataStore.edit { pref ->
-            pref[Keys.FOLDERS] = foldersToJson(foldersFromJson(pref[Keys.FOLDERS]).filterNot { it.id == id })
-            pref.writeFavorites(readFavorites(pref).filterNot { it == folderToken(id) })
+            val folders = foldersFromJson(pref[Keys.FOLDERS])
+            val orphans = folders.firstOrNull { it.id == id }?.subfolderIds.orEmpty().map(::folderToken)
+            val token = folderToken(id)
+            pref[Keys.FOLDERS] = foldersToJson(
+                folders.filterNot { it.id == id }.map { it.copy(apps = it.apps - token) }
+            )
+            val favorites = readFavorites(pref).filterNot { it == token }
+            pref.writeFavorites(favorites + orphans.filterNot { it in favorites })
+        }
+    }
+
+    /**
+     * Puts the folder inside [parentId], or back on the home screen when that is null (#188),
+     * taking it out of wherever it was. Refused when [parentId] is the folder or one inside it,
+     * which would leave it nowhere anything can reach.
+     */
+    suspend fun moveFolder(id: String, parentId: String?) {
+        context.dataStore.edit { pref ->
+            val folders = foldersFromJson(pref[Keys.FOLDERS])
+            if (parentId != null) {
+                if (folders.none { it.id == parentId }) return@edit
+                if (parentId in folderAndDescendants(id, folders.associateBy { it.id })) return@edit
+            }
+            val token = folderToken(id)
+            pref[Keys.FOLDERS] = foldersToJson(
+                folders.map { folder ->
+                    val without = folder.apps - token
+                    folder.copy(apps = if (folder.id == parentId) without + token else without)
+                }
+            )
+            val favorites = readFavorites(pref).filterNot { it == token }
+            pref.writeFavorites(if (parentId == null) favorites + token else favorites)
         }
     }
 
@@ -1052,8 +1085,12 @@ class Prefs(private val context: Context) {
 
     suspend fun setFolderApps(id: String, apps: List<String>) {
         context.dataStore.edit { pref ->
-            val updated = foldersFromJson(pref[Keys.FOLDERS])
-                .map { if (it.id == id) it.copy(apps = apps) else it }
+            // The screen that sets these lists apps only; the folders inside are kept, first.
+            val updated = foldersFromJson(pref[Keys.FOLDERS]).map { folder ->
+                if (folder.id != id) return@map folder
+                val subfolders = folder.apps.filter { folderIdFromToken(it) != null && it !in apps }
+                folder.copy(apps = subfolders + apps)
+            }
             pref[Keys.FOLDERS] = foldersToJson(updated)
         }
     }
