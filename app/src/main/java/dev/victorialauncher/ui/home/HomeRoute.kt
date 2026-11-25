@@ -115,6 +115,7 @@ private const val LAUNCH_CLOSE_TIMEOUT_MS = 2000L
 /** Long enough to read as a settle, short enough not to stand between you and the icons. */
 /** Room each letter wants on the strip before it stops being something anyone can hit. */
 private val MIN_LETTER_HEIGHT = 15.dp
+private val MIN_COLOR_STEP_HEIGHT = 5.dp
 
 private const val HOME_FADE_MS = 220
 
@@ -230,6 +231,7 @@ fun HomeRoute(
         listOpenFolders,
         foldersSection,
         hideFolderApps,
+        settings.iconColors,
     ) {
         val apps = appsByKey.values.toList()
         val counts = if (settings.sortByUsage) launchCounts else emptyMap()
@@ -249,6 +251,7 @@ fun HomeRoute(
                 expandedFolders = listOpenFolders,
                 foldersSection = foldersSection,
                 hideFolderApps = hideFolderApps,
+                iconColors = settings.iconColors,
             )
         }
     }
@@ -264,6 +267,7 @@ fun HomeRoute(
         settings.showListHeaders,
         listFolders,
         listOpenFolders,
+        settings.iconColors,
     ) {
         val apps = appsByKey.values.toList()
         val counts = if (settings.sortByUsage) launchCounts else emptyMap()
@@ -284,6 +288,7 @@ fun HomeRoute(
                     japanese = japanese,
                     folders = listFolders,
                     expandedFolders = listOpenFolders,
+                    iconColors = settings.iconColors,
                 )
             }
         }
@@ -298,7 +303,9 @@ fun HomeRoute(
     // Enough height for every letter to be worth aiming at. Counted per letter rather than set
     // as one number, since an alphabet with accents in it has more letters to find room for.
     val minBandHeightPx = with(LocalDensity.current) {
-        (listModel.letters.size * MIN_LETTER_HEIGHT.toPx())
+        // The colour strip has many more steps than the alphabet has letters, and a step of it
+        // only needs to be big enough to slide through, not to read.
+        (listModel.letters.size * (if (settings.iconColors != null) MIN_COLOR_STEP_HEIGHT else MIN_LETTER_HEIGHT).toPx())
     }
     var homeEditMode by remember { mutableStateOf(false) }
     var folderPickerFor by remember { mutableStateOf<AppInfo?>(null) }
@@ -1251,6 +1258,8 @@ data class HomeSettings(
     val appListSearchHidden: Boolean,
     val hideStatusBarAppList: Boolean,
     val sortByUsage: Boolean,
+    /** Icon colour keys while the list is sorted by colour, null for A-Z. */
+    val iconColors: Map<String, Int>? = null,
     val quickLaunchLeft: AppInfo?,
     val quickLaunchRight: AppInfo?,
     /** Place the favorites by measurement, until the user sets a padding of their own. */

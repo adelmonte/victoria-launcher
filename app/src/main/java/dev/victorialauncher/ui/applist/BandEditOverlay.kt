@@ -155,14 +155,27 @@ fun BandEditOverlay(
                     band.heightPx,
                     letters.size,
                 )
-                Text(
-                    text = letter.toString(),
-                    fontSize = 13.sp,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier
-                        .align(Alignment.TopCenter)
-                        .offset { IntOffset(0, (centerY - lineHalfPx).roundToInt()) },
-                )
+                val swatch = scrubSwatch(letter)
+                if (swatch != null) {
+                    // Colour sorting: a bar of the same colours, one cell per slice.
+                    val cell = band.heightPx / letters.size
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.TopCenter)
+                            .offset { IntOffset(0, (centerY - cell / 2f).roundToInt()) }
+                            .size(width = 8.dp, height = with(LocalDensity.current) { cell.toDp() })
+                            .background(swatch),
+                    )
+                } else {
+                    Text(
+                        text = letter.toString(),
+                        fontSize = 13.sp,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier
+                            .align(Alignment.TopCenter)
+                            .offset { IntOffset(0, (centerY - lineHalfPx).roundToInt()) },
+                    )
+                }
             }
         }
 

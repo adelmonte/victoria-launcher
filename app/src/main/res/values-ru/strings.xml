@@ -453,5 +453,7 @@
     <string name="widget_clock_battery_gap">Отступ над батареей</string>
     <string name="settings_release_to_launch">Открывать, отпустив палец</string>
     <string name="settings_release_to_launch_detail">Уведите палец с букв на приложения и отпустите его на нужном, чтобы открыть</string>
+    <string name="settings_sort_by_color">Сортировать по цвету иконок</string>
+    <string name="settings_sort_by_color_detail">Приложения идут по цвету иконок, а вместо букв A–Z — цветная полоса: радуга, затем от белого к чёрному</string>
 </resources>
 

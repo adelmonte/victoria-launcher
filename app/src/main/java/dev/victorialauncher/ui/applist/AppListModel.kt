@@ -8,6 +8,9 @@ import dev.victorialauncher.data.Folder
 import android.icu.text.Transliterator
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.compose.ui.graphics.Color
+import dev.victorialauncher.ui.common.ACHROMATIC_BASE
+import dev.victorialauncher.ui.common.UNKNOWN_ICON_COLOR
 import java.text.Normalizer
 
 /** Section tags, which only have to be distinct from each other and from no tag at all. */
@@ -209,6 +212,36 @@ private val LATIN_STANDALONE = mapOf(
 )
 
 /**
+ * Sorting by icon colour reuses the whole strip, which only knows letters: each colour range
+ * is given a letter of its own out of the private-use area, which no app name can file under.
+ * Hues come first in [HUE_STEPS] slices, red to pink, then [GREY_STEPS] greys, white to black,
+ * and that is also the order of their code points, so a sorted set of them is the strip.
+ */
+private const val HUE_STEPS = 36
+private const val GREY_STEPS = 8
+private const val HUE_BASE = '\uE000'
+private const val GREY_BASE = '\uE100'
+
+/** The strip's "letter" for an icon colour key (see [ACHROMATIC_BASE]). */
+internal fun colorBucket(key: Int): Char =
+    if (key < ACHROMATIC_BASE) {
+        HUE_BASE + (key * HUE_STEPS / 3600).coerceIn(0, HUE_STEPS - 1)
+    } else {
+        GREY_BASE + ((key - ACHROMATIC_BASE) * GREY_STEPS / 1001).coerceIn(0, GREY_STEPS - 1)
+    }
+
+/** The colour a strip "letter" stands for, or null for a real letter, drawn as text. */
+fun scrubSwatch(c: Char): Color? = when (c) {
+    in HUE_BASE until HUE_BASE + HUE_STEPS ->
+        Color.hsv((c - HUE_BASE) * (360f / HUE_STEPS) + 180f / HUE_STEPS, 0.8f, 0.95f)
+    in GREY_BASE until GREY_BASE + GREY_STEPS -> {
+        val light = 1f - ((c - GREY_BASE) + 0.5f) / GREY_STEPS
+        Color(light, light, light)
+    }
+    else -> null
+}
+
+/**
  * [launchCounts] empty keeps every section alphabetical; otherwise the apps inside each letter
  * are ordered by how often they were opened from here. The letters themselves never move —
  * an app is still filed under its own name, or the scrubber would be pointing at nothing.
@@ -251,7 +284,15 @@ fun buildAppListModel(
     foldersSection: String? = null,
     /** Whether an app in one of [folders] is listed only there, not under its own letter too (#176). */
     hideFolderApps: Boolean = false,
+    /**
+     * Icon colour keys by app key, to list the apps by the colour of their icons instead of
+     * by name; null for the alphabet. The colours then have no headings, and folders, which
+     * have no one colour, go after them unless [foldersSection] puts them above.
+     */
+    iconColors: Map<String, Int>? = null,
 ): AppListModel {
+    val byColor = iconColors != null
+    fun colorOf(app: AppInfo) = iconColors?.get(app.key) ?: UNKNOWN_ICON_COLOR
     val all = apps.filter { it.key !in hidden }
     // The row that locks and unlocks the space goes at the very end rather than under P, where
     // nobody looking for the space thinks to look (#120).
@@ -272,7 +313,8 @@ fun buildAppListModel(
     val inFolders = if (hideFolderApps) folderRows.flatMap { row -> row.members.map { it.key } }.toSet() else emptySet()
 
     val byLetter = visible.filterNot { it.key in inFolders }.groupBy { app ->
-        filingLetter(displayName(app), renamed(app), japanese) { englishName(app) }
+        if (byColor) colorBucket(colorOf(app))
+        else filingLetter(displayName(app), renamed(app), japanese) { englishName(app) }
     }
 
     fun addFolders(list: List<AppListRow.FolderRow>) {
@@ -287,12 +329,13 @@ fun buildAppListModel(
 
     val letterIndex = mutableListOf<Pair<Char, Int>>()
     if (foldersSection != null && folderRows.isNotEmpty()) {
-        letterIndex += FOLDERS_LETTER to rows.size
+        // Not on a colour strip: it has no colour, and every place on the strip is one.
+        if (!byColor) letterIndex += FOLDERS_LETTER to rows.size
         if (showHeaders) rows += AppListRow.Header(foldersSection)
         addFolders(folderRows)
     }
     // Otherwise filed by the name they were given, the way a renamed app is.
-    val foldersByLetter = if (foldersSection != null) {
+    val foldersByLetter = if (foldersSection != null || byColor) {
         emptyMap()
     } else {
         folderRows.groupBy { filingLetter(it.folder.name, renamed = true, japanese) { null } }
@@ -300,16 +343,23 @@ fun buildAppListModel(
 
     (byLetter.keys + foldersByLetter.keys).toSortedSet().forEach { letter ->
         letterIndex += letter to rows.size
-        if (showHeaders) rows += AppListRow.Header(letter.toString())
+        if (showHeaders && !byColor) rows += AppListRow.Header(letter.toString())
         // Ahead of the letter's apps: a handful at most, and found where they always are.
         addFolders(foldersByLetter[letter].orEmpty())
         byLetter[letter].orEmpty().sortedWith(
-            compareByDescending<AppInfo> { launchCounts[it.key] ?: 0 }
-                .thenBy { displayName(it).lowercase() }
+            if (byColor) {
+                // Within a slice too, so the colours run on smoothly from one to the next.
+                compareBy<AppInfo> { colorOf(it) }.thenBy { displayName(it).lowercase() }
+            } else {
+                compareByDescending<AppInfo> { launchCounts[it.key] ?: 0 }
+                    .thenBy { displayName(it).lowercase() }
+            }
         ).forEach { rows += AppListRow.Entry(it) }
     }
 
     val tailStart = rows.size
+
+    if (byColor && foldersSection == null) addFolders(folderRows)
 
     // Appended after the alphabet, each under its own heading. Not given a letter of their
     // own: the strip is the alphabet, and a section that is not a letter has no business

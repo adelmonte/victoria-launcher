@@ -85,6 +85,8 @@ private object IconCache {
      */
     fun clear() {
         cache.evictAll()
+        // An update that changes the icon changes its colour too.
+        clearIconColors()
         generation.value++
     }
 
@@ -368,7 +370,7 @@ internal fun decodeIconOverride(
     }.getOrNull()
 }
 
-private fun resolveDrawable(
+internal fun resolveDrawable(
     context: Context,
     victoriaApp: VictoriaApp,
     app: AppInfo,

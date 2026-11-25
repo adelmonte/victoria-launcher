@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 package dev.victorialauncher.ui.applist
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.offset
@@ -18,7 +19,10 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.IntOffset
@@ -189,6 +193,28 @@ fun EdgeScrubber(
         }
     }
 
+    // Sorting by colour: one continuous ribbon instead of a cell per step.
+    if (letters.all { scrubSwatch(it) != null }) {
+        ColorRibbon(
+            swatches = remember(letters) { letters.map { scrubSwatch(it)!! } },
+            centerYs = centerYs,
+            spacingPx = spacingPx,
+            sigmaPx = sigmaPx,
+            bellPx = bellPx,
+            style = style,
+            ripple = {
+                @Suppress("UNUSED_VARIABLE") val tick = frame // subscribe to sim updates
+                sim.u
+            },
+            scrubY = scrubY,
+            pullPx = pullPx,
+            shiftPx = shiftPx,
+            side = side,
+            modifier = modifier,
+        )
+        return
+    }
+
     Box(
         modifier = modifier
             // Wide enough for the inset, the letter cell and the whole outward bulge — at
@@ -235,5 +261,106 @@ fun EdgeScrubber(
                 Text(text = c.toString(), fontSize = 13.sp, color = Color.White)
             }
         }
+    }
+}
+
+/** How often down the ribbon its edge is worked out: fine enough that no corner shows. */
+private const val RIBBON_STEP_DP = 2.5f
+private const val RIBBON_WIDTH_DP = 8f
+
+/**
+ * The colour strip as one shape. The cells of the letter strip, each moved on its own, made
+ * the bend a staircase; here the edge is the same displacement sampled every few pixels, and
+ * the colour is one gradient, so it bends and shades without a step. One path a frame, which
+ * is less work than the cells it replaces.
+ */
+@Composable
+private fun ColorRibbon(
+    swatches: List<Color>,
+    centerYs: FloatArray,
+    spacingPx: Float,
+    sigmaPx: Float,
+    bellPx: Float,
+    style: ScrubStyle,
+    /** The ripple's displacement at each step's centre; reading it subscribes to its frames. */
+    ripple: () -> FloatArray,
+    scrubY: () -> Float?,
+    pullPx: () -> Float,
+    shiftPx: () -> Float,
+    side: EdgeSide,
+    modifier: Modifier,
+) {
+    val path = remember { Path() }
+    Canvas(
+        modifier = modifier
+            .width(210.dp)
+            .fillMaxHeight()
+            .padding(horizontal = EDGE_INSET_DP.dp),
+    ) {
+        val n = centerYs.size
+        if (n == 0) return@Canvas
+        val shift = shiftPx()
+        val finger = scrubY()?.let { it - shift }
+        val pull = pullPx()
+        val u = if (style == ScrubStyle.RIPPLE) ripple() else null
+        val floor = -EDGE_INSET_DP * density
+
+        fun gainAt(y: Float): Float {
+            if (finger == null) return 0f
+            val d = finger - y
+            return exp(-(d * d) / (2f * sigmaPx * sigmaPx))
+        }
+
+        // Catmull-Rom through the ripple's samples, so the wave between them is a curve too.
+        fun rippleAt(y: Float): Float {
+            val samples = u ?: return 0f
+            val f = ((y - centerYs[0]) / spacingPx).coerceIn(0f, (n - 1).toFloat())
+            val i = f.toInt().coerceAtMost(n - 2).coerceAtLeast(0)
+            if (n == 1) return samples[0]
+            val t = f - i
+            val p0 = samples[(i - 1).coerceAtLeast(0)]
+            val p1 = samples[i]
+            val p2 = samples[i + 1]
+            val p3 = samples[(i + 2).coerceAtMost(n - 1)]
+            val t2 = t * t
+            val t3 = t2 * t
+            return 0.5f * (2f * p1 + (-p0 + p2) * t + (2f * p0 - 5f * p1 + 4f * p2 - p3) * t2 +
+                (-p0 + 3f * p1 - 3f * p2 + p3) * t3)
+        }
+
+        fun outwardAt(y: Float): Float =
+            if (u != null) rippleAt(y).coerceAtLeast(floor) else (bellPx + pull) * gainAt(y)
+
+        val barW = RIBBON_WIDTH_DP.dp.toPx()
+        // Where the letters' 20 dp cell would centre its contents.
+        val cellW = 20.dp.toPx()
+        val restX = if (side == EdgeSide.LEFT) (cellW - barW) / 2f else size.width - (cellW + barW) / 2f
+        val dir = if (side == EdgeSide.LEFT) 1f else -1f
+        val top = centerYs[0] - spacingPx / 2f
+        val bottom = centerYs[n - 1] + spacingPx / 2f
+        val step = RIBBON_STEP_DP.dp.toPx()
+
+        path.reset()
+        var y = top
+        path.moveTo(restX + dir * outwardAt(y), y + shift)
+        while (y < bottom) {
+            y = (y + step).coerceAtMost(bottom)
+            path.lineTo(restX + dir * outwardAt(y), y + shift)
+        }
+        while (y > top) {
+            path.lineTo(restX + barW + dir * outwardAt(y), y + shift)
+            y = (y - step).coerceAtLeast(top)
+        }
+        path.lineTo(restX + barW + dir * outwardAt(top), top + shift)
+        path.close()
+
+        // Each step's colour at its centre, brighter where the finger is, as the letters are.
+        val stops = Array(n) { i ->
+            val gain = if (u != null) (abs(u[i]) / bellPx).coerceIn(0f, 1f) else gainAt(centerYs[i])
+            ((centerYs[i] - top) / (bottom - top)) to swatches[i].copy(alpha = 0.55f + 0.45f * gain)
+        }
+        val brush = if (n == 1) SolidColor(stops[0].second)
+        else Brush.verticalGradient(*stops, startY = top + shift, endY = bottom + shift)
+        drawPath(path, brush)
     }
 }

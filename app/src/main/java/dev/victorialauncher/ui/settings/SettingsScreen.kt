@@ -152,6 +152,7 @@ fun SettingsScreen(
     azStripVisibility: AzStripVisibility,
     showAlphabet: Boolean,
     sortByUsage: Boolean,
+    sortByIconColor: Boolean,
     appListSearch: Boolean,
     appListSearchBottom: Boolean,
     appListSearchHidden: Boolean,
@@ -262,6 +263,7 @@ fun SettingsScreen(
     onSetAzStripVisibility: (AzStripVisibility) -> Unit,
     onSetShowAlphabet: (Boolean) -> Unit,
     onSetSortByUsage: (Boolean) -> Unit,
+    onSetSortByIconColor: (Boolean) -> Unit,
     onSetSwipeUpOpensList: (Boolean) -> Unit,
     onSetAppListSearch: (Boolean) -> Unit,
     onSetAppListSearchBottom: (Boolean) -> Unit,
@@ -552,6 +554,13 @@ fun SettingsScreen(
                 label = stringResource(R.string.settings_sort_by_usage),
                 detail = stringResource(R.string.settings_sort_by_usage_detail),
                 checked = sortByUsage, onCheckedChange = onSetSortByUsage,
+            )
+        },
+        SettingsEntry(SettingsSection.APP_LIST, stringResource(R.string.settings_sort_by_color), "colour color icon rainbow gradient order") {
+            SwitchRowWithDetail(
+                label = stringResource(R.string.settings_sort_by_color),
+                detail = stringResource(R.string.settings_sort_by_color_detail),
+                checked = sortByIconColor, onCheckedChange = onSetSortByIconColor,
             )
         },
         SettingsEntry(SettingsSection.APP_LIST, stringResource(R.string.settings_az_visibility), "alphabet strip a-z") {

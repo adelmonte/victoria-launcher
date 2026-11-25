@@ -1523,12 +1523,22 @@ fun AppListScreen(
                     .graphicsLayer { alpha = lettersAlpha.value },
             ) {
                 Box(contentAlignment = Alignment.Center) {
-                    Text(
-                        scrubLetter.toString(),
-                        color = Color.White,
-                        fontSize = 30.sp,
-                        fontWeight = FontWeight.Bold,
-                    )
+                    val swatch = scrubSwatch(scrubLetter)
+                    if (swatch == null) {
+                        Text(
+                            scrubLetter.toString(),
+                            color = Color.White,
+                            fontSize = 30.sp,
+                            fontWeight = FontWeight.Bold,
+                        )
+                    } else {
+                        // Sorting by colour: the bubble shows the colour under the finger.
+                        Box(
+                            Modifier
+                                .fillMaxSize(0.6f)
+                                .background(swatch, CircleShape),
+                        )
+                    }
                 }
             }
         }
