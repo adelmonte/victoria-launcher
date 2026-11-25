@@ -1532,7 +1532,7 @@ fun AppListScreen(
                             fontWeight = FontWeight.Bold,
                         )
                     } else {
-                        // Sorting by colour: the bubble shows the colour under the finger.
+                        // Sorting by color: the bubble shows the color under the finger.
                         Box(
                             Modifier
                                 .fillMaxSize(0.6f)

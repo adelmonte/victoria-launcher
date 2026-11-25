@@ -85,7 +85,7 @@ private object IconCache {
      */
     fun clear() {
         cache.evictAll()
-        // An update that changes the icon changes its colour too.
+        // An update that changes the icon changes its color too.
         clearIconColors()
         generation.value++
     }

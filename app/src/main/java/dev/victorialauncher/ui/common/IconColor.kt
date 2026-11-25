@@ -16,22 +16,22 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.withContext
 
 /**
- * An icon's colour as one sortable number, for listing apps by colour instead of by name.
+ * An icon's color as one sortable number, for listing apps by color instead of by name.
  *
  * Below [ACHROMATIC_BASE] it is the icon's main hue in tenths of a degree, 0..3599, red first.
- * From [ACHROMATIC_BASE] up it is an icon with no colour worth the name, white, grey or black,
+ * From [ACHROMATIC_BASE] up it is an icon with no color worth the name, white, grey or black,
  * ordered from white to black: [ACHROMATIC_BASE] plus darkness in thousandths. So sorting by
  * the number gives the rainbow and then the greys, which is the order the strip draws them in.
  */
 const val ACHROMATIC_BASE = 10_000
 
-/** The colour of an icon nothing could be read from, a mid grey. */
+/** The color of an icon nothing could be read from, a mid grey. */
 const val UNKNOWN_ICON_COLOR = ACHROMATIC_BASE + 500
 
-/** Small on purpose: the main colour survives being shrunk, and 1024 pixels is quick to read. */
+/** Small on purpose: the main color survives being shrunk, and 1024 pixels is quick to read. */
 private const val SAMPLE_PX = 32
 
-/** Of the icon's opaque pixels, the share that must be colourful for it to count as coloured. */
+/** Of the icon's opaque pixels, the share that must be colorful for it to count as colored. */
 private const val COLORFUL_SHARE = 0.08f
 
 private val colorCache = ConcurrentHashMap<String, Int>()
@@ -40,7 +40,7 @@ private val colorCache = ConcurrentHashMap<String, Int>()
 internal fun clearIconColors() = colorCache.clear()
 
 /**
- * The colour key of every app in [apps], keyed by [AppInfo.key], from the icon as it is shown:
+ * The color key of every app in [apps], keyed by [AppInfo.key], from the icon as it is shown:
  * an icon pack's or a chosen override where there is one. Worked out once per icon and kept.
  */
 suspend fun iconColorKeys(
@@ -82,10 +82,10 @@ private fun iconColorKey(source: android.graphics.drawable.Drawable): Int {
 }
 
 /**
- * The main colour of [pixels] as a key (see [ACHROMATIC_BASE]).
+ * The main color of [pixels] as a key (see [ACHROMATIC_BASE]).
  *
- * Hue is voted for by every colourful pixel, weighted by how colourful it is, so a white
- * background behind a red logo comes out red rather than pink. An icon with too few colourful
+ * Hue is voted for by every colorful pixel, weighted by how colorful it is, so a white
+ * background behind a red logo comes out red rather than pink. An icon with too few colorful
  * pixels to say is filed among the greys by how light it is overall.
  */
 internal fun colorKeyOf(pixels: IntArray): Int {
@@ -112,7 +112,7 @@ internal fun colorKeyOf(pixels: IntArray): Int {
         val dark = 1.0 - lightness / opaque
         return ACHROMATIC_BASE + (dark * 1000).toInt().coerceIn(0, 1000)
     }
-    // The strongest bin together with its neighbours, so a colour split across a bin edge
+    // The strongest bin together with its neighbours, so a color split across a bin edge
     // still wins, then the hue within that window, averaged round the circle.
     var best = 0
     var bestScore = -1f

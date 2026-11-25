@@ -212,7 +212,7 @@ private val LATIN_STANDALONE = mapOf(
 )
 
 /**
- * Sorting by icon colour reuses the whole strip, which only knows letters: each colour range
+ * Sorting by icon color reuses the whole strip, which only knows letters: each color range
  * is given a letter of its own out of the private-use area, which no app name can file under.
  * Hues come first in [HUE_STEPS] slices, red to pink, then [GREY_STEPS] greys, white to black,
  * and that is also the order of their code points, so a sorted set of them is the strip.
@@ -222,7 +222,7 @@ private const val GREY_STEPS = 8
 private const val HUE_BASE = '\uE000'
 private const val GREY_BASE = '\uE100'
 
-/** The strip's "letter" for an icon colour key (see [ACHROMATIC_BASE]). */
+/** The strip's "letter" for an icon color key (see [ACHROMATIC_BASE]). */
 internal fun colorBucket(key: Int): Char =
     if (key < ACHROMATIC_BASE) {
         HUE_BASE + (key * HUE_STEPS / 3600).coerceIn(0, HUE_STEPS - 1)
@@ -230,7 +230,7 @@ internal fun colorBucket(key: Int): Char =
         GREY_BASE + ((key - ACHROMATIC_BASE) * GREY_STEPS / 1001).coerceIn(0, GREY_STEPS - 1)
     }
 
-/** The colour a strip "letter" stands for, or null for a real letter, drawn as text. */
+/** The color a strip "letter" stands for, or null for a real letter, drawn as text. */
 fun scrubSwatch(c: Char): Color? = when (c) {
     in HUE_BASE until HUE_BASE + HUE_STEPS ->
         Color.hsv((c - HUE_BASE) * (360f / HUE_STEPS) + 180f / HUE_STEPS, 0.8f, 0.95f)
@@ -285,9 +285,9 @@ fun buildAppListModel(
     /** Whether an app in one of [folders] is listed only there, not under its own letter too (#176). */
     hideFolderApps: Boolean = false,
     /**
-     * Icon colour keys by app key, to list the apps by the colour of their icons instead of
-     * by name; null for the alphabet. The colours then have no headings, and folders, which
-     * have no one colour, go after them unless [foldersSection] puts them above.
+     * Icon color keys by app key, to list the apps by the color of their icons instead of
+     * by name; null for the alphabet. The colors then have no headings, and folders, which
+     * have no one color, go after them unless [foldersSection] puts them above.
      */
     iconColors: Map<String, Int>? = null,
 ): AppListModel {
@@ -329,7 +329,7 @@ fun buildAppListModel(
 
     val letterIndex = mutableListOf<Pair<Char, Int>>()
     if (foldersSection != null && folderRows.isNotEmpty()) {
-        // Not on a colour strip: it has no colour, and every place on the strip is one.
+        // Not on a color strip: it has no color, and every place on the strip is one.
         if (!byColor) letterIndex += FOLDERS_LETTER to rows.size
         if (showHeaders) rows += AppListRow.Header(foldersSection)
         addFolders(folderRows)
@@ -348,7 +348,7 @@ fun buildAppListModel(
         addFolders(foldersByLetter[letter].orEmpty())
         byLetter[letter].orEmpty().sortedWith(
             if (byColor) {
-                // Within a slice too, so the colours run on smoothly from one to the next.
+                // Within a slice too, so the colors run on smoothly from one to the next.
                 compareBy<AppInfo> { colorOf(it) }.thenBy { displayName(it).lowercase() }
             } else {
                 compareByDescending<AppInfo> { launchCounts[it.key] ?: 0 }

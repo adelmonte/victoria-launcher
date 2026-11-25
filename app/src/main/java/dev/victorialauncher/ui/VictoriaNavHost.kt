@@ -489,7 +489,7 @@ fun VictoriaNavHost(
     LaunchedEffect(allApps, iconPackPackage, iconOverrides, listIconPx, priorityKeys, iconStyle, cacheGeneration) {
         warmIconCache(context, allApps, iconPackPackage, iconOverrides, listIconPx, iconStyle, priorityKeys)
     }
-    // Only worked out while the list is sorted by colour; null puts it back to A-Z.
+    // Only worked out while the list is sorted by color; null puts it back to A-Z.
     val iconColors by produceState<Map<String, Int>?>(
         null, sortByIconColor, allApps, iconPackPackage, iconOverrides, cacheGeneration,
     ) {

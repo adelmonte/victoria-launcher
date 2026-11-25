@@ -303,7 +303,7 @@ fun HomeRoute(
     // Enough height for every letter to be worth aiming at. Counted per letter rather than set
     // as one number, since an alphabet with accents in it has more letters to find room for.
     val minBandHeightPx = with(LocalDensity.current) {
-        // The colour strip has many more steps than the alphabet has letters, and a step of it
+        // The color strip has many more steps than the alphabet has letters, and a step of it
         // only needs to be big enough to slide through, not to read.
         (listModel.letters.size * (if (settings.iconColors != null) MIN_COLOR_STEP_HEIGHT else MIN_LETTER_HEIGHT).toPx())
     }
@@ -1258,7 +1258,7 @@ data class HomeSettings(
     val appListSearchHidden: Boolean,
     val hideStatusBarAppList: Boolean,
     val sortByUsage: Boolean,
-    /** Icon colour keys while the list is sorted by colour, null for A-Z. */
+    /** Icon color keys while the list is sorted by color, null for A-Z. */
     val iconColors: Map<String, Int>? = null,
     val quickLaunchLeft: AppInfo?,
     val quickLaunchRight: AppInfo?,

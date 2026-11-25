@@ -637,7 +637,7 @@ class Prefs(private val context: Context) {
     /** Orders each letter's apps by how often they were opened from here, rather than by name. */
     val sortByUsage: Flow<Boolean> = data.map { it[Keys.SORT_BY_USAGE] ?: false }.distinctUntilChanged()
 
-    /** List the apps by the colour of their icons, with a colour strip in place of A-Z. */
+    /** List the apps by the color of their icons, with a color strip in place of A-Z. */
     val sortByIconColor: Flow<Boolean> =
         data.map { it[Keys.SORT_BY_ICON_COLOR] ?: false }.distinctUntilChanged()
 
@@ -950,8 +950,8 @@ class Prefs(private val context: Context) {
     /**
      * Whether the favorites' own top gap has been set by hand.
      *
-     * What retires the computed centred placement, rather than any layout padding at all.
-     * Adjusting the gap *below* the favorites used to retire it too, which meant the centred
+     * What retires the computed centerd placement, rather than any layout padding at all.
+     * Adjusting the gap *below* the favorites used to retire it too, which meant the centerd
      * top had to be written out first to keep them where they were — and getting that wrong
      * sent them to the top of the screen with no obvious way back.
      */

@@ -449,6 +449,6 @@
     <string name="settings_strip_follows_detail">Dragging past A or Z pushes the letters along with your finger and keeps the list open. Past Z goes to the end of the list</string>
     <string name="settings_release_to_launch">Release to open</string>
     <string name="settings_release_to_launch_detail">Slide off the letters onto the apps and let go on one to open it</string>
-    <string name="settings_sort_by_color">Sort by icon colour</string>
-    <string name="settings_sort_by_color_detail">Lists the apps by the colour of their icons, with a colour strip in place of A–Z: the rainbow, then white to black</string>
+    <string name="settings_sort_by_color">Sort by icon color</string>
+    <string name="settings_sort_by_color_detail">Lists the apps by the color of their icons, with a color strip in place of A–Z: the rainbow, then white to black</string>
 </resources>

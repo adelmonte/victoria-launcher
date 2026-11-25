@@ -193,7 +193,7 @@ fun EdgeScrubber(
         }
     }
 
-    // Sorting by colour: one continuous ribbon instead of a cell per step.
+    // Sorting by color: one continuous ribbon instead of a cell per step.
     if (letters.all { scrubSwatch(it) != null }) {
         ColorRibbon(
             swatches = remember(letters) { letters.map { scrubSwatch(it)!! } },
@@ -269,9 +269,9 @@ private const val RIBBON_STEP_DP = 2.5f
 private const val RIBBON_WIDTH_DP = 8f
 
 /**
- * The colour strip as one shape. The cells of the letter strip, each moved on its own, made
+ * The color strip as one shape. The cells of the letter strip, each moved on its own, made
  * the bend a staircase; here the edge is the same displacement sampled every few pixels, and
- * the colour is one gradient, so it bends and shades without a step. One path a frame, which
+ * the color is one gradient, so it bends and shades without a step. One path a frame, which
  * is less work than the cells it replaces.
  */
 @Composable
@@ -282,7 +282,7 @@ private fun ColorRibbon(
     sigmaPx: Float,
     bellPx: Float,
     style: ScrubStyle,
-    /** The ripple's displacement at each step's centre; reading it subscribes to its frames. */
+    /** The ripple's displacement at each step's center; reading it subscribes to its frames. */
     ripple: () -> FloatArray,
     scrubY: () -> Float?,
     pullPx: () -> Float,
@@ -332,7 +332,7 @@ private fun ColorRibbon(
             if (u != null) rippleAt(y).coerceAtLeast(floor) else (bellPx + pull) * gainAt(y)
 
         val barW = RIBBON_WIDTH_DP.dp.toPx()
-        // Where the letters' 20 dp cell would centre its contents.
+        // Where the letters' 20 dp cell would center its contents.
         val cellW = 20.dp.toPx()
         val restX = if (side == EdgeSide.LEFT) (cellW - barW) / 2f else size.width - (cellW + barW) / 2f
         val dir = if (side == EdgeSide.LEFT) 1f else -1f
@@ -354,7 +354,7 @@ private fun ColorRibbon(
         path.lineTo(restX + barW + dir * outwardAt(top), top + shift)
         path.close()
 
-        // Each step's colour at its centre, brighter where the finger is, as the letters are.
+        // Each step's color at its center, brighter where the finger is, as the letters are.
         val stops = Array(n) { i ->
             val gain = if (u != null) (abs(u[i]) / bellPx).coerceIn(0f, 1f) else gainAt(centerYs[i])
             ((centerYs[i] - top) / (bottom - top)) to swatches[i].copy(alpha = 0.55f + 0.45f * gain)

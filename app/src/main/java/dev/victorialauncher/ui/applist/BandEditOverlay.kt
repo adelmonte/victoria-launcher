@@ -157,7 +157,7 @@ fun BandEditOverlay(
                 )
                 val swatch = scrubSwatch(letter)
                 if (swatch != null) {
-                    // Colour sorting: a bar of the same colours, one cell per slice.
+                    // Color sorting: a bar of the same colors, one cell per slice.
                     val cell = band.heightPx / letters.size
                     Box(
                         modifier = Modifier
