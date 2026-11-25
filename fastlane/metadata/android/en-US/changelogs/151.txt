@@ -1,0 +1,2 @@
+• Sort by icon color: lists the apps by the color of their icons, with a color strip in place of A–Z (thanks AlexS-online)
+• Spanish and Welsh wording fixes (thanks chiajlingvoj)
