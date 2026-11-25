@@ -1,0 +1,2 @@
+• A closed folder shows its apps' notification count and newest lines
+• Subfolders can be dragged among a folder's apps in Choose apps
