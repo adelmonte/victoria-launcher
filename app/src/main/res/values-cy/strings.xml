@@ -464,5 +464,5 @@
     <string name="settings_strip_follows">Y stribed yn dilyn heibio\'r pennau</string>
     <string name="settings_strip_follows_detail">Mae llusgo heibio A neu Z yn gwthio\'r llythrennau gyda\'ch bys ac yn cadw\'r rhestr ar agor. Mae llusgo heibio Z yn mynd â chi i ddiwedd y rhestr</string>
     <string name="settings_release_to_launch">Gollwng i agor</string>
-    <string name="settings_release_to_launch_detail">Llithrwch o\'r llythrennau i\'r apiau a gollwng ar un i\'w agor</string>
+    <string name="settings_release_to_launch_detail">Llithrwch o\'r llythrennau i\'r apiau a gollyngwch ar un i\'w agor</string>
 </resources>

@@ -328,8 +328,8 @@
     <string name="settings_folders_in_list_detail">Cada carpeta aparece también bajo su propia letra. Sus aplicaciones siguen bajo las suyas</string>
     <string name="settings_folders_at_top">Carpetas arriba</string>
     <string name="settings_folders_at_top_detail">Juntas encima de la A, no bajo sus letras</string>
-    <string name="settings_hide_folder_apps">Apps de carpetas solo en su carpeta</string>
-    <string name="settings_hide_folder_apps_detail">Las apps de una carpeta ya no aparecen bajo su propia letra. La búsqueda las sigue encontrando</string>
+    <string name="settings_hide_folder_apps">Aplicaciones de carpetas solo en su carpeta</string>
+    <string name="settings_hide_folder_apps_detail">Las aplicaciones de una carpeta ya no aparecen bajo su propia letra. La búsqueda las sigue encontrando</string>
     <string name="folder_add_to_home">Añadir a la pantalla de inicio</string>
     <string name="folder_remove_from_home">Quitar de la pantalla de inicio</string>
     <string name="settings_private_space_section_detail">Agrupa las aplicaciones del espacio privado bajo el alfabeto en vez de mezclarlas, para distinguir las dos copias de una aplicación</string>
