@@ -116,6 +116,8 @@
     <string name="settings_dim_applist">Przyciemnij tapetę za listą aplikacji</string>
     <string name="settings_haptics">Wibracje interfejsu</string>
     <string name="settings_haptics_detail">Zgodne z ustawieniami wibracji dotknięć w systemie</string>
+    <string name="settings_haptics_ignore_system">Wibruj przy wyłączonych wibracjach dotyku</string>
+    <string name="settings_haptics_ignore_system_detail">Wibruje tutaj, nawet gdy wibracje przy dotyku są wyłączone w ustawieniach Androida</string>
     <string name="settings_edge_side">Krawędź otwieranego menu aplikacji</string>
     <string name="settings_double_tap_lock">Stuknij dwukrotnie, aby zablokować ekran</string>
     <string name="settings_double_tap_lock_detail">Stuknij dwukrotnie w pasek A–Z</string>

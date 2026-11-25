@@ -186,6 +186,7 @@ class Prefs(private val context: Context) {
         val HIDE_STATUS_BAR_APPLIST = booleanPreferencesKey("hide_status_bar_applist")
         val DIM_WALLPAPER_ALPHA = floatPreferencesKey("dim_wallpaper_alpha")
         val HAPTICS_ENABLED = booleanPreferencesKey("haptics_enabled")
+        val HAPTICS_IGNORE_SYSTEM = booleanPreferencesKey("haptics_ignore_system")
         val DIM_HOME_ALPHA = floatPreferencesKey("dim_home_alpha")
         val SHOW_FAVORITE_LABELS = booleanPreferencesKey("show_favorite_labels")
         val TEXT_COLOR_MODE = stringPreferencesKey("text_color_mode")
@@ -508,6 +509,10 @@ class Prefs(private val context: Context) {
     val dimWallpaperAlpha: Flow<Float> = data.map { it[Keys.DIM_WALLPAPER_ALPHA] ?: 0.35f }.distinctUntilChanged()
 
     val hapticsEnabled: Flow<Boolean> = data.map { it[Keys.HAPTICS_ENABLED] ?: true }.distinctUntilChanged()
+
+    /** Whether the ticks vibrate even with the system's touch feedback off (#187). */
+    val hapticsIgnoreSystem: Flow<Boolean> =
+        data.map { it[Keys.HAPTICS_IGNORE_SYSTEM] ?: false }.distinctUntilChanged()
 
     val dimHomeAlpha: Flow<Float> = data.map { it[Keys.DIM_HOME_ALPHA] ?: 0f }.distinctUntilChanged()
 
@@ -1220,6 +1225,10 @@ class Prefs(private val context: Context) {
 
     suspend fun setHapticsEnabled(v: Boolean) {
         context.dataStore.edit { it[Keys.HAPTICS_ENABLED] = v }
+    }
+
+    suspend fun setHapticsIgnoreSystem(v: Boolean) {
+        context.dataStore.edit { it[Keys.HAPTICS_IGNORE_SYSTEM] = v }
     }
 
     suspend fun setShowAlphabet(v: Boolean) {

@@ -123,6 +123,8 @@
     <string name="settings_dim_applist">Stmaviť tapetu za zoznamom aplikácií</string>
     <string name="settings_haptics">Haptická spätná väzba</string>
     <string name="settings_haptics_detail">Použi nastavenie dotykovej spätnej väzby vášho systému</string>
+    <string name="settings_haptics_ignore_system">Vibrovať aj pri vypnutej odozve dotyku</string>
+    <string name="settings_haptics_ignore_system_detail">Vibruje tu, aj keď je odozva dotyku v nastaveniach Androidu vypnutá</string>
     <string name="settings_edge_side">Ktorý okraj otvára zoznam aplikácií</string>
     <string name="settings_scrub_style">Animácia pásu od A po Z</string>
     <string name="scrub_style_bell">Zvon</string>

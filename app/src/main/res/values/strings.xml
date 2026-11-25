@@ -123,6 +123,8 @@
     <string name="settings_dim_applist">Dim wallpaper behind app list</string>
     <string name="settings_haptics">Haptic feedback</string>
     <string name="settings_haptics_detail">Follows your system\'s touch feedback setting</string>
+    <string name="settings_haptics_ignore_system">Vibrate with touch feedback off</string>
+    <string name="settings_haptics_ignore_system_detail">Vibrates here even when touch feedback is off in Android\'s settings</string>
     <string name="settings_edge_side">Which edge opens the app list</string>
     <string name="settings_scrub_style">A-Z strip animation</string>
     <string name="scrub_style_bell">Bell</string>

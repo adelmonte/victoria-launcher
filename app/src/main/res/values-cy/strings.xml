@@ -123,6 +123,8 @@
     <string name="settings_dim_applist">Pylu\'r papur wal y tu ôl i\'r rhestr apiau</string>
     <string name="settings_haptics">Adborth haptig</string>
     <string name="settings_haptics_detail">Yn dilyn gosodiad adborth cyffwrdd eich system</string>
+    <string name="settings_haptics_ignore_system">Dirgrynnu gydag adborth cyffwrdd i ffwrdd</string>
+    <string name="settings_haptics_ignore_system_detail">Yn dirgrynnu yma hyd yn oed pan fo adborth cyffwrdd i ffwrdd yng ngosodiadau Android</string>
     <string name="settings_edge_side">Pa ymyl sy\'n agor y rhestr apiau</string>
     <string name="settings_scrub_style">Animeiddiad stribed A-Z</string>
     <string name="scrub_style_bell">Cloch</string>

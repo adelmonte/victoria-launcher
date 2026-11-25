@@ -131,6 +131,8 @@ fun SettingsScreen(
     hideStatusBarAppList: Boolean,
     dimWallpaperAlpha: Float,
     hapticsEnabled: Boolean,
+    hapticsIgnoreSystem: Boolean,
+    onSetHapticsIgnoreSystem: (Boolean) -> Unit,
     dimHomeAlpha: Float,
     showFavoriteLabels: Boolean,
     textColorMode: TextColorMode,
@@ -829,6 +831,16 @@ fun SettingsScreen(
                 label = stringResource(R.string.settings_haptics),
                 detail = stringResource(R.string.settings_haptics_detail),
                 checked = hapticsEnabled, onCheckedChange = onSetHaptics,
+            )
+        },
+        SettingsEntry(
+            SettingsSection.GESTURES, stringResource(R.string.settings_haptics_ignore_system),
+            "vibrate haptic touch feedback system", visible = hapticsEnabled,
+        ) {
+            SwitchRowWithDetail(
+                label = stringResource(R.string.settings_haptics_ignore_system),
+                detail = stringResource(R.string.settings_haptics_ignore_system_detail),
+                checked = hapticsIgnoreSystem, onCheckedChange = onSetHapticsIgnoreSystem,
             )
         },
         SettingsEntry(SettingsSection.GESTURES, stringResource(R.string.settings_swipe_up_list), "swipe up") {

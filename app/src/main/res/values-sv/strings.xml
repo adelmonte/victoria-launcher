@@ -123,6 +123,8 @@
     <string name="settings_dim_applist">Dämpa bakgrundsbilden bakom applistan</string>
     <string name="settings_haptics">Haptisk återkoppling</string>
     <string name="settings_haptics_detail">Följer ditt systems inställning för beröringsåterkoppling</string>
+    <string name="settings_haptics_ignore_system">Vibrera med beröringsfeedback av</string>
+    <string name="settings_haptics_ignore_system_detail">Vibrerar här även när beröringsfeedback är av i Androids inställningar</string>
     <string name="settings_edge_side">Vilken kant öppnar applistan</string>
     <string name="settings_scrub_style">A-Z-remsans animation</string>
     <string name="scrub_style_bell">Klocka</string>

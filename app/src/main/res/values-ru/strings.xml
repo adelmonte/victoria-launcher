@@ -88,6 +88,8 @@
     <string name="settings_dim_applist">Прозрачность фона в меню приложений</string>
     <string name="settings_haptics">Виброотклик</string>
     <string name="settings_haptics_detail">Следует настройке виброотклика вашей системы.</string>
+    <string name="settings_haptics_ignore_system">Вибрация при выключенном тактильном отклике</string>
+    <string name="settings_haptics_ignore_system_detail">Вибрирует здесь, даже если тактильный отклик выключен в настройках Android</string>
     <string name="settings_edge_side">Край для открытия списка приложений</string>
     <string name="settings_double_tap_lock">Двойное касание для блокировки экрана</string>
     <string name="settings_double_tap_lock_detail">Коснитесь дважды по алфавитной волне</string>

@@ -123,6 +123,8 @@
     <string name="settings_dim_applist">Mallumigi ekranfonon malantaŭ aplikaĵlisto</string>
     <string name="settings_haptics">Haptika retrosciigo</string>
     <string name="settings_haptics_detail">Sekvas la tuŝan retrosciigan agordon de via sistemo</string>
+    <string name="settings_haptics_ignore_system">Vibri kun tuŝa reago malŝaltita</string>
+    <string name="settings_haptics_ignore_system_detail">Vibras ĉi tie eĉ kiam tuŝa reago estas malŝaltita en la agordoj de Android</string>
     <string name="settings_edge_side">Kiu rando malfermas la aplikaĵliston</string>
     <string name="settings_scrub_style">A-Z stria animacio</string>
     <string name="scrub_style_bell">Sonorilo</string>

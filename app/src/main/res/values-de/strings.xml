@@ -86,6 +86,8 @@
     <string name="settings_dim_applist">Hintergrundbild hinter der App-Liste abdunkeln</string>
     <string name="settings_haptics">Haptisches Feedback</string>
     <string name="settings_haptics_detail">Folgt der Systemeinstellung für Vibration beim Tippen</string>
+    <string name="settings_haptics_ignore_system">Auch ohne Berührungsfeedback vibrieren</string>
+    <string name="settings_haptics_ignore_system_detail">Vibriert hier, auch wenn das Berührungsfeedback in den Android-Einstellungen aus ist</string>
     <string name="settings_edge_side">Welcher Rand die App-Liste öffnet</string>
     <string name="settings_double_tap_lock">Doppeltippen zum Sperren des Bildschirms</string>
     <string name="settings_double_tap_lock_detail">Tippe zweimal auf die A-Z-Leiste</string>

@@ -20,6 +20,8 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
+import dev.victorialauncher.service.HapticUtil
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -330,6 +332,8 @@ fun VictoriaNavHost(
     val alignRight by app.prefs.alignRight.collectAsState(initial = false)
     val dimWallpaperAlpha by app.prefs.dimWallpaperAlpha.collectAsState(initial = 0.35f)
     val hapticsEnabled by app.prefs.hapticsEnabled.collectAsState(initial = true)
+    val hapticsIgnoreSystem by app.prefs.hapticsIgnoreSystem.collectAsState(initial = false)
+    SideEffect { HapticUtil.ignoreSystemSetting = hapticsIgnoreSystem }
     val dimHomeAlpha by app.prefs.dimHomeAlpha.collectAsState(initial = 0f)
     val showFavoriteLabels by app.prefs.showFavoriteLabels.collectAsState(initial = true)
     val textColorMode by app.prefs.textColorMode.collectAsState(initial = TextColorMode.AUTO)
@@ -895,6 +899,8 @@ fun VictoriaNavHost(
                 onSetStatusBarPeekSeconds = { scope.launch { app.prefs.setStatusBarPeekSeconds(it) } },
                 onSetDimWallpaper = { scope.launch { app.prefs.setDimWallpaperAlpha(it) } },
                 onSetHaptics = { scope.launch { app.prefs.setHapticsEnabled(it) } },
+                hapticsIgnoreSystem = hapticsIgnoreSystem,
+                onSetHapticsIgnoreSystem = { scope.launch { app.prefs.setHapticsIgnoreSystem(it) } },
                 onSetDimHome = { scope.launch { app.prefs.setDimHomeAlpha(it) } },
                 onSetShowFavoriteLabels = { scope.launch { app.prefs.setShowFavoriteLabels(it) } },
                 onSetTextColorMode = { scope.launch { app.prefs.setTextColorMode(it) } },

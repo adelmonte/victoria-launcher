@@ -88,6 +88,8 @@
     <string name="settings_dim_applist">Atenuar el fondo tras la lista de aplicaciones</string>
     <string name="settings_haptics">Respuesta háptica</string>
     <string name="settings_haptics_detail">Sigue el ajuste de vibración táctil de tu sistema</string>
+    <string name="settings_haptics_ignore_system">Vibrar con la respuesta táctil desactivada</string>
+    <string name="settings_haptics_ignore_system_detail">Vibra aquí aunque la respuesta táctil esté desactivada en los ajustes de Android</string>
     <string name="settings_edge_side">Qué borde abre la lista de aplicaciones</string>
     <string name="settings_double_tap_lock">Tocar dos veces para bloquear la pantalla</string>
     <string name="settings_double_tap_lock_detail">Toca dos veces la barra A-Z</string>

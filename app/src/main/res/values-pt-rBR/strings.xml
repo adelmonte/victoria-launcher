@@ -122,6 +122,8 @@
     <string name="settings_dim_applist">Escurecer o papel de parede atrás da lista de apps</string>
     <string name="settings_haptics">Feedback tátil</string>
     <string name="settings_haptics_detail">Segue a configuração de feedback ao toque do sistema</string>
+    <string name="settings_haptics_ignore_system">Vibrar com a resposta tátil desligada</string>
+    <string name="settings_haptics_ignore_system_detail">Vibra aqui mesmo com a resposta tátil desligada nas configurações do Android</string>
     <string name="settings_edge_side">Qual borda abre a lista de apps</string>
     <string name="settings_scrub_style">Animação da barra A-Z</string>
     <string name="scrub_style_bell">Sino</string>
