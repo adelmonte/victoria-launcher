@@ -77,6 +77,8 @@ import dev.victorialauncher.data.QuickLaunchSlot
 import dev.victorialauncher.data.PaddingSlot
 import dev.victorialauncher.data.folderToken
 import dev.victorialauncher.media.NowPlayingBus
+import dev.victorialauncher.media.NotificationCountBus
+import dev.victorialauncher.media.conversationKey
 import dev.victorialauncher.media.isListenerEnabled
 import dev.victorialauncher.service.SystemUi
 import dev.victorialauncher.ui.applist.AppListModel
@@ -301,6 +303,19 @@ fun HomeRoute(
     // Asked first: it sits at the bottom of the menu where the other menus keep settings, and
     // a folder's arrangement and widgets cannot be had back.
     var folderToDelete by remember { mutableStateOf<Folder?>(null) }
+
+    // The chats on the home screen, in a folder or not, so their notifications show on them
+    // rather than on the app (#181).
+    LaunchedEffect(favorites) {
+        NotificationCountBus.pinnedConversations.value = favorites.flatMap { entry ->
+            when (entry) {
+                is FavoriteEntry.App -> listOf(entry.app)
+                is FavoriteEntry.FolderRef -> entry.folder.apps.mapNotNull { appsByKey[it] }
+            }
+        }.mapNotNullTo(HashSet()) { app ->
+            app.shortcutId?.takeIf { app.kind == EntryKind.SHORTCUT }?.let { conversationKey(app.packageName, it) }
+        }
+    }
 
     val nowPlaying by NowPlayingBus.state.collectAsState()
     val listenerGranted = remember(homeIntentTick) { isListenerEnabled(context) }

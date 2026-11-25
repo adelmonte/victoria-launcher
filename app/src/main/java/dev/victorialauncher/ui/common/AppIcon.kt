@@ -36,6 +36,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.drawable.toBitmap
 import dev.victorialauncher.media.NotificationCountBus
+import dev.victorialauncher.media.conversationKey
 import dev.victorialauncher.VictoriaApp
 import dev.victorialauncher.data.AppInfo
 import dev.victorialauncher.data.EntryKind
@@ -284,7 +285,17 @@ private val GreyedOut = ColorFilter.colorMatrix(ColorMatrix().apply { setToSatur
 private fun notificationBadgeCount(app: AppInfo): Int {
     if (!LocalIconConfig.current.notificationBadges) return 0
     val counts by NotificationCountBus.counts.collectAsState()
-    return counts[app.componentName.packageName] ?: 0
+    val byConversation by NotificationCountBus.conversationCounts.collectAsState()
+    val pinned by NotificationCountBus.pinnedConversations.collectAsState()
+    // A pinned chat counts its own messages, and the app's badge leaves them out (#181).
+    if (app.kind == EntryKind.SHORTCUT) {
+        val id = app.shortcutId ?: return 0
+        return byConversation[conversationKey(app.packageName, id)] ?: 0
+    }
+    val total = counts[app.componentName.packageName] ?: 0
+    val prefix = app.packageName + "/"
+    val elsewhere = pinned.sumOf { if (it.startsWith(prefix)) byConversation[it] ?: 0 else 0 }
+    return (total - elsewhere).coerceAtLeast(0)
 }
 
 /**

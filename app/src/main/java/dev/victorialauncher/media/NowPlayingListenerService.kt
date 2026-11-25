@@ -4,6 +4,7 @@ package dev.victorialauncher.media
 import android.app.Notification
 import android.content.ComponentName
 import android.content.Context
+import android.os.Build
 import android.provider.Settings
 import android.media.MediaMetadata
 import android.media.session.MediaController
@@ -113,12 +114,14 @@ class NowPlayingListenerService : NotificationListenerService() {
             return
         }
         val counts = HashMap<String, Int>()
+        val conversationCounts = HashMap<String, Int>()
         val shown = HashMap<String, MutableList<StatusBarNotification>>()
         active.forEach { sbn ->
             if (!sbn.isClearable) return@forEach
             val notification = sbn.notification ?: return@forEach
             if (notification.flags and Notification.FLAG_GROUP_SUMMARY != 0) return@forEach
             counts[sbn.packageName] = (counts[sbn.packageName] ?: 0) + 1
+            conversationOf(sbn)?.let { conversationCounts[it] = (conversationCounts[it] ?: 0) + 1 }
             if (notification.visibility == Notification.VISIBILITY_SECRET) return@forEach
             shown.getOrPut(sbn.packageName) { mutableListOf() }.add(sbn)
         }
@@ -130,15 +133,23 @@ class NowPlayingListenerService : NotificationListenerService() {
                         text = text,
                         intent = sbn.notification.contentIntent,
                         autoCancel = sbn.notification.flags and Notification.FLAG_AUTO_CANCEL != 0,
+                        conversation = conversationOf(sbn),
                     )
                 }
-            }.take(MAX_NOTIFICATION_LINES)
+            }
         }.filterValues { it.isNotEmpty() }
         val before = NotificationCountBus.counts.value.values.sum()
-        NotificationCountBus.update(counts, previews)
+        NotificationCountBus.update(counts, previews, conversationCounts)
         // A widget is drawn only when something asks. The home screen follows the bus on its
         // own; a RemoteViews cannot, so the total changing is what has to ask for it.
         if (counts.values.sum() != before) ClockWidgetProvider.renderAll(this)
+    }
+
+    /** The chat a message belongs to, by the shortcut the app tags it with (Android 10 on). */
+    private fun conversationOf(sbn: StatusBarNotification): String? {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) return null
+        val id = sbn.notification?.shortcutId ?: return null
+        return conversationKey(sbn.packageName, id)
     }
 
     /** "Title: text" on one line, or whichever of the two the notification has. */

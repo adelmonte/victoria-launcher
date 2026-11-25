@@ -152,6 +152,8 @@ import kotlin.math.roundToInt
 import dev.victorialauncher.R
 import dev.victorialauncher.media.NotificationCountBus
 import dev.victorialauncher.media.NotificationLine
+import dev.victorialauncher.media.MAX_NOTIFICATION_LINES
+import dev.victorialauncher.media.conversationKey
 import androidx.compose.ui.res.stringResource
 
 private sealed interface HomeItem {
@@ -2151,12 +2153,24 @@ private fun NotificationLines(
     }
 }
 
-/** This app's newest notifications, or none when the setting is off. */
+/**
+ * This app's newest notifications, or none when the setting is off. A pinned chat shows its
+ * own, and the app leaves those out (#181).
+ */
 @Composable
 private fun notificationPreview(app: AppInfo): List<NotificationLine> {
-    if (!LocalIconConfig.current.notificationPreviews || app.kind != EntryKind.APP) return emptyList()
+    if (!LocalIconConfig.current.notificationPreviews) return emptyList()
     val previews by NotificationCountBus.previews.collectAsState()
-    return previews[app.componentName.packageName].orEmpty()
+    val pinned by NotificationCountBus.pinnedConversations.collectAsState()
+    val all = previews[app.componentName.packageName].orEmpty()
+    return when (app.kind) {
+        EntryKind.APP -> all.filter { it.conversation == null || it.conversation !in pinned }
+        EntryKind.SHORTCUT -> {
+            val key = conversationKey(app.packageName, app.shortcutId ?: return emptyList())
+            all.filter { it.conversation == key }
+        }
+        else -> emptyList()
+    }.take(MAX_NOTIFICATION_LINES)
 }
 
 private fun HomeAlignment.textAlign() = when (this) {

@@ -15,7 +15,12 @@ data class NotificationLine(
     val intent: PendingIntent?,
     /** Whether the notification asked to go away once opened, as tapping it in the shade would. */
     val autoCancel: Boolean,
+    /** The conversation it belongs to, as [conversationKey], or null for any other kind. */
+    val conversation: String? = null,
 )
+
+/** A conversation's shortcut as the bus keys it, the same for a notification and a pinned chat. */
+fun conversationKey(packageName: String, shortcutId: String) = "$packageName/$shortcutId"
 
 /** How many of an app's notifications the home screen lists under it, newest first. */
 const val MAX_NOTIFICATION_LINES = 3
@@ -34,15 +39,31 @@ object NotificationCountBus {
     private val _counts = MutableStateFlow<Map<String, Int>>(emptyMap())
     val counts: StateFlow<Map<String, Int>> = _counts
 
+    /** Every previewable line per package, newest first; trimmed where it is shown. */
     private val _previews = MutableStateFlow<Map<String, List<NotificationLine>>>(emptyMap())
     val previews: StateFlow<Map<String, List<NotificationLine>>> = _previews
+
+    /** How many notifications each conversation is showing, by [conversationKey]. */
+    private val _conversationCounts = MutableStateFlow<Map<String, Int>>(emptyMap())
+    val conversationCounts: StateFlow<Map<String, Int>> = _conversationCounts
+
+    /**
+     * The chats pinned on the home screen, by [conversationKey]. Their notifications are shown
+     * on the chat itself and left off the app's own row and badge (#181).
+     */
+    val pinnedConversations = MutableStateFlow<Set<String>>(emptySet())
 
     /** Set by the service while it is connected, since only it can dismiss a notification. */
     var canceller: ((String) -> Unit)? = null
 
-    fun update(counts: Map<String, Int>, previews: Map<String, List<NotificationLine>>) {
+    fun update(
+        counts: Map<String, Int>,
+        previews: Map<String, List<NotificationLine>>,
+        conversationCounts: Map<String, Int> = emptyMap(),
+    ) {
         _counts.value = counts
         _previews.value = previews
+        _conversationCounts.value = conversationCounts
     }
 
     /** Clears the notification, as swiping it away in the shade would. */
@@ -70,5 +91,6 @@ object NotificationCountBus {
     fun clear() {
         _counts.value = emptyMap()
         _previews.value = emptyMap()
+        _conversationCounts.value = emptyMap()
     }
 }
