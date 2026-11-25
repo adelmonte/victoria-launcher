@@ -32,6 +32,7 @@ import dev.victorialauncher.R
 import dev.victorialauncher.data.AppInfo
 import dev.victorialauncher.data.Folder
 import dev.victorialauncher.data.folderIdFromToken
+import dev.victorialauncher.ui.home.FolderIcon
 import dev.victorialauncher.data.PrivateSpace
 import dev.victorialauncher.data.concealsStored
 import dev.victorialauncher.data.restoreConcealed
@@ -57,10 +58,14 @@ fun FolderAppsScreen(
     onForget: (String) -> Unit,
     onReorder: (List<String>) -> Unit,
     onBack: () -> Unit,
+    /** The folders that can be inside this one (#188), drawn among its apps. */
+    foldersById: Map<String, Folder> = emptyMap(),
+    /** Takes a folder out of this one and back onto the home screen. */
+    onMoveFolderOut: (String) -> Unit = {},
 ) {
     val surface = MaterialTheme.colorScheme.surface
-    // Apps only; the folders kept inside this one (#188) are moved from their own menu.
-    val members = folder?.apps.orEmpty().filter { folderIdFromToken(it) == null }
+    // Apps and the folders kept inside this one (#188), in one order to drag them in.
+    val members = folder?.apps.orEmpty()
     val memberSet = members.toSet()
     val appsByKey = remember(allApps) { allApps.associateBy { it.key } }
     // Left out rather than shown as a missing row, for the same reason as in the favorites
@@ -72,7 +77,7 @@ fun FolderAppsScreen(
     // hides more than the rule that restores loses everything between the two on the first
     // drag, because the screen writes back the whole list it was given.
     val conceal: (String) -> Boolean = remember(privateSpace, appsByKey) {
-        { key -> privateSpace.concealsStored(key, key in appsByKey) }
+        { key -> folderIdFromToken(key) == null && privateSpace.concealsStored(key, key in appsByKey) }
     }
     val shownMembers = remember(members, conceal) { members.filterNot(conceal) }
 
@@ -109,7 +114,16 @@ fun FolderAppsScreen(
                     onReorder = { order -> onReorder(restoreConcealed(members, order, conceal)) },
                 ) { key ->
                     val app = appsByKey[key]
-                    if (app != null) {
+                    val sub = folderIdFromToken(key)?.let { foldersById[it] }
+                    if (sub != null) {
+                        FolderIcon(
+                            sub.apps.mapNotNull { appsByKey[it] }, minOf(iconSizeDp, 44),
+                            MaterialTheme.colorScheme.onSurface, sub.icon,
+                        )
+                        Spacer(Modifier.width(16.dp))
+                        Text(sub.name, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
+                        Checkbox(checked = true, onCheckedChange = { onMoveFolderOut(sub.id) })
+                    } else if (app != null) {
                         AppIcon(app = app, sizeDp = minOf(iconSizeDp, 44))
                         Spacer(Modifier.width(16.dp))
                         Text(

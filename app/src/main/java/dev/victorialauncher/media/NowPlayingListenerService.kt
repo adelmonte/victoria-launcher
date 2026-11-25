@@ -134,6 +134,7 @@ class NowPlayingListenerService : NotificationListenerService() {
                         intent = sbn.notification.contentIntent,
                         autoCancel = sbn.notification.flags and Notification.FLAG_AUTO_CANCEL != 0,
                         conversation = conversationOf(sbn),
+                        postTime = sbn.postTime,
                     )
                 }
             }

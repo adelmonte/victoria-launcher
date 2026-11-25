@@ -1086,6 +1086,8 @@ fun VictoriaNavHost(
                 onReorder = { keys -> scope.launch { app.prefs.setFolderApps(id, keys) } },
                 onForget = { key -> scope.launch { app.prefs.removeAppFromFolder(id, key) } },
                 onBack = { navController.popBackStack() },
+                foldersById = foldersById,
+                onMoveFolderOut = { sub -> scope.launch { app.prefs.moveFolder(sub, null) } },
             )
         }
 

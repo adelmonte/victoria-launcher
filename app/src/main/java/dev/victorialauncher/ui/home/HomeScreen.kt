@@ -128,6 +128,8 @@ import dev.victorialauncher.data.ShortcutSwipe
 import dev.victorialauncher.data.EntryKind
 import dev.victorialauncher.data.Folder
 import dev.victorialauncher.data.subfolderIds
+import dev.victorialauncher.data.folderIdFromToken
+import dev.victorialauncher.data.folderAndDescendants
 import dev.victorialauncher.data.QuickLaunchSlot
 import dev.victorialauncher.data.HomeAlignment
 import dev.victorialauncher.data.IconSide
@@ -139,6 +141,9 @@ import dev.victorialauncher.media.openNowPlayingApp
 import dev.victorialauncher.service.HapticUtil
 import androidx.compose.runtime.CompositionLocalProvider
 import dev.victorialauncher.ui.common.AppIcon
+import dev.victorialauncher.ui.common.NotificationBadge
+import dev.victorialauncher.ui.common.badgeFill
+import dev.victorialauncher.ui.common.notificationBadgeCount
 import dev.victorialauncher.ui.common.swipeForShortcuts
 import dev.victorialauncher.ui.common.AppShortcutMenu
 import dev.victorialauncher.ui.common.TouchAnchoredMenu
@@ -1128,12 +1133,16 @@ fun HomeScreen(
                                 onMemberEditIconName = { member -> renameDialogFor = member },
                                 onOpenSettings = onOpenSettings,
                         
-                                    subfolders = {
-                                        subs.forEach { sub ->
+                                    subfolder = { id ->
+                                        subs.firstOrNull { it.id == id }?.let { sub ->
                                             key(sub.id) { FolderTree(sub, depth + 1, folder, path + sub.id) }
                                         }
                                     },
+                                    order = folder.apps,
                                     hasSubfolders = subs.isNotEmpty(),
+                                    notifyMembers = folderAndDescendants(folder.id, foldersById)
+                                        .flatMap { id -> foldersById[id]?.apps.orEmpty() }
+                                        .mapNotNull { appsByKey[it] },
                                     onMoveToFolder = onMoveFolder?.let { move -> { move(folder) } },
                                     onMoveToHome = if (parent == null) null else onMoveFolderToHome?.let { move -> { move(folder) } },
                                 )
@@ -1617,9 +1626,13 @@ private fun FolderRow(
     onMemberUnpin: (AppInfo) -> Unit,
     onMemberEditIconName: (AppInfo) -> Unit,
     onOpenSettings: () -> Unit,
-    /** The folders kept inside this one (#188), drawn in the open folder above its apps. */
-    subfolders: @Composable () -> Unit = {},
+    /** Draws the folder kept inside this one by that id (#188), where it is in [order]. */
+    subfolder: @Composable (String) -> Unit = {},
+    /** Apps and folders' tokens in the folder's own order, so the two can be mixed. */
+    order: List<String> = emptyList(),
     hasSubfolders: Boolean = false,
+    /** Every app in it and in the folders inside it, for what it shows while closed (#181). */
+    notifyMembers: List<AppInfo> = members,
     onMoveToFolder: (() -> Unit)? = null,
     /** Set for a folder inside another, to take it back out onto the home screen. */
     onMoveToHome: (() -> Unit)? = null,
@@ -1672,15 +1685,26 @@ private fun FolderRow(
                     showLabel = showLabels,
                     iconSide = iconSide,
                     iconWidth = iconSizeDp.dp,
-                    icon = { FolderIcon(members, iconSizeDp, contentColor, folder.icon) },
+                    icon = {
+                        FolderIcon(
+                            members, iconSizeDp, contentColor, folder.icon,
+                            badge = if (expanded && !editMode) 0 else notificationBadgeCount(notifyMembers),
+                        )
+                    },
                 ) { labelModifier ->
-                    Text(
-                        folder.name,
-                        color = contentColor,
-                        fontSize = labelSizeSp.sp,
-                        modifier = labelModifier,
-                        textAlign = alignment.textAlign(),
-                    )
+                    val preview = if (expanded && !editMode) emptyList() else notificationPreview(notifyMembers)
+                    Column(labelModifier, horizontalAlignment = alignment.columnAlignment()) {
+                        Text(
+                            folder.name,
+                            color = contentColor,
+                            fontSize = labelSizeSp.sp,
+                            textAlign = alignment.textAlign(),
+                        )
+                        NotificationLines(
+                            preview, alignment, contentColor,
+                            interactive = !editMode, onFallback = onToggleExpanded,
+                        )
+                    }
                 }
             }
 
@@ -1777,8 +1801,14 @@ private fun FolderRow(
                             },
                     )
                 }
-                subfolders()
-                members.forEach { member ->
+                val memberByKey = members.associateBy { it.key }
+                order.forEach { entry ->
+                    folderIdFromToken(entry)?.let { id ->
+                        subfolder(id)
+                        return@forEach
+                    }
+                    val member = memberByKey[entry] ?: return@forEach
+                    key(member.key) {
                     Box {
                     Row(
                         modifier = Modifier
@@ -1882,6 +1912,7 @@ private fun FolderRow(
                             leadingIcon = { Icon(Icons.Filled.Settings, contentDescription = null) },
                             onClick = { memberMenuFor = null; onOpenSettings() },
                         )
+                    }
                     }
                     }
                 }
@@ -2000,8 +2031,27 @@ internal fun FolderIcon(
     sizeDp: Int,
     contentColor: Color,
     iconOverride: String?,
+    /** Its members' notifications, shown while it is closed (#181). */
+    badge: Int = 0,
 ) {
-    if (!LocalIconConfig.current.showIcons) return
+    if (!LocalIconConfig.current.showIcons) {
+        // The same dot an app gets in a list with no icons.
+        if (badge > 0) Box(Modifier.padding(horizontal = 6.dp).size(8.dp).background(badgeFill(), CircleShape))
+        return
+    }
+    Box(Modifier.size(sizeDp.dp)) {
+        FolderIconBody(members, sizeDp, contentColor, iconOverride)
+        if (badge > 0) NotificationBadge(badge, sizeDp, Modifier.align(Alignment.TopEnd))
+    }
+}
+
+@Composable
+private fun FolderIconBody(
+    members: List<AppInfo>,
+    sizeDp: Int,
+    contentColor: Color,
+    iconOverride: String?,
+) {
     var drewOverride = false
     if (iconOverride != null) {
         drewOverride = FolderIconImage(iconOverride, sizeDp)
@@ -2203,19 +2253,27 @@ private fun NotificationLines(
  * own, and the app leaves those out (#181).
  */
 @Composable
-private fun notificationPreview(app: AppInfo): List<NotificationLine> {
+private fun notificationPreview(app: AppInfo): List<NotificationLine> = notificationPreview(listOf(app))
+
+/** The same for several apps, newest first: what a closed folder shows of its members (#181). */
+@Composable
+private fun notificationPreview(apps: List<AppInfo>): List<NotificationLine> {
     if (!LocalIconConfig.current.notificationPreviews) return emptyList()
     val previews by NotificationCountBus.previews.collectAsState()
     val pinned by NotificationCountBus.pinnedConversations.collectAsState()
-    val all = previews[app.componentName.packageName].orEmpty()
-    return when (app.kind) {
-        EntryKind.APP -> all.filter { it.conversation == null || it.conversation !in pinned }
-        EntryKind.SHORTCUT -> {
-            val key = conversationKey(app.packageName, app.shortcutId ?: return emptyList())
-            all.filter { it.conversation == key }
+    val lines = apps.flatMap { app ->
+        val all = previews[app.componentName.packageName].orEmpty()
+        when (app.kind) {
+            EntryKind.APP -> all.filter { it.conversation == null || it.conversation !in pinned }
+            EntryKind.SHORTCUT -> {
+                val key = conversationKey(app.packageName, app.shortcutId ?: return@flatMap emptyList())
+                all.filter { it.conversation == key }
+            }
+            else -> emptyList()
         }
-        else -> emptyList()
-    }.take(MAX_NOTIFICATION_LINES)
+    }
+    return (if (apps.size > 1) lines.distinctBy { it.key }.sortedByDescending { it.postTime } else lines)
+        .take(MAX_NOTIFICATION_LINES)
 }
 
 private fun HomeAlignment.textAlign() = when (this) {

@@ -1090,7 +1090,7 @@ class Prefs(private val context: Context) {
 
     suspend fun setFolderApps(id: String, apps: List<String>) {
         context.dataStore.edit { pref ->
-            // The screen that sets these lists apps only; the folders inside are kept, first.
+            // A folder inside that the list leaves out is kept, first, rather than dropped.
             val updated = foldersFromJson(pref[Keys.FOLDERS]).map { folder ->
                 if (folder.id != id) return@map folder
                 val subfolders = folder.apps.filter { folderIdFromToken(it) != null && it !in apps }

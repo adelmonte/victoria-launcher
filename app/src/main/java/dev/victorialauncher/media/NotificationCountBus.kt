@@ -17,6 +17,8 @@ data class NotificationLine(
     val autoCancel: Boolean,
     /** The conversation it belongs to, as [conversationKey], or null for any other kind. */
     val conversation: String? = null,
+    /** When it was posted, to put several apps' lines in one order. */
+    val postTime: Long = 0L,
 )
 
 /** A conversation's shortcut as the bus keys it, the same for a notification and a pinned chat. */

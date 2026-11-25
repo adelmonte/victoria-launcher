@@ -284,20 +284,26 @@ private val GreyedOut = ColorFilter.colorMatrix(ColorMatrix().apply { setToSatur
  * a count that is only as current as the last time the service was alive.
  */
 @Composable
-private fun notificationBadgeCount(app: AppInfo): Int {
+private fun notificationBadgeCount(app: AppInfo): Int = notificationBadgeCount(listOf(app))
+
+/** The same, summed over [apps]: a closed folder's count is its members' (#181). */
+@Composable
+internal fun notificationBadgeCount(apps: List<AppInfo>): Int {
     if (!LocalIconConfig.current.notificationBadges) return 0
     val counts by NotificationCountBus.counts.collectAsState()
     val byConversation by NotificationCountBus.conversationCounts.collectAsState()
     val pinned by NotificationCountBus.pinnedConversations.collectAsState()
-    // A pinned chat counts its own messages, and the app's badge leaves them out (#181).
-    if (app.kind == EntryKind.SHORTCUT) {
-        val id = app.shortcutId ?: return 0
-        return byConversation[conversationKey(app.packageName, id)] ?: 0
+    return apps.sumOf { app ->
+        // A pinned chat counts its own messages, and the app's badge leaves them out (#181).
+        if (app.kind == EntryKind.SHORTCUT) {
+            val id = app.shortcutId ?: return@sumOf 0
+            return@sumOf byConversation[conversationKey(app.packageName, id)] ?: 0
+        }
+        val total = counts[app.componentName.packageName] ?: 0
+        val prefix = app.packageName + "/"
+        val elsewhere = pinned.sumOf { if (it.startsWith(prefix)) byConversation[it] ?: 0 else 0 }
+        (total - elsewhere).coerceAtLeast(0)
     }
-    val total = counts[app.componentName.packageName] ?: 0
-    val prefix = app.packageName + "/"
-    val elsewhere = pinned.sumOf { if (it.startsWith(prefix)) byConversation[it] ?: 0 else 0 }
-    return (total - elsewhere).coerceAtLeast(0)
 }
 
 /**
@@ -308,7 +314,7 @@ private fun notificationBadgeCount(app: AppInfo): Int {
  * three-digit number in it is unreadable at any size an icon is drawn at.
  */
 @Composable
-private fun NotificationBadge(count: Int, iconSizeDp: Int, modifier: Modifier = Modifier) {
+internal fun NotificationBadge(count: Int, iconSizeDp: Int, modifier: Modifier = Modifier) {
     val diameter = (iconSizeDp * 0.42f).dp.coerceIn(14.dp, 22.dp)
     val fill = badgeFill()
     val custom = LocalIconConfig.current.badgeColor != null
@@ -334,7 +340,7 @@ private fun NotificationBadge(count: Int, iconSizeDp: Int, modifier: Modifier = 
 }
 
 @Composable
-private fun badgeFill(): Color =
+internal fun badgeFill(): Color =
     LocalIconConfig.current.badgeColor?.let { Color(it) } ?: MaterialTheme.colorScheme.primary
 
 /**
