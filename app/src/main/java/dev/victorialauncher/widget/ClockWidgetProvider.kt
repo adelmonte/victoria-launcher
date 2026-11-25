@@ -163,7 +163,7 @@ class ClockWidgetProvider : AppWidgetProvider() {
                     setTextColor(R.id.widget_notifications, config.colorAt(config.notificationsOpacity))
                 }
 
-                // What is coming up. The event rows are a fixed three in the layout rather
+                // What is coming up. The event rows are a fixed ten in the layout rather
                 // than a list, because a RemoteViews cannot be given children it was not
                 // written with — so the unused ones are simply hidden.
                 val events = if (config.showAgenda) {
@@ -187,7 +187,9 @@ class ClockWidgetProvider : AppWidgetProvider() {
                         setTextColor(viewId, config.colorAt(config.agendaOpacity))
                         setOnClickPendingIntent(
                             viewId,
-                            open(context, calendarIntent(), widgetId * 8 + 4 + index),
+                            // Every row opens the same calendar, so rows past the third share its code
+                            // rather than reaching into the next widget's range.
+                            open(context, calendarIntent(), widgetId * 8 + 4 + index.coerceAtMost(2)),
                         )
                     }
                 }
@@ -236,7 +238,11 @@ class ClockWidgetProvider : AppWidgetProvider() {
                 )
             }.getOrNull()
 
-        private val EVENT_ROWS = intArrayOf(R.id.widget_event_1, R.id.widget_event_2, R.id.widget_event_3)
+        private val EVENT_ROWS = intArrayOf(
+            R.id.widget_event_1, R.id.widget_event_2, R.id.widget_event_3, R.id.widget_event_4,
+            R.id.widget_event_5, R.id.widget_event_6, R.id.widget_event_7, R.id.widget_event_8,
+            R.id.widget_event_9, R.id.widget_event_10,
+        )
 
         private fun launchIntentFor(context: Context, pkg: String): Intent? = runCatching {
             context.packageManager.getLaunchIntentForPackage(pkg)

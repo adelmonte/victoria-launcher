@@ -102,8 +102,8 @@ data class ClockWidgetConfig(
 
         val GAP_RANGE = 0..64
 
-        /** More than three and the widget is an agenda rather than a clock. */
-        val AGENDA_COUNT_RANGE = 1..3
+        /** Up to a full day's worth (#186); the layout holds this many rows. */
+        val AGENDA_COUNT_RANGE = 1..10
 
         /** An hour out to a week; past that it is not what is coming up. */
         val AGENDA_HOURS_RANGE = 1..168
