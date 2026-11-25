@@ -1,0 +1,4 @@
+• Folders inside folders: Move to folder in a folder's menu
+• A pinned chat shows its own notifications, and its app no longer counts them too
+• Clock widget can list up to ten events
+• Optional vibration even with Android's touch feedback turned off
