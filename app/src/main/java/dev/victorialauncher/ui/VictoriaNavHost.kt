@@ -42,6 +42,7 @@ import androidx.navigation.compose.rememberNavController
 import dev.victorialauncher.TypedKey
 import dev.victorialauncher.VictoriaApp
 import android.widget.Toast
+import androidx.compose.runtime.produceState
 import dev.victorialauncher.data.IconShape
 import dev.victorialauncher.data.AppFont
 import dev.victorialauncher.data.AppInfo
@@ -73,6 +74,7 @@ import dev.victorialauncher.ui.common.clearIconCache
 import dev.victorialauncher.ui.common.encodePackOverride
 import dev.victorialauncher.ui.common.warmIconCache
 import dev.victorialauncher.ui.common.iconCacheGeneration
+import dev.victorialauncher.ui.common.iconColorKeys
 import dev.victorialauncher.ui.home.FavoriteEntry
 import dev.victorialauncher.ui.home.HomeRoute
 import dev.victorialauncher.ui.home.HomeSettings
@@ -359,6 +361,7 @@ fun VictoriaNavHost(
     val frequentCount by app.prefs.frequentCount.collectAsState(initial = 6)
     val appListSearchHidden by app.prefs.appListSearchHidden.collectAsState(initial = false)
     val sortByUsage by app.prefs.sortByUsage.collectAsState(initial = false)
+    val sortByIconColor by app.prefs.sortByIconColor.collectAsState(initial = false)
     val launchCounts by app.prefs.launchCounts.collectAsState(initial = emptyMap())
     val edgeZoneWidthDp by app.prefs.edgeZoneWidthDp.collectAsState(initial = 56)
     val quickLaunchLeftKey by app.prefs.quickLaunchLeft.collectAsState(initial = null)
@@ -482,6 +485,12 @@ fun VictoriaNavHost(
     LaunchedEffect(allApps, iconPackPackage, iconOverrides, listIconPx, priorityKeys, iconStyle, cacheGeneration) {
         warmIconCache(context, allApps, iconPackPackage, iconOverrides, listIconPx, iconStyle, priorityKeys)
     }
+    // Only worked out while the list is sorted by colour; null puts it back to A-Z.
+    val iconColors by produceState<Map<String, Int>?>(
+        null, sortByIconColor, allApps, iconPackPackage, iconOverrides, cacheGeneration,
+    ) {
+        value = if (sortByIconColor) iconColorKeys(context, allApps, iconPackPackage, iconOverrides) else null
+    }
 
     // Written through the document picker rather than to a path of our own: the file is the
     // user's to keep, and this way it lands wherever they keep things without the app asking
@@ -586,6 +595,7 @@ fun VictoriaNavHost(
         appListSearchHidden = appListSearchHidden,
         hideStatusBarAppList = hideStatusBarAppList,
         sortByUsage = sortByUsage,
+        iconColors = iconColors,
         quickLaunchLeft = quickLaunchLeftKey?.let { appsByKey[it] },
         quickLaunchRight = quickLaunchRightKey?.let { appsByKey[it] },
         // Both flows start null/true so nothing is centered or offered before the stored
@@ -874,6 +884,7 @@ fun VictoriaNavHost(
                 azStripVisibility = azStripVisibility,
                 showAlphabet = showAlphabet,
                 sortByUsage = sortByUsage,
+                sortByIconColor = sortByIconColor,
                 appListSearch = appListSearchEnabled,
                 appListSearchBottom = appListSearchBottom,
                 appListSearchHidden = appListSearchHidden,
@@ -947,6 +958,7 @@ fun VictoriaNavHost(
                 onSetAzStripVisibility = { scope.launch { app.prefs.setAzStripVisibility(it) } },
                 onSetShowAlphabet = { scope.launch { app.prefs.setShowAlphabet(it) } },
                 onSetSortByUsage = { scope.launch { app.prefs.setSortByUsage(it) } },
+                onSetSortByIconColor = { scope.launch { app.prefs.setSortByIconColor(it) } },
                 onSetAppListSearch = { scope.launch { app.prefs.setAppListSearchEnabled(it) } },
                 onSetAppListSearchBottom = { scope.launch { app.prefs.setAppListSearchBottom(it) } },
                 onSetAppListSearchHidden = { scope.launch { app.prefs.setAppListSearchHidden(it) } },

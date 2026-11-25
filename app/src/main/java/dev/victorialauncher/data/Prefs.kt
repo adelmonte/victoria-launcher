@@ -216,6 +216,7 @@ class Prefs(private val context: Context) {
         val APPLIST_SEARCH_BOTTOM = booleanPreferencesKey("applist_search_bottom")
         val APPLIST_SEARCH_HIDDEN = booleanPreferencesKey("applist_search_hidden")
         val SORT_BY_USAGE = booleanPreferencesKey("sort_by_usage")
+        val SORT_BY_ICON_COLOR = booleanPreferencesKey("sort_by_icon_color")
         val LAUNCH_COUNTS = stringPreferencesKey(PREF_LAUNCH_COUNTS)
         val EDGE_ZONE_WIDTH_DP = intPreferencesKey("edge_zone_width_dp")
         val EDGE_ZONE_INSET_DP = intPreferencesKey("edge_zone_inset_dp")
@@ -630,6 +631,10 @@ class Prefs(private val context: Context) {
 
     /** Orders each letter's apps by how often they were opened from here, rather than by name. */
     val sortByUsage: Flow<Boolean> = data.map { it[Keys.SORT_BY_USAGE] ?: false }.distinctUntilChanged()
+
+    /** List the apps by the colour of their icons, with a colour strip in place of A-Z. */
+    val sortByIconColor: Flow<Boolean> =
+        data.map { it[Keys.SORT_BY_ICON_COLOR] ?: false }.distinctUntilChanged()
 
     val launchCounts: Flow<Map<String, Int>> = data.map { pref ->
         jsonToMap(pref[Keys.LAUNCH_COUNTS]).mapValues { (_, v) -> v.toIntOrNull() ?: 0 }
@@ -1321,6 +1326,10 @@ class Prefs(private val context: Context) {
 
     suspend fun setSortByUsage(v: Boolean) {
         context.dataStore.edit { it[Keys.SORT_BY_USAGE] = v }
+    }
+
+    suspend fun setSortByIconColor(v: Boolean) {
+        context.dataStore.edit { it[Keys.SORT_BY_ICON_COLOR] = v }
     }
 
     /**
