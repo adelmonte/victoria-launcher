@@ -395,6 +395,8 @@
     <string name="widget_clock_agenda_hours">На сколько часов вперёд</string>
     <string name="widget_clock_agenda_relative">Через 20 минут</string>
     <string name="widget_clock_agenda_absolute">В 12:30</string>
+    <string name="widget_clock_agenda_colors_show">Цвета календарей</string>
+    <string name="widget_clock_agenda_colors_hide">Без цветов</string>
     <string name="widget_clock_alarm_show">Следующий будильник</string>
     <string name="widget_clock_alarm_hide">Без будильника</string>
     <string name="widget_clock_agenda_permission">Разрешить доступ к календарю</string>

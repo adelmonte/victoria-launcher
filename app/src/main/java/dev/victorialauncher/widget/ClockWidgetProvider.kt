@@ -9,6 +9,9 @@ import android.content.Context
 import android.content.Intent
 import android.provider.AlarmClock
 import android.provider.CalendarContract
+import android.text.style.ForegroundColorSpan
+import android.text.Spanned
+import android.text.SpannableString
 import android.provider.Settings
 import android.util.TypedValue
 import android.view.View
@@ -182,7 +185,17 @@ class ClockWidgetProvider : AppWidgetProvider() {
                         setViewVisibility(viewId, View.GONE)
                     } else {
                         setViewVisibility(viewId, View.VISIBLE)
-                        setTextViewText(viewId, entry.text)
+                        val color = entry.color
+                        setTextViewText(
+                            viewId,
+                            if (config.agendaColors && color != null) {
+                                SpannableString("\u25CF  " + entry.text).apply {
+                                    setSpan(ForegroundColorSpan(color), 0, 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+                                }
+                            } else {
+                                entry.text
+                            },
+                        )
                         setTextViewTextSize(viewId, TypedValue.COMPLEX_UNIT_SP, config.agendaSizeSp.toFloat())
                         setTextColor(viewId, config.colorAt(config.agendaOpacity))
                         setOnClickPendingIntent(

@@ -395,6 +395,8 @@
     <string name="widget_clock_agenda_hours">Stunden vorausschauen</string>
     <string name="widget_clock_agenda_relative">In 20 Minuten</string>
     <string name="widget_clock_agenda_absolute">Um 12:30</string>
+    <string name="widget_clock_agenda_colors_show">Kalenderfarben</string>
+    <string name="widget_clock_agenda_colors_hide">Keine Farben</string>
     <string name="widget_clock_alarm_show">Nächster Wecker</string>
     <string name="widget_clock_alarm_hide">Kein Wecker</string>
     <string name="widget_clock_agenda_permission">Zugriff auf deinen Kalender erlauben</string>

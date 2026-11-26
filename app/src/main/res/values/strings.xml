@@ -378,6 +378,8 @@
     <string name="widget_clock_agenda_hours">Hours to look ahead</string>
     <string name="widget_clock_agenda_relative">In 20 minutes</string>
     <string name="widget_clock_agenda_absolute">At 12:30</string>
+    <string name="widget_clock_agenda_colors_show">Calendar colors</string>
+    <string name="widget_clock_agenda_colors_hide">No colors</string>
     <string name="widget_clock_alarm_show">Next alarm</string>
     <string name="widget_clock_alarm_hide">No alarm</string>
     <string name="widget_clock_agenda_permission">Allow access to your calendar</string>

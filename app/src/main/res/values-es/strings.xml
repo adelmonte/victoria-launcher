@@ -405,6 +405,8 @@
     <string name="widget_clock_agenda_hours">Horas por adelantado</string>
     <string name="widget_clock_agenda_relative">En 20 minutos</string>
     <string name="widget_clock_agenda_absolute">A las 12:30</string>
+    <string name="widget_clock_agenda_colors_show">Colores del calendario</string>
+    <string name="widget_clock_agenda_colors_hide">Sin colores</string>
     <string name="widget_clock_alarm_show">Próxima alarma</string>
     <string name="widget_clock_alarm_hide">Sin alarma</string>
     <string name="widget_clock_agenda_permission">Permitir el acceso a tu calendario</string>

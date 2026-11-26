@@ -151,6 +151,7 @@ class ClockWidgetConfigActivity : ComponentActivity() {
                                 onCount = { config = config.copy(agendaCount = it) },
                                 onHours = { config = config.copy(agendaLookaheadHours = it) },
                                 onAlarm = { config = config.copy(showAlarm = it) },
+                                onColors = { config = config.copy(agendaColors = it) },
                                 onAskPermission = {
                                     askCalendar.launch(Manifest.permission.READ_CALENDAR)
                                 },
@@ -637,6 +638,7 @@ private fun AgendaSection(
     onCount: (Int) -> Unit,
     onHours: (Int) -> Unit,
     onAlarm: (Boolean) -> Unit,
+    onColors: (Boolean) -> Unit,
     onAskPermission: () -> Unit,
 ) {
     Column {
@@ -661,6 +663,14 @@ private fun AgendaSection(
                 }
                 FilledChip(stringResource(R.string.widget_clock_agenda_absolute), !config.agendaRelative) {
                     onRelative(false)
+                }
+            }
+            Chips {
+                FilledChip(stringResource(R.string.widget_clock_agenda_colors_show), config.agendaColors) {
+                    onColors(true)
+                }
+                FilledChip(stringResource(R.string.widget_clock_agenda_colors_hide), !config.agendaColors) {
+                    onColors(false)
                 }
             }
             SliderRow(

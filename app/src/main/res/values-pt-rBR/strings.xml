@@ -376,6 +376,8 @@
     <string name="widget_clock_agenda_hours">Horas de antecedência</string>
     <string name="widget_clock_agenda_relative">Em 20 minutos</string>
     <string name="widget_clock_agenda_absolute">Às 12:30</string>
+    <string name="widget_clock_agenda_colors_show">Cores da agenda</string>
+    <string name="widget_clock_agenda_colors_hide">Sem cores</string>
     <string name="widget_clock_alarm_show">Próximo alarme</string>
     <string name="widget_clock_alarm_hide">Sem alarme</string>
     <string name="widget_clock_agenda_permission">Permitir acesso à sua agenda</string>

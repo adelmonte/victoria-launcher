@@ -377,6 +377,8 @@
     <string name="widget_clock_agenda_hours">Horoj por antaŭvidi</string>
     <string name="widget_clock_agenda_relative">Post 20 minutoj</string>
     <string name="widget_clock_agenda_absolute">Je la 12:30</string>
+    <string name="widget_clock_agenda_colors_show">Kalendaraj koloroj</string>
+    <string name="widget_clock_agenda_colors_hide">Sen koloroj</string>
     <string name="widget_clock_alarm_show">Sekva vekhorloĝo</string>
     <string name="widget_clock_alarm_hide">Neniu vekhorloĝo</string>
     <string name="widget_clock_agenda_permission">Permesi aliron al via kalendaro</string>

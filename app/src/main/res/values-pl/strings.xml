@@ -345,6 +345,8 @@
     <string name="widget_clock_agenda_hours">Liczba godzin do przodu</string>
     <string name="widget_clock_agenda_relative">Za 20 minut</string>
     <string name="widget_clock_agenda_absolute">O 12:30</string>
+    <string name="widget_clock_agenda_colors_show">Kolory kalendarzy</string>
+    <string name="widget_clock_agenda_colors_hide">Bez kolorów</string>
     <string name="widget_clock_alarm_show">Następny alarm</string>
     <string name="widget_clock_alarm_hide">Brak alarmu</string>
     <string name="widget_clock_agenda_permission">Zezwól na dostęp do kalendarza</string>

@@ -378,6 +378,8 @@
     <string name="widget_clock_agenda_hours">Oriau i edrych ymlaen</string>
     <string name="widget_clock_agenda_relative">Mewn 20 munud</string>
     <string name="widget_clock_agenda_absolute">Am 12:30</string>
+    <string name="widget_clock_agenda_colors_show">Lliwiau calendr</string>
+    <string name="widget_clock_agenda_colors_hide">Dim lliwiau</string>
     <string name="widget_clock_alarm_show">Larwm nesaf</string>
     <string name="widget_clock_alarm_hide">Dim larwm</string>
     <string name="widget_clock_agenda_permission">Caniatáu mynediad i\'ch calendr</string>

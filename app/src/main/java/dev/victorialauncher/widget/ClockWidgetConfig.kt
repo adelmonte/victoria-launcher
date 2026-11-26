@@ -36,6 +36,8 @@ data class ClockWidgetConfig(
     /** "in 20 minutes" rather than a clock time. Reads better, goes stale. */
     val agendaRelative: Boolean,
     val showAlarm: Boolean,
+    /** A dot in each event's calendar color before it (#193). */
+    val agendaColors: Boolean = false,
     val textColor: Int,
     val timeOpacity: Int,
     val dateOpacity: Int,
@@ -149,6 +151,7 @@ data class ClockWidgetConfig(
                     .coerceIn(AGENDA_HOURS_RANGE),
                 agendaRelative = prefs.getBoolean(key("agendaRelative", widgetId), true),
                 showAlarm = prefs.getBoolean(key("alarm", widgetId), false),
+                agendaColors = prefs.getBoolean(key("agendaColors", widgetId), false),
                 notificationsSizeSp = prefs.getInt(key("notificationsSize", widgetId), DEFAULT_ROW_SIZE_SP),
                 batterySizeSp = prefs.getInt(key("batterySize", widgetId), DEFAULT_BATTERY_SIZE_SP),
                 textColor = prefs.getInt(key("color", widgetId), DEFAULT_COLOR),
@@ -184,6 +187,7 @@ data class ClockWidgetConfig(
                 .putInt(key("agendaHours", widgetId), config.agendaLookaheadHours)
                 .putBoolean(key("agendaRelative", widgetId), config.agendaRelative)
                 .putBoolean(key("alarm", widgetId), config.showAlarm)
+                .putBoolean(key("agendaColors", widgetId), config.agendaColors)
                 .putInt(key("notificationsSize", widgetId), config.notificationsSizeSp)
                 .putInt(key("batterySize", widgetId), config.batterySizeSp)
                 .putInt(key("color", widgetId), config.textColor)
@@ -229,6 +233,7 @@ data class ClockWidgetConfig(
                 .remove(key("agendaRelative", widgetId))
                 .remove(key("agendaOpacity", widgetId))
                 .remove(key("alarm", widgetId))
+                .remove(key("agendaColors", widgetId))
                 .remove(key("dateGap", widgetId))
                 .remove(key("weatherGap", widgetId))
                 .remove(key("notificationsGap", widgetId))

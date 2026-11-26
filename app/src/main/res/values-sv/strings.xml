@@ -377,6 +377,8 @@
     <string name="widget_clock_agenda_hours">Timmar framåt i tiden</string>
     <string name="widget_clock_agenda_relative">Om 20 minuter</string>
     <string name="widget_clock_agenda_absolute">Kl. 12:30</string>
+    <string name="widget_clock_agenda_colors_show">Kalenderfärger</string>
+    <string name="widget_clock_agenda_colors_hide">Inga färger</string>
     <string name="widget_clock_alarm_show">Nästa alarm</string>
     <string name="widget_clock_alarm_hide">Inget alarm</string>
     <string name="widget_clock_agenda_permission">Tillåt åtkomst till din kalender</string>

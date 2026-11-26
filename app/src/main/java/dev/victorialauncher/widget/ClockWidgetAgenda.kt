@@ -29,8 +29,8 @@ import java.util.concurrent.TimeUnit
  */
 object ClockWidgetAgenda {
 
-    /** Title and when, already in the form the widget draws. */
-    data class Entry(val text: String)
+    /** Title and when, already in the form the widget draws, and its calendar's color. */
+    data class Entry(val text: String, val color: Int? = null)
 
     fun hasCalendarPermission(context: Context): Boolean =
         ContextCompat.checkSelfPermission(context, Manifest.permission.READ_CALENDAR) ==
@@ -60,6 +60,7 @@ object ClockWidgetAgenda {
             CalendarContract.Instances.TITLE,
             CalendarContract.Instances.BEGIN,
             CalendarContract.Instances.ALL_DAY,
+            CalendarContract.Instances.DISPLAY_COLOR,
         )
         return runCatching {
             context.contentResolver.query(
@@ -76,7 +77,8 @@ object ClockWidgetAgenda {
                         .ifEmpty { context.getString(R.string.widget_clock_event_untitled) }
                     val begin = cursor.getLong(1)
                     val allDay = cursor.getInt(2) == 1
-                    out += Entry(describe(context, title, begin, allDay, relative, now))
+                    val color = if (cursor.isNull(3)) null else cursor.getInt(3) or 0xFF000000.toInt()
+                    out += Entry(describe(context, title, begin, allDay, relative, now), color)
                 }
                 out
             }.orEmpty()
