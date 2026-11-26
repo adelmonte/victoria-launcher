@@ -2,7 +2,9 @@
 package dev.victorialauncher.service
 
 import android.content.Context
+import android.media.AudioAttributes
 import android.os.Build
+import android.os.VibrationAttributes
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.os.VibratorManager
@@ -42,7 +44,15 @@ object HapticUtil {
         } else {
             VibrationEffect.createOneShot(TICK_MS, VibrationEffect.DEFAULT_AMPLITUDE)
         }
-        vibrator.vibrate(effect)
+        // Not left to the system to classify: a tick with no stated use is filed as touch
+        // feedback, which is the very setting this is meant to get past (#187).
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            vibrator.vibrate(effect, VibrationAttributes.createForUsage(VibrationAttributes.USAGE_MEDIA))
+        } else {
+            val audio = AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_MEDIA).build()
+            @Suppress("DEPRECATION")
+            vibrator.vibrate(effect, audio)
+        }
         true
     }.getOrDefault(false)
 
