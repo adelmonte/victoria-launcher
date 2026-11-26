@@ -26,7 +26,7 @@
     <string name="home_folder_choose_apps">Rheoli ffolder</string>
     <string name="home_folder_delete">Dileu ffolder</string>
     <string name="home_folder_move_to_folder">Symud i ffolder</string>
-    <string name="home_folder_move_to_home">Symud i’r sgrin gartref</string>
+    <string name="home_folder_move_to_home">Symud i\’r sgrin gartref</string>
     <string name="home_folder_remove_app">Tynnu o\'r ffolder</string>
     <string name="home_folder_empty">Gwag - gwasgwch y ffolder yn hir i ddewis apiau</string>
     <string name="home_folder_name_label">Enw ffolder</string>
@@ -465,4 +465,6 @@
     <string name="settings_strip_follows_detail">Mae llusgo heibio A neu Z yn gwthio\'r llythrennau gyda\'ch bys ac yn cadw\'r rhestr ar agor. Mae llusgo heibio Z yn mynd â chi i ddiwedd y rhestr</string>
     <string name="settings_release_to_launch">Gollwng i agor</string>
     <string name="settings_release_to_launch_detail">Llithrwch o\'r llythrennau i\'r apiau a gollyngwch ar un i\'w agor</string>
+    <string name="settings_sort_by_color">Trefnu yn ôl lliw eicon</string>
+    <string name="settings_sort_by_color_detail">Yn rhestru\'r apiau yn ôl lliw eu heiconau, gyda stribed lliw yn lle A–Z: yr enfys, yna o wyn i ddu</string>
 </resources>
