@@ -1,0 +1,2 @@
+• Vibrate with touch feedback off now works
+• Clock widget: optional dot in each event's calendar color
