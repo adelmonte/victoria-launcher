@@ -451,4 +451,6 @@
     <string name="widget_clock_battery_gap">Espacio sobre la batería</string>
     <string name="settings_release_to_launch">Soltar para abrir</string>
     <string name="settings_release_to_launch_detail">Desliza desde las letras hasta las aplicaciones y suelta sobre una para abrirla</string>
+    <string name="settings_sort_by_color">Ordenar por el color de los iconos</string>
+    <string name="settings_sort_by_color_detail">Enumera las aplicaciones por el color de sus iconos, con una barra de color en lugar de la A a la Z: el arco iris, luego del blanco al negro</string>
 </resources>

@@ -451,4 +451,6 @@
     <string name="settings_strip_follows_detail">Treni preter A aŭ Z puŝas la literojn kun via fingro kaj tenas la liston malfermita. Treni preter Z kondukas al la fino de la listo</string>
     <string name="settings_release_to_launch">Ellasi por malfermi</string>
     <string name="settings_release_to_launch_detail">Glitu de la literoj al la aplikaĵoj kaj ellasu sur unu por malfermi ĝin</string>
+    <string name="settings_sort_by_color">Ordigi laŭ ikonkoloro</string>
+    <string name="settings_sort_by_color_detail">Listigas la aplikaĵojn laŭ la koloro de iliaj ikonoj, kun kolorstrio anstataŭ A–Z: la ĉielarko, poste de blanka ĝis nigra</string>
 </resources>
