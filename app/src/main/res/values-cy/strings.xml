@@ -26,7 +26,7 @@
     <string name="home_folder_choose_apps">Rheoli ffolder</string>
     <string name="home_folder_delete">Dileu ffolder</string>
     <string name="home_folder_move_to_folder">Symud i ffolder</string>
-    <string name="home_folder_move_to_home">Symud i\’r sgrin gartref</string>
+    <string name="home_folder_move_to_home">Symud i\'r sgrin gartref</string>
     <string name="home_folder_remove_app">Tynnu o\'r ffolder</string>
     <string name="home_folder_empty">Gwag - gwasgwch y ffolder yn hir i ddewis apiau</string>
     <string name="home_folder_name_label">Enw ffolder</string>
