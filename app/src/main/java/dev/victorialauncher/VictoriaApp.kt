@@ -7,6 +7,7 @@ import dev.victorialauncher.data.IconPackRepository
 import dev.victorialauncher.data.CrashLog
 import dev.victorialauncher.data.Prefs
 import dev.victorialauncher.widget.ClockWidgetBattery
+import dev.victorialauncher.widget.HostedWidgets
 import dev.victorialauncher.widget.VictoriaAppWidgetHost
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -22,6 +23,9 @@ class VictoriaApp : Application() {
         private set
     lateinit var widgetHost: VictoriaAppWidgetHost
         private set
+
+    /** Where the widgets on the home screen are, for the edge strip drawn over them (#185). */
+    val hostedWidgets = HostedWidgets()
 
     /** Outlives any screen, for work that must finish even as the launcher is left behind. */
     private val appScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)

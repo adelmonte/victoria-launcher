@@ -14,15 +14,19 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.Dp
 import dev.victorialauncher.data.EdgeSide
 import dev.victorialauncher.service.HapticUtil
+import dev.victorialauncher.widget.HostedWidgets
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -91,6 +95,8 @@ fun EdgeTouchZone(
     bottomKeepOut: Dp = 0.dp,
     hapticsEnabled: Boolean,
     state: ScrubState,
+    /** The widgets the strip may be lying over, so a tap on one of them can be passed on (#185). */
+    widgets: HostedWidgets? = null,
     /** Whether the app list is already showing, so a tap on the strip knows which it is. */
     listOpen: Boolean,
     onOpen: () -> Unit,
@@ -109,6 +115,9 @@ fun EdgeTouchZone(
     val currentDoubleTap by rememberUpdatedState(onDoubleTap)
     val currentDismiss by rememberUpdatedState(onDismiss)
     val currentListOpen by rememberUpdatedState(listOpen)
+    val currentWidgets by rememberUpdatedState(widgets)
+    // Touches arrive in the zone's own coordinates and the widgets are placed in the window's.
+    val zoneCoordinates = remember { arrayOfNulls<LayoutCoordinates>(1) }
 
     Box(
         modifier = modifier
@@ -130,6 +139,7 @@ fun EdgeTouchZone(
                         .height((bandOnlyHeightPx(band, view.height - bottomKeepOut.value * density) / density).dp)
                 }
             )
+            .onGloballyPositioned { zoneCoordinates[0] = it }
             .pointerInput(letters, band, hapticsEnabled, fromLeft, bandOnly, followPastEnds, releaseToLaunch) {
                 awaitEachGesture {
                     val down = awaitFirstDown(requireUnconsumed = false)
@@ -137,6 +147,57 @@ fun EdgeTouchZone(
                     // Read before onOpen changes it: a tap that opened the list must not
                     // also be read as a tap on an open one.
                     val openAtDown = currentListOpen
+
+                    // Over a widget the touch is held back until it has said which it is (#185).
+                    // Let go where it landed and it was meant for the widget, which gets it as a
+                    // tap while the strip does nothing at all. Travel, or stay down for as long
+                    // as a long-press takes, and it is the strip's, from here on exactly as if it
+                    // had come down on bare strip.
+                    // Only with the list shut: open, the home screen is still laid out behind it
+                    // but is not what is being touched.
+                    val widget = if (openAtDown) {
+                        null
+                    } else {
+                        zoneCoordinates[0]?.takeIf { it.isAttached }
+                            ?.let { currentWidgets?.at(it.localToWindow(down.position)) }
+                    }
+                    // Where the finger got to while it was held back, and whether it has gone.
+                    var heldTo = down.position
+                    var lifted = false
+                    var travelled = false
+                    if (widget != null) {
+                        var upTime = down.uptimeMillis
+                        var gone = false
+                        // One wait for the whole of it, the way a long-press is waited for, and
+                        // not the restarted kind that loses events; see the hold further down.
+                        val verdict = withTimeoutOrNull(viewConfiguration.longPressTimeoutMillis) {
+                            var seen = HeldTouch.WAITING
+                            while (seen == HeldTouch.WAITING) {
+                                val change = awaitPointerEvent().changes.firstOrNull { it.id == down.id }
+                                if (change == null) {
+                                    gone = true
+                                    break
+                                }
+                                heldTo = change.position
+                                upTime = change.uptimeMillis
+                                lifted = !change.pressed
+                                seen = heldTouch(
+                                    pressed = change.pressed,
+                                    travelPx = (change.position - down.position).getDistance(),
+                                    slopPx = viewConfiguration.touchSlop,
+                                )
+                                change.consume()
+                            }
+                            seen
+                        }
+                        if (gone) return@awaitEachGesture
+                        if (verdict == HeldTouch.TAP) {
+                            widget.deliver(down.uptimeMillis, upTime)
+                            return@awaitEachGesture
+                        }
+                        travelled = verdict == HeldTouch.SCRUB && !lifted
+                    }
+
                     state.begin(side)
                     onOpen()
 
@@ -303,7 +364,15 @@ fun EdgeTouchZone(
                         state.holdScroll(false)
                     }
                     armHold()
-                    while (true) {
+                    // Held back over a widget and then dragged: catch up with the finger.
+                    if (travelled) {
+                        moved = true
+                        state.markScrubbing()
+                        report(heldTo.x, heldTo.y)
+                    }
+                    // A flick that was already over when the wait above ended has no more events
+                    // coming; what is left of it is the letting go.
+                    while (!lifted) {
                         val event = awaitPointerEvent()
                         val change = event.changes.firstOrNull { it.id == down.id } ?: break
                         if (!change.pressed) break
@@ -366,6 +435,19 @@ fun EdgeTouchZone(
             },
     )
 }
+/** What a touch that came down on a widget under the strip has turned out to be (#185). */
+internal enum class HeldTouch { WAITING, TAP, SCRUB }
+
+/**
+ * Travel is asked before the lift, so a flick whose last event is also its letting go is still
+ * the strip's, as it was before widgets were given their taps.
+ */
+internal fun heldTouch(pressed: Boolean, travelPx: Float, slopPx: Float): HeldTouch = when {
+    travelPx > slopPx -> HeldTouch.SCRUB
+    !pressed -> HeldTouch.TAP
+    else -> HeldTouch.WAITING
+}
+
 /** How tall a band-only strip is when it may reach no lower than [limitPx]. */
 internal fun bandOnlyHeightPx(band: ScrubBand, limitPx: Float): Float =
     (minOf(band.bottomPx, limitPx) - band.topPx).coerceAtLeast(0f)

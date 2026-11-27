@@ -38,6 +38,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
@@ -51,6 +52,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -337,9 +339,13 @@ internal fun WidgetPage(
     // The container reports how tall the clock's content is, and the slot takes that height.
     val latestOnContentHeight by rememberUpdatedState(onContentHeight)
     val containerRef = remember { arrayOfNulls<LongPressFrameLayout>(1) }
+    // Where this widget is, for the edge strip to pass on a tap that lands on both (#185).
+    val placedKey = remember { Any() }
+    DisposableEffect(placedKey) { onDispose { app.hostedWidgets.remove(placedKey) } }
     AndroidView(
         modifier = Modifier
             .fillMaxSize()
+            .onGloballyPositioned { app.hostedWidgets.place(placedKey, it) { containerRef[0] } }
             .onSizeChanged { size ->
                 slotSizeDp = with(density) { size.width.toDp().value.toInt() to size.height.toDp().value.toInt() }
             }
