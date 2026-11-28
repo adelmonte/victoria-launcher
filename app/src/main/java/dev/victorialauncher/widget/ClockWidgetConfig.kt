@@ -38,6 +38,8 @@ data class ClockWidgetConfig(
     val showAlarm: Boolean,
     /** A dot in each event's calendar color before it (#193). */
     val agendaColors: Boolean = false,
+    /** Calendars left off the widget (#204). Left off rather than chosen, so a new one shows. */
+    val agendaHiddenCalendars: Set<Long> = emptySet(),
     val textColor: Int,
     val timeOpacity: Int,
     val dateOpacity: Int,
@@ -152,6 +154,8 @@ data class ClockWidgetConfig(
                 agendaRelative = prefs.getBoolean(key("agendaRelative", widgetId), true),
                 showAlarm = prefs.getBoolean(key("alarm", widgetId), false),
                 agendaColors = prefs.getBoolean(key("agendaColors", widgetId), false),
+                agendaHiddenCalendars = prefs.getStringSet(key("agendaHidden", widgetId), null)
+                    .orEmpty().mapNotNull { it.toLongOrNull() }.toSet(),
                 notificationsSizeSp = prefs.getInt(key("notificationsSize", widgetId), DEFAULT_ROW_SIZE_SP),
                 batterySizeSp = prefs.getInt(key("batterySize", widgetId), DEFAULT_BATTERY_SIZE_SP),
                 textColor = prefs.getInt(key("color", widgetId), DEFAULT_COLOR),
@@ -188,6 +192,7 @@ data class ClockWidgetConfig(
                 .putBoolean(key("agendaRelative", widgetId), config.agendaRelative)
                 .putBoolean(key("alarm", widgetId), config.showAlarm)
                 .putBoolean(key("agendaColors", widgetId), config.agendaColors)
+                .putStringSet(key("agendaHidden", widgetId), config.agendaHiddenCalendars.map { it.toString() }.toSet())
                 .putInt(key("notificationsSize", widgetId), config.notificationsSizeSp)
                 .putInt(key("batterySize", widgetId), config.batterySizeSp)
                 .putInt(key("color", widgetId), config.textColor)
@@ -234,6 +239,7 @@ data class ClockWidgetConfig(
                 .remove(key("agendaOpacity", widgetId))
                 .remove(key("alarm", widgetId))
                 .remove(key("agendaColors", widgetId))
+                .remove(key("agendaHidden", widgetId))
                 .remove(key("dateGap", widgetId))
                 .remove(key("weatherGap", widgetId))
                 .remove(key("notificationsGap", widgetId))

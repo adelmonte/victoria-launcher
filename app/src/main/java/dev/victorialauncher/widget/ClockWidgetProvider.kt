@@ -175,6 +175,7 @@ class ClockWidgetProvider : AppWidgetProvider() {
                         limit = config.agendaCount,
                         lookaheadHours = config.agendaLookaheadHours,
                         relative = config.agendaRelative,
+                        hiddenCalendars = config.agendaHiddenCalendars,
                     )
                 } else {
                     emptyList()

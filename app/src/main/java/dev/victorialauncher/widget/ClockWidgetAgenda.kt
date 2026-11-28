@@ -32,6 +32,40 @@ object ClockWidgetAgenda {
     /** Title and when, already in the form the widget draws, and its calendar's color. */
     data class Entry(val text: String, val color: Int? = null)
 
+    /** One of the phone's calendars, for choosing which the widget shows (#204). */
+    data class Source(val id: Long, val name: String, val account: String, val color: Int)
+
+    /** Every calendar the phone shows, by account and then name. */
+    fun calendars(context: Context): List<Source> {
+        if (!hasCalendarPermission(context)) return emptyList()
+        val projection = arrayOf(
+            CalendarContract.Calendars._ID,
+            CalendarContract.Calendars.CALENDAR_DISPLAY_NAME,
+            CalendarContract.Calendars.ACCOUNT_NAME,
+            CalendarContract.Calendars.CALENDAR_COLOR,
+        )
+        return runCatching {
+            context.contentResolver.query(
+                CalendarContract.Calendars.CONTENT_URI,
+                projection,
+                "${CalendarContract.Calendars.VISIBLE} = 1",
+                null,
+                null,
+            )?.use { cursor ->
+                val out = mutableListOf<Source>()
+                while (cursor.moveToNext()) {
+                    out += Source(
+                        id = cursor.getLong(0),
+                        name = cursor.getString(1).orEmpty(),
+                        account = cursor.getString(2).orEmpty(),
+                        color = cursor.getInt(3) or 0xFF000000.toInt(),
+                    )
+                }
+                out.sortedWith(compareBy({ it.account.lowercase() }, { it.name.lowercase() }))
+            }.orEmpty()
+        }.getOrDefault(emptyList())
+    }
+
     fun hasCalendarPermission(context: Context): Boolean =
         ContextCompat.checkSelfPermission(context, Manifest.permission.READ_CALENDAR) ==
             PackageManager.PERMISSION_GRANTED
@@ -48,6 +82,7 @@ object ClockWidgetAgenda {
         limit: Int,
         lookaheadHours: Int,
         relative: Boolean,
+        hiddenCalendars: Set<Long> = emptySet(),
     ): List<Entry> {
         if (!hasCalendarPermission(context)) return emptyList()
         val now = System.currentTimeMillis()
@@ -61,6 +96,7 @@ object ClockWidgetAgenda {
             CalendarContract.Instances.BEGIN,
             CalendarContract.Instances.ALL_DAY,
             CalendarContract.Instances.DISPLAY_COLOR,
+            CalendarContract.Instances.CALENDAR_ID,
         )
         return runCatching {
             context.contentResolver.query(
@@ -73,6 +109,7 @@ object ClockWidgetAgenda {
             )?.use { cursor ->
                 val out = mutableListOf<Entry>()
                 while (cursor.moveToNext() && out.size < limit) {
+                    if (cursor.getLong(4) in hiddenCalendars) continue
                     val title = cursor.getString(0)?.trim().orEmpty()
                         .ifEmpty { context.getString(R.string.widget_clock_event_untitled) }
                     val begin = cursor.getLong(1)

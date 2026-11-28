@@ -384,6 +384,7 @@
     <string name="widget_clock_agenda_absolute">O 12:30</string>
     <string name="widget_clock_agenda_colors_show">Farby kalendárov</string>
     <string name="widget_clock_agenda_colors_hide">Bez farieb</string>
+    <string name="widget_clock_agenda_calendars">Kalendáre</string>
     <string name="widget_clock_alarm_show">Ďalší budík</string>
     <string name="widget_clock_alarm_hide">Žiadny budík</string>
     <string name="widget_clock_agenda_permission">Povoliť prístup k vášmu kalendáru</string>

@@ -22,6 +22,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -146,6 +148,18 @@ class ClockWidgetConfigActivity : ComponentActivity() {
                             AgendaSection(
                                 config = config,
                                 hasPermission = calendarGranted,
+                                calendars = remember(calendarGranted) {
+                                    ClockWidgetAgenda.calendars(this@ClockWidgetConfigActivity)
+                                },
+                                onCalendarShown = { id, shown ->
+                                    config = config.copy(
+                                        agendaHiddenCalendars = if (shown) {
+                                            config.agendaHiddenCalendars - id
+                                        } else {
+                                            config.agendaHiddenCalendars + id
+                                        },
+                                    )
+                                },
                                 onShow = { config = config.copy(showAgenda = it) },
                                 onRelative = { config = config.copy(agendaRelative = it) },
                                 onCount = { config = config.copy(agendaCount = it) },
@@ -231,7 +245,7 @@ class ClockWidgetConfigActivity : ComponentActivity() {
                                     sizeLabel = stringResource(R.string.widget_clock_agenda_size),
                                     opacityLabel = stringResource(R.string.widget_clock_agenda_opacity),
                                     preview = ClockWidgetAgenda
-                                        .events(this@ClockWidgetConfigActivity, 1, config.agendaLookaheadHours, config.agendaRelative)
+                                        .events(this@ClockWidgetConfigActivity, 1, config.agendaLookaheadHours, config.agendaRelative, config.agendaHiddenCalendars)
                                         .firstOrNull()?.text
                                         ?: stringResource(R.string.widget_clock_agenda_empty),
                                     size = config.agendaSizeSp,
@@ -633,6 +647,8 @@ private fun WeatherAppDialog(
 private fun AgendaSection(
     config: ClockWidgetConfig,
     hasPermission: Boolean,
+    calendars: List<ClockWidgetAgenda.Source>,
+    onCalendarShown: (Long, Boolean) -> Unit,
     onShow: (Boolean) -> Unit,
     onRelative: (Boolean) -> Unit,
     onCount: (Int) -> Unit,
@@ -671,6 +687,33 @@ private fun AgendaSection(
                 }
                 FilledChip(stringResource(R.string.widget_clock_agenda_colors_hide), !config.agendaColors) {
                     onColors(false)
+                }
+            }
+            // Only worth asking with more than one to choose from.
+            if (calendars.size > 1) {
+                Text(stringResource(R.string.widget_clock_agenda_calendars), style = MaterialTheme.typography.bodySmall)
+                calendars.forEach { source ->
+                    val shown = source.id !in config.agendaHiddenCalendars
+                    LayoutRow(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { onCalendarShown(source.id, !shown) },
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Checkbox(checked = shown, onCheckedChange = { onCalendarShown(source.id, it) })
+                        Box(Modifier.size(10.dp).background(Color(source.color), CircleShape))
+                        Spacer(Modifier.width(10.dp))
+                        Column {
+                            Text(source.name, style = MaterialTheme.typography.bodyMedium)
+                            if (source.account.isNotEmpty() && source.account != source.name) {
+                                Text(
+                                    source.account,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                                )
+                            }
+                        }
+                    }
                 }
             }
             SliderRow(
