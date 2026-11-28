@@ -124,6 +124,12 @@ fun VictoriaNavHost(
     // let the home screen render against an empty list for the first frame.
     var appsAndSpace by remember { mutableStateOf(AppsAndSpace(PrivateSpace.Absent, emptyList())) }
     val allApps = appsAndSpace.apps
+    // An update that renames an app's activity changes its key; carry what was stored under
+    // the old one across, or the app drops out of favorites and loses its name (#198).
+    LaunchedEffect(allApps) {
+        val keys = allApps.filter { it.kind == EntryKind.APP }.map { it.key }
+        if (keys.isNotEmpty()) app.prefs.followMovedActivities(keys)
+    }
     // Kept beside the list because the settings screens need it for keys whose rows are
     // deliberately absent: a favorite inside a locked private space has nothing to look up.
     val privateSpace = appsAndSpace.privateSpace

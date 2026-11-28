@@ -1026,6 +1026,40 @@ class Prefs(private val context: Context) {
         }
     }
 
+    /**
+     * Moves what is stored under an app's old activity onto the one an update replaced it with
+     * (#198), so the favorite, its place in a folder, its name and its icon follow the app.
+     * [current] is every app key the launcher can see right now. Where the new key already has
+     * a name or icon of its own, that one is kept.
+     */
+    suspend fun followMovedActivities(current: Collection<String>) {
+        context.dataStore.edit { pref ->
+            val favorites = readFavorites(pref)
+            val folders = foldersFromJson(pref[Keys.FOLDERS])
+            val names = jsonToMap(pref[Keys.NAME_OVERRIDES])
+            val icons = jsonToMap(pref[Keys.ICON_OVERRIDES])
+            val hidden = pref[Keys.HIDDEN_APPS] ?: emptySet()
+            val counts = jsonToMap(pref[Keys.LAUNCH_COUNTS])
+            val slots = listOf(Keys.CORNER_BUTTON_KEY, Keys.QUICK_LAUNCH_LEFT, Keys.QUICK_LAUNCH_RIGHT)
+            val stored = favorites + folders.flatMap { it.apps } + names.keys + icons.keys + hidden +
+                counts.keys + slots.mapNotNull { pref[it] }
+            val moves = EntryKeys.movedActivities(stored.toSet(), current)
+            if (moves.isEmpty()) return@edit
+            fun moved(key: String) = moves[key] ?: key
+
+            pref.writeFavorites(favorites.map(::moved).distinct())
+            pref[Keys.FOLDERS] = foldersToJson(folders.map { it.copy(apps = it.apps.map(::moved).distinct()) })
+            fun <V> MutableMap<String, V>.follow() = moves.forEach { (old, new) ->
+                remove(old)?.let { if (new !in this) this[new] = it }
+            }
+            pref[Keys.NAME_OVERRIDES] = mapToJson(names.toMutableMap().apply { follow() })
+            pref[Keys.ICON_OVERRIDES] = mapToJson(icons.toMutableMap().apply { follow() })
+            pref[Keys.HIDDEN_APPS] = hidden.map(::moved).toSet()
+            pref[Keys.LAUNCH_COUNTS] = mapToJson(counts.toMutableMap().apply { follow() })
+            slots.forEach { slot -> pref[slot]?.let { pref[slot] = moved(it) } }
+        }
+    }
+
     /** Creates the folder if [id] is new, otherwise replaces it. */
     suspend fun upsertFolder(folder: Folder) {
         context.dataStore.edit { pref ->

@@ -67,6 +67,34 @@ object EntryKeys {
     fun userSerial(key: String): Long =
         userSuffixPattern.find(key)?.groupValues?.get(1)?.toLongOrNull() ?: 0L
 
+    /** The package and profile an app's key belongs to, or null for any other kind of key. */
+    fun appPackage(key: String): Pair<String, Long>? {
+        if (key.contains(':')) return null
+        val slash = key.indexOf('/')
+        if (slash <= 0) return null
+        return key.substring(0, slash) to userSerial(key)
+    }
+
+    /**
+     * Stored app keys whose activity an update renamed, each to the one that replaced it (#198).
+     *
+     * Only where the stored activity is gone and its package, in the same profile, now has
+     * exactly one: with two there is no telling which one it became. A package that is not in
+     * [current] at all is left alone, since it may only be in a locked space or mid-update.
+     */
+    fun movedActivities(stored: Collection<String>, current: Collection<String>): Map<String, String> {
+        val currentSet = current.toSet()
+        val byPackage = current.groupBy { appPackage(it) }
+        return stored.asSequence()
+            .filter { it !in currentSet }
+            .mapNotNull { key ->
+                val pkg = appPackage(key) ?: return@mapNotNull null
+                val only = byPackage[pkg]?.singleOrNull() ?: return@mapNotNull null
+                key to only
+            }
+            .toMap()
+    }
+
     data class ShortcutRef(val packageName: String, val shortcutId: String, val userSerial: Long)
 
     /**

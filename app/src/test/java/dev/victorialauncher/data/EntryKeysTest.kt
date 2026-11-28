@@ -170,4 +170,22 @@ class EntryKeysTest {
         assertTrue(EntryKeys.isStorableShortcutId("a".repeat(1024)))
         assertFalse(EntryKeys.isStorableShortcutId("a".repeat(1025)))
     }
+
+    @Test
+    fun `a renamed activity moves to the package's only one`() {
+        val moves = EntryKeys.movedActivities(
+            stored = listOf("com.music/.OldMain", "com.gone/.Main", "com.two/.Old", "com.keep/.Main"),
+            current = listOf("com.music/.NewMain", "com.two/.A", "com.two/.B", "com.keep/.Main"),
+        )
+        assertEquals(mapOf("com.music/.OldMain" to "com.music/.NewMain"), moves)
+    }
+
+    @Test
+    fun `moves stay inside their profile and skip non-app keys`() {
+        val moves = EntryKeys.movedActivities(
+            stored = listOf("com.music/.Old|u10", "folder:abc", "shortcut:com.music/id", "search:default"),
+            current = listOf("com.music/.New"),
+        )
+        assertEquals(emptyMap<String, String>(), moves)
+    }
 }
