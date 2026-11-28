@@ -1,0 +1,3 @@
+• Apps whose update renames them keep their place in favorites and their custom name
+• Only one folder open at a time, as an option
+• Hide the navigation bar, as an option
