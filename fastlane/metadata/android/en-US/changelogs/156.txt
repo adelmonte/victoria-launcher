@@ -1,0 +1,1 @@
+• A tap on a widget under the A-Z strip now reaches the widget; a drag still opens the list (thanks Voyagerroc)
