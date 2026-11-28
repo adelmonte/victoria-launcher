@@ -195,7 +195,9 @@ fun EdgeTouchZone(
                             widget.deliver(down.uptimeMillis, upTime)
                             return@awaitEachGesture
                         }
-                        travelled = verdict == HeldTouch.SCRUB && !lifted
+                        // A flick that ended in the same event that took it past the slop is
+                        // still a drag: placed where it got to, and never a tap toward a double.
+                        travelled = verdict == HeldTouch.SCRUB
                     }
 
                     state.begin(side)
