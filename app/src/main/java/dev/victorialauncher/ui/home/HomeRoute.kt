@@ -1174,6 +1174,7 @@ fun HomeRoute(
                     releaseToLaunch = settings.releaseToLaunch,
                     hapticsEnabled = settings.hapticsEnabled,
                     state = scrub,
+                    widgets = app.hostedWidgets,
                     listOpen = appListVisible,
                     onDismiss = { closeAppList() },
                     onOpen = {

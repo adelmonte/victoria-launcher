@@ -48,6 +48,14 @@ starts tracking, which would break the widget's own buttons. This mirrors how
 scrollable containers arbitrate with children: don't intercept on `ACTION_DOWN`,
 watch via `onInterceptTouchEvent`, steal the stream only once our timer fires.
 
+**The edge strip hands a widget its tap as two events of its own.** The strip is
+drawn over the home screen, and where siblings overlap Compose offers the touch only
+to the top one, so a widget under the strip never sees it and leaving the down
+unconsumed changes nothing. `EdgeTouchZone` therefore holds a touch that lands on a
+widget until it is a tap or a drag, and `HostedWidgets` gives a tap to the widget's
+view as a down and an up. A drag, or a press held as long as a long-press, is the
+strip's as before.
+
 **The A-Z strip bows; the letters never scale.** Scaling the glyphs stretched them
 until they looked pixelated, so `EdgeScrubber` translates each letter along a
 gaussian instead. `scrubY`/`pullPx` arrive as lambdas read inside `graphicsLayer`,
