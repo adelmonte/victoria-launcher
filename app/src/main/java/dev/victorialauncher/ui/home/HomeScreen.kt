@@ -380,7 +380,7 @@ fun HomeScreen(
     // A drag only ever ends through its own release, and a gesture can be taken away before
     // that — when the row holding it is disposed, nothing is told, and the moved order, the
     // held row and its offset are all left behind. None of it belongs to edit mode, so it
-    // stayed on the home screen as a row drawn across its neighbour, and only another
+    // stayed on the home screen as a row drawn across its neighbor, and only another
     // finished drag would clear it. Leaving edit mode drops anything a drag left standing,
     // back to the order that was actually saved.
     LaunchedEffect(editMode) {
@@ -396,7 +396,7 @@ fun HomeScreen(
     // showed up as the favorites shivering in place.
     // Keyed by which row, not by where it sits. Positions are what a reorder changes, so a
     // height stored against one was read back for whichever row had since moved into it — and
-    // the drag arithmetic below is all neighbour heights. Among rows of one kind every height
+    // the drag arithmetic below is all neighbor heights. Among rows of one kind every height
     // is the same and the mix-up is invisible; a folder and an app are different heights, which
     // is why reordering the two together threw them about and reordering either alone did not.
     val itemHeights = remember { HashMap<String, Int>() }
@@ -945,7 +945,7 @@ fun HomeScreen(
                     // Keyed by which row this is, never by where it sits. Now that the rows
                     // are identified, a row that moves takes its node with it — so a key of
                     // the position restarts this the moment the held row swaps with its
-                    // neighbour, which tears down the gesture half way through: the order is
+                    // neighbor, which tears down the gesture half way through: the order is
                     // left shown but never committed, and the row keeps the offset it had
                     // when the finger was taken away from it.
                     Modifier.pointerInput(itemKey) {

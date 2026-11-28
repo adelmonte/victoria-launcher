@@ -41,7 +41,7 @@ class HostedWidgets {
             val view = entry.view() ?: continue
             // An empty container is a widget that failed to load: nothing there to tap.
             if (!view.isAttachedToWindow || !view.isShown || view.childCount == 0) continue
-            // Clipped to what is on screen, so the pager's neighbouring pages do not count.
+            // Clipped to what is on screen, so the pager's neighboring pages do not count.
             if (!coordinates.boundsInWindow().contains(windowPosition)) continue
             return Tap(view, coordinates.windowToLocal(windowPosition))
         }

@@ -112,7 +112,7 @@ internal fun colorKeyOf(pixels: IntArray): Int {
         val dark = 1.0 - lightness / opaque
         return ACHROMATIC_BASE + (dark * 1000).toInt().coerceIn(0, 1000)
     }
-    // The strongest bin together with its neighbours, so a color split across a bin edge
+    // The strongest bin together with its neighbors, so a color split across a bin edge
     // still wins, then the hue within that window, averaged round the circle.
     var best = 0
     var bestScore = -1f

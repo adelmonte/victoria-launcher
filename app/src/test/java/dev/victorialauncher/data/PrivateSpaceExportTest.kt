@@ -34,7 +34,7 @@ class PrivateSpaceExportTest {
     // --- favorites_order (newline-joined keys) ---------------------------------------------
 
     @Test
-    fun `a private favorite is removed and its neighbours survive in order`() {
+    fun `a private favorite is removed and its neighbors survive in order`() {
         val raw = listOf(a, bPrivate, c).joinToString("\n")
         assertEquals(
             listOf(a, c).joinToString("\n"),
