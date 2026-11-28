@@ -101,6 +101,8 @@
     <string name="settings_section_top">Lle mae llythyren yn glanio</string>
     <string name="settings_close_folder">Cau ffolder ar ôl agor ap</string>
     <string name="settings_close_folder_detail">O\'i ddiffodd, mae\'n aros ar agor nes i chi ei gau eich hun</string>
+    <string name="settings_one_folder_open">Dim ond un ffolder ar agor ar y tro</string>
+    <string name="settings_one_folder_open_detail">Mae agor ffolder ar y sgrin gartref yn cau\'r lleill</string>
     <string name="settings_favorites_source">Ffefrynnau</string>
     <string name="settings_frequent_count">Sawl</string>
     <string name="favorites_source_manual">Y rhestr rydych chi\'n ei chadw</string>
@@ -119,6 +121,8 @@
     <string name="settings_widgets_stacked">Dangos yr holl declynnau ar unwaith</string>
     <string name="settings_widgets_stacked_detail">Mae teclynnau cartref yn eistedd un o dan y llall yn hytrach na llithro rhyngddyn nhw. Mae pob un yn daldra ardal y teclyn</string>
     <string name="settings_hide_status_bar">Cuddio bar statws ar y sgrin gartref</string>
+    <string name="settings_hide_nav_bar">Cuddio\'r bar llywio</string>
+    <string name="settings_hide_nav_bar_detail">Llithrwch i fyny o\'r ymyl isaf i\'w ddangos am eiliad</string>
     <string name="settings_hide_status_bar_applist">Cuddio bar statws yn y rhestr apiau</string>
     <string name="settings_status_bar_timeout">Bar statws yn aros am</string>
     <string name="settings_dim_home">Pylu\'r papur wal ar y sgrin gartref</string>

@@ -101,6 +101,8 @@
     <string name="settings_section_top">Kde sa zastaví písmeno</string>
     <string name="settings_close_folder">Zatvorte priečinok po otvorení aplikácie</string>
     <string name="settings_close_folder_detail">Vypnutie ho nechá otvorené, kým ho sami nezatvoríte</string>
+    <string name="settings_one_folder_open">Naraz len jeden otvorený priečinok</string>
+    <string name="settings_one_folder_open_detail">Otvorenie priečinka na ploche zatvorí ostatné</string>
     <string name="settings_favorites_source">Obľúbené</string>
     <string name="settings_frequent_count">Koľko</string>
     <string name="favorites_source_manual">Vlastný zoznam</string>
@@ -119,6 +121,8 @@
     <string name="settings_widgets_stacked">Zobraziť všetky widgety naraz</string>
     <string name="settings_widgets_stacked_detail">Domovské widgety sú umiestnené jeden pod druhým namiesto toho, aby sa medzi nimi prechádzalo. Každý z nich je výška oblasti widgetu</string>
     <string name="settings_hide_status_bar">Skryť stavový riadok na domovskej obrazovke</string>
+    <string name="settings_hide_nav_bar">Skryť navigačný panel</string>
+    <string name="settings_hide_nav_bar_detail">Potiahnutím nahor od spodného okraja ho na chvíľu zobrazíte</string>
     <string name="settings_hide_status_bar_applist">Skryť stavový riadok v zozname aplikácií</string>
     <string name="settings_status_bar_timeout">Stavový riadok zostáva pre</string>
     <string name="settings_dim_home">Stmaviť tapetu na domovskej obrazovke</string>

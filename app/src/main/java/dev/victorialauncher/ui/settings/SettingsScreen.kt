@@ -222,7 +222,11 @@ fun SettingsScreen(
     sectionTopPercent: Int,
     onSetSectionTopPercent: (Int) -> Unit,
     closeFolderOnLaunch: Boolean,
+    oneFolderOpen: Boolean,
+    hideNavBar: Boolean,
     onSetCloseFolderOnLaunch: (Boolean) -> Unit,
+    onSetOneFolderOpen: (Boolean) -> Unit,
+    onSetHideNavBar: (Boolean) -> Unit,
     favoritesSource: FavoritesSource,
     onSetFavoritesSource: (FavoritesSource) -> Unit,
     frequentCount: Int,
@@ -457,6 +461,13 @@ fun SettingsScreen(
                 checked = closeFolderOnLaunch, onCheckedChange = onSetCloseFolderOnLaunch,
             )
         },
+        SettingsEntry(SettingsSection.HOME, stringResource(R.string.settings_one_folder_open), "folder close others") {
+            SwitchRowWithDetail(
+                label = stringResource(R.string.settings_one_folder_open),
+                detail = stringResource(R.string.settings_one_folder_open_detail),
+                checked = oneFolderOpen, onCheckedChange = onSetOneFolderOpen,
+            )
+        },
         SettingsEntry(SettingsSection.HOME, stringResource(R.string.settings_widgets_stacked), "widgets stack below carousel") {
             SwitchRowWithDetail(
                 label = stringResource(R.string.settings_widgets_stacked),
@@ -466,6 +477,13 @@ fun SettingsScreen(
         },
         SettingsEntry(SettingsSection.HOME, stringResource(R.string.settings_hide_status_bar), "status bar") {
             SwitchRow(stringResource(R.string.settings_hide_status_bar), hideStatusBar, onSetHideStatusBar)
+        },
+        SettingsEntry(SettingsSection.HOME, stringResource(R.string.settings_hide_nav_bar), "navigation gesture bar handle bottom") {
+            SwitchRowWithDetail(
+                label = stringResource(R.string.settings_hide_nav_bar),
+                detail = stringResource(R.string.settings_hide_nav_bar_detail),
+                checked = hideNavBar, onCheckedChange = onSetHideNavBar,
+            )
         },
         SettingsEntry(
             SettingsSection.HOME, stringResource(R.string.settings_status_bar_timeout), "status bar peek",

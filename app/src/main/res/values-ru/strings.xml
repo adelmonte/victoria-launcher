@@ -84,6 +84,8 @@
     <string name="settings_text_color_detail">При автоматическом режиме система считывает обои и выбирает наилучший вариант читаемости.</string>
     <string name="settings_show_names">Отображать названия приложений рядом с иконками</string>
     <string name="settings_hide_status_bar">Скрыть строку состояния на главном экране</string>
+    <string name="settings_hide_nav_bar">Скрыть панель навигации</string>
+    <string name="settings_hide_nav_bar_detail">Проведите вверх от нижнего края, чтобы ненадолго её показать</string>
     <string name="settings_hide_status_bar_applist">Скрыть строку состояния в меню приложений</string>
     <string name="settings_status_bar_timeout">Скрыть статус-бар через: </string>
     <string name="settings_dim_home">Прозрачность фона на главном экране</string>
@@ -269,6 +271,8 @@
     <string name="settings_section_top">Где оказывается буква</string>
     <string name="settings_close_folder">Закрывать папку после запуска приложения</string>
     <string name="settings_close_folder_detail">Если выключено, папка остаётся открытой, пока вы её не закроете</string>
+    <string name="settings_one_folder_open">Только одна открытая папка</string>
+    <string name="settings_one_folder_open_detail">Открытие папки на главном экране закрывает остальные</string>
     <string name="settings_favorites_source">Избранное</string>
     <string name="settings_frequent_count">Сколько</string>
     <string name="favorites_source_manual">Ваш собственный список</string>

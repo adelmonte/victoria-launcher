@@ -212,6 +212,8 @@ fun HomeScreen(
     homeIntentTick: Int,
     /** Whether opening an app from inside a folder closes the folder behind it. */
     closeFolderOnLaunch: Boolean,
+    /** Opening a folder here closes the others, and whatever is open inside them (#196). */
+    oneFolderOpen: Boolean = false,
     /** Whether the favorites draw icons, which is asked separately from the app list. */
     showFavoriteIcons: Boolean,
     /** Whether the empty home screen should still explain itself. */
@@ -1105,7 +1107,18 @@ fun HomeScreen(
                                         expandedFolders - folder.id
                                     } else {
                                         revealFolder = folder.id to System.nanoTime()
-                                        expandedFolders + folder.id
+                                        // Only among folders on the same level: opening one
+                                        // inside keeps the folder it is in open.
+                                        val kept = if (oneFolderOpen) {
+                                            val siblings = parent?.subfolderIds
+                                                ?: favorites.mapNotNull { (it as? FavoriteEntry.FolderRef)?.folder?.id }
+                                            val closing = siblings.filter { it != folder.id }
+                                                .flatMap { folderAndDescendants(it, foldersById) }.toSet()
+                                            expandedFolders - closing
+                                        } else {
+                                            expandedFolders
+                                        }
+                                        kept + folder.id
                                     }
                                 },
                                 onOpenMenu = { offset -> menuOffset = offset; folderMenuFor = folder.id },

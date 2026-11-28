@@ -101,6 +101,8 @@
     <string name="settings_section_top">Where a letter lands</string>
     <string name="settings_close_folder">Close a folder after opening an app</string>
     <string name="settings_close_folder_detail">Off leaves it open until you close it yourself</string>
+    <string name="settings_one_folder_open">Only one folder open at a time</string>
+    <string name="settings_one_folder_open_detail">Opening a folder on the home screen closes the others</string>
     <string name="settings_favorites_source">Favorites</string>
     <string name="settings_frequent_count">How many</string>
     <string name="favorites_source_manual">The list you keep</string>
@@ -119,6 +121,8 @@
     <string name="settings_widgets_stacked">Show all widgets at once</string>
     <string name="settings_widgets_stacked_detail">Home widgets sit one under another instead of being swiped between. Each one is the widget area\'s height</string>
     <string name="settings_hide_status_bar">Hide status bar on the home screen</string>
+    <string name="settings_hide_nav_bar">Hide navigation bar</string>
+    <string name="settings_hide_nav_bar_detail">Swipe up from the bottom edge to bring it back for a moment</string>
     <string name="settings_hide_status_bar_applist">Hide status bar in the app list</string>
     <string name="settings_status_bar_timeout">Status bar stays for</string>
     <string name="settings_dim_home">Dim wallpaper on home screen</string>

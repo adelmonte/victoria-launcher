@@ -101,6 +101,8 @@
     <string name="settings_section_top">Kie litero alteriĝas</string>
     <string name="settings_close_folder">Fermi dosierujon post malfermo de aplikaĵo</string>
     <string name="settings_close_folder_detail">Malŝaltita lasas ĝin malfermita ĝis vi mem fermas ĝin</string>
+    <string name="settings_one_folder_open">Nur unu dosierujo malfermita samtempe</string>
+    <string name="settings_one_folder_open_detail">Malfermi dosierujon sur la hejmekrano fermas la aliajn</string>
     <string name="settings_favorites_source">Ŝatatoj</string>
     <string name="settings_frequent_count">Kiom</string>
     <string name="favorites_source_manual">La listo, kiun vi konservas</string>
@@ -119,6 +121,8 @@
     <string name="settings_widgets_stacked">Montri ĉiujn fenestraĵojn samtempe</string>
     <string name="settings_widgets_stacked_detail">Hejmaj fenestraĵoj sidas unu sub la alia anstataŭ esti ŝovitaj inter ili. Ĉiu estas la alto de la fenestraĵa areo</string>
     <string name="settings_hide_status_bar">Kaŝi statusan stangon sur la hejma ekrano</string>
+    <string name="settings_hide_nav_bar">Kaŝi la navigan breton</string>
+    <string name="settings_hide_nav_bar_detail">Glitu supren de la malsupra rando por momente revidi ĝin</string>
     <string name="settings_hide_status_bar_applist">Kaŝi statusan stangon en la aplikaĵlisto</string>
     <string name="settings_status_bar_timeout">Statusa stango restas dum</string>
     <string name="settings_dim_home">Mallumigi ekranfonon sur la hejma ekrano</string>

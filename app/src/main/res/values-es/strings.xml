@@ -84,6 +84,8 @@
     <string name="settings_text_color_detail">Automático analiza el fondo de pantalla y elige el que se lea mejor</string>
     <string name="settings_show_names">Mostrar los nombres junto a los iconos de favoritos</string>
     <string name="settings_hide_status_bar">Ocultar la barra de estado en la pantalla de inicio</string>
+    <string name="settings_hide_nav_bar">Ocultar la barra de navegación</string>
+    <string name="settings_hide_nav_bar_detail">Desliza hacia arriba desde el borde inferior para verla un momento</string>
     <string name="settings_hide_status_bar_applist">Ocultar la barra de estado en la lista de aplicaciones</string>
     <string name="settings_status_bar_timeout">La barra de estado permanece</string>
     <string name="settings_dim_home">Atenuar el fondo en la pantalla de inicio</string>
@@ -279,6 +281,8 @@
     <string name="settings_section_top">Dónde queda una letra</string>
     <string name="settings_close_folder">Cerrar la carpeta al abrir una aplicación</string>
     <string name="settings_close_folder_detail">Desactivado, sigue abierta hasta que la cierres tú</string>
+    <string name="settings_one_folder_open">Solo una carpeta abierta a la vez</string>
+    <string name="settings_one_folder_open_detail">Abrir una carpeta en la pantalla de inicio cierra las demás</string>
     <string name="settings_favorites_source">Favoritos</string>
     <string name="settings_frequent_count">Cuántas</string>
     <string name="favorites_source_manual">La lista que tú eliges</string>

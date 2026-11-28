@@ -100,6 +100,8 @@
     <string name="settings_section_top">Onde a letra aparece</string>
     <string name="settings_close_folder">Fechar a pasta depois de abrir um app</string>
     <string name="settings_close_folder_detail">Desativado, ela continua aberta até você fechá-la</string>
+    <string name="settings_one_folder_open">Só uma pasta aberta por vez</string>
+    <string name="settings_one_folder_open_detail">Abrir uma pasta na tela inicial fecha as outras</string>
     <string name="settings_favorites_source">Favoritos</string>
     <string name="settings_frequent_count">Quantidade</string>
     <string name="favorites_source_manual">A lista que você mantém</string>
@@ -118,6 +120,8 @@
     <string name="settings_widgets_stacked">Mostrar todos os widgets de uma vez</string>
     <string name="settings_widgets_stacked_detail">Os widgets da tela inicial ficam um embaixo do outro, em vez de alternar com um deslize. Cada um tem a altura da área de widgets</string>
     <string name="settings_hide_status_bar">Ocultar a barra de status na tela inicial</string>
+    <string name="settings_hide_nav_bar">Ocultar a barra de navegação</string>
+    <string name="settings_hide_nav_bar_detail">Deslize para cima a partir da borda inferior para vê-la por um momento</string>
     <string name="settings_hide_status_bar_applist">Ocultar a barra de status na lista de apps</string>
     <string name="settings_status_bar_timeout">A barra de status permanece por</string>
     <string name="settings_dim_home">Escurecer o papel de parede na tela inicial</string>

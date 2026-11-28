@@ -19,6 +19,7 @@ import androidx.compose.runtime.setValue
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import dev.victorialauncher.data.AppFont
 import dev.victorialauncher.data.IconShape
 import dev.victorialauncher.media.NowPlayingListenerService
@@ -51,6 +52,18 @@ class MainActivity : ComponentActivity() {
      * was hidden, until some setting changed and the request was made afresh.
      */
     private var desiredStatusBarVisible: Boolean? = null
+    private var desiredNavBarHidden = false
+
+    /** Hidden until swiped back in for a moment, the way the status bar is (#195). */
+    private fun applyNavBar(hidden: Boolean) {
+        val controller = WindowInsetsControllerCompat(window, window.decorView)
+        if (hidden) {
+            controller.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+            controller.hide(WindowInsetsCompat.Type.navigationBars())
+        } else {
+            controller.show(WindowInsetsCompat.Type.navigationBars())
+        }
+    }
 
     /** A peek of 0: the bar is hidden at once rather than faded out. */
     private var hideStatusBarInstantly = false
@@ -78,6 +91,11 @@ class MainActivity : ComponentActivity() {
         setContent {
             val hideStatusBar by app.prefs.hideStatusBar.collectAsState(initial = false)
             val hideStatusBarAppList by app.prefs.hideStatusBarAppList.collectAsState(initial = false)
+            val hideNavBar by app.prefs.hideNavBar.collectAsState(initial = false)
+            LaunchedEffect(hideNavBar) {
+                desiredNavBarHidden = hideNavBar
+                applyNavBar(hideNavBar)
+            }
             val peekSeconds by app.prefs.statusBarPeekSeconds.collectAsState(initial = 5)
             // A short pull-down peeks the status bar, then it slides away again.
             var statusBarPeek by remember { mutableStateOf(false) }
@@ -224,6 +242,8 @@ class MainActivity : ComponentActivity() {
         // left behind. Asked again only when it is actually wrong: asking for the state it is
         // already in restarts the fade, and a fade out begins by showing the bar in full.
         if (!hasFocus) return
+        // Coming back from an app that showed it, the bar would otherwise stay.
+        if (desiredNavBarHidden) applyNavBar(true)
         val want = desiredStatusBarVisible ?: return
         // Coming back from an app, the system hides the bar again with a fade of its own, and
         // the insets already read as hidden while it plays. An instant hide cuts that fade

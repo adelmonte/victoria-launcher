@@ -361,6 +361,8 @@ fun VictoriaNavHost(
     val appListSearchBottom by app.prefs.appListSearchBottom.collectAsState(initial = false)
     val sectionTopPercent by app.prefs.sectionTopPercent.collectAsState(initial = 26)
     val closeFolderOnLaunch by app.prefs.closeFolderOnLaunch.collectAsState(initial = false)
+    val oneFolderOpen by app.prefs.oneFolderOpen.collectAsState(initial = false)
+    val hideNavBar by app.prefs.hideNavBar.collectAsState(initial = false)
     val showListHeaders by app.prefs.showListHeaders.collectAsState(initial = true)
     val showSettingsRow by app.prefs.showSettingsRow.collectAsState(initial = true)
     val cornerButtonKey by app.prefs.cornerButtonKey.collectAsState(initial = null)
@@ -576,6 +578,7 @@ fun VictoriaNavHost(
         appListSearchBottom = appListSearchBottom,
         sectionTopPercent = sectionTopPercent,
         closeFolderOnLaunch = closeFolderOnLaunch,
+        oneFolderOpen = oneFolderOpen,
         showListHeaders = showListHeaders,
         showSettingsRow = showSettingsRow,
         showFavoriteIcons = showFavoriteIcons,
@@ -848,6 +851,10 @@ fun VictoriaNavHost(
                 onSetSectionTopPercent = { scope.launch { app.prefs.setSectionTopPercent(it) } },
                 closeFolderOnLaunch = closeFolderOnLaunch,
                 onSetCloseFolderOnLaunch = { scope.launch { app.prefs.setCloseFolderOnLaunch(it) } },
+                oneFolderOpen = oneFolderOpen,
+                onSetOneFolderOpen = { scope.launch { app.prefs.setOneFolderOpen(it) } },
+                hideNavBar = hideNavBar,
+                onSetHideNavBar = { scope.launch { app.prefs.setHideNavBar(it) } },
                 favoritesSource = favoritesSource,
                 onSetFavoritesSource = { scope.launch { app.prefs.setFavoritesSource(it) } },
                 frequentCount = frequentCount,

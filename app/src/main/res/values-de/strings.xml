@@ -82,6 +82,8 @@
     <string name="settings_text_color_detail">„Automatisch“ liest das Hintergrundbild aus und wählt die besser lesbare Farbe</string>
     <string name="settings_show_names">App-Namen neben Favoritensymbolen anzeigen</string>
     <string name="settings_hide_status_bar">Statusleiste auf dem Startbildschirm ausblenden</string>
+    <string name="settings_hide_nav_bar">Navigationsleiste ausblenden</string>
+    <string name="settings_hide_nav_bar_detail">Vom unteren Rand nach oben wischen, um sie kurz einzublenden</string>
     <string name="settings_hide_status_bar_applist">Statusleiste in der App-Liste ausblenden</string>
     <string name="settings_status_bar_timeout">Statusleiste bleibt für</string>
     <string name="settings_dim_home">Hintergrundbild auf dem Startbildschirm abdunkeln</string>
@@ -249,6 +251,8 @@
     <string name="settings_section_top">Wo ein Buchstabe landet</string>
     <string name="settings_close_folder">Ordner nach dem Öffnen einer App schließen</string>
     <string name="settings_close_folder_detail">Aus bleibt er offen, bis du ihn selbst schließt</string>
+    <string name="settings_one_folder_open">Nur ein Ordner gleichzeitig offen</string>
+    <string name="settings_one_folder_open_detail">Ein Ordner auf dem Startbildschirm schließt beim Öffnen die anderen</string>
     <string name="settings_favorites_source">Favoriten</string>
     <string name="settings_frequent_count">Wie viele</string>
     <string name="favorites_source_manual">Deine eigene Liste</string>

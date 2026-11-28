@@ -688,6 +688,7 @@ fun HomeRoute(
                 edgeZoneExtentDp = settings.edgeZoneWidthDp + insetLiveDp,
                 homeIntentTick = homeIntentTick,
                 closeFolderOnLaunch = settings.closeFolderOnLaunch,
+                oneFolderOpen = settings.oneFolderOpen,
                 showFavoriteIcons = settings.showFavoriteIcons,
                 // Only while it would still be telling someone something they do not know.
                 showEmptyHint = !settings.favoritesEverSet &&
@@ -1229,6 +1230,7 @@ data class HomeSettings(
     val appListSearchBottom: Boolean,
     val sectionTopPercent: Int,
     val closeFolderOnLaunch: Boolean,
+    val oneFolderOpen: Boolean = false,
     val showListHeaders: Boolean,
     val showSettingsRow: Boolean,
     val showFavoriteIcons: Boolean,

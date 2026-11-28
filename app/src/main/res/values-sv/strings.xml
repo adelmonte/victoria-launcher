@@ -101,6 +101,8 @@
     <string name="settings_section_top">Vart en bokstav hamnar</string>
     <string name="settings_close_folder">Stäng en mapp efter att en app har öppnats</string>
     <string name="settings_close_folder_detail">Av lämnar den öppen tills du stänger den själv</string>
+    <string name="settings_one_folder_open">Bara en mapp öppen åt gången</string>
+    <string name="settings_one_folder_open_detail">Att öppna en mapp på hemskärmen stänger de andra</string>
     <string name="settings_favorites_source">Favoriter</string>
     <string name="settings_frequent_count">Hur många</string>
     <string name="favorites_source_manual">Listan som du gör</string>
@@ -119,6 +121,8 @@
     <string name="settings_widgets_stacked">Visa alla widgetar samtidigt</string>
     <string name="settings_widgets_stacked_detail">Startskärmswidgetar placeras under varandra i stället för att bytas genom svepning. Var och en upptar widgetområdets höjd.</string>
     <string name="settings_hide_status_bar">Dölj statusfältet på startskärmen</string>
+    <string name="settings_hide_nav_bar">Dölj navigeringsfältet</string>
+    <string name="settings_hide_nav_bar_detail">Svep uppåt från nederkanten för att visa det en stund</string>
     <string name="settings_hide_status_bar_applist">Dölj statusfältet i applistan</string>
     <string name="settings_status_bar_timeout">Statusfältet visas i</string>
     <string name="settings_dim_home">Dämpa bakgrundsbilden på startskärmen</string>

@@ -183,6 +183,7 @@ class Prefs(private val context: Context) {
         val THEMED_ICONS = booleanPreferencesKey("themed_icons")
         val ICON_SHAPE = stringPreferencesKey("icon_shape")
         val HIDE_STATUS_BAR = booleanPreferencesKey("hide_status_bar")
+        val HIDE_NAV_BAR = booleanPreferencesKey("hide_nav_bar")
         val HIDE_STATUS_BAR_APPLIST = booleanPreferencesKey("hide_status_bar_applist")
         val DIM_WALLPAPER_ALPHA = floatPreferencesKey("dim_wallpaper_alpha")
         val HAPTICS_ENABLED = booleanPreferencesKey("haptics_enabled")
@@ -249,6 +250,7 @@ class Prefs(private val context: Context) {
         val NOTIFICATION_BADGE_COLOR = intPreferencesKey("notification_badge_color")
         val SECTION_TOP_PERCENT = intPreferencesKey("section_top_percent")
         val CLOSE_FOLDER_ON_LAUNCH = booleanPreferencesKey("close_folder_on_launch")
+        val ONE_FOLDER_OPEN = booleanPreferencesKey("one_folder_open")
         val SHOW_SETTINGS_ROW = booleanPreferencesKey("show_settings_row")
         val CORNER_BUTTON_KEY = stringPreferencesKey("corner_button_key")
         val AUTO_KEYBOARD = booleanPreferencesKey("auto_keyboard")
@@ -497,6 +499,9 @@ class Prefs(private val context: Context) {
     }.distinctUntilChanged()
 
     val hideStatusBar: Flow<Boolean> = data.map { it[Keys.HIDE_STATUS_BAR] ?: false }.distinctUntilChanged()
+
+    /** The navigation bar or gesture handle, hidden until swiped back in (#195). */
+    val hideNavBar: Flow<Boolean> = data.map { it[Keys.HIDE_NAV_BAR] ?: false }.distinctUntilChanged()
 
     /**
      * The same choice for the app list, which used to follow the home screen's.
@@ -899,6 +904,9 @@ class Prefs(private val context: Context) {
     val closeFolderOnLaunch: Flow<Boolean> =
         data.map { it[Keys.CLOSE_FOLDER_ON_LAUNCH] ?: false }.distinctUntilChanged()
 
+    /** Opening a folder on the home screen closes the others there (#196). */
+    val oneFolderOpen: Flow<Boolean> = data.map { it[Keys.ONE_FOLDER_OPEN] ?: false }.distinctUntilChanged()
+
     /**
      * Reads [key], falling back to the shared alignment and then to the old right-handed
      * boolean, so an upgrade keeps whichever side the user had chosen and splitting the two
@@ -1279,6 +1287,10 @@ class Prefs(private val context: Context) {
         context.dataStore.edit { it[Keys.HIDE_STATUS_BAR] = v }
     }
 
+    suspend fun setHideNavBar(v: Boolean) {
+        context.dataStore.edit { it[Keys.HIDE_NAV_BAR] = v }
+    }
+
     suspend fun setDimWallpaperAlpha(v: Float) {
         context.dataStore.edit { it[Keys.DIM_WALLPAPER_ALPHA] = v }
     }
@@ -1614,6 +1626,10 @@ class Prefs(private val context: Context) {
 
     suspend fun setCloseFolderOnLaunch(v: Boolean) {
         context.dataStore.edit { it[Keys.CLOSE_FOLDER_ON_LAUNCH] = v }
+    }
+
+    suspend fun setOneFolderOpen(v: Boolean) {
+        context.dataStore.edit { it[Keys.ONE_FOLDER_OPEN] = v }
     }
 
     suspend fun setAlignment(v: HomeAlignment) {

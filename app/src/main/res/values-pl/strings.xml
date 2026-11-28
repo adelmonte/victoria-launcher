@@ -98,6 +98,8 @@
     <string name="settings_section_top">Pozycja liter</string>
     <string name="settings_close_folder">Zamknij folder po uruchomieniu aplikacji</string>
     <string name="settings_close_folder_detail">Wyłączenie pozostawia go otwartym do momentu ręcznego zamknięcia</string>
+    <string name="settings_one_folder_open">Tylko jeden otwarty folder naraz</string>
+    <string name="settings_one_folder_open_detail">Otwarcie folderu na ekranie głównym zamyka pozostałe</string>
     <string name="settings_favorites_source">Ulubione</string>
     <string name="settings_frequent_count">Ile pozycji</string>
     <string name="favorites_source_manual">Lista, którą prowadzisz</string>
@@ -112,6 +114,8 @@
     <string name="settings_text_color_detail">Automatycznie odczytuje tapetę i wybiera czytelny wariant</string>
     <string name="settings_show_names">Pokaż nazwy obok ikon ulubionych</string>
     <string name="settings_hide_status_bar">Ukryj pasek stanu na ekranie startowym</string>
+    <string name="settings_hide_nav_bar">Ukryj pasek nawigacji</string>
+    <string name="settings_hide_nav_bar_detail">Przesuń w górę od dolnej krawędzi, aby na chwilę go pokazać</string>
     <string name="settings_hide_status_bar_applist">Ukryj pasek stanu na liście aplikacji</string>
     <string name="settings_status_bar_timeout">Pasek stanu pozostaje przez</string>
     <string name="settings_dim_home">Przyciemnij tapetę na ekranie startowym</string>
